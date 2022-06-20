@@ -7,7 +7,7 @@ from ..image.transform.cross_correlation_map import CrossCorrelationMap
 class DriftEstimator(object):
     def __init__(self):
         self.estimator_table = DriftEstimatorTable()
-        self.crosscorrelation_map = None
+        self.cross_correlation_map = None
         self.drift_plot_XY = None
         self.drift_plot_X = None
         self.drift_plot_Y = None
@@ -45,8 +45,7 @@ class DriftEstimator(object):
         else:
             img_ref = None
 
-        image_ccm = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
-        return image_ccm
+        self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
 
 
     def compute_temporal_averaging(self, image_arr):
