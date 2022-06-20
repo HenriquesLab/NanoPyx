@@ -61,4 +61,3 @@ def flip(ccm):
 
     return pixels_out.reshape((dims[0], dims[1]))
 
-
