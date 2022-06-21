@@ -5,11 +5,8 @@ from .methods.drift_correction.drift_estimator import DriftEstimator
 
 def estimate_drift_correction(image_array, apply_correction=True, roi=None, **kwargs):
     estimator = DriftEstimator()
-    return estimator.estimate(image_array, roi=roi, **kwargs)
-    #estimator.save_drift_table()
-
-    #if apply_correction and estimator.estimator_table.drift_table is not None:
-    #   apply_drift_correction(image_array, estimator.estimator_table.drift_table)
+    estimator.estimate(image_array, roi=roi, **kwargs)
+    estimator.save_drift_table(save_as_npy=False)
 
 def apply_drift_correction(image_array, drift_table):
     corrector = DriftCorrector()
