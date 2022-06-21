@@ -1,5 +1,7 @@
+import numpy as np
 from importlib import metadata
 from datetime import datetime
+from tkinter import filedialog as fd
 
 
 class DriftEstimatorTable(object):
@@ -31,9 +33,42 @@ class DriftEstimatorTable(object):
     def set_comments(self, comment_string):
         self.params["comments"] = comment_string
 
-    def export_npy(self):
-        pass
+    def export_npy(self, path=None):
+        tmp = []
+        for key in self.params.keys():
+            tmp.append((key, self.params[key]))
+        tmp.append(self.drift_table)
+        if path is None:
+            filepath = fd.asksaveasfilename()
+            np.save(filepath, np.array(tmp, dtype=object))
+        else:
+            np.save(path, np.array(tmp, dtype=object))
 
-    def export_csv(self):
-        pass
+    def import_npy(self, path=None):
+        if path is None:
+            filepath = fd.askopenfilename()
+        else:
+            filepath = path
+        tmp = np.load(filepath)
+
+        for i in range(tmp.shape[0]-1):
+            key, value = tmp[i]
+            self.params[key] = value
+        self.drift_table = tmp[tmp.shape[0]-1]
+
+    def export_csv(self, path=None):
+        if path is None:
+            filepath = fd.asksaveasfilename()
+        else:
+            filepath = path
+
+        txt = ""
+        for key in self.params.keys():
+            txt += key + ";" + str(self.params[key]) + ";\n"
+        txt += "Drift Table;\n"
+        txt += "XY;X;Y;\n"
+        for i in range(self.drift_table.shape[0]):
+            txt += str(self.drift_table[i][0]) + ";" + str(self.drift_table[i][1]) + ";" + str(self.drift_table[i][2]) + ";\n"
+
+        open(filepath + ".csv", "w").writelines(txt)
 

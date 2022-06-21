@@ -1,16 +1,21 @@
 import numpy as np
+from math import sqrt
+from scipy.fftpack import shift
+from skimage.transform import resize
+from scipy.ndimage import measurements, center_of_mass
 
 from .drift_estimator_table import DriftEstimatorTable
 from ..image.transform.cross_correlation_map import CrossCorrelationMap
+from ..image.drift.estimate_shift import GetMaxOptimizer
 
 
 class DriftEstimator(object):
     def __init__(self):
         self.estimator_table = DriftEstimatorTable()
         self.cross_correlation_map = None
-        self.drift_plot_XY = None
-        self.drift_plot_X = None
-        self.drift_plot_Y = None
+        self.drift_xy = None
+        self.drift_x = None
+        self.drift_y = None
 
     def estimate(self, image_array, **kwargs):
         self.set_estimator_params(**kwargs)
@@ -46,6 +51,27 @@ class DriftEstimator(object):
             img_ref = None
 
         self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
+        
+        self.get_shifts_from_ccm(self.cross_correlation_map)
+
+        if self.estimator_table.params["time_averaging"] > 1:
+            print("Interpolating time points")
+            #FIXME
+            self.drift_x = resize(self.drift_x.reshape(1, self.drift_x.shape[0]), (1, image_array.shape[0]), order=3)
+            self.drift_x = self.drift_x.reshape((self.drift_x.shape[1]))
+            self.drift_y = resize(self.drift_y.reshape(1, self.drift_y.shape[0]), (1, image_array.shape[0]), order=3)
+            self.drift_y = self.drift_y.reshape((self.drift_y.shape[1]))
+
+        self.drift_xy = []
+        for i in range(image_array.shape[0]):
+            self.drift_xy.append(sqrt(pow(self.drift_x[i], 2) + pow(self.drift_y[i], 2)))
+        self.drift_xy = np.array(self.drift_xy)
+
+        self.create_drift_table()
+        #self.save_drift_table()
+
+        if self.estimator_table.params["apply"]:
+            pass
 
 
     def compute_temporal_averaging(self, image_arr):
@@ -78,14 +104,69 @@ class DriftEstimator(object):
 
         return ccm
 
-    def get_shift_from_ccm(self):
-        pass
+    def get_shift_from_ccm_slice(self, slice_ccm, method="Custom"):
+        #w = slice_ccm.shape[1]
+        #h = slice_ccm.shape[0]
+
+        #radius_x = w / 2.0
+        #radius_y = h / 2.0
+
+        if method == "Max Fitting":
+            optimizer = GetMaxOptimizer(slice_ccm)
+            drift = optimizer.get_max()
+        elif method == "Center of Mass":
+            drift = measurements.center_of_mass(slice_ccm)
+        else:
+            deviation = np.unravel_index(np.argmax(slice_ccm), slice_ccm.shape)
+            cm = center_of_mass(np.ones(slice_ccm.shape))
+            shift_y, shift_x = np.subtract(deviation, cm)
+
+        #shift_x = radius_x - drift[1] - 0.5
+        #shift_y = radius_y - drift[0] - 0.5
+
+        return shift_x, shift_y
+
+
+    def get_shifts_from_ccm(self, ccm):
+        n_slices = ccm.shape[0]
+
+        drift_x = []
+        drift_y = []
+
+        for i in range(0, n_slices):
+            slice_drift_x, slice_drift_y = self.get_shift_from_ccm_slice(ccm[i])
+            drift_x.append(slice_drift_x)
+            drift_y.append(slice_drift_y)
+
+        bias_x = drift_x[0]
+        bias_y = drift_y[0]
+
+        self.drift_x = []
+        self.drift_y = []
+
+        for i in range(0, ccm.shape[0]):
+            self.drift_x.append(drift_x[i] - bias_x)
+            self.drift_y.append(drift_y[i] - bias_y)
+            if self.estimator_table.params["ref_option"] == 1 and i > 0:
+                self.drift_x[i] += self.drift_x[i-1]
+                self.drift_y[i] += self.drift_y[i-1]
+
+        self.drift_x = np.array(self.drift_x)
+        self.drift_y = np.array(self.drift_y)
+
 
     def create_drift_table(self):
-        pass
+        table = []
+        for i in range(0, self.drift_xy.shape[0]):
+            table.append([self.drift_xy[i], self.drift_x[i], self.drift_y[i]])
+        table = np.array(table)
+        self.estimator_table.drift_table = table
 
-    def save_drift_table(self):
-        pass
+    def save_drift_table(self, save_as_npy=True, path=None):
+        if save_as_npy:
+            self.estimator_table.export_npy(path=path)
+        else:
+            self.estimator_table.export_csv(path=path)
 
     def set_estimator_params(self, **kwargs):
         self.estimator_table.set_params(**kwargs)
