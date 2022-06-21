@@ -47,8 +47,4 @@ If you encounter any problems, please [file an issue] along with a detailed desc
 [PyPI]: https://pypi.org/
 
 
-## Test
-this is a test
-newtest
-
 
