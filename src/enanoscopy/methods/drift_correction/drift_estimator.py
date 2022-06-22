@@ -1,10 +1,13 @@
 import numpy as np
+import multiprocessing as mp
 from math import sqrt
+from pytest import skip
 from scipy.fftpack import shift
 from skimage.transform import resize
-from scipy.ndimage import measurements, center_of_mass
+from scipy.interpolate import interp1d, griddata
 
 from .drift_estimator_table import DriftEstimatorTable
+from .drift_corrector import DriftCorrector
 from ..image.transform.cross_correlation_map import CrossCorrelationMap
 from ..image.drift.estimate_shift import GetMaxOptimizer
 
@@ -55,24 +58,29 @@ class DriftEstimator(object):
         self.get_shifts_from_ccm(self.cross_correlation_map)
 
         if self.estimator_table.params["time_averaging"] > 1:
+
             print("Interpolating time points")
-            #FIXME
-            self.drift_x = resize(self.drift_x.reshape(1, self.drift_x.shape[0]), (1, image_array.shape[0]), order=3)
-            self.drift_x = self.drift_x.reshape((self.drift_x.shape[1]))
-            self.drift_y = resize(self.drift_y.reshape(1, self.drift_y.shape[0]), (1, image_array.shape[0]), order=3)
-            self.drift_y = self.drift_y.reshape((self.drift_y.shape[1]))
+            #TODO confirm implementation
+            x_idx = np.linspace(1, image_array.shape[0], num=self.drift_x.shape[0], endpoint=True, dtype=int)
+            x_interpolator = interp1d(x_idx, self.drift_x, kind="cubic") # linear seems to work similar as in nanoj-core however its codebase calls setInterpolation("Bicubic")
+            self.drift_x = x_interpolator(range(1, image_array.shape[0] + 1))
+            y_idx = np.linspace(1, image_array.shape[0], num=self.drift_y.shape[0], endpoint=True, dtype=int)
+            y_interpolator = interp1d(y_idx, self.drift_y, kind="cubic") # linear seems to work similar as in nanoj-core however its codebase calls setInterpolation("Bicubic")
+            self.drift_y = y_interpolator(range(1, image_array.shape[0] + 1))
 
         self.drift_xy = []
-        for i in range(image_array.shape[0]):
+        for i in range(image_array.shape[0]): 
             self.drift_xy.append(sqrt(pow(self.drift_x[i], 2) + pow(self.drift_y[i], 2)))
         self.drift_xy = np.array(self.drift_xy)
 
         self.create_drift_table()
-        #self.save_drift_table()
 
         if self.estimator_table.params["apply"]:
-            pass
-
+            drift_corrector = DriftCorrector()
+            drift_corrector.estimator_table = self.estimator_table
+            return drift_corrector.apply_correction(image_array)
+        else:
+            return None
 
     def compute_temporal_averaging(self, image_arr):
         n_slices = image_arr.shape[0]
@@ -104,25 +112,20 @@ class DriftEstimator(object):
 
         return ccm
 
-    def get_shift_from_ccm_slice(self, slice_ccm, method="Custom"):
-        #w = slice_ccm.shape[1]
-        #h = slice_ccm.shape[0]
+    def get_shift_from_ccm_slice(self, slice_ccm, method="Max Fitting"):
 
-        #radius_x = w / 2.0
-        #radius_y = h / 2.0
+        w = slice_ccm.shape[1]
+        h = slice_ccm.shape[0]
+
+        radius_x = w / 2.0
+        radius_y = h / 2.0
 
         if method == "Max Fitting":
             optimizer = GetMaxOptimizer(slice_ccm)
-            drift = optimizer.get_max()
-        elif method == "Center of Mass":
-            drift = measurements.center_of_mass(slice_ccm)
-        else:
-            deviation = np.unravel_index(np.argmax(slice_ccm), slice_ccm.shape)
-            cm = center_of_mass(np.ones(slice_ccm.shape))
-            shift_y, shift_x = np.subtract(deviation, cm)
+            shift_y, shift_x = optimizer.get_max()
 
-        #shift_x = radius_x - drift[1] - 0.5
-        #shift_y = radius_y - drift[0] - 0.5
+        shift_x = radius_x - shift_x - 0.5
+        shift_y = radius_y - shift_y - 0.5
 
         return shift_x, shift_y
 

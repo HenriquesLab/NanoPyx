@@ -19,9 +19,9 @@ class DriftEstimatorTable(object):
         self.params["normalize"] = True
         self.params["use_roi"] = False
         self.params["roi"] = None
-        self.params["show_ccm"] = True
-        self.params["show_drift_plot"] = True
-        self.params["show_drift_table"] = True
+        self.params["show_ccm"] = True # used for napari
+        self.params["show_drift_plot"] = True # used for napari
+        self.params["show_drift_table"] = True # used for napari
         self.params["comments"] = None
 
         self.drift_table = None
