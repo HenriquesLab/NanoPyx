@@ -23,6 +23,7 @@ class DriftCorrector(object):
             pool = mp.Pool(mp.cpu_count())
             corrected_image = pool.map(self._translate_slice, range(0, image_array.shape[0]))
             pool.close()
+            pool.join()
 
             return np.array(corrected_image)
 

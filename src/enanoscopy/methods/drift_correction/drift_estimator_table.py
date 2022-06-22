@@ -39,17 +39,17 @@ class DriftEstimatorTable(object):
             tmp.append((key, self.params[key]))
         tmp.append(self.drift_table)
         if path is None:
-            filepath = fd.asksaveasfilename()
+            filepath = fd.asksaveasfilename(title="Save Drift Table as npy")
             np.save(filepath, np.array(tmp, dtype=object))
         else:
             np.save(path, np.array(tmp, dtype=object))
 
     def import_npy(self, path=None):
         if path is None:
-            filepath = fd.askopenfilename()
+            filepath = fd.askopenfilename(title="Load npy Drift Table")
         else:
             filepath = path
-        tmp = np.load(filepath)
+        tmp = np.load(filepath, allow_pickle=True)
 
         for i in range(tmp.shape[0]-1):
             key, value = tmp[i]
@@ -58,7 +58,7 @@ class DriftEstimatorTable(object):
 
     def export_csv(self, path=None):
         if path is None:
-            filepath = fd.asksaveasfilename()
+            filepath = fd.asksaveasfilename(title="Save Drift Table as csv")
         else:
             filepath = path
 
