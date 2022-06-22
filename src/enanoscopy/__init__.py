@@ -14,10 +14,10 @@ def estimate_drift_correction(image_array, save_as_npy=True, roi=None, **kwargs)
     else:
         pass
 
-def apply_drift_correction(image_array, drift_table=None):
+def apply_drift_correction(image_array, path=None, drift_table=None):
     corrector = DriftCorrector()
     if drift_table is None:
-        corrector.estimator_table.import_npy()
+        corrector.load_drift_table(path=path)
     corrected_img = corrector.apply_correction(image_array)
 
     if corrected_img is not None:
