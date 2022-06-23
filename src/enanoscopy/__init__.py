@@ -5,10 +5,11 @@ from .methods.drift_correction.drift_estimator import DriftEstimator
 
 #TODO write tests for shift from ccm and alignment correction, and test differences between linear and cubic interpolation
 
-def estimate_drift_correction(image_array, save_as_npy=True, roi=None, **kwargs):
+def estimate_drift_correction(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):
     estimator = DriftEstimator()
     corrected_img = estimator.estimate(image_array, roi=roi, **kwargs)
-    estimator.save_drift_table(save_as_npy=save_as_npy)
+    print(save_drift_table_path)
+    estimator.save_drift_table(save_as_npy=save_as_npy, path=save_drift_table_path)
     if corrected_img is not None:
         return corrected_img
     else:

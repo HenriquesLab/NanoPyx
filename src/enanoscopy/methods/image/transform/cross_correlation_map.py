@@ -90,12 +90,16 @@ class CrossCorrelationMap(object):
         else:
             self.img_stack = img_stack
 
-        pool = mp.Pool(mp.cpu_count())
-        ccm = pool.map(self._calculate_ccm, range(0, self.img_stack.shape[0], 1))
+        ccm = []
+        """pool = mp.Pool(mp.cpu_count())
+        ccm_pool = pool.map_async(self._calculate_ccm, range(0, self.img_stack.shape[0], 1), callback=ccm.append)
+        ccm_pool.wait()
         pool.close() # makes pool no longer usable
         #pool.join() # used to catch exceptions, requires expanding functionality
-
+        ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))"""
+        ccm = [self._calculate_ccm(i) for i in range(0, self.img_stack.shape[0], 1)]
         ccm = np.array(ccm)
+
         return ccm
 
 
