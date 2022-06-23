@@ -1,5 +1,7 @@
 import os
 import pathlib
+import platform
+import multiprocessing as mp
 from tkinter import Image
 from matplotlib import use
 import enanoscopy

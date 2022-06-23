@@ -1,7 +1,6 @@
 from .fft_helper_functions import make_even_square, check_even_square, flip
 from ...image.analysis.image_statistics import calculate_ppmcc
 
-import sys
 import numpy as np
 import multiprocessing as mp
 from scipy.signal import fftconvolve
@@ -28,10 +27,9 @@ class CrossCorrelationMap(object):
         slice_ccm = np.fft.fftshift(slice_ccm)
         slice_ccm = flip(slice_ccm)
 
-        #FIXME normalization not working as intended
         if self.normalize:
             slice_ccm = self._normalize_ccm(img_ref, img_slice, slice_ccm)
-
+        print(index)
         return slice_ccm[0:slice_ccm.shape[0]-1, 0:slice_ccm.shape[1]-1]
 
     def _normalize_ccm(self, img_ref, img_curr, slice_ccm):
@@ -91,13 +89,13 @@ class CrossCorrelationMap(object):
             self.img_stack = img_stack
 
         ccm = []
-        """pool = mp.Pool(mp.cpu_count())
+        pool = mp.Pool(mp.cpu_count())
         ccm_pool = pool.map_async(self._calculate_ccm, range(0, self.img_stack.shape[0], 1), callback=ccm.append)
         ccm_pool.wait()
         pool.close() # makes pool no longer usable
         #pool.join() # used to catch exceptions, requires expanding functionality
-        ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))"""
-        ccm = [self._calculate_ccm(i) for i in range(0, self.img_stack.shape[0], 1)]
+        ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))
+        #ccm = [self._calculate_ccm(i) for i in range(0, self.img_stack.shape[0], 1)]
         ccm = np.array(ccm)
 
         return ccm
