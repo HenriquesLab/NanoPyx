@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import multiprocessing as mp
 from math import sqrt
@@ -53,10 +54,12 @@ class DriftEstimator(object):
         else:
             img_ref = None
 
+        start_time = time.time()
         self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
-        
-        self.get_shifts_from_ccm(self.cross_correlation_map)
-
+        print("--- %s seconds ---" % (time.time() - start_time))
+        start_time = time.time()
+        self.get_shifts_from_ccm()
+        print("--- %s seconds ---" % (time.time() - start_time))
         if self.estimator_table.params["time_averaging"] > 1:
 
             print("Interpolating time points")
@@ -75,12 +78,16 @@ class DriftEstimator(object):
 
         self.create_drift_table()
 
+        start_time = time.time()
         if self.estimator_table.params["apply"]:
             drift_corrector = DriftCorrector()
             drift_corrector.estimator_table = self.estimator_table
-            return drift_corrector.apply_correction(image_array)
+            tmp = drift_corrector.apply_correction(image_array)
+            print("--- %s seconds ---" % (time.time() - start_time))
+            return tmp
         else:
             return None
+        
 
     def compute_temporal_averaging(self, image_arr):
         n_slices = image_arr.shape[0]
@@ -112,7 +119,8 @@ class DriftEstimator(object):
 
         return ccm
 
-    def get_shift_from_ccm_slice(self, slice_ccm, method="Max Fitting"):
+    def get_shift_from_ccm_slice(self, slice_index, method="Max Fitting"):
+        slice_ccm = self.cross_correlation_map[slice_index]
 
         w = slice_ccm.shape[1]
         h = slice_ccm.shape[0]
@@ -127,19 +135,24 @@ class DriftEstimator(object):
         shift_x = radius_x - shift_x - 0.5
         shift_y = radius_y - shift_y - 0.5
 
-        return shift_x, shift_y
+        return [shift_x, shift_y]
 
 
-    def get_shifts_from_ccm(self, ccm):
-        n_slices = ccm.shape[0]
+    def get_shifts_from_ccm(self):
+        n_slices = self.cross_correlation_map.shape[0]
 
         drift_x = []
         drift_y = []
+        drift = []
 
-        for i in range(0, n_slices):
-            slice_drift_x, slice_drift_y = self.get_shift_from_ccm_slice(ccm[i])
-            drift_x.append(slice_drift_x)
-            drift_y.append(slice_drift_y)
+        pool = mp.Pool(mp.cpu_count())
+        shift_pool = pool.map_async(self.get_shift_from_ccm_slice, range(0, n_slices), callback=drift.append)
+        shift_pool.wait()
+        pool.close()
+
+        drift = np.array(drift)
+        drift_x = drift[0, :, 0]
+        drift_y = drift[0, :, 1]
 
         bias_x = drift_x[0]
         bias_y = drift_y[0]
@@ -147,7 +160,7 @@ class DriftEstimator(object):
         self.drift_x = []
         self.drift_y = []
 
-        for i in range(0, ccm.shape[0]):
+        for i in range(0, self.cross_correlation_map.shape[0]):
             self.drift_x.append(drift_x[i] - bias_x)
             self.drift_y.append(drift_y[i] - bias_y)
             if self.estimator_table.params["ref_option"] == 1 and i > 0:

@@ -21,12 +21,12 @@ class DriftCorrector(object):
             self.image_arr = image_array
 
             corrected_image = []
-            """pool = mp.Pool(mp.cpu_count())
+            pool = mp.Pool(mp.cpu_count())
             corrected_image_pool = pool.map_async(self._translate_slice, range(0, image_array.shape[0]), callback=corrected_image.append)
             corrected_image_pool.wait()
             pool.close()
-            pool.join()"""
-            corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])] #no parallelization
+            pool.join()
+            #corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])] #no parallelization
 
 
             return np.array(corrected_image).reshape((self.image_arr.shape[0], self.image_arr.shape[1], self.image_arr.shape[2]))

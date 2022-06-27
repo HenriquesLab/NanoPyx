@@ -24,12 +24,12 @@ class CrossCorrelationMap(object):
 
         image_product = np.fft.fft2(img_ref) * np.fft.fft2(img_slice).conj()
         slice_ccm = np.fft.ifft2(image_product)
-        slice_ccm = np.fft.fftshift(slice_ccm)
-        slice_ccm = flip(slice_ccm)
+        slice_ccm = np.fft.fftshift(slice_ccm).real
+        slice_ccm = slice_ccm[::-1, ::-1]
+        #slice_ccm = flip(slice_ccm)
 
         if self.normalize:
             slice_ccm = self._normalize_ccm(img_ref, img_slice, slice_ccm)
-        print(index)
         return slice_ccm[0:slice_ccm.shape[0]-1, 0:slice_ccm.shape[1]-1]
 
     def _normalize_ccm(self, img_ref, img_curr, slice_ccm):
@@ -57,7 +57,7 @@ class CrossCorrelationMap(object):
         for i in range(ccm_pixels.shape[0]):
             value = (ccm_pixels[i] - min_value) / delta_v
             value = (value * (max_ppmcc - min_ppmcc)) + min_ppmcc
-            ccm_pixels[i] = value
+            ccm_pixels[i] = value.real
 
         return ccm_pixels.reshape((slice_ccm.shape[0], slice_ccm.shape[1]))
 
