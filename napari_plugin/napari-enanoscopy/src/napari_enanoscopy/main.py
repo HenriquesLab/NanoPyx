@@ -3,7 +3,6 @@ import pathlib
 import platform
 import multiprocessing as mp
 from tkinter import Image
-from matplotlib import use
 import enanoscopy
 from magicgui import magic_factory, magicgui
 from napari.types import ImageData
