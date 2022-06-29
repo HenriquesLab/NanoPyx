@@ -119,7 +119,7 @@ class DriftEstimator(object):
 
         return ccm
 
-    def get_shift_from_ccm_slice(self, slice_index, method="Max Fitting"):
+    def get_shift_from_ccm_slice(self, slice_index):
         slice_ccm = self.cross_correlation_map[slice_index]
 
         w = slice_ccm.shape[1]
@@ -128,9 +128,13 @@ class DriftEstimator(object):
         radius_x = w / 2.0
         radius_y = h / 2.0
 
+        method = self.estimator_table.params["shift_calc_method"]
+
         if method == "Max Fitting":
             optimizer = GetMaxOptimizer(slice_ccm)
             shift_y, shift_x = optimizer.get_max()
+        elif method == "Max":
+            shift_y, shift_x = np.unravel_index(slice_ccm.argmax(), slice_ccm.shape)
 
         shift_x = radius_x - shift_x - 0.5
         shift_y = radius_y - shift_y - 0.5

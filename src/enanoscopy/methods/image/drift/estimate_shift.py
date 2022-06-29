@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.interpolate import griddata, interp2d
+from scipy.interpolate import griddata
 from scipy.optimize import minimize
 
 

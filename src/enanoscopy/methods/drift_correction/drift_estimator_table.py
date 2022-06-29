@@ -17,6 +17,7 @@ class DriftEstimatorTable(object):
         self.params["max_expected_drift"] = 10
         self.params["reference_frame"] = 0
         self.params["normalize"] = True
+        self.params["shift_calc_method"] = "Max Fitting"
         self.params["use_roi"] = False
         self.params["roi"] = None
         self.params["show_ccm"] = True # used for napari

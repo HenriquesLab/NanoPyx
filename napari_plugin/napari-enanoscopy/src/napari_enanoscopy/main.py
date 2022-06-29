@@ -6,15 +6,23 @@ from tkinter import Image
 import enanoscopy
 from magicgui import magic_factory, magicgui
 from napari.types import ImageData
+from napari.layers import Image
+from napari import Viewer
+from napari.qt.threading import thread_worker
 
 
 @magic_factory(call_button="Estimate",
                img={"label": "Image Stack"},
                ref_option={"widget_type": "RadioButtons",
-                           "orientation": "horizontal",
+                           "orientation": "vertical",
                            "value": 0,
                            "choices": [("First Frame", 0), ("Previous Frame", 1)],
                            "label": "Reference Frame"},
+               shift_calc_method={"widget_type": "RadioButtons",
+                                  "orientation": "vertical",
+                                  "value": "Max Fitting",
+                                  "choices": [("Max", "Max"), ("Subpixel Fitting", "Max Fitting")],
+                                  "label": "Shift Calculation Method"},
                time_averaging={"value": 100,
                                "label": "Time Averaging"},
                max_expected_drift={"value": 10,
@@ -27,12 +35,22 @@ from napari.types import ImageData
                                       "mode": "d"},
                apply_correction={"value": True,
                                  "label": "Apply"})
-def estimate_drift_correction(img: ImageData, ref_option: int, time_averaging: int,
-                              max_expected_drift: int, use_roi: bool,
+def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_averaging: int,
+                              max_expected_drift: int, use_roi: bool, shift_calc_method: str,
                               save_as_npy: bool, apply_correction: bool, save_drift_table_path=pathlib.Path.home()) -> ImageData:
-    return enanoscopy.estimate_drift_correction(img, save_as_npy=save_as_npy, save_drift_table_path=pathlib.Path.joinpath(save_drift_table_path, "drift_table"), ref_option=ref_option,
-                                                time_averaging=time_averaging, max_expected_drift=max_expected_drift,
-                                                use_roi=use_roi, apply=apply_correction)
+
+    result = enanoscopy.estimate_drift_correction(img.data, save_as_npy=save_as_npy, save_drift_table_path=pathlib.Path.joinpath(save_drift_table_path, "drift_table"), ref_option=ref_option,
+                                                  time_averaging=time_averaging, max_expected_drift=max_expected_drift, shift_calc_method=shift_calc_method,
+                                                  use_roi=use_roi, apply=apply_correction)
+    
+    if result is not None:
+        result_name = img.name + "_aligned"
+        try: 
+            # if the layer exists, update the data
+            viewer.layers[result_name].data = result
+        except KeyError:
+            # otherwise add it to the viewer
+            viewer.add_image(result, name=result_name)
 
 @magic_factory(call_button="Correct",
                npy_path={"mode": "d",
