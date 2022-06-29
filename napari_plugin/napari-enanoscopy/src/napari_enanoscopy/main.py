@@ -42,19 +42,19 @@ def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_
     result = enanoscopy.estimate_drift_correction(img.data, save_as_npy=save_as_npy, save_drift_table_path=pathlib.Path.joinpath(save_drift_table_path, "drift_table"), ref_option=ref_option,
                                                   time_averaging=time_averaging, max_expected_drift=max_expected_drift, shift_calc_method=shift_calc_method,
                                                   use_roi=use_roi, apply=apply_correction)
-    
+
     if result is not None:
         result_name = img.name + "_aligned"
-        try: 
+        try:
             # if the layer exists, update the data
             viewer.layers[result_name].data = result
         except KeyError:
             # otherwise add it to the viewer
             viewer.add_image(result, name=result_name)
 
+
 @magic_factory(call_button="Correct",
                npy_path={"mode": "d",
                          "label": "Path to Drift Table"},)
 def apply_drift_correction(img: ImageData, npy_path=pathlib.Path.home()) -> ImageData:
     return enanoscopy.apply_drift_correction(img, path=npy_path)
-
