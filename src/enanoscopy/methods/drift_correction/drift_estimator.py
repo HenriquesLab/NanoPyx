@@ -2,10 +2,7 @@ import time
 import numpy as np
 import multiprocessing as mp
 from math import sqrt
-from pytest import skip
-from scipy.fftpack import shift
-from skimage.transform import resize
-from scipy.interpolate import interp1d, griddata
+from scipy.interpolate import interp1d
 
 from .drift_estimator_table import DriftEstimatorTable
 from .drift_corrector import DriftCorrector

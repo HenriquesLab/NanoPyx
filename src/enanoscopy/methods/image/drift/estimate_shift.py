@@ -21,10 +21,3 @@ class GetMaxOptimizer(object):
         minimizer = minimize(self.get_interpolated_px_value, (y_max, x_max), method="Nelder-Mead", options={"maxiter": 1000})
         return minimizer.x
 
-class GetCenterOfMass(object):
-
-    def __init__(self) -> None:
-        pass
-
-    def get_max(self):
-        y_max, x_max = np.unravel_index(self.slice_ccm.argmax(), self.slice_ccm.shape)

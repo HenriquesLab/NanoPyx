@@ -1,10 +1,11 @@
-from .fft_helper_functions import make_even_square, check_even_square, flip
-from ...image.analysis.image_statistics import calculate_ppmcc
-
 import numpy as np
 import multiprocessing as mp
 from scipy.signal import fftconvolve
 from matplotlib import pyplot as plt
+
+from .fft_helper_functions import make_even_square, check_even_square
+from ...image.analysis.image_statistics import calculate_ppmcc
+
 
 class CrossCorrelationMap(object):
     def __init__(self) -> None:
@@ -26,7 +27,6 @@ class CrossCorrelationMap(object):
         slice_ccm = np.fft.ifft2(image_product)
         slice_ccm = np.fft.fftshift(slice_ccm).real
         slice_ccm = slice_ccm[::-1, ::-1]
-        #slice_ccm = flip(slice_ccm)
 
         if self.normalize:
             slice_ccm = self._normalize_ccm(img_ref, img_slice, slice_ccm)
@@ -52,7 +52,6 @@ class CrossCorrelationMap(object):
         min_ppmcc = calculate_ppmcc(img_ref, img_curr, shift_x_min, shift_y_min)
 
         delta_v = max_value - min_value
-        #delta_idx = max_ppmcc - min_ppmcc #not currently in use, older implementation?
 
         for i in range(ccm_pixels.shape[0]):
             value = (ccm_pixels[i] - min_value) / delta_v
@@ -95,7 +94,6 @@ class CrossCorrelationMap(object):
         pool.close() # makes pool no longer usable
         #pool.join() # used to catch exceptions, requires expanding functionality
         ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))
-        #ccm = [self._calculate_ccm(i) for i in range(0, self.img_stack.shape[0], 1)]
         ccm = np.array(ccm)
 
         return ccm
