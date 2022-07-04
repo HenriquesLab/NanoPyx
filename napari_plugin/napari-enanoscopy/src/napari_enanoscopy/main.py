@@ -58,3 +58,9 @@ def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_
                          "label": "Path to Drift Table"},)
 def apply_drift_correction(img: ImageData, npy_path=pathlib.Path.home()) -> ImageData:
     return enanoscopy.apply_drift_correction(img, path=npy_path)
+
+# @magic_factory(call_button="tSSIM",
+#                reg_meth={"regmeth":""},
+#               ref_option={"widget_type": "RadioButtons",
+#                           "orientation"
+# )
