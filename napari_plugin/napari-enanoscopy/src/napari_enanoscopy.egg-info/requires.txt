@@ -1,0 +1,6 @@
+numpy
+
+[testing]
+tox
+pytest
+pytest-cov

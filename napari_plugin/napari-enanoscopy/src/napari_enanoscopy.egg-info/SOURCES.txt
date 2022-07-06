@@ -1,0 +1,15 @@
+LICENSE
+MANIFEST.in
+README.md
+pyproject.toml
+setup.cfg
+src/napari_enanoscopy/__init__.py
+src/napari_enanoscopy/main.py
+src/napari_enanoscopy/napari.yaml
+src/napari_enanoscopy.egg-info/PKG-INFO
+src/napari_enanoscopy.egg-info/SOURCES.txt
+src/napari_enanoscopy.egg-info/dependency_links.txt
+src/napari_enanoscopy.egg-info/entry_points.txt
+src/napari_enanoscopy.egg-info/requires.txt
+src/napari_enanoscopy.egg-info/top_level.txt
+src/napari_enanoscopy/_tests/__init__.py
