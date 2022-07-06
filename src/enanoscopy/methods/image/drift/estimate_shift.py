@@ -3,6 +3,7 @@ from scipy.interpolate import griddata
 from scipy.optimize import minimize
 
 
+# TODO refactor to not create a new griddata object on every iteration
 class GetMaxOptimizer(object):
 
     def __init__(self, slice_ccm) -> None:

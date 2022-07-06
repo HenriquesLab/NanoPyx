@@ -1,4 +1,6 @@
 import time
+import types
+
 import numpy as np
 import multiprocessing as mp
 from math import sqrt
@@ -17,6 +19,7 @@ class DriftEstimator(object):
         self.drift_xy = None
         self.drift_x = None
         self.drift_y = None
+
 
     def estimate(self, image_array, **kwargs):
         self.set_estimator_params(**kwargs)
@@ -51,12 +54,8 @@ class DriftEstimator(object):
         else:
             img_ref = None
 
-        start_time = time.time()
         self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
-        print("--- %s seconds ---" % (time.time() - start_time))
-        start_time = time.time()
         self.get_shifts_from_ccm()
-        print("--- %s seconds ---" % (time.time() - start_time))
         if self.estimator_table.params["time_averaging"] > 1:
 
             print("Interpolating time points")
@@ -75,12 +74,10 @@ class DriftEstimator(object):
 
         self.create_drift_table()
 
-        start_time = time.time()
         if self.estimator_table.params["apply"]:
             drift_corrector = DriftCorrector()
             drift_corrector.estimator_table = self.estimator_table
             tmp = drift_corrector.apply_correction(image_array)
-            print("--- %s seconds ---" % (time.time() - start_time))
             return tmp
         else:
             return None
