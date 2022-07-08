@@ -42,6 +42,7 @@ class ChannelAlignmentEstimator(object):
 
         for channel in channels_to_align:
             translation_mask = self.calculate_translation(img_stack[channel], img_stack[ref_channel], max_shift, blocks_per_axis, min_similarity)
+            #TODO recheck implementation and implement apply
             print(translation_mask.shape)
             self.translation_masks[channel] = translation_mask
 
