@@ -18,11 +18,8 @@ class ChannelAlignmentEstimator(object):
         corrector = ChannelAlignmentCorrector()
         return corrector.align_channels(img_stack, self.translation_masks)
 
-    def calculate_translation(self, channel_to_align, ref_channel_img, max_shift,
-                                   blocks_per_axis, min_similarity):
-        translation_mask = calculate_translation_mask(channel_to_align, ref_channel_img,
-                                                      max_shift, blocks_per_axis,
-                                                      min_similarity)
+    def calculate_translation(self, channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity):
+        translation_mask = calculate_translation_mask(channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity)
         return translation_mask
 
     def save_translation_mask(self, path=None):
@@ -41,11 +38,11 @@ class ChannelAlignmentEstimator(object):
             print("Reference channel number cannot be bigger than number of channels!")
             return None
 
-        self.translation_masks = np.zeros((img_stack.shape[0], img_stack.shape[1]), img_stack.shape[2])
+        self.translation_masks = np.zeros((img_stack.shape[0], img_stack.shape[1], img_stack.shape[2]))
 
         for channel in channels_to_align:
-            translation_mask = self.calculate_translation(img_stack[channel], img_stack[ref_channel], max_shift,
-                                                               blocks_per_axis, min_similarity)
+            translation_mask = self.calculate_translation(img_stack[channel], img_stack[ref_channel], max_shift, blocks_per_axis, min_similarity)
+            print(translation_mask.shape)
             self.translation_masks[channel] = translation_mask
 
         self.save_translation_mask()
