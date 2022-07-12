@@ -7,6 +7,8 @@ from ..feature_extraction.break_into_blocks import assemble_frame_from_blocks
 from ..transform.cross_correlation_map import CrossCorrelationMap
 
 def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity):
+
+    method = "subpixel" # set for pixel or subpixel precision
     
     width = img_slice.shape[1]
     height = img_slice.shape[0]
@@ -28,17 +30,20 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
             slice_crop = img_slice[y_start:y_start+block_height, x_start:x_start+block_width]
             ref_crop = img_ref[y_start:y_start+block_height, x_start:x_start+block_width]
             ccm = CrossCorrelationMap()
-            slice_ccm = ccm.calculate_ccm(ref_crop, np.array([slice_crop]), True)
+            slice_ccm = ccm.calculate_ccm(ref_crop, np.array([slice_crop]), True)[0]
 
             if max_shift > 0 and max_shift*2+1 < slice_ccm.shape[0] and max_shift*2+1 < slice_ccm.shape[1]:
                 ccm_x_start = int(slice_ccm.shape[0]/2 - max_shift)
                 ccm_y_start = int(slice_ccm.shape[1]/2 - max_shift)
-                slice_ccm = slice_ccm[ccm_y_start:max_shift*2+1, ccm_y_start:max_shift*2+1]
+                slice_ccm = slice_ccm[ccm_y_start:ccm_y_start+max_shift*2+1, ccm_x_start:ccm_x_start+max_shift*2+1]
 
-            
-            optimizer = GetMaxOptimizer(slice_ccm)
-            max_coords = GetMaxOptimizer.get_max()
-            ccm_max_value = -GetMaxOptimizer.get_interpolated_px_value(max_coords)
+            if method == "subpixel":
+                optimizer = GetMaxOptimizer(slice_ccm)
+                max_coords = optimizer.get_max()
+                ccm_max_value = -optimizer.get_interpolated_px_value_interp2d(max_coords)
+            else:
+                max_coords = np.unravel_index(slice_ccm.argmax(), slice_ccm.shape)
+                ccm_max_value = slice_ccm[max_coords[0], max_coords[1]]
 
             ccm_width = slice_ccm.shape[0]
             ccm_height = slice_ccm.shape[1]
@@ -47,7 +52,7 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
             if ccm_max_value >= min_similarity:
                 vector_x = ccm_width/2.0 - max_coords[1] - 0.5
                 vector_y = ccm_height/2.0 - max_coords[0] - 0.5
-                flow_arrows.append(x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y, ccm_max_value)
+                flow_arrows.append([x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y, ccm_max_value])
     
     if len(flow_arrows) == 0:
         print("Couldn't find any correlation between frames... try reducing the 'Min Similarity' parameter")
@@ -103,4 +108,4 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
     blocks = assemble_frame_from_blocks(np.array(blocks_stack), blocks_per_axis, blocks_per_axis)
 
-    return [translation_matrix, blocks]
+    return translation_matrix, blocks
