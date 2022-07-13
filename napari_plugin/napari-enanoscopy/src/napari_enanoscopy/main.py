@@ -32,14 +32,14 @@ from napari.qt.threading import thread_worker
                use_roi={"value": False,
                         "label": "Use RoI"},
                save_drift_table_path={"label": "Save Drift Table to",
-                                      "mode": "d"},
+                                      "mode": "w"},
                apply_correction={"value": True,
                                  "label": "Apply"})
 def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_averaging: int,
                               max_expected_drift: int, use_roi: bool, shift_calc_method: str,
                               save_as_npy: bool, apply_correction: bool, save_drift_table_path=pathlib.Path.home()) -> ImageData:
 
-    result = enanoscopy.estimate_drift_correction(img.data, save_as_npy=save_as_npy, save_drift_table_path=pathlib.Path.joinpath(save_drift_table_path, "drift_table"), ref_option=ref_option,
+    result = enanoscopy.estimate_drift_correction(img.data, save_as_npy=save_as_npy, save_drift_table_path=str(save_drift_table_path), ref_option=ref_option,
                                                   time_averaging=time_averaging, max_expected_drift=max_expected_drift, shift_calc_method=shift_calc_method,
                                                   use_roi=use_roi, apply=apply_correction)
 
@@ -54,7 +54,7 @@ def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_
 
 
 @magic_factory(call_button="Correct",
-               npy_path={"mode": "d",
-                         "label": "Path to Drift Table"},)
-def apply_drift_correction(img: ImageData, npy_path=pathlib.Path.home()) -> ImageData:
-    return enanoscopy.apply_drift_correction(img, path=npy_path)
+               drift_table_path={"mode": "r",
+                                 "label": "Path to Drift Table"},)
+def apply_drift_correction(img: ImageData, drift_table_path=pathlib.Path.home()) -> ImageData:
+    return enanoscopy.apply_drift_correction(img, path=str(drift_table_path))
