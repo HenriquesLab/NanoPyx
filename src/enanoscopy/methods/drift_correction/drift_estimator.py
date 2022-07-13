@@ -13,6 +13,7 @@ from ..image.drift.estimate_shift import GetMaxOptimizer
 
 
 class DriftEstimator(object):
+
     def __init__(self):
         self.estimator_table = DriftEstimatorTable()
         self.cross_correlation_map = None
@@ -26,12 +27,12 @@ class DriftEstimator(object):
 
         n_slices = image_array.shape[0]
 
-        # x0, y0, x1, y1 correspond to the exact coordinates of the roi to be used or full image dims
+        # x0, y0, x1, y1 correspond to the exact coordinates of the roi to be used or full image dims and should be a tuple
         if not self.estimator_table.params["use_roi"]:
             x0, y0, x1, y1 = 0, 0, image_array.shape[2]-1, image_array.shape[1]-1
             image_arr = image_array
         elif self.estimator_table.params["use_roi"] & self.estimator_table.params["roi"] is not None: # crops image to roi
-            x0, y0, x1, y1 = self.estimator_table.params["roi"]
+            x0, y0, x1, y1 = tuple(self.estimator_table.params["roi"])
             image_arr = image_array[:, y0:y1+1, x0:x1+1]
 
         # checks time averaging, in case it's lower than 1 defaults to 1
