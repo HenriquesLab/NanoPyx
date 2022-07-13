@@ -59,8 +59,14 @@ def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_
 def apply_drift_correction(img: ImageData, drift_table_path=pathlib.Path.home()) -> ImageData:
     return enanoscopy.apply_drift_correction(img, path=str(drift_table_path))
 
-# @magic_factory(call_button="tSSIM",
-#                reg_meth={"regmeth":""},
+# @magic_factory(call_button="Estimate",
+#               reg_meth={"regmeth":""},
 #               ref_option={"widget_type": "RadioButtons",
 #                           "orientation"
+#  img={"label": "Image Stack"},
+               #  ref_option={"widget_type": "RadioButtons",
+               #             "orientation": "vertical",
+              #             "value": 0,
+               #            "choices": [("First Frame", 0), ("Previous Frame", 1)],
+                #           "label": "Reference Frame"},
 # )
