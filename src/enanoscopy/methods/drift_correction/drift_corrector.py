@@ -35,11 +35,14 @@ class DriftCorrector(object):
             print("Missing drift calculation")
             return None
 
-    def load_drift_table(self, path):
+    def load_drift_table(self, path=None):
         if path is None:
             filepath = fd.askopenfilename()
         else:
             filepath = path
-        
-        self.estimator_table.import_npy(filepath)
+
+        if filepath.split(".")[-1] == "npy":
+            self.estimator_table.import_npy(filepath)
+        elif filepath.split(".")[-1] == "csv":
+            self.estimator_table.import_csv(filepath)
 

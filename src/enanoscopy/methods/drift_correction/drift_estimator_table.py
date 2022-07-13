@@ -65,11 +65,47 @@ class DriftEstimatorTable(object):
 
         txt = ""
         for key in self.params.keys():
-            txt += key + ";" + str(self.params[key]) + ";\n"
-        txt += "Drift Table;\n"
-        txt += "XY;X;Y;\n"
+            txt += key + ";" + str(self.params[key]) + "\n"
+        txt += "Drift Table\n"
+        txt += "XY;X;Y\n"
         for i in range(self.drift_table.shape[0]):
-            txt += str(self.drift_table[i][0]) + ";" + str(self.drift_table[i][1]) + ";" + str(self.drift_table[i][2]) + ";\n"
+            txt += str(self.drift_table[i][0]) + ";" + str(self.drift_table[i][1]) + ";" + str(self.drift_table[i][2]) + "\n"
 
         open(filepath + ".csv", "w").writelines(txt)
 
+    def import_csv(self, path=None):
+        if path is None:
+            filepath = fd.asksaveasfilename(title="Save Drift Table as csv")
+        else:
+            filepath = path
+
+        tmp = open(filepath, "r").readlines()
+
+        n_params = len(self.params.keys())
+
+        for i in range(n_params):
+            param_split = tmp[i].split(";")
+            key = param_split[0]
+            value = param_split[1].split("\n")[0]
+            if value == "TRUE":
+                value = True
+            elif value == "FALSE":
+                value = False
+            elif value == "None":
+                value = None
+            self.params[key] = value
+
+        if self.params["roi"] is not None:
+            roi_str_list = self.params["roi"][1:-1].split(", ")
+            self.params["roi"] = tuple([int(coord) for coord in roi_str_list])
+
+        drift_table = []
+
+        for row in tmp[n_params+2:]:
+            row_split = row.split(";")
+            drift_xy = float(row_split[0])
+            drift_x = float(row_split[1])
+            drift_y = float(row_split[2])
+            drift_table.append([drift_xy, drift_x, drift_y])
+
+        self.drift_table = np.array(drift_table)

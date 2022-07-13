@@ -27,7 +27,7 @@ from napari.qt.threading import thread_worker
                                "label": "Time Averaging"},
                max_expected_drift={"value": 10,
                                    "label": "Max Expected Drift"},
-               save_as_npy={"value": True,
+               save_as_npy={"value": False,
                             "label": "Save Drift Table as npy"},
                use_roi={"value": False,
                         "label": "Use RoI"},
