@@ -19,24 +19,24 @@ class ChannelAlignmentEstimator(object):
         corrector = ChannelAlignmentCorrector()
         return corrector.align_channels(img_stack, translation_masks=self.translation_masks)
 
-    def calculate_translation(self, channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity):
-        translation_mask = calculate_translation_mask(channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity)
+    def calculate_translation(self, channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity, method="subpixel"):
+        translation_mask = calculate_translation_mask(channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity, method=method)
         return translation_mask
 
     def save_translation_mask(self, path=None):
         if path is not None:
             imsave(path + ".tif", self.translation_masks)
         else:
-            imsave(fd.asksaveasfilename() + ".tif", self.translation_masks)
+            imsave(fd.asksaveasfilename(title="Save Translation Masks") + ".tif", self.translation_masks)
 
     def save_ccms(self, path=None):
         if path is not None:
             imsave(path + ".tif", self.ccms)
         else:
-            imsave(fd.asksaveasfilename() + ".tif", self.ccms)
+            imsave(fd.asksaveasfilename(title="Save Cross Correlation Maps") + ".tif", self.ccms)
 
     def estimate(self, img_stack: array, ref_channel: int, max_shift: float,
-                 blocks_per_axis: int, min_similarity: float, apply: bool):
+                 blocks_per_axis: int, min_similarity: float, method: str="subpixel", save_ccms: bool=False, apply: bool=False):
 
         channels_to_align = list(range(img_stack.shape[0]))
         channels_to_align.remove(ref_channel)
@@ -49,7 +49,7 @@ class ChannelAlignmentEstimator(object):
         self.ccms = []
 
         for channel in channels_to_align:
-            translation_mask, ccm = self.calculate_translation(img_stack[channel], img_stack[ref_channel], max_shift, blocks_per_axis, min_similarity)
+            translation_mask, ccm = self.calculate_translation(img_stack[channel], img_stack[ref_channel], max_shift, blocks_per_axis, min_similarity, method=method)
             self.translation_masks[channel] = translation_mask
             self.ccms.append(ccm)
 
@@ -57,7 +57,9 @@ class ChannelAlignmentEstimator(object):
         self.ccms = np.array(self.ccms)
 
         self.save_translation_mask()
-        self.save_ccms()
+
+        if save_ccms:
+            self.save_ccms()
 
         if apply:
             return self.apply_elastic_transform(img_stack)

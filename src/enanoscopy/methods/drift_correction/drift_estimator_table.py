@@ -75,7 +75,7 @@ class DriftEstimatorTable(object):
 
     def import_csv(self, path=None):
         if path is None:
-            filepath = fd.asksaveasfilename(title="Save Drift Table as csv")
+            filepath = fd.asksaveasfilename(title="Load Drift Table as csv")
         else:
             filepath = path
 

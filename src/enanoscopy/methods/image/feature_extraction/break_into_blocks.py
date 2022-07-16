@@ -12,8 +12,8 @@ def assemble_frame_from_blocks(blocks_stack, n_blocks_width, n_blocks_height):
     reconstructed_image = np.zeros((height, width))
 
     counter = 0
-    for x_i in range(n_blocks_width):
-        for y_i in range(n_blocks_height):
+    for y_i in range(n_blocks_width):
+        for x_i in range(n_blocks_height):
             reconstructed_image[y_i*height_b:y_i*height_b+height_b, x_i*width_b:x_i*width_b+width_b] += blocks_stack[counter]
             counter += 1
 

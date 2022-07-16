@@ -37,7 +37,7 @@ class DriftCorrector(object):
 
     def load_drift_table(self, path=None):
         if path is None:
-            filepath = fd.askopenfilename()
+            filepath = fd.askopenfilename(title="Load Drift Table as csv or npy")
         else:
             filepath = path
 

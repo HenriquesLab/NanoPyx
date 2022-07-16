@@ -16,7 +16,7 @@ class ChannelAlignmentCorrector(object):
         if path is not None:
             self.translation_masks = imread(path)
         else:
-            self.translation_masks = imread(fd.askopenfilename())
+            self.translation_masks = imread(fd.askopenfilename(title="Load Translation Masks"))
 
     @timeit
     def get_interpolated_value(self, img_slice, coords):
@@ -56,6 +56,8 @@ class ChannelAlignmentCorrector(object):
                         #value = self.get_interpolated_value(img_stack[channel], (y_i+dy, x_i+dx))
                         value = interpolator(dy, dx)
                         self.aligned_stack[channel][y_i, x_i] = value
+
+        #TODO fix bug translation masks
 
         return self.aligned_stack
 
