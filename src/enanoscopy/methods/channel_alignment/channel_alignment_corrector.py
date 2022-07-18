@@ -10,7 +10,6 @@ from enanoscopy.methods.utils.timeit import timeit
 class ChannelAlignmentCorrector(object):
     def __init__(self):
         self.aligned_stack = None
-        self.translation_masks = None
 
     def load_translation_masks(self, path=None):
         if path is not None:
@@ -28,10 +27,10 @@ class ChannelAlignmentCorrector(object):
     @timeit
     def align_channels(self, img_stack, translation_masks=None):
         
-        self.translation_masks = translation_masks
+        translation_masks = translation_masks
 
-        if self.translation_masks is None:
-            self.load_translation_masks()
+        if translation_masks is None:
+            translation_masks = imread(fd.askopenfilename(title="Load Translation Masks"))
 
         n_channels = img_stack.shape[0]
         height = img_stack.shape[1]
@@ -51,10 +50,10 @@ class ChannelAlignmentCorrector(object):
             else:
                 for y_i in range(height):
                     for x_i in range(width):
-                        dx = self.translation_masks[channel][y_i, x_i]
-                        dy = self.translation_masks[channel][y_i, x_i + width]
+                        dx = translation_masks[channel][y_i, x_i]
+                        dy = translation_masks[channel][y_i, x_i + width]
                         #value = self.get_interpolated_value(img_stack[channel], (y_i+dy, x_i+dx))
-                        value = interpolator(dy, dx)
+                        value = interpolator(y_i+dy, x_i+dx)
                         self.aligned_stack[channel][y_i, x_i] = value
 
         #TODO fix bug translation masks
