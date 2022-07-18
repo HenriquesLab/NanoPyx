@@ -62,6 +62,9 @@ class CrossCorrelationMap(object):
 
     def calculate_ccm(self, img_ref, img_stack, normalize):
 
+        if len(img_stack.shape) < 3:
+            img_stack = np.array([img_stack]) #in case a single image slice is used, reshapes it
+
         self.normalize = normalize
 
         if img_ref is not None:

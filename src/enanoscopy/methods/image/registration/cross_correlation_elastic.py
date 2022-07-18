@@ -6,9 +6,9 @@ from ..drift.estimate_shift import GetMaxOptimizer
 from ..feature_extraction.break_into_blocks import assemble_frame_from_blocks
 from ..transform.cross_correlation_map import CrossCorrelationMap
 
-def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity):
+def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"):
 
-    method = "subpixel" # set for pixel or subpixel precision
+    method = "pixel" # set for pixel or subpixel precision
     
     width = img_slice.shape[1]
     height = img_slice.shape[0]
@@ -22,19 +22,19 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
     flow_arrows = []
     blocks_stack = []
 
-    for x_i in range(blocks_per_axis):
-        for y_i in range(blocks_per_axis):
+    for y_i in range(blocks_per_axis):
+        for x_i in range(blocks_per_axis):
             x_start = x_i * block_width
             y_start = y_i * block_height
 
             slice_crop = img_slice[y_start:y_start+block_height, x_start:x_start+block_width]
             ref_crop = img_ref[y_start:y_start+block_height, x_start:x_start+block_width]
             ccm = CrossCorrelationMap()
-            slice_ccm = ccm.calculate_ccm(ref_crop, np.array([slice_crop]), True)[0]
+            slice_ccm = ccm.calculate_ccm(slice_crop, ref_crop, True)[0]
 
             if max_shift > 0 and max_shift*2+1 < slice_ccm.shape[0] and max_shift*2+1 < slice_ccm.shape[1]:
-                ccm_x_start = int(slice_ccm.shape[0]/2 - max_shift)
-                ccm_y_start = int(slice_ccm.shape[1]/2 - max_shift)
+                ccm_x_start = int(slice_ccm.shape[1]/2 - max_shift)
+                ccm_y_start = int(slice_ccm.shape[0]/2 - max_shift)
                 slice_ccm = slice_ccm[ccm_y_start:ccm_y_start+max_shift*2+1, ccm_x_start:ccm_x_start+max_shift*2+1]
 
             if method == "subpixel":
@@ -45,15 +45,15 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
                 max_coords = np.unravel_index(slice_ccm.argmax(), slice_ccm.shape)
                 ccm_max_value = slice_ccm[max_coords[0], max_coords[1]]
 
-            ccm_width = slice_ccm.shape[0]
-            ccm_height = slice_ccm.shape[1]
+            ccm_width = slice_ccm.shape[1]
+            ccm_height = slice_ccm.shape[0]
             blocks_stack.append(slice_ccm)
 
             if ccm_max_value >= min_similarity:
                 vector_x = ccm_width/2.0 - max_coords[1] - 0.5
                 vector_y = ccm_height/2.0 - max_coords[0] - 0.5
                 flow_arrows.append([x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y, ccm_max_value])
-    
+                
     if len(flow_arrows) == 0:
         print("Couldn't find any correlation between frames... try reducing the 'Min Similarity' parameter")
         return None
@@ -64,8 +64,8 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
     max_distance = sqrt(pow(width, 2) + pow(height, 2))
 
-    for x_i in range(width):
-        for y_i in range(height):
+    for y_i in range(height):
+        for x_i in range(width):
             # iterate over vectors
             dx, dy, w_sum = 0, 0, 0
 
@@ -74,24 +74,28 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
                 dy = flow_arrows[0][3]
 
             else:
-                distances = []
+                distances = [None for i in range(len(flow_arrows))]
+                counter = 0
                 for arrow in flow_arrows:
-                    distance = sqrt(pow(arrow[0] - x_i, 2) + pow(arrow[1] - y_i, 2))
-                    distances.append(distance)
-                
-                all_distances = 0
-                for distance in distances:
-                    all_distances += pow(((max_distance - distance) / (max_distance * distance)), 2)
+                    d = sqrt(pow(arrow[0] - x_i, 2) + pow(arrow[1] - y_i, 2)) +1
+                    distances[counter] = d
+                    counter += 1
 
-                for i, arrow in enumerate(flow_arrows):
-                    distance = distances[i]
-                    first_term = pow(((max_distance - distance) / (max_distance * distance)), 2)
+                all_distances = 0
+                for d in distances:
+                    all_distances += pow(((max_distance - d) / (max_distance * d)), 2)
+
+                counter = 0
+                for arrow in flow_arrows:
+                    d = distances[counter]
+                    first_term = pow(((max_distance - d) / (max_distance * d)), 2)
                     second_term = all_distances
 
                     weight = first_term / second_term
                     dx += arrow[2] * weight
                     dy += arrow[3] * weight
                     w_sum += weight
+                    counter += 1
 
                 dx /= w_sum
                 dy /= w_sum
