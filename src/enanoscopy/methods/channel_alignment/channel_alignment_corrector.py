@@ -18,13 +18,6 @@ class ChannelAlignmentCorrector(object):
             self.translation_masks = imread(fd.askopenfilename(title="Load Translation Masks"))
 
     @timeit
-    def get_interpolated_value(self, img_slice, coords):
-        points = [(y, x) for y in range(img_slice.shape[0]) for x in range(img_slice.shape[1])]
-        values = img_slice.reshape((img_slice.shape[0] * img_slice.shape[1]))
-
-        return griddata(points, values, coords, method="cubic")
-
-    @timeit
     def align_channels(self, img_stack, translation_masks=None):
         
         translation_masks = translation_masks
@@ -41,22 +34,23 @@ class ChannelAlignmentCorrector(object):
 
         for channel in channels_list:
             img_slice = img_stack[channel]
-            x = [xi for xi in range(img_slice.shape[1])]
-            y = [yi for yi in range(img_slice.shape[0])]
-            z = img_slice.reshape((img_slice.shape[0] * img_slice.shape[1]))
-            interpolator = interp2d(y, x, z, kind="cubic") # this is much faster than using griddata
-            if np.sum(translation_masks[channel]) == 0:
-                self.aligned_stack[channel] = img_stack[channel]
+            translation_mask = translation_masks[channel]
+            print(channel)
+            if np.sum(translation_mask) == 0:
+                print(channel, "copying original")
+                self.aligned_stack[channel] = img_slice
             else:
+                x = [xi for xi in range(img_slice.shape[1])]
+                y = [yi for yi in range(img_slice.shape[0])]
+                z = img_slice.reshape((img_slice.shape[0] * img_slice.shape[1]))
+                interpolator = interp2d(y, x, z, kind="cubic")
                 for y_i in range(height):
                     for x_i in range(width):
-                        dx = translation_masks[channel][y_i, x_i]
-                        dy = translation_masks[channel][y_i, x_i + width]
-                        #value = self.get_interpolated_value(img_stack[channel], (y_i+dy, x_i+dx))
-                        value = interpolator(y_i+dy, x_i+dx)
+                        dx = translation_mask[y_i, x_i]
+                        dy = translation_mask[y_i, x_i + width]
+                        value = interpolator(y_i-dy, x_i-dx)
                         self.aligned_stack[channel][y_i, x_i] = value
 
-        #TODO fix bug translation masks
 
         return self.aligned_stack
 

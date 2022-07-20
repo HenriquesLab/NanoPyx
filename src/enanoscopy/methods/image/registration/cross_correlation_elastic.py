@@ -31,7 +31,7 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
             slice_crop = img_slice[y_start:y_start+block_height, x_start:x_start+block_width]
             ref_crop = img_ref[y_start:y_start+block_height, x_start:x_start+block_width]
             ccm = CrossCorrelationMap()
-            slice_ccm = ccm.calculate_ccm(slice_crop, ref_crop, True)[0]
+            slice_ccm = ccm.calculate_ccm(ref_crop, slice_crop, True)[0]
 
             if max_shift > 0 and max_shift*2+1 < slice_ccm.shape[0] and max_shift*2+1 < slice_ccm.shape[1]:
                 ccm_x_start = int(slice_ccm.shape[1]/2 - max_shift)
@@ -51,8 +51,8 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
             blocks_stack.append(slice_ccm)
 
             if ccm_max_value >= min_similarity:
-                vector_x = ccm_width/2.0 - max_coords[1] - 0.5
-                vector_y = ccm_height/2.0 - max_coords[0] - 0.5
+                vector_x = (ccm_width/2.0 - max_coords[1] - 0.5)
+                vector_y = (ccm_height/2.0 - max_coords[0] - 0.5)
                 flow_arrows.append([x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y])
                 
     if len(flow_arrows) == 0:
@@ -97,7 +97,7 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
             translation_matrix_x[j, i] = dx
             translation_matrix_y[j, i] = dy
-    
+    print(flow_arrows)
     if blocks_per_axis > 1:
         translation_matrix_x = gaussian(translation_matrix_x, sigma=max(block_width, block_height/2.0))
         translation_matrix_y = gaussian(translation_matrix_y, sigma=max(block_width, block_height/2.0))
@@ -148,8 +148,8 @@ def calculate_translation_mask_from_ccm(img_slice, ccm, max_shift, blocks_per_ax
             blocks_stack.append(slice_ccm)
 
             if ccm_max_value >= min_similarity:
-                vector_x = ccm_width/2.0 - max_coords[1] - 0.5
-                vector_y = ccm_height/2.0 - max_coords[0] - 0.5
+                vector_x = (ccm_width/2.0 - max_coords[1] - 0.5) * -1
+                vector_y = (ccm_height/2.0 - max_coords[0] - 0.5) * -1
                 flow_arrows.append([x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y])
                 
     if len(flow_arrows) == 0:
