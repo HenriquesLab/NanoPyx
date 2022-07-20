@@ -67,3 +67,4 @@ def apply_channel_alignment(viewer: Viewer, img: Image, translation_mask_path):
         except KeyError:
             # otherwise add it to the viewer
             viewer.add_image(result, name=result_name)
+

@@ -66,3 +66,4 @@ def apply_drift_correction(viewer: Viewer, img: Image, drift_table_path=pathlib.
         except KeyError:
             # otherwise add it to the viewer
             viewer.add_image(result, name=result_name)
+
