@@ -1,12 +1,11 @@
 import multiprocessing as mp
-mp.set_start_method("spawn", force=True) #FIXME workaround for macOs to be able to run it from napari
+mp.set_start_method("spawn", force=True) # workaround for macOs to be able to run it from napari
 from .methods.drift_correction.drift_corrector import DriftCorrector
 from .methods.drift_correction.drift_estimator import DriftEstimator
 from .methods.channel_alignment.channel_alignment_estimator import ChannelAlignmentEstimator
 from .methods.channel_alignment.channel_alignment_corrector import ChannelAlignmentCorrector
-# this library assumes image_array is an array with shape as defined in numpy arrays (time, y, x) or (time, y, x, z)
 
-#TODO write tests for shift from ccm and alignment correction, and test differences between linear and cubic interpolation
+#TODO write tests, create simulated data for tests and write docstrings
 
 def estimate_drift_correction(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):
     estimator = DriftEstimator()
@@ -30,11 +29,25 @@ def apply_drift_correction(image_array, path=None, drift_table=None):
         print("No corrected image was generated")
         pass
 
-def estimate_channel_alignment(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, apply):
+def estimate_channel_alignment(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method="subpixel",
+                               save_translation_masks=True, translation_mask_save_path=None,
+                               save_ccms=False, ccms_save_path=False, apply=True):
     estimator = ChannelAlignmentEstimator()
-    aligned_image = estimator.estimate(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, apply)
+    aligned_image = estimator.estimate(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method=method,
+                                       save_translation_masks=save_translation_masks, translation_mask_save_path=translation_mask_save_path,
+                                       save_ccms=save_ccms, ccms_save_path=ccms_save_path, apply=apply)
 
     if aligned_image is not None:
         return aligned_image
     else:
+        pass
+
+def apply_channel_alignment(image_array, translation_masks=None):
+    corrector = ChannelAlignmentCorrector()
+    aligned_image = corrector.align_channels(image_array, translation_masks=translation_masks)
+
+    if aligned_image is not None:
+        return aligned_image
+    else:
+        print("No aligned image was generated")
         pass
