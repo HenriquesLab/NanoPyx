@@ -36,7 +36,10 @@ class ChannelAlignmentEstimator(object):
             imsave(fd.asksaveasfilename(title="Save Cross Correlation Maps") + ".tif", self.ccms)
 
     def estimate(self, img_stack: array, ref_channel: int, max_shift: float,
-                 blocks_per_axis: int, min_similarity: float, method: str="subpixel", save_ccms: bool=False, apply: bool=False):
+                 blocks_per_axis: int, min_similarity: float, method: str="subpixel",
+                 save_translation_masks: bool=True, translation_mask_save_path: str=None,
+                 save_ccms: bool=False, ccms_save_path: str=None,
+                 apply: bool=False):
 
         channels_to_align = list(range(img_stack.shape[0]))
         channels_to_align.remove(ref_channel)
@@ -56,10 +59,11 @@ class ChannelAlignmentEstimator(object):
         self.ccms.insert(ref_channel, np.zeros((len(self.ccms[0]), len(self.ccms[0][0]))))
         self.ccms = np.array(self.ccms)
 
-        self.save_translation_mask()
+        if save_translation_masks:
+            self.save_translation_mask(path=translation_mask_save_path)
 
         if save_ccms:
-            self.save_ccms()
+            self.save_ccms(path=ccms_save_path)
 
         if apply:
             return self.apply_elastic_transform(img_stack)
