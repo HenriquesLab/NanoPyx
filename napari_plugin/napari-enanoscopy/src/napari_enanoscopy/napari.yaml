@@ -4,10 +4,16 @@ contributions:
   commands:
     - id: napari-enanoscopy.estimate_drift_correction
       title: Estimate Drift Correction
-      python_name: napari_enanoscopy.main:estimate_drift_correction
+      python_name: napari_enanoscopy.drift_alignment:estimate_drift_correction
     - id: napari-enanoscopy.apply_drift_correction
       title: Apply Drift Correction
-      python_name: napari_enanoscopy.main:apply_drift_correction
+      python_name: napari_enanoscopy.drift_alignment:apply_drift_correction
+    - id: napari-enanoscopy.estimate_channel_alignment
+      title: Estimate Channel Alignment
+      python_name: napari_enanoscopy.channel_alignment:estimate_channel_alignment
+    - id: napari-enanoscopy.apply_channel_alignment
+      title: Apply Channel Alignment
+      python_name: napari_enanoscopy.channel_alignment:apply_channel_alignment
   widgets:
     - command: napari-enanoscopy.estimate_drift_correction
       display_name: Estimate Drift Correction
@@ -15,3 +21,10 @@ contributions:
     - command: napari-enanoscopy.apply_drift_correction
       display_name: Apply Drift Correction
       autogenerate: false
+    - command: napari-enanoscopy.estimate_channel_alignment
+      display_name: Estimate Channel Alignment
+      autogenerate: false
+    - command: napari-enanoscopy.apply_channel_alignment
+      display_name: Apply Channel Alignment
+      autogenerate: false
+
