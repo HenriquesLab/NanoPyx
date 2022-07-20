@@ -97,7 +97,7 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
             translation_matrix_x[j, i] = dx
             translation_matrix_y[j, i] = dy
-    print(flow_arrows)
+
     if blocks_per_axis > 1:
         translation_matrix_x = gaussian(translation_matrix_x, sigma=max(block_width, block_height/2.0))
         translation_matrix_y = gaussian(translation_matrix_y, sigma=max(block_width, block_height/2.0))
@@ -148,8 +148,8 @@ def calculate_translation_mask_from_ccm(img_slice, ccm, max_shift, blocks_per_ax
             blocks_stack.append(slice_ccm)
 
             if ccm_max_value >= min_similarity:
-                vector_x = (ccm_width/2.0 - max_coords[1] - 0.5) * -1
-                vector_y = (ccm_height/2.0 - max_coords[0] - 0.5) * -1
+                vector_x = ccm_width/2.0 - max_coords[1] - 0.5
+                vector_y = ccm_height/2.0 - max_coords[0] - 0.5
                 flow_arrows.append([x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y])
                 
     if len(flow_arrows) == 0:

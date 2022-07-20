@@ -17,7 +17,6 @@ class ChannelAlignmentCorrector(object):
         else:
             self.translation_masks = imread(fd.askopenfilename(title="Load Translation Masks"))
 
-    @timeit
     def align_channels(self, img_stack, translation_masks=None):
         
         translation_masks = translation_masks
@@ -35,9 +34,7 @@ class ChannelAlignmentCorrector(object):
         for channel in channels_list:
             img_slice = img_stack[channel]
             translation_mask = translation_masks[channel]
-            print(channel)
             if np.sum(translation_mask) == 0:
-                print(channel, "copying original")
                 self.aligned_stack[channel] = img_slice
             else:
                 x = [xi for xi in range(img_slice.shape[1])]
