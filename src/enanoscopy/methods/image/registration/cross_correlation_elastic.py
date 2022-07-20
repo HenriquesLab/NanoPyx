@@ -1,5 +1,5 @@
 import numpy as np
-from cmath import sqrt
+from math cimport sqrt
 from skimage.filters import gaussian
 
 from ..drift.estimate_shift import GetMaxOptimizer
@@ -59,7 +59,6 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
         print("Couldn't find any correlation between frames... try reducing the 'Min Similarity' parameter")
         return None
 
-    print(flow_arrows)
     translation_matrix = np.zeros((height, width*2))
     translation_matrix_x = np.zeros((height, width))
     translation_matrix_y = np.zeros((height, width))
@@ -98,7 +97,7 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
             translation_matrix_x[j, i] = dx
             translation_matrix_y[j, i] = dy
-
+    
     if blocks_per_axis > 1:
         translation_matrix_x = gaussian(translation_matrix_x, sigma=max(block_width, block_height/2.0))
         translation_matrix_y = gaussian(translation_matrix_y, sigma=max(block_width, block_height/2.0))
@@ -157,7 +156,6 @@ def calculate_translation_mask_from_ccm(img_slice, ccm, max_shift, blocks_per_ax
         print("Couldn't find any correlation between frames... try reducing the 'Min Similarity' parameter")
         return None
 
-    print(flow_arrows)
     translation_matrix = np.zeros((height, width*2))
     translation_matrix_x = np.zeros((height, width))
     translation_matrix_y = np.zeros((height, width))
@@ -200,7 +198,6 @@ def calculate_translation_mask_from_ccm(img_slice, ccm, max_shift, blocks_per_ax
     if blocks_per_axis > 1:
         translation_matrix_x = gaussian(translation_matrix_x, sigma=max(block_width, block_height/2.0))
         translation_matrix_y = gaussian(translation_matrix_y, sigma=max(block_width, block_height/2.0))
-
     translation_matrix[:, :width] += translation_matrix_x
     translation_matrix[:, width:] += translation_matrix_y
 
