@@ -55,6 +55,14 @@ def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_
 
 @magic_factory(call_button="Correct",
                drift_table_path={"mode": "r",
-                                 "label": "Path to Drift Table"},)
-def apply_drift_correction(img: ImageData, drift_table_path=pathlib.Path.home()) -> ImageData:
-    return enanoscopy.apply_drift_correction(img, path=str(drift_table_path))
+                                 "label": "Path to Drift Table"})
+def apply_drift_correction(viewer: Viewer, img: Image, drift_table_path=pathlib.Path.home()) -> ImageData:
+    result = enanoscopy.apply_drift_correction(img.data, path=str(drift_table_path))
+    if result is not None:
+        result_name = img.name + "_aligned"
+        try:
+            # if the layer exists, update the data
+            viewer.layers[result_name].data = result
+        except KeyError:
+            # otherwise add it to the viewer
+            viewer.add_image(result, name=result_name)
