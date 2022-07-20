@@ -1,5 +1,5 @@
 import numpy as np
-from math cimport sqrt
+from cmath import sqrt
 from skimage.filters import gaussian
 
 from ..drift.estimate_shift import GetMaxOptimizer
