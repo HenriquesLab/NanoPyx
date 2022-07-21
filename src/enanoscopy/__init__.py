@@ -21,6 +21,8 @@ def apply_drift_correction(image_array, path=None, drift_table=None):
     corrector = DriftCorrector()
     if drift_table is None:
         corrector.load_drift_table(path=path)
+    else:
+        corrector.estimator_table = drift_table
     corrected_img = corrector.apply_correction(image_array)
 
     if corrected_img is not None:
