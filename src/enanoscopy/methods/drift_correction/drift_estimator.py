@@ -134,24 +134,21 @@ class DriftEstimator(object):
         shift_x = radius_x - shift_x - 0.5
         shift_y = radius_y - shift_y - 0.5
 
-        return [shift_x, shift_y]
+        return shift_x, shift_y
 
 
     def get_shifts_from_ccm(self):
-        n_slices = self.cross_correlation_map.shape[0]
 
         drift_x = []
         drift_y = []
         drift = []
 
-        pool = mp.Pool(mp.cpu_count())
-        shift_pool = pool.map_async(self.get_shift_from_ccm_slice, range(0, n_slices), callback=drift.append)
-        shift_pool.wait()
-        pool.close()
-
+        for i in range(self.cross_correlation_map.shape[0]):
+            drift.append(self.get_shift_from_ccm_slice(i))
+        
         drift = np.array(drift)
-        drift_x = drift[0, :, 0]
-        drift_y = drift[0, :, 1]
+        drift_x = drift[:, 0]
+        drift_y = drift[:, 1]
 
         bias_x = drift_x[0]
         bias_y = drift_y[0]
