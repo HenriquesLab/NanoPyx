@@ -61,7 +61,6 @@ class CrossCorrelationMap(object):
 
         return ccm_pixels.reshape((slice_ccm.shape[0], slice_ccm.shape[1]))
 
-    @timeit
     def calculate_ccm(self, img_ref, img_stack, normalize):
 
         if len(img_stack.shape) < 3:
