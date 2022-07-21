@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 
 from .fft_helper_functions import make_even_square, check_even_square
 from ...image.analysis.image_statistics import calculate_ppmcc
+from ...utils.timeit import timeit
 
 
 class CrossCorrelationMap(object):
@@ -60,6 +61,7 @@ class CrossCorrelationMap(object):
 
         return ccm_pixels.reshape((slice_ccm.shape[0], slice_ccm.shape[1]))
 
+    @timeit
     def calculate_ccm(self, img_ref, img_stack, normalize):
 
         if len(img_stack.shape) < 3:
@@ -91,13 +93,16 @@ class CrossCorrelationMap(object):
             self.img_stack = img_stack
 
         ccm = []
-        pool = mp.Pool(mp.cpu_count())
-        ccm_pool = pool.map_async(self._calculate_ccm, range(0, self.img_stack.shape[0], 1), callback=ccm.append)
-        ccm_pool.wait()
-        pool.close() # makes pool no longer usable
-        #pool.join() # used to catch exceptions, requires expanding functionality
-        ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))
-        ccm = np.array(ccm)
+        if img_stack.shape[0] > 100:
+            pool = mp.Pool(mp.cpu_count())
+            ccm_pool = pool.map_async(self._calculate_ccm, range(0, self.img_stack.shape[0], 1), callback=ccm.append)
+            ccm_pool.wait()
+            pool.close() # makes pool no longer usable
+            ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))
+        else:
+            for i in range(self.img_stack.shape[0]):
+                ccm.append(self._calculate_ccm(i))
+            ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))
 
         return ccm
 
