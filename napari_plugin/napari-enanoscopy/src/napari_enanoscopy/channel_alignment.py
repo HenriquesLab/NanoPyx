@@ -1,16 +1,10 @@
-from ctypes import alignment
-import os
 import pathlib
-import platform
-import multiprocessing as mp
+import enanoscopy
+from napari import Viewer
 from tkinter import Image
 from skimage.io import imread
-import enanoscopy
-from magicgui import magic_factory, magicgui
-from napari.types import ImageData
 from napari.layers import Image
-from napari import Viewer
-from napari.qt.threading import thread_worker
+from magicgui import magic_factory
 
 
 @magic_factory(call_button="Estimate",
