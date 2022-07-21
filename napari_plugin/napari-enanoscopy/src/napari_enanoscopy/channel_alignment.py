@@ -1,3 +1,4 @@
+import os
 import pathlib
 import enanoscopy
 from napari import Viewer
@@ -5,6 +6,7 @@ from tkinter import Image
 from skimage.io import imread
 from napari.layers import Image
 from magicgui import magic_factory
+from napari.utils.notifications import show_info
 
 
 @magic_factory(call_button="Estimate",
@@ -39,7 +41,7 @@ from magicgui import magic_factory
                       "label": "Apply"})
 def estimate_channel_alignment(viewer: Viewer, img: Image, ref_channel: int, max_shift: int, blocks_per_axis: int,
                                min_similarity: float, method: str, save_translation_masks: bool, save_ccms: bool, apply: bool,
-                               translation_mask_save_path=pathlib.Path.home(), ccms_save_path=pathlib.Path.home()):
+                               translation_mask_save_path=pathlib.Path.home()/"translation_mask", ccms_save_path=pathlib.Path.home()/"ccms"):
     result = enanoscopy.estimate_channel_alignment(img.data, ref_channel, max_shift, blocks_per_axis, min_similarity,
                                                    method=method, save_translation_masks=save_translation_masks,
                                                    translation_mask_save_path=str(translation_mask_save_path),
@@ -57,16 +59,19 @@ def estimate_channel_alignment(viewer: Viewer, img: Image, ref_channel: int, max
 @magic_factory(call_button="Correct",
                translation_mask_path={"mode": "r",
                                       "label": "Path to Translation Mask"})
-def apply_channel_alignment(viewer: Viewer, img: Image, translation_mask_path):
-    translation_mask = imread(str(translation_mask_path))
-    result = enanoscopy.apply_channel_alignment(img.data, translation_masks=translation_mask)
+def apply_channel_alignment(viewer: Viewer, img: Image, translation_mask_path: pathlib.Path):
+    if str(translation_mask_path).split(".")[-1] != "tif":
+        show_info("Translation Mask file should be .tif file")
+    else:
+        translation_mask = imread(str(translation_mask_path))
+        result = enanoscopy.apply_channel_alignment(img.data, translation_masks=translation_mask)
 
-    if result is not None:
-        result_name = img.name + "_aligned"
-        try:
-            # if the layer exists, update the data
-            viewer.layers[result_name].data = result
-        except KeyError:
-            # otherwise add it to the viewer
-            viewer.add_image(result, name=result_name)
+        if result is not None:
+            result_name = img.name + "_aligned"
+            try:
+                # if the layer exists, update the data
+                viewer.layers[result_name].data = result
+            except KeyError:
+                # otherwise add it to the viewer
+                viewer.add_image(result, name=result_name)
 

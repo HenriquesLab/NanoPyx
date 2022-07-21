@@ -1,14 +1,10 @@
-import os
 import pathlib
-import platform
-import multiprocessing as mp
-from tkinter import Image
 import enanoscopy
-from magicgui import magic_factory, magicgui
-from napari.types import ImageData
-from napari.layers import Image
+from tkinter import Image
 from napari import Viewer
-from napari.qt.threading import thread_worker
+from napari.layers import Image
+from magicgui import magic_factory
+from napari.utils.notifications import show_info
 
 
 @magic_factory(call_button="Estimate",
@@ -37,7 +33,7 @@ from napari.qt.threading import thread_worker
                                  "label": "Apply"})
 def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_averaging: int,
                               max_expected_drift: int, use_roi: bool, shift_calc_method: str,
-                              save_as_npy: bool, apply_correction: bool, save_drift_table_path=pathlib.Path.home()) -> ImageData:
+                              save_as_npy: bool, apply_correction: bool, save_drift_table_path=pathlib.Path.home()/"drift_table"):
 
     result = enanoscopy.estimate_drift_correction(img.data, save_as_npy=save_as_npy, save_drift_table_path=str(save_drift_table_path), ref_option=ref_option,
                                                   time_averaging=time_averaging, max_expected_drift=max_expected_drift, shift_calc_method=shift_calc_method,
@@ -56,14 +52,17 @@ def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_
 @magic_factory(call_button="Correct",
                drift_table_path={"mode": "r",
                                  "label": "Path to Drift Table"})
-def apply_drift_correction(viewer: Viewer, img: Image, drift_table_path=pathlib.Path.home()) -> ImageData:
-    result = enanoscopy.apply_drift_correction(img.data, path=str(drift_table_path))
-    if result is not None:
-        result_name = img.name + "_aligned"
-        try:
-            # if the layer exists, update the data
-            viewer.layers[result_name].data = result
-        except KeyError:
-            # otherwise add it to the viewer
-            viewer.add_image(result, name=result_name)
+def apply_drift_correction(viewer: Viewer, img: Image, drift_table_path: pathlib.Path):
+    if str(drift_table_path).split(".")[-1] != "npy" and str(drift_table_path).split(".")[-1] != "csv":
+        show_info("Drift table should either be a .csv or .npy file")
+    else:
+        result = enanoscopy.apply_drift_correction(img.data, path=str(drift_table_path))
+        if result is not None:
+            result_name = img.name + "_aligned"
+            try:
+                # if the layer exists, update the data
+                viewer.layers[result_name].data = result
+            except KeyError:
+                # otherwise add it to the viewer
+                viewer.add_image(result, name=result_name)
 
