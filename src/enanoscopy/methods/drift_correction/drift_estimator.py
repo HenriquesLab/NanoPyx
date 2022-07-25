@@ -153,15 +153,15 @@ class DriftEstimator(object):
         bias_x = drift_x[0]
         bias_y = drift_y[0]
 
-        self.drift_x = []
-        self.drift_y = []
+        self.drift_x = np.zeros((drift_x.shape[0]))
+        self.drift_y = np.zeros((drift_y.shape[0]))
 
         for i in range(0, self.cross_correlation_map.shape[0]):
-            self.drift_x.append(drift_x[i] - bias_x)
-            self.drift_y.append(drift_y[i] - bias_y)
+            self.drift_x[i] = drift_x[i] - bias_x
+            self.drift_y[i] = drift_y[i] - bias_y
             if self.estimator_table.params["ref_option"] == 1 and i > 0:
-                self.drift_x[i] += self.drift_x[i-1]
-                self.drift_y[i] += self.drift_y[i-1]
+                self.drift_x[i] += drift_x[i-1]
+                self.drift_y[i] += drift_y[i-1]
 
         self.drift_x = np.array(self.drift_x)
         self.drift_y = np.array(self.drift_y)
