@@ -28,12 +28,12 @@ class DriftEstimator(object):
         n_slices = image_array.shape[0]
 
         # x0, y0, x1, y1 correspond to the exact coordinates of the roi to be used or full image dims and should be a tuple
-        if not self.estimator_table.params["use_roi"]:
-            x0, y0, x1, y1 = 0, 0, image_array.shape[2]-1, image_array.shape[1]-1
-            image_arr = image_array
-        elif self.estimator_table.params["use_roi"] & self.estimator_table.params["roi"] is not None: # crops image to roi
+        if self.estimator_table.params["use_roi"] and self.estimator_table.params["roi"] is not None: # crops image to roi
+            print(self.estimator_table.params["use_roi"], self.estimator_table.params["roi"])
             x0, y0, x1, y1 = tuple(self.estimator_table.params["roi"])
             image_arr = image_array[:, y0:y1+1, x0:x1+1]
+        else:
+            image_arr = image_array
 
         # checks time averaging, in case it's lower than 1 defaults to 1
         # if higher than n_slices/2 defaults to n_slices/2
@@ -50,8 +50,8 @@ class DriftEstimator(object):
             image_averages = self.compute_temporal_averaging(image_arr)
 
         # perform cross correlation map calculation
-        if self.estimator_table.params["reference_frame"] == 0:
-            img_ref = image_arr[0, y0:y1+1, x0:x1+1]
+        if self.estimator_table.params["ref_option"] == 0:
+            img_ref = image_arr[0]
         else:
             img_ref = None
 
@@ -60,7 +60,6 @@ class DriftEstimator(object):
         if self.estimator_table.params["time_averaging"] > 1:
 
             print("Interpolating time points")
-            #TODO confirm implementation
             x_idx = np.linspace(1, image_array.shape[0], num=self.drift_x.shape[0], endpoint=True, dtype=int)
             x_interpolator = interp1d(x_idx, self.drift_x, kind="cubic") # linear seems to work similar as in nanoj-core however its codebase calls setInterpolation("Bicubic")
             self.drift_x = x_interpolator(range(1, image_array.shape[0] + 1))
