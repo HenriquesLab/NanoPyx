@@ -42,9 +42,11 @@ def estimate_drift_correction(viewer: Viewer, img: Image, ref_option: int, time_
         y0 = int(min(roi_coords[:, -2]))
         y1 = int(max(roi_coords[:, -2]))
 
+        print(x0, y0, x1, y1)
+
         result = enanoscopy.estimate_drift_correction(img.data, save_as_npy=save_as_npy, save_drift_table_path=str(save_drift_table_path), ref_option=ref_option,
                                                     time_averaging=time_averaging, max_expected_drift=max_expected_drift, shift_calc_method=shift_calc_method,
-                                                    use_roi=use_roi, roi=(x0, x1, y0, y1), apply=apply_correction)
+                                                    use_roi=use_roi, roi=(x0, y0, x1, y1), apply=apply_correction)
     
     else:
         result = enanoscopy.estimate_drift_correction(img.data, save_as_npy=save_as_npy, save_drift_table_path=str(save_drift_table_path), ref_option=ref_option,
