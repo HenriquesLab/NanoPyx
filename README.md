@@ -15,7 +15,7 @@ Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light mi
 
 You can install `NanoPyx-Core` via [pip]:
 
-    pip install nanopyx-core
+    pip install nanopyx_core
 
 
 
