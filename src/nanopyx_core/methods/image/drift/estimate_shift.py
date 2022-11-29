@@ -2,7 +2,7 @@ import numpy as np
 from scipy.interpolate import griddata, interp2d
 from scipy.optimize import minimize
 
-from enanoscopy.methods.utils.timeit import timeit
+from ...utils.timeit import timeit
 
 
 # interp2d is faster than griddata approach

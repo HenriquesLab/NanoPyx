@@ -4,7 +4,7 @@ from skimage.io import imread
 from tkinter import filedialog as fd
 from scipy.interpolate import griddata, interp2d
 
-from enanoscopy.methods.utils.timeit import timeit
+from ..utils.timeit import timeit
 
 
 class ChannelAlignmentCorrector(object):
