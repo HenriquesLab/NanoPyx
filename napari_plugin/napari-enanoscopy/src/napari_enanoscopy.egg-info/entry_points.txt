@@ -1,2 +1,0 @@
-[napari.manifest]
-napari-enanoscopy = napari_enanoscopy:napari.yaml
