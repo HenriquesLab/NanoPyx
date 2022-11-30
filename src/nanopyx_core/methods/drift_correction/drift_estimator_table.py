@@ -8,7 +8,7 @@ class DriftEstimatorTable(object):
 
     def __init__(self):
         self.params = {}
-        self.params["lib_version"] = metadata.version("NanoPyx-Core-0.1")
+        self.params["lib_version"] = metadata.version("nanopyx-core")
         self.params["date"] = datetime.today()
         self.params["apply"] = False
         self.params["do_batch"] = False
