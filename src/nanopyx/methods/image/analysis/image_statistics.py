@@ -28,9 +28,9 @@ def calculate_ppmcc(img_ref, img_slice, shift_x, shift_y):
         v1 = pixels_1[i] - mean_1
         v2 = pixels_2[i] - mean_2
 
-        covariance += v1 * v2
-        square_sum_1 += v1 * v1
-        square_sum_2 += v2 * v2
+        covariance += (v1 * v2)
+        square_sum_1 += (v1 * v1)
+        square_sum_2 += (v2 * v2)
 
     if square_sum_1 == 0 or square_sum_2 == 0:
         return 0

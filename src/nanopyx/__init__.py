@@ -1,5 +1,3 @@
-import multiprocessing as mp
-mp.set_start_method("spawn", force=True) # workaround for macOs to be able to run it from napari
 from .methods.drift_correction.drift_corrector import DriftCorrector
 from .methods.drift_correction.drift_estimator import DriftEstimator
 from .methods.channel_alignment.channel_alignment_estimator import ChannelAlignmentEstimator

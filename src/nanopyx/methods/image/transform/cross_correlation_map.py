@@ -1,7 +1,4 @@
 import numpy as np
-import multiprocessing as mp
-from scipy.signal import fftconvolve
-from matplotlib import pyplot as plt
 
 from .fft_helper_functions import make_even_square, check_even_square
 from ...image.analysis.image_statistics import calculate_ppmcc
@@ -28,7 +25,6 @@ class CrossCorrelationMap(object):
         slice_ccm = np.fft.ifft2(image_product)
         slice_ccm = np.fft.fftshift(slice_ccm).real
         slice_ccm = slice_ccm[::-1, ::-1]
-
         if self.normalize:
             slice_ccm = self._normalize_ccm(img_ref, img_slice, slice_ccm)
         return slice_ccm[0:slice_ccm.shape[0]-1, 0:slice_ccm.shape[1]-1]
@@ -93,16 +89,9 @@ class CrossCorrelationMap(object):
             self.img_stack = img_stack
 
         ccm = []
-        if img_stack.shape[0] > 100:
-            pool = mp.Pool(mp.cpu_count())
-            ccm_pool = pool.map_async(self._calculate_ccm, range(0, self.img_stack.shape[0], 1), callback=ccm.append)
-            ccm_pool.wait()
-            pool.close() # makes pool no longer usable
-            ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))
-        else:
-            for i in range(self.img_stack.shape[0]):
-                ccm.append(self._calculate_ccm(i))
-            ccm = np.array(ccm).reshape((self.img_stack.shape[0], self.img_stack.shape[1]-1, self.img_stack.shape[2]-1))
+        for i in range(self.img_stack.shape[0]):
+            ccm.append(self._calculate_ccm(i))
+        ccm = np.array(ccm)
 
         return ccm
 

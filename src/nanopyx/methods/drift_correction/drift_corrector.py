@@ -1,7 +1,6 @@
 from .drift_estimator_table import DriftEstimatorTable
 
 import numpy as np
-import multiprocessing as mp
 from tkinter import filedialog as fd
 from skimage.transform import EuclideanTransform, warp
 
