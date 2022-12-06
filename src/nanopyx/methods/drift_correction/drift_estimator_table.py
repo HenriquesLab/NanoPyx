@@ -12,8 +12,8 @@ class DriftEstimatorTable(object):
         self.params["date"] = datetime.today()
         self.params["apply"] = False
         self.params["do_batch"] = False
-        self.params["ref_option"] = 0 # 0 if it is to use first frame, 1 if uses the previous frame
-        self.params["time_averaging"] = 100
+        self.params["ref_option"] = 1 # 0 if it is to use first frame, 1 if uses the previous frame
+        self.params["time_averaging"] = 1
         self.params["max_expected_drift"] = 10
         self.params["normalize"] = True
         self.params["shift_calc_method"] = "Max Fitting"
