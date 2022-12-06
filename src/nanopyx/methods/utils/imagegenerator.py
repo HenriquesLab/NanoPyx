@@ -95,8 +95,6 @@ def generate_channel_misalignment(n_objects=10, shape=(2, 300, 300), dtype=np.fl
                 vector_y = r_misalignment[x_i]
                 flow_arrows.append([x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y])
 
-        print(flow_arrows)
-
         translation_matrix = np.zeros((height, width*2))
         translation_matrix_x = np.zeros((height, width))
         translation_matrix_y = np.zeros((height, width))

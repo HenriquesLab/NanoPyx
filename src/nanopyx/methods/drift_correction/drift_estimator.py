@@ -159,7 +159,6 @@ class DriftEstimator(object):
             if self.estimator_table.params["ref_option"] == 1 and i > 0:
                 self.drift_x[i] += self.drift_x[i-1]
                 self.drift_y[i] += self.drift_y[i-1]
-                print(self.drift_x[i])
 
         self.drift_x = np.array(self.drift_x)
         self.drift_y = np.array(self.drift_y)

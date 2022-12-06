@@ -71,7 +71,6 @@ class CrossCorrelationMap(object):
             stack_height = img_stack.shape[1]
 
             if ref_width != stack_width and ref_height != stack_height:
-                print(ref_width, stack_width, ref_height, stack_height)
                 print("Reference image and image stack do not have the same size!")
                 return None
 

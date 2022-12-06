@@ -1,4 +1,4 @@
-from cmath import sqrt
+import math
 import numpy as np
 
 
@@ -20,13 +20,13 @@ def calculate_ppmcc(img_ref, img_slice, shift_x, shift_y):
     mean_1 = np.mean(pixels_1)
     mean_2 = np.mean(pixels_2)
 
-    covariance = 0
-    square_sum_1 = 0
-    square_sum_2 = 0
+    covariance = 0.0
+    square_sum_1 = 0.0
+    square_sum_2 = 0.0
 
     for i in range(pixels_1.shape[0]):
-        v1 = pixels_1[i] - mean_1
-        v2 = pixels_2[i] - mean_2
+        v1 = float(pixels_1[i] - mean_1)
+        v2 = float(pixels_2[i] - mean_2)
 
         covariance += (v1 * v2)
         square_sum_1 += (v1 * v1)
@@ -35,5 +35,5 @@ def calculate_ppmcc(img_ref, img_slice, shift_x, shift_y):
     if square_sum_1 == 0 or square_sum_2 == 0:
         return 0
     else:
-        return covariance / sqrt(square_sum_1 * square_sum_2)
+        return covariance / math.sqrt(square_sum_1 * square_sum_2)
 
