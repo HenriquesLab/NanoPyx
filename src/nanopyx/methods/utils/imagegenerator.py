@@ -1,5 +1,5 @@
 import numpy as np
-from cmath import sqrt
+from math import sqrt
 from scipy.interpolate import interp2d
 from skimage.filters import gaussian
 from skimage.transform import EuclideanTransform, warp
@@ -43,7 +43,7 @@ def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float1
     img = generate_image(n_objects=n_objects, shape=shape, dtype=dtype)
 
     if drift_mode == "directional":
-        transformation_matrix = EuclideanTransform(translation=(sqrt(drift), sqrt(drift)))
+        transformation_matrix = EuclideanTransform(translation=(-sqrt(drift), -sqrt(drift)))
         for i in range(shape[0]-1):
             img[i+1] = warp(img[i], transformation_matrix.inverse, order=3, preserve_range=True)
 
