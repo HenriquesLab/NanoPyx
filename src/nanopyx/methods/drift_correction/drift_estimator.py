@@ -1,10 +1,7 @@
-import time
-import types
-
 import numpy as np
-import multiprocessing as mp
 from math import sqrt
 from scipy.interpolate import interp1d
+from tifffile import imwrite
 
 from .drift_estimator_table import DriftEstimatorTable
 from .drift_corrector import DriftCorrector
@@ -56,6 +53,7 @@ class DriftEstimator(object):
             img_ref = None
 
         self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
+        imwrite("/Users/bsaraiva/Code/NanoPyx/ccm.tif", self.cross_correlation_map)
         self.get_shifts_from_ccm()
         if self.estimator_table.params["time_averaging"] > 1:
 
@@ -133,7 +131,7 @@ class DriftEstimator(object):
         shift_x = radius_x - shift_x - 0.5
         shift_y = radius_y - shift_y - 0.5
 
-        return shift_x, shift_y
+        return (shift_x, shift_y)
 
 
     def get_shifts_from_ccm(self):
@@ -159,12 +157,12 @@ class DriftEstimator(object):
             self.drift_x[i] = drift_x[i] - bias_x
             self.drift_y[i] = drift_y[i] - bias_y
             if self.estimator_table.params["ref_option"] == 1 and i > 0:
-                self.drift_x[i] += drift_x[i-1]
-                self.drift_y[i] += drift_y[i-1]
+                self.drift_x[i] += self.drift_x[i-1]
+                self.drift_y[i] += self.drift_y[i-1]
+                print(self.drift_x[i])
 
         self.drift_x = np.array(self.drift_x)
         self.drift_y = np.array(self.drift_y)
-
 
     def create_drift_table(self):
         table = []
