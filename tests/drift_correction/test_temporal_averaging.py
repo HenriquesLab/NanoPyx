@@ -1,4 +1,4 @@
-from nanopyx.methods.drift_correction.drift_estimator import DriftEstimator
+from nanopyx.methods.drift_alignment.estimator import DriftEstimator
 
 import os
 import numpy as np

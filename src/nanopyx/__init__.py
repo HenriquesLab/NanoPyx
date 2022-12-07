@@ -1,11 +1,11 @@
-from .methods.drift_correction.drift_corrector import DriftCorrector
-from .methods.drift_correction.drift_estimator import DriftEstimator
-from .methods.channel_alignment.channel_alignment_estimator import ChannelAlignmentEstimator
-from .methods.channel_alignment.channel_alignment_corrector import ChannelAlignmentCorrector
+from .methods.drift_alignment.corrector import DriftCorrector
+from .methods.drift_alignment.estimator import DriftEstimator
+from .methods.channel_registration.estimator import ChannelRegistrationEstimator
+from .methods.channel_registration.corrector import ChannelRegistrationCorrector
 
 #TODO write tests, create simulated data for tests and write docstrings
 
-def estimate_drift_correction(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):
+def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):
     estimator = DriftEstimator()
     corrected_img = estimator.estimate(image_array, roi=roi, **kwargs)
     print(save_drift_table_path)
@@ -15,7 +15,7 @@ def estimate_drift_correction(image_array, save_as_npy=True, save_drift_table_pa
     else:
         pass
 
-def apply_drift_correction(image_array, path=None, drift_table=None):
+def apply_drift_alignment(image_array, path=None, drift_table=None):
     corrector = DriftCorrector()
     if drift_table is None:
         corrector.load_drift_table(path=path)
@@ -29,10 +29,10 @@ def apply_drift_correction(image_array, path=None, drift_table=None):
         print("No corrected image was generated")
         pass
 
-def estimate_channel_alignment(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method="subpixel",
+def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method="subpixel",
                                save_translation_masks=True, translation_mask_save_path=None,
                                save_ccms=False, ccms_save_path=False, apply=True):
-    estimator = ChannelAlignmentEstimator()
+    estimator = ChannelRegistrationEstimator()
     aligned_image = estimator.estimate(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method=method,
                                        save_translation_masks=save_translation_masks, translation_mask_save_path=translation_mask_save_path,
                                        save_ccms=save_ccms, ccms_save_path=ccms_save_path, apply=apply)
@@ -42,8 +42,8 @@ def estimate_channel_alignment(image_array, ref_channel, max_shift, blocks_per_a
     else:
         pass
 
-def apply_channel_alignment(image_array, translation_masks=None):
-    corrector = ChannelAlignmentCorrector()
+def apply_channel_registration(image_array, translation_masks=None):
+    corrector = ChannelRegistrationCorrector()
     aligned_image = corrector.align_channels(image_array, translation_masks=translation_masks)
 
     if aligned_image is not None:
