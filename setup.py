@@ -89,7 +89,7 @@ def collect_extensions():
         os.path.join(dir, file)
         for (dir,dirs,files) in os.walk(path) 
         for file in files 
-        if file.endswith(".pyx") or (file.endswith(".py") and "# NanoPyx-Cythonise: True\n" in open(os.path.join(dir, file)).read())
+        if file.endswith(".pyx") or (file.endswith(".py") and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read())
         ]
     
     cython_extensions = []
@@ -98,7 +98,7 @@ def collect_extensions():
         ext = Extension(module, [file], **kwargs)
         cython_extensions.append(ext)
     
-    print(f"Found following files to build:\n {'*'.join(cython_files)}")
+    print(f"Found following files to build:\n {'; '.join(cython_files)}")
     
     collected_extensions = cythonize(cython_extensions, annotate=True, language_level = "3")
     
