@@ -1,7 +1,7 @@
 """Build and Install NanoPyx helper file
 
 This module is particularly designed to help build Cython extensions.
-Note that any .py containing "# NanoPyx-Cythonise: True" will be automatically identified as a Pure-Python Cython extension
+Note that any .py containing "# nanopyx-cythonize: True" will be automatically identified as a Pure-Python Cython extension
 
 Example:
     To build cython extensions
