@@ -10,57 +10,81 @@
 # docker images # lists the pulled or built images
 # docker push   # pushes the image to a docker registry
 
-# some help here https://blog.boltops.com/2018/04/19/docker-introduction-tutorial/
+# some help here https://blog.boltops.com/2018/04/19/docker-introduction-tutorial/ and https://docs.docker.com/engine/reference/builder/
 # sudo docker build -t nanopyx .
-# sudo docker stop nanopyx
-# sudo docker ps
 # sudo docker run --rm -it nanopyx bash
-# sudo docker run --name nanopyx1 --rm -p 8888:8888 nanopyx --name nanopyx
+# sudo docker run --name nanopyx1 --rm -p 8888:8888 -v ./notebooks:/opt/app/data nanopyx
+
+# sudo docker ps
+# sudo docker stop nanopyx1
 # sudo docker rmi nanopyx
+
+######################################
+# Install base resources and nanopyx #
+######################################
 
 FROM --platform=linux/amd64 ubuntu:22.04 AS nanopyx
 
 ENV TZ=Europe/London
+ENV LANG=C.UTF-8
+
 ARG DEBIAN_FRONTEND=noninteractive
 
-# install resources
 RUN apt-get update && \
     apt-get install -qqy  \
         build-essential \
         python3.9 \
         python3-pip \
         git \
+        # for latex labels
+        cm-super \
+        dvipng \
+        # for matplotlib anim
+        ffmpeg \
+        # for javascript
+        nodejs npm \
         && apt-get clean
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir cython
+# Install yarn for handling npm packages
+RUN npm install --global yarn
+# Enable yarn global add:
+ENV PATH="$PATH:$HOME/.yarn/bin"
 
-# copy content of current directory to inside docker container
-COPY . . 
-RUN pip3 install ./
-#RUN python3 setup.py sdist bdist_wheel
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir cython
 
+# see https://github.com/napari/napari/blob/main/dockerfile
+# install napari release version
+RUN pip3 install --no-cache-dir napari[all]
 
 # Install Jupyter
-RUN pip3 install jupyter
-RUN pip3 install ipywidgets
-RUN jupyter nbextension enable --py widgetsnbextension
+RUN pip3 install --no-cache-dir jupyter ipywidgets && \
+    jupyter notebook --generate-config && \
+    jupyter nbextension enable --py widgetsnbextension
 
 # Install JupyterLab
-RUN pip3 install jupyterlab && jupyter serverextension enable --py jupyterlab
-# Install extensions
-RUN pip3 install \ 
+RUN pip3 install --no-cache-dir jupyterlab && \
+    jupyter serverextension enable --py jupyterlab
+
+# Install Jupyter extensions
+RUN pip3 install --no-cache-dir \ 
     jupyterlab-github \
     jupyterlab-topbar \
     jupyterlab-system-monitor \
-    jupyter-tabnine
-
-ENV LANG=C.UTF-8
+    jupyterlab_tabnine 
+    #jupyter-resource-usage
 
 # Set jupyter theme
-RUN pip3 install jupyterthemes && jt -t onedork
+RUN jupyter labextension install jupyterlab_onedarkpro
 
-# Expose Jupyter port & cmd
+# copy content of current directory to inside docker container
+ENV BUILD_DIR=/tmp/build
+COPY . ${BUILD_DIR}
+RUN pip3 install ${BUILD_DIR}
+
+# Start Jupyterlab port & cmd
 EXPOSE 8888
-RUN mkdir -p /opt/app/data
-CMD jupyter lab --ip=* --port=8888 --no-browser --notebook-dir=/opt/app/data --allow-root
+ENV NB_DIR=/tmp/notebooks
+# RUN mkdir -p /tmp/notebooks
+COPY ./notebooks ${NB_DIR}
+CMD jupyter lab --ip=* --port=8888 --no-browser --notebook-dir=${NB_DIR} --allow-root --ResourceUseDisplay.track_cpu_percent=True
