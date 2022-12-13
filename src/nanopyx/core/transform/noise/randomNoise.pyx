@@ -90,14 +90,14 @@ cdef double normalValue() nogil:
 
 @cy.boundscheck(False)
 @cy.wraparound(False)
-def addMixedGaussianPoissonNoise(float[:,:] image, double gaussSigma, double gaussMean):
+def addMixedGaussianPoissonNoise(float[:] image, double gaussSigma, double gaussMean):
+    # consider using with arr.ravel() to get a flattened view of the array
     cdef float v
-    cdef int w = image.shape[0]
-    cdef int h = image.shape[1]
-    for j in range(h):
-        for i in range(w):
-            v = image[i,j]
-            v = poissonValue(v) + normalValue() * gaussSigma + gaussMean
-            v = fmax(v, 0)
-            v = fmin(v, 65535)
-            image[i,j] = v
+    cdef int l = image.shape[0]
+    
+    for i in range(l):
+        v = image[i]
+        v = poissonValue(v) + normalValue() * gaussSigma + gaussMean
+        v = fmax(v, 0)
+        v = fmin(v, 65535)
+        image[i] = v
