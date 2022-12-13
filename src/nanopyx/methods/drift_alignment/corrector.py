@@ -18,13 +18,7 @@ class DriftCorrector(object):
         if self.estimator_table.drift_table is not None:
             self.image_arr = image_array
 
-            # corrected_image = []
-            # pool = mp.Pool(mp.cpu_count())
-            # corrected_image_pool = pool.map_async(self._translate_slice, range(0, image_array.shape[0]), callback=corrected_image.append)
-            # corrected_image_pool.wait()
-            # pool.close()
-            # pool.join()
-            corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])] #no parallelization, which seems to always be faster
+            corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])]
 
             return np.array(corrected_image).reshape((self.image_arr.shape[0], self.image_arr.shape[1], self.image_arr.shape[2]))
 
@@ -34,10 +28,10 @@ class DriftCorrector(object):
 
     def load_drift_table(self, path=None):
         if path is None:
-            print("Please provide a filename path to import")
-        else:
-            if path.split(".")[-1] == "npy":
-                self.estimator_table.import_npy(path)
-            elif path.split(".")[-1] == "csv":
-                self.estimator_table.import_csv(path)
+            path = input("Please provide a filepath to the drift table")
+
+        if path.split(".")[-1] == "npy":
+            self.estimator_table.import_npy(path)
+        elif path.split(".")[-1] == "csv":
+            self.estimator_table.import_csv(path)
 

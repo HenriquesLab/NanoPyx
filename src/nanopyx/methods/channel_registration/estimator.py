@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from numpy import array
 from skimage.io import imsave
@@ -23,16 +24,16 @@ class ChannelRegistrationEstimator(object):
         return translation_mask
 
     def save_translation_mask(self, path=None):
-        if path is not None:
-            imsave(path + ".tif", self.translation_masks)
-        else:
-            print("Please provide a filename path to save translation masks")
+        if path is None:
+            path = input("Please provide a filepath to save the translation masks")
+
+        imsave(path + os.sep + "translation_masks.tif", self.translation_masks)
 
     def save_ccms(self, path=None):
-        if path is not None:
-            imsave(path + ".tif", self.ccms)
-        else:
-            print("Please provide a filename path to save ccms")
+        if path is None:
+            path = input("Please provide a filepath to save the ccms")
+
+        imsave(path + os.sep + "ccms.tif", self.ccms)
 
     def estimate(self, img_stack: array, ref_channel: int, max_shift: float,
                  blocks_per_axis: int, min_similarity: float, method: str="subpixel",
