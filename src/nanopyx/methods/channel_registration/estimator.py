@@ -1,7 +1,6 @@
 import numpy as np
 from numpy import array
 from skimage.io import imsave
-from tkinter import filedialog as fd
 
 from .corrector import ChannelRegistrationCorrector
 from ...core.ccm.cross_correlation_elastic import calculate_translation_mask
@@ -27,13 +26,13 @@ class ChannelRegistrationEstimator(object):
         if path is not None:
             imsave(path + ".tif", self.translation_masks)
         else:
-            imsave(fd.asksaveasfilename(title="Save Translation Masks") + ".tif", self.translation_masks)
+            print("Please provide a filename path to save translation masks")
 
     def save_ccms(self, path=None):
         if path is not None:
             imsave(path + ".tif", self.ccms)
         else:
-            imsave(fd.asksaveasfilename(title="Save Cross Correlation Maps") + ".tif", self.ccms)
+            print("Please provide a filename path to save ccms")
 
     def estimate(self, img_stack: array, ref_channel: int, max_shift: float,
                  blocks_per_axis: int, min_similarity: float, method: str="subpixel",

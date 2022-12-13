@@ -1,7 +1,6 @@
 from .estimator_table import DriftEstimatorTable
 
 import numpy as np
-from tkinter import filedialog as fd
 from skimage.transform import EuclideanTransform, warp
 
 class DriftCorrector(object):
@@ -35,12 +34,10 @@ class DriftCorrector(object):
 
     def load_drift_table(self, path=None):
         if path is None:
-            filepath = fd.askopenfilename(title="Load Drift Table as csv or npy")
+            print("Please provide a filename path to import")
         else:
-            filepath = path
-
-        if filepath.split(".")[-1] == "npy":
-            self.estimator_table.import_npy(filepath)
-        elif filepath.split(".")[-1] == "csv":
-            self.estimator_table.import_csv(filepath)
+            if path.split(".")[-1] == "npy":
+                self.estimator_table.import_npy(path)
+            elif path.split(".")[-1] == "csv":
+                self.estimator_table.import_csv(path)
 
