@@ -7,12 +7,18 @@ def rebin2d(arr, bin_factor, mode="sum"):
     :param mode: can be either sum, mean or max, defaults to sum if not specified or not valid mode
     :return: binned array
     """
-    new_shape = [int(arr.shape[-2] / bin_factor), int(arr.shape[-1] / bin_factor)]
-    shape = (new_shape[-2], arr.shape[-2] // new_shape[-2],
-             new_shape[-1], arr.shape[-1] // new_shape[-1])
+    og_shape = arr.shape
+    bin_shape = [i for i in og_shape][:-2]
+    bin_shape.append(int(arr.shape[-2] / bin_factor))
+    bin_shape.append(int(arr.shape[-1] / bin_factor))
+    shape = [i for i in og_shape][:-2]
+    shape.append(bin_shape[-2])
+    shape.append(og_shape[-2]//bin_shape[-2])
+    shape.append(bin_shape[-1])
+    shape.append(og_shape[-1]//bin_shape[-1])
     if mode == "mean":
-        return arr.reshape(shape).mean(-1).mean(1)
+        return arr.reshape(shape).mean(-1).mean(-2)
     elif mode == "max":
-        return arr.reshape(shape).max(-1).max(1)
+        return arr.reshape(shape).max(-1).max(-2)
     else:
-        return arr.reshape(shape).sum(-1).sum(1)
+        return arr.reshape(shape).sum(-1).sum(-2)
