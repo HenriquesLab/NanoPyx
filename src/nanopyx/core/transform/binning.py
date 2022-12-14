@@ -8,14 +8,13 @@ def rebin2d(arr, bin_factor, mode="sum"):
     :return: binned array
     """
     og_shape = arr.shape
-    bin_shape = [i for i in og_shape][:-2]
-    bin_shape.append(int(arr.shape[-2] / bin_factor))
-    bin_shape.append(int(arr.shape[-1] / bin_factor))
+    bin_shape = [int(arr.shape[-2] / bin_factor), int(arr.shape[-1] / bin_factor)]
     shape = [i for i in og_shape][:-2]
     shape.append(bin_shape[-2])
     shape.append(og_shape[-2]//bin_shape[-2])
     shape.append(bin_shape[-1])
     shape.append(og_shape[-1]//bin_shape[-1])
+
     if mode == "mean":
         return arr.reshape(shape).mean(-1).mean(-2)
     elif mode == "max":
