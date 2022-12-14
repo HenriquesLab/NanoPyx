@@ -5,7 +5,7 @@ import os
 nb_path = os.path.join(os.getcwd(), "notebooks")
 
 options = {
-    "Build nanopyx extensions": "python setup.py build_ext --inplace",
+    "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
 }
 
 # print the options
