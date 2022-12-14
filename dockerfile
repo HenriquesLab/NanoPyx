@@ -84,7 +84,7 @@ RUN pip3 install ${BUILD_DIR}
 
 # Start Jupyterlab port & cmd
 EXPOSE 8888
-ENV NB_DIR=/tmp/notebooks
+ENV NB_DIR=/notebooks
 # RUN mkdir -p /tmp/notebooks
-COPY ./notebooks ${NB_DIR}
+# COPY ./notebooks ${NB_DIR}
 CMD jupyter lab --ip=* --port=8888 --no-browser --notebook-dir=${NB_DIR} --allow-root --ResourceUseDisplay.track_cpu_percent=True
