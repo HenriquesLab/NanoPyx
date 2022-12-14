@@ -1,16 +1,18 @@
-# cython: infer_types=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3
 # code based on NanoJ-Core/Core/src/nanoj/core2/NanoJRandomNoise.java
 
-from libc.stdlib cimport rand, RAND_MAX
+from libc.stdlib cimport rand, srand, RAND_MAX
 from libc.math cimport pow, log, sqrt, exp, pi, floor, fabs, fmax, fmin
-import cython as cy
-    
-@cy.cdivision(True)
+
+import cython
+cimport cython
+
+# @cython.cdivision(True)
 cdef double random() nogil:
     # not thread safe since it depends on a time seed
-    return rand() / RAND_MAX
+    return float(rand()) / float(RAND_MAX)
 
-@cy.cdivision(True)
+# @cython.cdivision(True)
 cdef double logFactorial(int x) nogil:
     """
     Return the logarithm of the factorial of x. Uses Stirling's approximation for large
@@ -41,7 +43,7 @@ cdef int poissonSmall(double mean) nogil:
     
     return k - 1
 
-@cy.cdivision(True)
+# @cython.cdivision(True)
 cdef int poissonLarge(double mean) nogil:
     # "Rejection method PA" from "The Computer Generation of
     # Poisson Random Variables" by A. C. Atkinson,
@@ -78,7 +80,7 @@ cdef int poissonValue(double mean) nogil:
     else:
         return poissonLarge(mean)
 
-@cy.cdivision(True)
+# @cython.cdivision(True)
 cdef double normalValue() nogil:
     cdef double u = random() * 2 - 1
     cdef double v = random() * 2 - 1
@@ -88,16 +90,18 @@ cdef double normalValue() nogil:
     cdef double c = sqrt(-2 * log(r) / r)
     return u * c
 
-@cy.boundscheck(False)
-@cy.wraparound(False)
-def addMixedGaussianPoissonNoise(float[:] image, double gaussSigma, double gaussMean):
+# @cython.boundscheck(False)
+# @cython.wraparound(False)
+def addMixedGaussianPoissonNoise(float[:] image, double gaussSigma, double gaussMean) -> float[:]:
     # consider using with arr.ravel() to get a flattened view of the array
     cdef float v
     cdef int l = image.shape[0]
-    
+
     for i in range(l):
         v = image[i]
         v = poissonValue(v) + normalValue() * gaussSigma + gaussMean
+        # v = RAND.poisson(v) + RAND.normal(loc=gaussMean, scale=gaussSigma)
         v = fmax(v, 0)
         v = fmin(v, 65535)
         image[i] = v
+
