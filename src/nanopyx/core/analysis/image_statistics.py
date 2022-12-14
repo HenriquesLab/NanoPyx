@@ -1,7 +1,7 @@
 import math
 import numpy as np
 
-
+# TODO: cythonize this function
 def calculate_ppmcc(img_ref, img_slice, shift_x, shift_y):
     w = img_ref.shape[1]
     h = img_ref.shape[0]
@@ -14,6 +14,7 @@ def calculate_ppmcc(img_ref, img_slice, shift_x, shift_y):
     x1 = x0 + shift_x
     y1 = y0 + shift_y
 
+    # TODO: use .ravel() instead of reshape to flatten out the array
     pixels_1 = img_ref[y0:y0+new_h, x0:x0+new_w].reshape((new_h*new_w))
     pixels_2 = img_slice[y1:y1+new_h, x1:x1+new_w].reshape((new_h*new_w))
 

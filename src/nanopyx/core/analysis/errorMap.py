@@ -1,0 +1,1 @@
+# TODO: this is a placeholder to adapt https://github.com/HenriquesLab/NanoJ-eSRRF/blob/master/src/nanoj/liveSRRF/ErrorMapLiveSRRF.java into NanoPyx
