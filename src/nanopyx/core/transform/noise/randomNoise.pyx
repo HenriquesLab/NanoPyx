@@ -1,12 +1,16 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3
 # code based on NanoJ-Core/Core/src/nanoj/core2/NanoJRandomNoise.java
 
-from libc.stdlib cimport rand, srand, RAND_MAX
+from libc.stdlib cimport rand, RAND_MAX
 from libc.math cimport pow, log, sqrt, exp, pi, floor, fabs, fmax, fmin
 
 import cython
 cimport cython
-from cython.parallel import prange
+
+import numpy as np
+cimport numpy as np
+
+r = np.random.RandomState()
 
 # @cython.cdivision(True)
 cdef double random() nogil:
@@ -93,7 +97,7 @@ cdef double normalValue() nogil:
 
 # @cython.boundscheck(False)
 # @cython.wraparound(False)
-def addMixedGaussianPoissonNoise(float[:] image, double gaussSigma, double gaussMean) -> float[:]:
+def addMixedGaussianPoissonNoise(float[:] image, double gaussSigma, double gaussMean):
     # consider using with arr.ravel() to get a flattened view of the array
     cdef float v
     cdef int i, l = image.shape[0]
@@ -105,4 +109,10 @@ def addMixedGaussianPoissonNoise(float[:] image, double gaussSigma, double gauss
         v = fmax(v, 0)
         v = fmin(v, 65535)
         image[i] = v
+
+def addMixedGaussianPoissonNoise2(np.ndarray image, double gaussSigma, double gaussMean):
+    shape = []
+    for i in range(image.ndim):
+        shape.append(image.shape[i])
+    image[:] = np.clip(r.poisson(image)+r.normal(scale=gaussSigma, size=tuple(shape), loc=gaussMean), 0, 65535)
 

@@ -43,6 +43,24 @@ RUN apt-get update && \
         ffmpeg \
         # for javascript
         nodejs npm \
+        # for napari - ref: https://github.com/napari/napari/blob/main/dockerfile
+        mesa-utils \
+        libgl1-mesa-glx \
+        libglib2.0-0 \
+        libfontconfig1 \
+        libxrender1 \
+        libdbus-1-3 \
+        libxkbcommon-x11-0 \
+        libxi6 \
+        libxcb-icccm4 \
+        libxcb-image0 \
+        libxcb-keysyms1 \
+        libxcb-randr0 \
+        libxcb-render-util0 \
+        libxcb-xinerama0 \
+        libxcb-xinput0 \
+        libxcb-xfixes0 \
+        libxcb-shape0 \
         && apt-get clean
 
 # Install yarn for handling npm packages
@@ -52,10 +70,6 @@ ENV PATH="$PATH:$HOME/.yarn/bin"
 
 RUN pip3 install --no-cache-dir --upgrade pip && \
     pip3 install --no-cache-dir cython
-
-# see https://github.com/napari/napari/blob/main/dockerfile
-# install napari release version
-RUN pip3 install --no-cache-dir napari[all]
 
 # Install Jupyter
 RUN pip3 install --no-cache-dir jupyter ipywidgets && \
@@ -76,6 +90,10 @@ RUN pip3 install --no-cache-dir \
 
 # Set jupyter theme
 RUN jupyter labextension install jupyterlab_onedarkpro
+
+# see https://github.com/napari/napari/blob/main/dockerfile
+# install napari release version
+RUN pip3 install --no-cache-dir napari[all]
 
 # copy content of current directory to inside docker container
 ENV BUILD_DIR=/tmp/build
