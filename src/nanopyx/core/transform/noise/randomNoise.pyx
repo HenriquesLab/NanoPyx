@@ -10,6 +10,8 @@ cimport cython
 import numpy as np
 cimport numpy as np
 
+from noise import pnoise2
+
 r = np.random.RandomState()
 
 # @cython.cdivision(True)
@@ -97,18 +99,17 @@ cdef double normalValue() nogil:
 
 # @cython.boundscheck(False)
 # @cython.wraparound(False)
-def addMixedGaussianPoissonNoise(float[:] image, double gaussSigma, double gaussMean):
+def addMixedGaussianPoissonNoise(np.ndarray[np.float32_t, ndim=2] image, double gaussSigma, double gaussMean):
     # consider using with arr.ravel() to get a flattened view of the array
     cdef float v
-    cdef int i, l = image.shape[0]
 
-    for i in range(l):
-        v = image[i]
-        v = poissonValue(v) + normalValue() * gaussSigma + gaussMean
-        # v = np.clip(r.poisson(image)+r.normal(loc=gaussMean, scale=gaussSigma), 0, 65535)
-        v = fmax(v, 0)
-        v = fmin(v, 65535)
-        image[i] = v
+    for j in range(image.shape[1]):
+        for i in range(image.shape[0]):
+            v = image[i,j]
+            v = poissonValue(v) + normalValue() * gaussSigma + gaussMean
+            v = fmax(v, 0)
+            v = fmin(v, 65535)
+            image[i,j] = v
 
 def addMixedGaussianPoissonNoise2(np.ndarray image, double gaussSigma, double gaussMean):
     shape = []
@@ -116,3 +117,45 @@ def addMixedGaussianPoissonNoise2(np.ndarray image, double gaussSigma, double ga
         shape.append(image.shape[i])
     image[:] = np.clip(r.poisson(image)+r.normal(scale=gaussSigma, size=tuple(shape), loc=gaussMean), 0, 65535)
 
+def addPerlinNoise(np.ndarray[np.float32_t, ndim=2] image, int amp=100, float f = 100, int octaves = 1, float persistence = 0.5, float lacunarity = 2., float repeatx = 1024, float repeaty = 1024, int base = 0):
+    for j in range(image.shape[1]):
+        for i in range(image.shape[0]):
+            image[i, j] += amp * pnoise2(i/f, j/f, octaves, persistence, lacunarity, repeatx, repeaty, base)
+
+def addSquares(np.ndarray[np.float32_t, ndim=2] image, float vmax=100, float vmin=0, int nSquares=100):
+    
+    cdef int w = image.shape[0]
+    cdef int h = image.shape[1]
+    cdef int x0, x1, y0, y1
+    cdef float v
+
+    cdef int[:] x0_arr = np.random.randint(low=0, high=w-1, size=nSquares, dtype='int32')
+    cdef int[:] x1_arr = np.random.randint(low=0, high=w-1, size=nSquares, dtype='int32')
+    cdef int[:] y0_arr = np.random.randint(low=0, high=h-1, size=nSquares, dtype='int32')
+    cdef int[:] y1_arr = np.random.randint(low=0, high=h-1, size=nSquares, dtype='int32')
+    
+    with nogil:
+        for n in range(nSquares):
+            v = random() * (vmax-vmin) + vmin
+            x0 = min(x0_arr[n], x1_arr[n])
+            x1 = max(x0_arr[n], x1_arr[n])
+            y0 = min(y0_arr[n], y1_arr[n])
+            y1 = max(y0_arr[n], y1_arr[n])    
+            for j in range(y0, y1):
+                for i in range(x0, x1):
+                    image[i, j] += v
+    
+    return image
+
+def addRamp(np.ndarray[np.float32_t, ndim=2] image, float vmax=100, float vmin=0):
+
+    cdef int w = image.shape[0]
+    cdef int h = image.shape[1]
+    cdef float v
+
+    with nogil:
+        for j in range(h):
+            v = float(j)/h * (vmax-vmin) + vmin
+            for i in range(w):
+                image[i, j] += v
+    
