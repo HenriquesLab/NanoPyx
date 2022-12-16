@@ -6,6 +6,7 @@ from libc.math cimport pow, log, sqrt, exp, pi, floor, fabs, fmax, fmin
 
 import cython
 cimport cython
+from cython.parallel import prange
 
 import numpy as np
 cimport numpy as np
@@ -101,15 +102,18 @@ cdef double normalValue() nogil:
 # @cython.wraparound(False)
 def addMixedGaussianPoissonNoise(np.ndarray[np.float32_t, ndim=2] image, double gaussSigma, double gaussMean):
     # consider using with arr.ravel() to get a flattened view of the array
-    cdef float v
 
-    for j in range(image.shape[1]):
-        for i in range(image.shape[0]):
-            v = image[i,j]
-            v = poissonValue(v) + normalValue() * gaussSigma + gaussMean
-            v = fmax(v, 0)
-            v = fmin(v, 65535)
-            image[i,j] = v
+    cdef float v
+    cdef int i, j
+
+    with nogil:
+        for j in range(image.shape[1]):
+            for i in range(image.shape[0]):
+                v = image[i,j]
+                v = poissonValue(v) + normalValue() * gaussSigma + gaussMean
+                v = fmax(v, 0)
+                v = fmin(v, 65535)
+                image[i,j] = v
 
 def addMixedGaussianPoissonNoise2(np.ndarray image, double gaussSigma, double gaussMean):
     shape = []
