@@ -1,17 +1,17 @@
-# this is a placeholder to adapt https://github.com/HenriquesLab/NanoJ-eSRRF/blob/master/src/nanoj/liveSRRF/ErrorMapLiveSRRF.java into NanoPyx
-# TODO: Ricardo will recode this
+# adaptation of https://github.com/HenriquesLab/NanoJ-eSRRF/blob/master/src/nanoj/liveSRRF/ErrorMapLiveSRRF.java into NanoPyx
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
 from scipy.optimize import brent # https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.brent.html
 from scipy.stats import linregress # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html
-from scipy.stats import pearsonr
+
+from nanopyx.core.analysis.pearsonCorrelation import pearsonCorrelation
 
 class ErrorMap:
     
     def __init__(self):
-        self.globalRMSE: float = 0
-        self.globalPPMCC: float = 0
+        self.vRSE: float = 0
+        self.vRSP: float = 0
         self.alpha: float = 0
         self.beta: float = 0
         self.sigma: float = 0
@@ -43,11 +43,14 @@ class ErrorMap:
         self.sigma = sigma_linear
         self.imSRIntensityScaledBlurred = gaussian_filter(imSR * self.alpha + self.beta, self.sigma)
         self.imRSE = np.abs(self.imSRIntensityScaledBlurred-self.imRef)
-        self.globalRMSE = np.mean((self.imSRIntensityScaledBlurred - self.imRef)**2)**0.5
-        
-        # Calculate the Pearson correlation coefficient and p-value
-        #corr, pvalue = pearsonr(self.imSRIntensityScaledBlurred, self.imRef)
-        #self.globalPPMCC = corr
+        self.vRSE = np.mean((self.imSRIntensityScaledBlurred - self.imRef)**2)**0.5
+        self.vRSP = pearsonCorrelation(self.imSRIntensityScaledBlurred, self.imRef)
+
+    def getRSE(self):
+        return self.vRSE
+
+    def getRSP(self):
+        return self.vRSP
 
 def calculateAlphaBeta(sigma: float, imRef: np.ndarray, imSR: np.ndarray):
     imSRBlurred = gaussian_filter(imSR, sigma)
