@@ -14,10 +14,12 @@ def find_files(root_dir, extension):
 
 def main():
 
-    pyx_files = ", ".join(find_files("src", ".pyx"))
+    cython_files = ' '.join(find_files('src', '.so')+find_files('src', '.c')+find_files('src', '.html'))
+    notebook_files = ' '.join(find_files('notebooks', '.ipynb'))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
-        "Clear cython files": f"rm {' '.join(find_files('src', '.so')+find_files('src', '.c')+find_files('src', '.html'))}",
+        "Clear cython files": f"rm {cython_files}",
+        "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Install coding tools": "pip install cython-lint",
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
     }

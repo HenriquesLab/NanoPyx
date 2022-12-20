@@ -29,5 +29,5 @@ def test_error_map():
     squirrel_error_map.optimise(image_ref, image_sr)
 
     assert squirrel_error_map.getRSP() > 0.95
-    assert abs(squirrel_error_map.alpha - alpha) < 1e3
-    assert squirrel_error_map.sigma - 15 < 1e3
+    assert abs(squirrel_error_map._alpha - alpha) < 1e3
+    assert squirrel_error_map._sigma - 15 < 1e3

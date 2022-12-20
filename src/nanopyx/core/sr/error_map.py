@@ -15,11 +15,11 @@ from ..analysis.pearson_correlation import pearsonCorrelation
 
 class ErrorMap:
     def __init__(self):
-        self.vRSE: float = 0
-        self.vRSP: float = 0
-        self.alpha: float = 0
-        self.beta: float = 0
-        self.sigma: float = 0
+        self._vRSE: float = 0
+        self._vRSP: float = 0
+        self._alpha: float = 0
+        self._beta: float = 0
+        self._sigma: float = 0
 
         self.imRef: np.ndarray = None
         self.imSR: np.ndarray = None
@@ -56,21 +56,24 @@ class ErrorMap:
 
         # GET ALPHA AND BETA
         alpha, beta = calculateAlphaBeta(sigma_linear, imRef, imSR)
-        self.alpha = alpha
-        self.beta = beta
-        self.sigma = sigma_linear
+        self._alpha = alpha
+        self._beta = beta
+        self._sigma = sigma_linear
         self.imSRIntensityScaledBlurred = gaussian_filter(
-            imSR * self.alpha + self.beta, self.sigma
+            imSR * self._alpha + self._beta, self._sigma
         )
         self.imRSE = np.abs(self.imSRIntensityScaledBlurred - imRef)
-        self.vRSE = np.mean((self.imSRIntensityScaledBlurred - imRef) ** 2) ** 0.5
-        self.vRSP = pearsonCorrelation(self.imSRIntensityScaledBlurred, imRef)
+        self._vRSE = np.mean((self.imSRIntensityScaledBlurred - imRef) ** 2) ** 0.5
+        self._vRSP = pearsonCorrelation(self.imSRIntensityScaledBlurred, imRef)
 
     def getRSE(self) -> float:
-        return self.vRSE
+        return self._vRSE
 
     def getRSP(self) -> float:
-        return self.vRSP
+        return self._vRSP
+
+    def getSigma(self) -> float:
+        return self._sigma
 
 
 def calculateAlphaBeta(
