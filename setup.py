@@ -49,64 +49,73 @@ from setuptools import Extension, setup
 # │ OpenBSD 6           │ openbsd6            │
 # ┕━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━┙
 
-if sys.platform == 'win32':
+if sys.platform == "win32":
     from distutils import msvccompiler
     from platform import architecture
+
     VC_VERSION = msvccompiler.get_build_version()
     ARCH = "x64" if architecture()[0] == "64bit" else "x86"
     INCLUDE_DIRS = []
     LIBRARY_DIRS = []
-    
-elif sys.platform == 'darwin':
-    INCLUDE_DIRS = ['/usr/local/include']
-    LIBRARY_DIRS = ['/usr/local/lib']
 
-elif sys.platform.startswith('linux'): 
-    INCLUDE_DIRS = ['/usr/local/include', '/usr/include']
-    LIBRARY_DIRS = ['/usr/local/lib', '/usr/lib']
+elif sys.platform == "darwin":
+    INCLUDE_DIRS = ["/usr/local/include"]
+    LIBRARY_DIRS = ["/usr/local/lib"]
+
+elif sys.platform.startswith("linux"):
+    INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
+    LIBRARY_DIRS = ["/usr/local/lib", "/usr/lib"]
 
 try:
     import numpy
+
     INCLUDE_DIRS.append(numpy.get_include())
     HAS_NUMPY = True
 except ImportError:
     HAS_NUMPY = False
-    
-    
+
+
 def collect_extensions():
-    """ 
+    """
     Collect all the directories with Cython extensions and return the list of Extension.
     The function combines static Extension declaration and calls to cythonize to build the list of extensions.
     """
     kwargs = {
-        'include_dirs': INCLUDE_DIRS,
-        'library_dirs': LIBRARY_DIRS,
+        "include_dirs": INCLUDE_DIRS,
+        "library_dirs": LIBRARY_DIRS,
     }
-    
+
     path = os.path.join("src")
 
     cython_files = [
         os.path.join(dir, file)
-        for (dir,dirs,files) in os.walk(path) 
-        for file in files 
-        if file.endswith(".pyx") or (file.endswith(".py") and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read())
-        ]
-    
+        for (dir, dirs, files) in os.walk(path)
+        for file in files
+        if file.endswith(".pyx")
+        or (
+            file.endswith(".py")
+            and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read()
+        )
+    ]
+
     cython_extensions = []
     for file in cython_files:
         module = ".".join(os.path.splitext(file)[0].split(os.sep)[1:])
         ext = Extension(module, [file], **kwargs)
         cython_extensions.append(ext)
-    
+
     print(f"Found following files to build:\n {'; '.join(cython_files)}")
-    
-    collected_extensions = cythonize(cython_extensions, annotate=True, language_level = "3")
-    
+
+    collected_extensions = cythonize(
+        cython_extensions, annotate=True, language_level="3"
+    )
+
     return collected_extensions
 
 
 setup(
     name="nanopyx",
-    ext_modules = collect_extensions(),
-    zip_safe = False
+    ext_modules=collect_extensions(),
+    package_data={"nanopyx": [os.path.join("data", "*.yaml")]},
+    zip_safe=False,
 )

@@ -1,0 +1,69 @@
+datasets:
+  LongContinuous_UtrGFP:
+    filename: "LongContinuous_UtrGFP.zip"
+    description: "
+      Cos7 cells expressing Utrophin-GFP imaged as seen in Fig 2e of the paper
+      'SRRF: Universal live-cell super-resolution microscopy'\n
+      Details:\n
+      Illumination = 5% 470nm LED\n
+      Objective = Nikon Apo TIRF 100x Oil DIC N2\n
+      Set exposure time = 30ms\n
+      Timestamp frame 59068 = 1800.333 --> mean exposure time = 30.5ms per frame\n
+      Pixel size = 0.107 um (1.5x mag)\n
+      "
+    url: "https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EdFkJTrr8mFPg9yGxSmdXC4B3_uxa15mHVNF2ivHsIRFNQ?e=1rRnKg"
+    url_type: "onedrive"
+    reference: "Culley et al, The International Journal of Biochemistry & Cell Biology, 2018"
+    reference_doi: "https://doi.org/10.1016/j.biocel.2018.05.014"
+    size: "28.8GB"
+    filesize: 0
+    dimensions: 
+      labels: "t, x, y"
+      ndim: 3
+      t: 59000
+      x: 512
+      y: 512
+    unpacking: 
+      format: "zip"
+      pattern: "image_NNNNN.tif"
+  ShortContinuous_UtrGFP:
+    filename: "ShortContinuous_UtrGFP.zip"
+    description: "Cropped version of 'LongContinuous_UtrGFP'"
+    url: "https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EeDDWRJDMudAqnubk__kMq4BoqOgCl4ZOX3SFY7aSQ4Bsw?e=gqe600"
+    url_type: "onedrive"
+    reference: "Culley et al, The International Journal of Biochemistry & Cell Biology, 2018"
+    reference_doi: "https://doi.org/10.1016/j.biocel.2018.05.014"
+    size: "1.8GB"
+    filesize: 0
+    dimensions: 
+      labels: "t, x, y"
+      ndim: 3
+      t: 59000
+      x: 128
+      y: 128
+    unpacking: 
+      format: "zip"
+      pattern: "image_NNNNN.tif"
+  HD_SMLM_Challenge2013_TubulinAlexa647:
+    filename: "HD_SMLM_Challenge2013_TubulinAlexa647.zip"
+    description: "
+    Dataset used in the ISBI SMLM 2013 challenge. Images of tubulin with in high-density\n
+    imaging conditions(short sequence of 500 high-density frames of 128 × 128 pixels).\n
+    The microtubules are stained with α-tubulin primary antibodies and Alexa-647–conjugated\n
+    secondary antibody fragments. \n
+    "
+    url: "https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EfekzeYmulREofOsF9NVIjIBo0j2GMPStCGR6pRqvZd8dg?e=Xya19a"
+    url_type: "onedrive"
+    reference: "Sage et al, Nature Methods, 2015"
+    reference_doi: "https://doi.org/10.1038/nmeth.3442"
+    size: "16MB"
+    filesize: 17401
+    dimensions: 
+      labels: "t, x, y"
+      ndim: 3
+      t: 500
+      x: 128
+      y: 128
+    unpacking: 
+      format: "zip"
+      pattern: "NNNNN.tif"
