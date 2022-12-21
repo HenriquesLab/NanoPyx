@@ -25,7 +25,7 @@ datasets:
       y: 512
     unpacking: 
       format: "zip"
-      pattern: "image_NNNNN.tif"
+      pattern: r'^image_\d{5}\.tif$'
   ShortContinuous_UtrGFP:
     filename: "ShortContinuous_UtrGFP.zip"
     description: "Cropped version of 'LongContinuous_UtrGFP'"
@@ -43,7 +43,7 @@ datasets:
       y: 128
     unpacking: 
       format: "zip"
-      pattern: "image_NNNNN.tif"
+      pattern: r'^image_\d{5}\.tif$'
   HD_SMLM_Challenge2013_TubulinAlexa647:
     filename: "HD_SMLM_Challenge2013_TubulinAlexa647.zip"
     description: "
@@ -57,7 +57,7 @@ datasets:
     reference: "Sage et al, Nature Methods, 2015"
     reference_doi: "https://doi.org/10.1038/nmeth.3442"
     size: "16MB"
-    filesize: 17401
+    checksum: "70e0a3085107779448f4c5b6b2c8a31c7f6e2b10f6bf205b96af9622e08a908b"
     dimensions: 
       labels: "t, x, y"
       ndim: 3
@@ -66,4 +66,4 @@ datasets:
       y: 128
     unpacking: 
       format: "zip"
-      pattern: "NNNNN.tif"
+      pattern: r'\d{5}\.tif$'

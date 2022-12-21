@@ -1,29 +1,22 @@
 import os
 import shutil
-import pkg_resources
-import yaml
 import tempfile
-import wget
-from urllib.request import ProxyHandler, build_opener, install_opener, urlretrieve
-from ..utils.download_file import DownloadFile
 
+import pkg_resources
+import wget
+import yaml
 from onedrivedownloader import download as onedrive_download
+
+from .checksum import getChecksum
+from .zip_image_loader import open_tiffs_in_zip
+
 
 class GetExampleData:
     _file_name = "examples.yaml"
     _temp_dir = os.path.join(tempfile.gettempdir(), "nanopix_data")
+    _dataset_files = {}
 
     def __init__(self, path_example_yaml: str = None):
-
-        proxy = ProxyHandler({})
-        opener = build_opener(proxy)
-        opener.addheaders = [
-            (
-                "User-Agent",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.1 Safari/603.1.30",
-            )
-        ]
-        install_opener(opener)
 
         if path_example_yaml is None:
             possible_paths = [
@@ -51,7 +44,9 @@ class GetExampleData:
     def list_datasets(self):
         return self.data["datasets"]
 
-    def download_dataset(self, label: str, path: str = None):
+    def download_dataset(
+        self, label: str, path: str = None, return_dataset: bool = True
+    ):
         if path is None:
             if not os.path.exists(self._temp_dir):
                 os.mkdir(self._temp_dir)
@@ -61,18 +56,23 @@ class GetExampleData:
 
         dataset = self.data["datasets"][label]
         file_path = os.path.join(path, dataset["filename"])
-        if os.path.exists(file_path):
-            if os.path.getsize(file_path) != dataset["filesize"]:
-                os.remove(file_path)
+
+        # clear wrong file
+        if os.path.exists(file_path) and getChecksum(file_path) != dataset["checksum"]:
+            os.remove(file_path)
+
+        if not os.path.exists(file_path):
+            if dataset["url_type"] == "onedrive":
+                onedrive_download(
+                    dataset["url"], file_path, unzip=False
+                )  # , unzip=False, unzip_path: str = None, force_download=False, force_unzip=False, clean=False)
             else:
-                return file_path
+                wget.download(url=dataset["url"], out=file_path)
 
-        if dataset["url_type"] == "onedrive":
-            onedrive_download(dataset["url"], file_path, unzip=False)  # , unzip=False, unzip_path: str = None, force_download=False, force_unzip=False, clean=False)
-        else:
-            wget.download(url=dataset["url"], out=file_path)
-
-        return file_path
+        self._dataset_files = {label: file_path}
+        if return_dataset:
+            if dataset["unpacking"]["format"] == "zip":
+                return open_tiffs_in_zip(file_path, dataset["unpacking"]["pattern"])
 
     def clear_downloads(self):
         if os.path.exists(self._temp_dir):
