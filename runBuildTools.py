@@ -18,6 +18,8 @@ def main():
     notebook_files = ' '.join(find_files('notebooks', '.ipynb'))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
+        "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",
+        "Build nanopyx source distribution": "python3 setup.py sdist",
         "Clear cython files": f"rm {cython_files}",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Install coding tools": "pip install cython-lint",
