@@ -32,36 +32,36 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
     apt-get install -qqy  \
-        build-essential \
-        python3.9 \
-        python3-pip \
-        git \
-        # for latex labels
-        cm-super \
-        dvipng \
-        # for matplotlib anim
-        ffmpeg \
-        # for javascript
-        nodejs npm \
-        # below is for napari - ref: https://github.com/napari/napari/blob/main/dockerfile
-        #mesa-utils \
-        #libgl1-mesa-glx \
-        #libglib2.0-0 \
-        #libfontconfig1 \
-        #libxrender1 \
-        #libdbus-1-3 \
-        #libxkbcommon-x11-0 \
-        #libxi6 \
-        #libxcb-icccm4 \
-        #libxcb-image0 \
-        #libxcb-keysyms1 \
-        #libxcb-randr0 \
-        #libxcb-render-util0 \
-        #libxcb-xinerama0 \
-        #libxcb-xinput0 \
-        #libxcb-xfixes0 \
-        #libxcb-shape0 \
-        && apt-get clean
+    build-essential \
+    python3.9 \
+    python3-pip \
+    git \
+    # for latex labels
+    cm-super \
+    dvipng \
+    # for matplotlib anim
+    ffmpeg \
+    # for javascript
+    nodejs npm \
+    # below is for napari - ref: https://github.com/napari/napari/blob/main/dockerfile
+    #mesa-utils \
+    #libgl1-mesa-glx \
+    #libglib2.0-0 \
+    #libfontconfig1 \
+    #libxrender1 \
+    #libdbus-1-3 \
+    #libxkbcommon-x11-0 \
+    #libxi6 \
+    #libxcb-icccm4 \
+    #libxcb-image0 \
+    #libxcb-keysyms1 \
+    #libxcb-randr0 \
+    #libxcb-render-util0 \
+    #libxcb-xinerama0 \
+    #libxcb-xinput0 \
+    #libxcb-xfixes0 \
+    #libxcb-shape0 \
+    && apt-get clean
 
 # Install yarn for handling npm packages
 RUN npm install --global yarn
@@ -86,7 +86,7 @@ RUN pip3 install --no-cache-dir \
     jupyterlab-topbar \
     jupyterlab-system-monitor \
     jupyterlab_tabnine 
-    #jupyter-resource-usage
+#jupyter-resource-usage
 
 # Set jupyter theme
 RUN jupyter labextension install jupyterlab_onedarkpro
