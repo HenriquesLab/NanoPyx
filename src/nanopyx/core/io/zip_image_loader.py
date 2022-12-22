@@ -1,87 +1,69 @@
-
-import re
+import os
 import zipfile
 
 import numpy as np
 import skimage.io
+from skimage import transform
 
 
-def open_tiffs_in_zip(file_path: str, pattern: str = None) -> np.ndarray:
-    # Open the zip file
-    with zipfile.ZipFile(file_path, "r") as zip_ref:
-        # Get a list of the file names in the zip file
-        filenames = zip_ref.namelist()
+class ZipTiffIterator:
+    _shape = None
+    _dtype = None
+    _im0 = None
 
-        print(pattern)
-
-        if pattern is not None:
-            image_filenames = [
-                filename for filename in filenames if re.search(pattern, filename)
-            ]
-        else:
-            image_filenames = [
-                filename for filename in filenames if filename.endswith(".tif")
-            ]
-        image_filenames = [
-            filename for filename in image_filenames if not filename.startswith("_")
+    def __init__(self, zip_file_path: str):
+        self.zip_file_path = zip_file_path
+        self.zip_file = zipfile.ZipFile(zip_file_path)
+        self.tiff_file_names = [
+            name
+            for name in self.zip_file.namelist()
+            if name.endswith(".tif") and not name.startswith("_")
         ]
+        self.tiff_file_names = sorted(self.tiff_file_names)
+        # print(self.tiff_file_names)
 
-        image_filenames = sorted(image_filenames)
-        print(image_filenames)
+    def __getitem__(self, index: int) -> np.ndarray:
+        if index >= len(self.tiff_file_names):
+            raise IndexError
+        else:
+            with self.zip_file.open(self.tiff_file_names[index]) as tiff_file:
+                image = skimage.io.imread(tiff_file)
+                return np.array(image)
 
-        images = []
-        # Find the TIFF file in the list of filenames
-        for filename in image_filenames:
-            # Open the TIFF file from the zip file
-            with zip_ref.open(filename) as tiff_file:
-                # Load the TIFF file into a NumPy array using skimage
-                image_array = skimage.io.imread(tiff_file)
-                images.append(image_array)
-                # break
+    def __len__(self) -> int:
+        return len(self.tiff_file_names)
 
-    return np.asarray(images)
+    def __iter__(self):
+        for index in range(len(self.tiff_file_names)):
+            yield self[index]
 
+    def _getIm0(self):
+        if self._im0 is None:
+            self._im0 = self[0]
+            self._shape = (
+                len(self.tiff_file_names),
+                self._im0.shape[0],
+                self._im0.shape[1],
+            )
+            self._dtype = self._im0.dtype
+        return self._im0
 
-# def zip2zarr(file_path: str, pattern: str = None):
-#     # Open the zip file
-#     with zipfile.ZipFile(file_path, "r") as zip_ref:
-#         # Get a list of the file names in the zip file
-#         filenames = zip_ref.namelist()
+    def get_shape(self) -> list:
+        self._getIm0()
+        return self._shape
 
-#         if pattern is not None:
-#             image_filenames = [
-#                 filename for filename in filenames if re.search(pattern, filename)
-#             ]
-#         else:
-#             image_filenames = [
-#                 filename for filename in filenames if filename.endswith(".tif")
-#             ]
-#         image_filenames = [filename for filename in image_filenames if not filename.startswith("_")]
-#         image_filenames = sorted(image_filenames)
-#         # print(image_filenames)
+    def get_dtype(self) -> str:
+        self._getIm0()
+        return self._dtype
 
-#         # Create the 3D dataset in the OME-Zarr format
-#         new_file_path = os.path.splitext(file_path)[0]+".zarr"
-#         store = zarr.ZipStore(new_file_path, mode='w')
-#         root = zarr.group(store=store, overwrite=True)
-#         root.attrs['OME'] = 'https://www.openmicroscopy.org/Schemas/OME/2016-06'
-#         root.attrs['image_count'] = len(image_filenames)
-#         dataset = None
+    def get_thumb(self, save_path=None):
+        thumb = transform.resize(self._getIm0(), (64, 64))
+        _max = thumb.max()
+        _min = thumb.min()
+        thumb = (thumb.astype("float32") - _min / (_max - _min)) * 255
+        if save_path != None:
+            # Save the thumbnail as a JPEG file
+            skimage.io.imsave(os.path.join(save_path, "thumbnail.jpg"), thumb)
 
-#         # Find the TIFF file in the list of filenames
-#         for i in range(len(image_filenames)):
-#             # Open the TIFF file from the zip file
-#             with zip_ref.open(image_filenames[i]) as tiff_file:
-#                 # Load the TIFF file into a NumPy array using skimage
-#                 image_array = skimage.io.imread(tiff_file)
-
-#                 if dataset == None:
-#                     # Create the 3D dataset with dimensions t, x, y
-#                     shape = (len(image_filenames), image_array.shape[0], image_array.shape[1])
-#                     dtype = image_array.dtype
-#                     dataset = root.create_dataset('Data', shape=shape, chunks=True, dtype=dtype, compressor=zarr.Blosc(cname='lz4', clevel=5))
-
-#                 dataset[i] = image_array
-
-#         store.close()
-#         return new_file_path
+    def close(self):
+        self.zip_file.close()
