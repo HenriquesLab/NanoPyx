@@ -112,10 +112,9 @@ def collect_extensions():
 
     return collected_extensions
 
-
 setup(
     name="nanopyx",
     ext_modules=collect_extensions(),
-    package_data={"nanopyx": [os.path.join("data", "*.yaml")]},
+    package_data={'': ['**/*.jpg', '**/*.yaml']},
     zip_safe=False,
 )
