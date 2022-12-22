@@ -1,0 +1,25 @@
+label: ShortContinuous_UtrGFP
+nickname: Furball
+description: | 
+  * Cropped version of 'LongContinuous_UtrGFP' *
+  Cos7 cells expressing Utrophin-GFP imaged as seen in Fig 2e of the paper
+  'SRRF: Universal live-cell super-resolution microscopy'
+  Details:
+  Illumination = 5% 470nm LED
+  Objective = Nikon Apo TIRF 100x Oil DIC N2
+  Set exposure time = 30ms
+  Timestamp frame 59068 = 1800.333 --> mean exposure time = 30.5ms per frame
+  Pixel size = 0.107 um (1.5x mag)  
+data_dims: "t,x,y"
+data_shape: 5900, 128, 128
+data_dtype: uint16
+reference: "Culley et al, The International Journal of Biochemistry & Cell Biology, 2018"
+reference_doi: "https://doi.org/10.1016/j.biocel.2018.05.014"
+tiff_sequence_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EeDDWRJDMudAqnubk__kMq4BoqOgCl4ZOX3SFY7aSQ4Bsw?e=5TrjTn
+tiff_sequence_url_type: onedrive
+tiff_sequence_size: "1.71GB"
+tiff_sequence_checksum: 
+zarr_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/ESuTs-QqSR5NqcDeifOyC8kBZv0bRjE6Plfo--G0DG2acg?e=Y6WM4n
+zarr_url_type: onedrive
+zarr_url_size: "1.69GB"
+zarr_url_checksum:

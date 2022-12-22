@@ -1,0 +1,20 @@
+label: SMLMS2013_HDTubulinAlexa647
+nickname: Barktastic
+description: | 
+    Dataset used in the ISBI SMLM 2013 challenge. Images of tubulin with in high-density
+    imaging conditions(short sequence of 500 high-density frames of 128 × 128 pixels).
+    The microtubules are stained with α-tubulin primary antibodies and Alexa-647–conjugated
+    secondary antibody fragments.
+data_dims: "t,x,y"
+data_shape: 500, 128, 128
+data_dtype: uint16
+reference: "Sage et al, Nature Methods, 2015"
+reference_doi: "https://doi.org/10.1038/nmeth.3442"
+tiff_sequence_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EfekzeYmulREofOsF9NVIjIBo0j2GMPStCGR6pRqvZd8dg?e=eS4aPX
+tiff_sequence_url_type: "onedrive"
+tiff_sequence_size: "10.9MB"
+tiff_sequence_checksum: 
+zarr_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EbI3HWOT2XBNmZ8LFMxH09UBxivutesUITuoYfAJ4BAbmg?e=rwd0mV
+zarr_url_type: "onedrive"
+zarr_url_size:
+zarr_url_checksum:
