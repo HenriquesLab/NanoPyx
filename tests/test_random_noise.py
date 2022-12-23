@@ -11,4 +11,4 @@ def test_random_noise(random_image_with_ramp_squares):
 
     addMixedGaussianPoissonNoise(random_image, gaussSigma=100, gaussMean=100)
     assert random_image.mean() > 100
-    return True
+
