@@ -1,1 +1,15 @@
-/.idea/
+.gitignore
+.idea
+.pytest_cache
+.venv
+.vscode
+build
+dist
+.ipynb_checkpoints
+__pycache__
+*.egg-info
+*.so
+*.html
+.DS_Store
+.gitignore
+*.c

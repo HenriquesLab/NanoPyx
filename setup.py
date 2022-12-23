@@ -57,14 +57,26 @@ if sys.platform == "win32":
     ARCH = "x64" if architecture()[0] == "64bit" else "x86"
     INCLUDE_DIRS = []
     LIBRARY_DIRS = []
+    EXTRA_COMPILE_ARGS = ["/openmp"]
+    EXTRA_LING_ARGS = ["/openmp"]
 
 elif sys.platform == "darwin":
+    print("Double check you have openmp installed, do 'brew install gcc llvm libomp' if in doubt, you'll also need to install xcode from the app store")
+    # brew install gcc llvm libomp
+    # sudo xcode-select install
+    # export CC='gcc-12'
+    # export LDFLAGS="-L/usr/local/opt/libomp/lib"
+    # export CPPFLAGS="-I/usr/local/opt/libomp/include"
     INCLUDE_DIRS = ["/usr/local/include"]
     LIBRARY_DIRS = ["/usr/local/lib"]
+    EXTRA_COMPILE_ARGS = ["-fopenmp"]
+    EXTRA_LING_ARGS = ["-fopenmp"]
 
 elif sys.platform.startswith("linux"):
     INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
     LIBRARY_DIRS = ["/usr/local/lib", "/usr/lib"]
+    EXTRA_COMPILE_ARGS = ["-fopenmp"]
+    EXTRA_LING_ARGS = ["-fopenmp"]
 
 try:
     import numpy
@@ -83,6 +95,8 @@ def collect_extensions():
     kwargs = {
         "include_dirs": INCLUDE_DIRS,
         "library_dirs": LIBRARY_DIRS,
+        "extra_compile_args": EXTRA_COMPILE_ARGS,
+        "extra_link_args": EXTRA_LING_ARGS,
     }
 
     path = os.path.join("src")
