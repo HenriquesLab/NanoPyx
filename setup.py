@@ -29,6 +29,12 @@ from setuptools import Extension, setup
 # def f(seq):
 #  pass
 
+if 'CC' in os.environ:
+    print("Using CC={}".format(os.environ['CC']))
+else:
+    # os.environ["CC"] = "gcc"
+    print("Using CC={} (set by setup.py)".format(os.environ['CC']))
+
 # Just a basic platform check to engage any platform specific tasks we may need
 # Possible values for sys.platform
 # ┍━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━┑
@@ -69,13 +75,13 @@ elif sys.platform == "darwin":
     # export CPPFLAGS="-I/usr/local/opt/libomp/include"
     INCLUDE_DIRS = ["/usr/local/include"]
     LIBRARY_DIRS = ["/usr/local/lib"]
-    EXTRA_COMPILE_ARGS = ["-fopenmp"]
-    EXTRA_LING_ARGS = ["-fopenmp"]
+    EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
+    EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
 
 elif sys.platform.startswith("linux"):
     INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
     LIBRARY_DIRS = ["/usr/local/lib", "/usr/lib"]
-    EXTRA_COMPILE_ARGS = ["-fopenmp"]
+    EXTRA_COMPILE_ARGS = ["-O3", "-march=native", "-fopenmp"]
     EXTRA_LING_ARGS = ["-fopenmp"]
 
 try:
