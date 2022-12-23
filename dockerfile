@@ -33,9 +33,17 @@ ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -qqy  \
     build-essential \
-    python3.9 \
+    python3 \
+    python3-venv \
     python3-pip \
+    libopenblas0-serial \
+    libopenblas-dev \
+    libblas-dev \
+    liblapack-dev \
+    libopenmpi-dev \
+    openmpi-bin \
     git \
+    libomp-dev \
     # for latex labels
     cm-super \
     dvipng \
@@ -99,6 +107,9 @@ RUN jupyter labextension install jupyterlab_onedarkpro
 ENV BUILD_DIR=/tmp/build
 COPY . ${BUILD_DIR}
 RUN pip3 install ${BUILD_DIR}
+
+# test that we built correctly by running a pytest
+RUN pytest ${BUILD_DIR}/tests/test_random_noise.py
 
 # Start Jupyterlab port & cmd
 EXPOSE 8888
