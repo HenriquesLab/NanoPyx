@@ -3,7 +3,7 @@ from scipy.ndimage import gaussian_filter
 
 from nanopyx.core.sr.error_map import ErrorMap
 from nanopyx.core.transform.binning import rebin2d
-from nanopyx.core.transform.random_noise import (
+from nanopyx.core.transform.image_add_random_noise import (
     addMixedGaussianPoissonNoise,
     addPerlinNoise,
 )

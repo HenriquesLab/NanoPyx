@@ -1,9 +1,9 @@
-from nanopyx.core.transform.random_noise import addMixedGaussianPoissonNoise
-from nanopyx.core.transform import random_noise
+from nanopyx.core.transform.image_add_random_noise import addMixedGaussianPoissonNoise
+from nanopyx.core.transform import image_add_random_noise
 
 
 def test_logFactorial():
-    random_noise.test_logFactorial()
+    image_add_random_noise.test_logFactorial()
 
 
 def test_random_noise(random_image_with_ramp_squares):
