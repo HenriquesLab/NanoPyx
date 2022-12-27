@@ -32,7 +32,7 @@ from setuptools import Extension, setup
 if 'CC' in os.environ:
     print("Using CC={}".format(os.environ['CC']))
 else:
-    # os.environ["CC"] = "gcc"
+    os.environ["CC"] = "gcc"
     print("Using CC={} (set by setup.py)".format(os.environ['CC']))
 
 # Just a basic platform check to engage any platform specific tasks we may need
@@ -75,7 +75,7 @@ elif sys.platform == "darwin":
     # export CPPFLAGS="-I/usr/local/opt/libomp/include"
     INCLUDE_DIRS = ["/usr/local/include"]
     LIBRARY_DIRS = ["/usr/local/lib"]
-    EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
+    EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"] # for M1 Mac OS use -mpcpu=apple-m1 instead of -march=native
     EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
 
 elif sys.platform.startswith("linux"):
