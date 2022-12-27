@@ -5,6 +5,8 @@ from libc.math cimport sqrt, pi, floor, fabs, cos, sin
 import numpy as np
 cimport numpy as np
 
+from nanopyx.core.transform.interpolation.catmull_rom cimport _interpolate
+
 from cython.parallel import prange
 
 # code based on https://github.com/HenriquesLab/NanoJ-SRRF/blob/master/SRRF/src/nanoj/srrf/java/SRRF.java
@@ -75,7 +77,7 @@ cdef class CalculateRadiality:
                 xc = i + 0.5 + shiftX * self.magnification
                 yc = j + 0.5 + shiftY * self.magnification
 
-                imIW[i,j] = _interpolate(imRaw, xc, yc, self.magnification)
+                imIW[i,j] = _interpolate(imRaw, xc / self.magnification, yc / self.magnification)
 
                 # Output
                 CGH = 0
@@ -86,8 +88,8 @@ cdef class CalculateRadiality:
                     x0 = xc + xRing
                     y0 = yc + yRing
 
-                    vGx = _interpolate(imGx, x0, y0, self.magnification)
-                    vGy = _interpolate(imGy, x0, y0, self.magnification)
+                    vGx = _interpolate(imGx, x0 / self.magnification, y0 / self.magnification)
+                    vGy = _interpolate(imGy, x0 / self.magnification, y0 / self.magnification)
                     GMag = sqrt(vGx * vGx + vGy * vGy)
 
                     Dk = 1 - self._calculateDk(x0, y0, xc, yc, vGx, vGy, GMag) / self.ringRadius
@@ -117,42 +119,3 @@ cdef class CalculateRadiality:
             return self.ringRadius
         else:
             return fabs(vGy * (xc - x) - vGx * (yc - y)) / vGx2Gy2
-
-cdef float _cubic(float x) nogil:
-    cdef float a = 0.5  # Catmull-Rom interpolation
-    cdef float z = 0
-    if x < 0: 
-        x = -x
-    if x < 1:
-        z = x * x * (x * (-a + 2.) + (a - 3.)) + 1.
-    elif x < 2:
-        z = -a * x * x * x + 5. * a * x * x - 8. * a * x + 4.0 * a
-    return z
-
-cdef float _interpolate(float[:,:] im, float x, float y, int magnification) nogil:
-    """
-    Carryout Catmull-Rom interpolation
-    """
-    cdef int w = im.shape[0]
-    cdef int h = im.shape[1]
-    x = x / magnification
-    y = y / magnification
-
-    if x<1.5 or x>w-1.5 or y<1.5 or y>h-1.5:
-        return 0
-    
-    cdef int u0 = int(floor(x - 0.5))
-    cdef int v0 = int(floor(y - 0.5))
-    cdef float q = 0
-    cdef float p
-    cdef int v, u, i, j
-
-    for j in range(4):
-        v = v0 - 1 + j
-        p = 0
-        for i in range(4):
-            u = u0 - 1 + i
-            p = p + im[u, v] * _cubic(x - (u + 0.5))
-        q = q + p * _cubic(y - (v + 0.5))
-
-    return q
