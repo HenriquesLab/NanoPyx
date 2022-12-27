@@ -12,7 +12,8 @@ def fourier_zoom(image, z=2):
     Returns:
         np.ndarray: zoomed image.
 
-    #REF: based on https://github.com/centreborelli/fourier
+    REF: based on https://github.com/centreborelli/fourier
+    Credit goes to Carlo de Franchis <carlo.de-franchis@ens-paris-saclay.fr>
     """
     w, h = image.shape
 

@@ -95,7 +95,7 @@ class ExampleDataManager:
         raise ValueError(f"{dataset_name} not found in example datasets")
 
     def _download(self, url, file_path, download_type=None, unzip=False):
-        if os.path.exists(file_path) or os.path.exists(os.path.splitext(file_path)[0]):
+        if os.path.exists(file_path): # or os.path.exists(os.path.splitext(file_path)[0]):
             # raise Warning(f"already exists, no need to download: {file_path}")
             return
 
@@ -131,16 +131,18 @@ class ExampleDataManager:
         info = self.get_dataset_info(dataset_name)
         path = os.path.join(self._to_download_path, info["label"])
 
-        file_path = os.path.join(path, "dataset.zarr.zip")
+        file_path_zip = os.path.join(path, "dataset.zarr.zip")
+        file_path_zarr = os.path.join(path, "dataset.zarr")
+        if os.path.exists(file_path_zarr):
+            return file_path_zarr
+        
         url = info["zarr_url"]
         download_type = info["zarr_url_type"]
-
         self._copy_auxiliary_files(info)
-        self._download(url, file_path, download_type, unzip=True)
-        file_path = os.path.join(path, "dataset.zarr")
-        info["zarr_path"] = file_path
+        self._download(url, file_path_zip, download_type, unzip=True)
+        info["zarr_path"] = file_path_zarr
 
-        return file_path
+        return file_path_zarr
 
     def download_tiff_sequence(self, dataset_name: str) -> str:
         info = self.get_dataset_info(dataset_name)
@@ -158,6 +160,7 @@ class ExampleDataManager:
 
     def get_zarr(self, dataset_name: str):
         file_path = self.download_zarr(dataset_name)
+        print(file_path)
         z = zarr.open(file_path, mode="r")
         return z
 
