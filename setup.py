@@ -16,7 +16,7 @@ Todo:
     * Nothing yet
 """
 
-import sys, os, os.path
+import sys, os, os.path, platform
 from Cython.Build import cythonize
 from setuptools import Extension, setup
 
@@ -75,7 +75,11 @@ elif sys.platform == "darwin":
     # export CPPFLAGS="-I/usr/local/opt/libomp/include"
     INCLUDE_DIRS = ["/usr/local/include"]
     LIBRARY_DIRS = ["/usr/local/lib"]
-    EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"] # for M1 Mac OS use -mpcpu=apple-m1 instead of -march=native
+    pltform = platform.platform().split("-")
+    if "macOS" in pltform and "arm" in pltform:
+        EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mpcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
+    else:
+        EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
     EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
 
 elif sys.platform.startswith("linux"):
