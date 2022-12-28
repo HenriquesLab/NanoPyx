@@ -1,14 +1,14 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
 
-from libc.math cimport sqrt, pi, floor, fabs, cos, sin, floor
+# from libc.math cimport sqrt, pi, floor, fabs, cos, sin
 
 import numpy as np
 cimport numpy as np
 
 from cython.parallel import prange
 
-def interpolate(np.ndarray im, float x, float y):
-    return _interpolate(im.astype(np.float32), x, y).astype(im.dtype)
+def interpolate(np.ndarray im, float x, float y) -> float:
+    return _interpolate(im.view(np.float32), x, y).astype(im.dtype)
 
 
 cdef float _interpolate(float[:,:] im, float x, float y) nogil:
@@ -17,12 +17,14 @@ cdef float _interpolate(float[:,:] im, float x, float y) nogil:
     """
     cdef int w = im.shape[0]
     cdef int h = im.shape[1]
+    cdef int _x = int(x)
+    cdef int _y = int(y)
 
     if x<0.5 or x>w-1.5 or y<0.5 or y>h-1.5:
-        return im[int(x), int(y)]
+        return im[_x, _y]
     
-    cdef int u0 = int(floor(x - 0.5))
-    cdef int v0 = int(floor(y - 0.5))
+    cdef int u0 = int(x - 0.5)
+    cdef int v0 = int(y - 0.5)
     cdef float q = 0
     cdef float p
     cdef int v, u, i, j
