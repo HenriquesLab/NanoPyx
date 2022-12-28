@@ -77,7 +77,7 @@ elif sys.platform == "darwin":
     LIBRARY_DIRS = ["/usr/local/lib"]
     pltform = platform.platform().split("-")
     if "macOS" in pltform and "arm" in pltform:
-        EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mpcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
+        EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
     else:
         EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
     EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
