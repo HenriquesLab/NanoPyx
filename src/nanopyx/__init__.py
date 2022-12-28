@@ -2,9 +2,11 @@ from .methods.drift_alignment.corrector import DriftCorrector
 from .methods.drift_alignment.estimator import DriftEstimator
 from .methods.channel_registration.estimator import ChannelRegistrationEstimator
 from .methods.channel_registration.corrector import ChannelRegistrationCorrector
+from .core.utils.time.timeit import timeit
 
 #TODO write tests, create simulated data for tests and write docstrings
 
+@timeit
 def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):
     estimator = DriftEstimator()
     corrected_img = estimator.estimate(image_array, roi=roi, **kwargs)
@@ -15,10 +17,11 @@ def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_pat
     else:
         pass
 
+@timeit
 def apply_drift_alignment(image_array, path=None, drift_table=None):
     corrector = DriftCorrector()
     if drift_table is None:
-        corrector.load_drift_table(path=path)
+        corrector.load_estimator_table(path=path)
     else:
         corrector.estimator_table = drift_table
     corrected_img = corrector.apply_correction(image_array)
@@ -29,6 +32,7 @@ def apply_drift_alignment(image_array, path=None, drift_table=None):
         print("No corrected image was generated")
         pass
 
+@timeit
 def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method="subpixel",
                                save_translation_masks=True, translation_mask_save_path=None,
                                save_ccms=False, ccms_save_path=False, apply=True):
@@ -42,6 +46,7 @@ def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_pe
     else:
         pass
 
+@timeit
 def apply_channel_registration(image_array, translation_masks=None):
     corrector = ChannelRegistrationCorrector()
     aligned_image = corrector.align_channels(image_array, translation_masks=translation_masks)

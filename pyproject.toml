@@ -5,4 +5,4 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nanopyx"
 version = "0.0.1"
-dynamic = ["readme", "urls", "classifiers", "authors", "requires-python", "description"]
+dynamic = ["urls", "classifiers", "authors", "requires-python", "description"]
