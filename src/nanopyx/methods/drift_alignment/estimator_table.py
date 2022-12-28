@@ -5,7 +5,10 @@ from datetime import datetime
 
 
 class DriftEstimatorTable(object):
-
+    """
+    Class used to store DriftAlignment parameters as a dictionary.
+    Parameters can be changes individually by setting the corresponding params key value to desired parameter
+    """
     def __init__(self):
         self.params = {}
         self.params["lib_version"] = metadata.version("nanopyx")
@@ -27,23 +30,39 @@ class DriftEstimatorTable(object):
         self.drift_table = None
 
     def set_params(self, **kwargs):
+        """
+        Method used to set the parameters of drift alignment using keyword arguments.
+        :param kwargs: same as self.params.keys()
+        """
         for key, value in kwargs.items():
             self.params[key] = value
 
-    def set_comments(self, comment_string):
+    def set_comments(self, comment_string: str):
+        """
+        Method used to set comments for drift alignment operation
+        :param comment_string: str, comment text to be added
+        """
         self.params["comments"] = comment_string
 
-    def export_npy(self, path=None):
+    def export_npy(self, path: str = None):
+        """
+        Method used to export drift table as a npy file.
+        :param path: Path to export drift table as npy
+        """
         tmp = []
         for key in self.params.keys():
             tmp.append((key, self.params[key]))
         tmp.append(self.drift_table)
         if path is None:
-            path = input("Please provide a filepath to export drift table as npy") + os.sep + "_drift_table.npy"
+            path = input("Please provide a filepath to export drift table as npy") + "_drift_table.npy"
 
         np.save(path, np.array(tmp, dtype=object))
 
-    def import_npy(self, path=None):
+    def import_npy(self, path: str = None):
+        """
+        Method used to import drift table as a npy file.
+        :param path: str, Path to drift table saved as a npy file
+        """
         if path is None:
             path = input("Please provide a filepath to import drift table")
 
@@ -54,9 +73,13 @@ class DriftEstimatorTable(object):
             self.params[key] = value
         self.drift_table = tmp[tmp.shape[0]-1]
 
-    def export_csv(self, path=None):
+    def export_csv(self, path: str = None):
+        """
+        Method used to export drift table as a csv file.
+        :param path: str, Path to export drift table as csv
+        """
         if path is None:
-            path = input("Please provide a filepath to export drift table as csv") + os.sep + "_drift_table.csv"
+            path = input("Please provide a filepath to export drift table as csv") + "_drift_table.csv"
 
         txt = ""
         for key in self.params.keys():
@@ -68,7 +91,11 @@ class DriftEstimatorTable(object):
 
         open(path, "w").writelines(txt)
 
-    def import_csv(self, path=None):
+    def import_csv(self, path: str = None):
+        """
+        Method used to import drift table from a csv file
+        :param path: str, path to import drift table as csv
+        """
         if path is None:
             path = input("Please provide a filepath to import drift table")
 
