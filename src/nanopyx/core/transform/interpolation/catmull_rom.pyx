@@ -1,7 +1,5 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
 
-# from libc.math cimport sqrt, pi, floor, fabs, cos, sin
-
 import numpy as np
 cimport numpy as np
 
@@ -94,4 +92,3 @@ cdef float _cubic(float x) nogil:
     elif x < 2:
         z = -a * x * x * x + 5. * a * x * x - 8. * a * x + 4.0 * a
     return z
-

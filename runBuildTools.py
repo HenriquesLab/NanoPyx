@@ -18,18 +18,22 @@ def main():
     notebook_files = ' '.join(find_files('notebooks', '.ipynb'))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
+        "Clear cython files": f"rm {cython_files}",
+        "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
+        "Install nanopyx in developer mode": "pip3 install -e .",
         "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",
         "Build nanopyx source distribution": "python3 setup.py sdist",
-        "Clear cython files": f"rm {cython_files}",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Install coding tools": "pip install cython-lint",
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
     }
 
+
     # print the options
     print("What do you want to do:")
     for i, option in enumerate(options.keys()):
-        print(f"{i+1}. {option}: [CMD]> { options[option]}")
+        cmd = options[option]
+        print(f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}")
 
     # get the user's selection
     selection = int(input("Enter your selection: ")) - 1
