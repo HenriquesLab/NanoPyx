@@ -81,7 +81,6 @@ if sys.platform == "win32":
     EXTRA_LING_ARGS = ["/openmp"]
 
 elif sys.platform == "darwin":
-
     # Lets check if homebrew is installed
     use_openmp_support = True
     print("Checking for openmp support, to run code blazing fast!!!")
@@ -121,18 +120,18 @@ elif sys.platform == "darwin":
     # export CPPFLAGS="-I/usr/local/opt/libomp/include"
     INCLUDE_DIRS = ["/usr/local/include"]
     LIBRARY_DIRS = ["/usr/local/lib"]
+    EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math"]
+    EXTRA_LING_ARGS = []
     pltform = platform.platform().split("-")
-    #if "macOS" in pltform and "arm" in pltform:
-    #    EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
-    #else:
-    #   EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
-    #   EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
+    # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
+    # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
+    # EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
+    if "macOS" in pltform and "arm" in pltform:
+        EXTRA_COMPILE_ARGS += ["-mcpu=apple-m1", "-Xpreprocessor"]
+        EXTRA_LING_ARGS += ["-Xpreprocessor"]
     if use_openmp_support:
-        EXTRA_COMPILE_ARGS = ["-fopenmp"]#["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
-        EXTRA_LING_ARGS = ["-fopenmp"] # ["-Xpreprocessor", "-fopenmp"]
-    else:
-        EXTRA_COMPILE_ARGS = []
-        EXTRA_LING_ARGS = []
+        EXTRA_COMPILE_ARGS += ["-fopenmp"] #["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
+        EXTRA_LING_ARGS += ["-fopenmp"] # ["-Xpreprocessor", "-fopenmp"]
 
 elif sys.platform.startswith("linux"):
     INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
