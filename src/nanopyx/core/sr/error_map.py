@@ -10,7 +10,7 @@ from scipy.stats import (
 )
 from skimage.transform import resize
 
-from ..analysis.pearson_correlation import pearsonCorrelation
+from ..analysis.pearson_correlation import pearson_correlation
 
 
 class ErrorMap:
@@ -64,7 +64,7 @@ class ErrorMap:
         )
         self.imRSE = np.abs(self.imSRIntensityScaledBlurred - imRef)
         self._vRSE = np.mean((self.imSRIntensityScaledBlurred - imRef) ** 2) ** 0.5
-        self._vRSP = pearsonCorrelation(self.imSRIntensityScaledBlurred, imRef)
+        self._vRSP = pearson_correlation(self.imSRIntensityScaledBlurred, imRef)
 
     def getRSE(self) -> float:
         return self._vRSE
