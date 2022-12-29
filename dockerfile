@@ -23,7 +23,7 @@
 # Install base resources and nanopyx #
 ######################################
 
-FROM --platform=linux/amd64 ubuntu:22.04 AS nanopyx
+FROM --platform=$BUILDPLATFORM ubuntu:22.04 AS nanopyx-base
 
 ENV TZ=Europe/London
 ENV LANG=C.UTF-8
@@ -97,16 +97,16 @@ RUN pip3 install --no-cache-dir \
 #jupyter-resource-usage
 
 # Set jupyter theme
-RUN jupyter labextension install jupyterlab_onedarkpro
+# RUN jupyter labextension install jupyterlab_onedarkpro
 
 # see https://github.com/napari/napari/blob/main/dockerfile
 # install napari release version
 # RUN pip3 install --no-cache-dir napari[all]
 
 # copy content of current directory to inside docker container
-ENV BUILD_DIR=/tmp/build
+ENV BUILD_DIR=/nanopyx
 COPY . ${BUILD_DIR}
-RUN pip3 install ${BUILD_DIR}
+RUN pip3 install -e ${BUILD_DIR}
 
 # test that we built correctly by running a pytest
 RUN pytest ${BUILD_DIR}/tests/test_random_noise.py
@@ -117,3 +117,4 @@ ENV NB_DIR=/notebooks
 # RUN mkdir -p /tmp/notebooks
 # COPY ./notebooks ${NB_DIR}
 CMD jupyter lab --ip=* --port=8888 --no-browser --notebook-dir=${NB_DIR} --allow-root --ResourceUseDisplay.track_cpu_percent=True
+
