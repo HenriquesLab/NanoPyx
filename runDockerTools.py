@@ -3,10 +3,11 @@
 import os
 
 nb_path = os.path.join(os.getcwd(), "notebooks")
+nanopyx_path = os.getcwd()
 
 options = {
     "Build nanopyx docker-image": "sudo docker build -t nanopyx .",
-    "Run jupyterlab from nanopyx docker-image": f"sudo docker run --rm --name nanopyx1 -p 8888:8888 -v {nb_path}:/notebooks nanopyx",  # potentially add --rm
+    "Run jupyterlab from nanopyx docker-image": f"sudo docker run --rm --name nanopyx1 -p 8888:8888 -v {nanopyx_path}:/nanopyx nanopyx",  # potentially add --rm
     "Run bash from from nanopyx docker-image": "sudo docker run -it nanopyx bash",  # potentially add --rm
     "Start jupyterlab from nanopyx docker-image (needs run first)": "sudo docker start nanopyx1",
     "Stop jupyterlab from nanopyx docker-image": "sudo docker stop nanopyx1",

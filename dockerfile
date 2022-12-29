@@ -113,8 +113,9 @@ RUN pytest ${BUILD_DIR}/tests/test_random_noise.py
 
 # Start Jupyterlab port & cmd
 EXPOSE 8888
-ENV NB_DIR=/notebooks
+ENV SHELL=/bin/bash
+ENV NB_DIR=${BUILD_DIR}/notebooks
 # RUN mkdir -p /tmp/notebooks
 # COPY ./notebooks ${NB_DIR}
-CMD jupyter lab --ip=* --port=8888 --no-browser --notebook-dir=${NB_DIR} --allow-root --ResourceUseDisplay.track_cpu_percent=True
+CMD jupyter lab --ip=* --port=8888 --no-browser --notebook-dir=${BUILD_DIR} --allow-root --ResourceUseDisplay.track_cpu_percent=True
 
