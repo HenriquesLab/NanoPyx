@@ -67,7 +67,48 @@ if sys.platform == "win32":
     EXTRA_LING_ARGS = ["/openmp"]
 
 elif sys.platform == "darwin":
-    print("Double check you have openmp installed, do 'brew install gcc llvm libomp' if in doubt, you'll also need to install xcode from the app store")
+
+    # Lets check if homebrew is installed
+    use_openmp_support = True
+    print("Checking for openmp support, to run code blazing fast!!!")
+    if use_openmp_support and os.system("brew --version") == 0:
+        print("\t - Homebrew instalation detected...")
+    else:
+        print("\t - Homebrew instalation not detected: consider installing from here https://brew.sh/")
+        use_openmp_support = False
+
+    if use_openmp_support and os.system("brew list | grep gcc") == 0:
+        print("\t - GCC instalation detected...")
+    else:
+        print("\t - GCC instalation not detected: consider running 'brew install gcc llvm libomp'")
+        use_openmp_support = False
+    
+    if use_openmp_support and os.system("brew list | grep llvm") == 0:
+        print("\t - llvm instalation detected...")
+    else:
+        print("\t - llvm instalation not detected: consider running 'brew install gcc llvm libomp'")
+        use_openmp_support = False
+
+    if use_openmp_support and os.system("brew list | grep libomp") == 0:
+        print("\t - libomp instalation detected...")
+    else:
+        print("\t - libomp instalation not detected: consider running 'brew install gcc llvm libomp'")
+        use_openmp_support = False
+
+    # Lets try to set the correct gcc version for compilation
+    if os.system("gcc-12 --version") == 0:
+        print("\t - gcc-12 detected: export CC='gcc-12'")
+        os.environ["CC"] = "gcc-12"
+    elif os.system("gcc-11 --version") == 0:
+        print("\t - gcc-11 detected: export CC='gcc-11'")
+        os.environ["CC"] = "gcc-11"
+    elif os.system("gcc-10 --version") == 0:
+        print("\t - gcc-10 detected: export CC='gcc-10'")
+        os.environ["CC"] = "gcc-10"
+    elif os.system("gcc-9 --version") == 0:
+        print("\t - gcc-9 detected: export CC='gcc-9'")
+        os.environ["CC"] = "gcc-9"
+
     # brew install gcc llvm libomp
     # sudo xcode-select install
     # export CC='gcc-12'
@@ -81,8 +122,12 @@ elif sys.platform == "darwin":
     #else:
     #   EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
     #   EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
-    EXTRA_COMPILE_ARGS = ["-fopenmp"]#["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
-    EXTRA_LING_ARGS = ["-fopenmp"] # ["-Xpreprocessor", "-fopenmp"]
+    if use_openmp_support:
+        EXTRA_COMPILE_ARGS = ["-fopenmp"]#["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
+        EXTRA_LING_ARGS = ["-fopenmp"] # ["-Xpreprocessor", "-fopenmp"]
+    else:
+        EXTRA_COMPILE_ARGS = []
+        EXTRA_LING_ARGS = []
 
 elif sys.platform.startswith("linux"):
     INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
