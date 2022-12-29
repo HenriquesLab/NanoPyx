@@ -6,12 +6,12 @@ nb_path = os.path.join(os.getcwd(), "notebooks")
 nanopyx_path = os.getcwd()
 
 options = {
-    "Build nanopyx docker-image": "sudo docker build -t nanopyx .",
-    "Run jupyterlab from nanopyx docker-image": f"sudo docker run --rm --name nanopyx1 -p 8888:8888 -v {nanopyx_path}:/nanopyx nanopyx",  # potentially add --rm
-    "Run bash from from nanopyx docker-image": "sudo docker run -it nanopyx bash",  # potentially add --rm
+    "Build nanopyx docker-image": "sudo docker build -t henriqueslab/nanopyx:v1 .",
+    "Run jupyterlab from nanopyx docker-image": f"sudo docker run --rm --name nanopyx1 -p 8888:8888 -v {nanopyx_path}:/nanopyx henriqueslab/nanopyx:v1",  # potentially add --rm
+    "Run bash from from nanopyx docker-image": "sudo docker run -it henriqueslab/nanopyx:v1 bash",  # potentially add --rm
     "Start jupyterlab from nanopyx docker-image (needs run first)": "sudo docker start nanopyx1",
     "Stop jupyterlab from nanopyx docker-image": "sudo docker stop nanopyx1",
-    "Remove nanopyx docker-image": "sudo docker rm nanopyx1 || sudo docker image rm nanopyx || sudo docker image prune -f || sudo docker container prune -f || sudo docker system df",
+    "Remove nanopyx docker-image": "sudo docker rm nanopyx1 || sudo docker image rm nanopyx || sudo docker image prune -f §|| sudo docker container prune -f || sudo docker system df",
 }
 
 # print the options
