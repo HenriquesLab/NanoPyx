@@ -10,7 +10,7 @@ Example:
 Initial creation by:
 - Ricardo Henriques, December 2022
 Modified by:
-- None yet
+- Bruno Saraiva, December 2022
 
 Todo:
     * Nothing yet
@@ -32,7 +32,7 @@ from setuptools import Extension, setup
 if 'CC' in os.environ:
     print("Using CC={}".format(os.environ['CC']))
 else:
-    os.environ["CC"] = "gcc"
+    # os.environ["CC"] = "gcc"
     print("Using CC={} (set by setup.py)".format(os.environ['CC']))
 
 # Just a basic platform check to engage any platform specific tasks we may need
@@ -76,11 +76,13 @@ elif sys.platform == "darwin":
     INCLUDE_DIRS = ["/usr/local/include"]
     LIBRARY_DIRS = ["/usr/local/lib"]
     pltform = platform.platform().split("-")
-    if "macOS" in pltform and "arm" in pltform:
-        EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
-    else:
-        EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
-    EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
+    #if "macOS" in pltform and "arm" in pltform:
+    #    EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
+    #else:
+    #   EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
+    #   EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
+    EXTRA_COMPILE_ARGS = ["-fopenmp"]#["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
+    EXTRA_LING_ARGS = ["-fopenmp"] # ["-Xpreprocessor", "-fopenmp"]
 
 elif sys.platform.startswith("linux"):
     INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
