@@ -16,24 +16,38 @@ Todo:
     * Nothing yet
 """
 
-import sys, os, os.path, platform
+import os
+import os.path
+import platform
+import subprocess
+import sys
+
 from Cython.Build import cythonize
 from setuptools import Extension, setup
 
-# Some advice when using cython
-# consider using the following decorators:
-# @cython.boundscheck(False)
-# @cython.wraparound(False)
-# @cython.cdivision(True)
-# @cython.infer_types(True)
-# def f(seq):
-#  pass
+def run_command(command: str) -> str:
+    result = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return result.stdout.decode('utf-8').strip()
 
-if 'CC' in os.environ:
-    print("Using CC={}".format(os.environ['CC']))
-else:
-    # os.environ["CC"] = "gcc"
-    print("Using CC={} (set by setup.py)".format(os.environ['CC']))
+def is_xcode_installed() -> bool:
+    try:
+        result = subprocess.run(['xcode-select', '--print-path'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return result.returncode == 0
+    except:
+        return False
+
+def is_homebrew_installed() -> bool:
+    try:
+        result = subprocess.run(['which', 'brew'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        return result.returncode == 0
+    except:
+        return False
+
+# if 'CC' in os.environ:
+#     print("Using CC={}".format(os.environ['CC']))
+# else:
+#     # os.environ["CC"] = "gcc"
+#     print("Using CC={} (set by setup.py)".format(os.environ['CC']))
 
 # Just a basic platform check to engage any platform specific tasks we may need
 # Possible values for sys.platform
@@ -71,47 +85,38 @@ elif sys.platform == "darwin":
     # Lets check if homebrew is installed
     use_openmp_support = True
     print("Checking for openmp support, to run code blazing fast!!!")
-    if use_openmp_support and os.system("brew --version") == 0:
-        print("\t - Homebrew instalation detected...")
+    if is_xcode_installed():
+        print("\t - xcode instalation detected...")
+        if is_homebrew_installed():
+            print("\t - brew instalation detected...")
+            brew_list = run_command("brew list").split()
+            packages = ['gcc', 'llvm', 'libomp']
+            for package in packages:
+                if package in brew_list:
+                    print(f"\t - {package} instalation detected...")
+                else:
+                    print(f"\t - {package} instalation not detected: consider running 'brew install {' '.join(packages)}'")
+                    use_openmp_support = False
+                    break
+        else:
+            print("\t - brew instalation not detected, consider installing from https://brew.sh/")
+            use_openmp_support = False
     else:
-        print("\t - Homebrew instalation not detected: consider installing from here https://brew.sh/")
+        print("\t - xcode instalation not detected, consider installing from the App Store")
         use_openmp_support = False
 
-    if use_openmp_support and os.system("brew list | grep gcc") == 0:
-        print("\t - GCC instalation detected...")
-    else:
-        print("\t - GCC instalation not detected: consider running 'brew install gcc llvm libomp'")
-        use_openmp_support = False
-    
-    if use_openmp_support and os.system("brew list | grep llvm") == 0:
-        print("\t - llvm instalation detected...")
-    else:
-        print("\t - llvm instalation not detected: consider running 'brew install gcc llvm libomp'")
-        use_openmp_support = False
-
-    if use_openmp_support and os.system("brew list | grep libomp") == 0:
-        print("\t - libomp instalation detected...")
-    else:
-        print("\t - libomp instalation not detected: consider running 'brew install gcc llvm libomp'")
-        use_openmp_support = False
-
-    # Lets try to set the correct gcc version for compilation
-    if os.system("gcc-12 --version") == 0:
-        print("\t - gcc-12 detected: export CC='gcc-12'")
-        os.environ["CC"] = "gcc-12"
-    elif os.system("gcc-11 --version") == 0:
-        print("\t - gcc-11 detected: export CC='gcc-11'")
-        os.environ["CC"] = "gcc-11"
-    elif os.system("gcc-10 --version") == 0:
-        print("\t - gcc-10 detected: export CC='gcc-10'")
-        os.environ["CC"] = "gcc-10"
-    elif os.system("gcc-9 --version") == 0:
-        print("\t - gcc-9 detected: export CC='gcc-9'")
-        os.environ["CC"] = "gcc-9"
+    if use_openmp_support:
+        gcc_list = run_command("ls /usr/local/bin/").split()
+        # Lets try to set the correct gcc version for compilation
+        versions = ["12", "11", "10", "9"]
+        for version in versions:
+            gcc_cmd = f"gcc-{version}"
+            if gcc_cmd in gcc_list:
+                print(f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'")
+                os.environ["CC"] = gcc_cmd
 
     # brew install gcc llvm libomp
     # sudo xcode-select install
-    # export CC='gcc-12'
     # export LDFLAGS="-L/usr/local/opt/libomp/lib"
     # export CPPFLAGS="-I/usr/local/opt/libomp/include"
     INCLUDE_DIRS = ["/usr/local/include"]
