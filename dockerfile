@@ -54,7 +54,8 @@ RUN pip3 install --no-cache-dir \
     jupyterlab-github \
     jupyterlab-topbar \
     jupyterlab-system-monitor \
-    jupyterlab_tabnine 
+    jupyterlab_tabnine \
+    jupyterlab-simpledark
 
 # Set jupyter theme
 # RUN jupyter labextension install jupyterlab_onedarkpro
