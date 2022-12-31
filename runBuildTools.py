@@ -14,11 +14,11 @@ def find_files(root_dir, extension):
 
 def main():
 
-    cython_files = ' '.join(find_files('src', '.so')+find_files('src', '.c')+find_files('src', '.html'))
+    clean_files = ' '.join(find_files('src', '.so')+find_files('src', '.c')+find_files('src', '.html')+find_files('src', '.profile')+find_files('notebooks', '.profile'))
     notebook_files = ' '.join(find_files('notebooks', '.ipynb'))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
-        "Clear cython files": f"rm {cython_files}",
+        "Clean files": f"rm {clean_files}",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Install nanopyx in developer mode": "pip3 install -e .",
         "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",
