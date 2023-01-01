@@ -1,8 +1,7 @@
 import numpy as np
 
-from nanopyx.core.transform.interpolation.catmull_rom import (
-    magnify as _catmull_rom_magnify,
-)
+from .interpolation.catmull_rom import magnify as _catmull_rom_magnify
+from .interpolation.lanczos import magnify as _lanczos_magnify
 
 # from scipy.stats import \
 #    linregress  # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html
@@ -61,7 +60,7 @@ def catmull_rom_zoom(image: np.ndarray, magnification: int = 2):
 
     Args:
         image (np.ndarray): 2D grid of pixel values.
-        z (float): Factor by which to multiply the dimensions of the image.
+        magnification (float): Factor by which to multiply the dimensions of the image.
             Must be >= 1.
 
     Returns:
@@ -70,3 +69,19 @@ def catmull_rom_zoom(image: np.ndarray, magnification: int = 2):
     REF: based on https://github.com/HenriquesLab/NanoJ-SRRF/blob/master/SRRF/src/nanoj/srrf/java/SRRF.java
     """
     return _catmull_rom_magnify(image, magnification)
+
+
+def lanczos_zoom(image: np.ndarray, magnification: int = 2, taps: int = 3):
+    """
+    Zoom an image by Lanczos interpolation
+
+    Args:
+        image (np.ndarray): 2D grid of pixel values.
+        magnification (float): Factor by which to multiply the dimensions of the image.
+            Must be >= 1.
+        taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
+
+    Returns:
+        np.ndarray: zoomed image.
+    """
+    return _lanczos_magnify(image, magnification, taps)

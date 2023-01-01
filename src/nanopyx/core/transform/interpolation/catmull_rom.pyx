@@ -5,11 +5,11 @@ cimport numpy as np
 
 from cython.parallel import prange
 
-def interpolate(np.ndarray im, float x, float y) -> float:
+def interpolate(np.ndarray im, double x, double y) -> float:
     return _interpolate(im.view(np.float32), x, y).astype(im.dtype)
 
 
-cdef float _interpolate(float[:,:] im, float x, float y) nogil:
+cdef double _interpolate(float[:,:] im, double x, double y) nogil:
     """
     Carryout Catmull-Rom interpolation, 
     """
@@ -23,8 +23,8 @@ cdef float _interpolate(float[:,:] im, float x, float y) nogil:
     
     cdef int u0 = int(x - 0.5)
     cdef int v0 = int(y - 0.5)
-    cdef float q = 0
-    cdef float p
+    cdef double q = 0
+    cdef double p
     cdef int v, u, i, j
 
     for j in range(4):
@@ -35,39 +35,39 @@ cdef float _interpolate(float[:,:] im, float x, float y) nogil:
             p = p + im[u, v] * _cubic(x - (u + 0.5))
         q = q + p * _cubic(y - (v + 0.5))
 
-    return q
+    return float(q)
 
 
 def magnify(np.ndarray im, int magnification):
     assert im.ndim == 2
-    cdef np.ndarray im_new = np.asarray(_magnify(im.astype(np.float32), magnification))
-    return im_new.astype(im.dtype)
+    imMagnified = np.empty((im.shape[0] * magnification, im.shape[1] * magnification), dtype=np.float32)
+    _magnify(im.astype(np.float32), imMagnified, magnification)
+    return imMagnified.astype(im.dtype)
 
 
-cdef float[:,:] _magnify(float[:,:] im, int magnification):
-    cdef int w = im.shape[0]
-    cdef int h = im.shape[1]
-    cdef int wM = w * magnification
-    cdef int hM = h * magnification
-
-    cdef float[:,:] imMagnified = np.empty((wM, hM), dtype=np.float32)
-
+cdef float[:,:] _magnify(float[:,:] im, float[:,:] imM, int magnification) nogil:
+    cdef int wM = imM.shape[0]
+    cdef int hM = imM.shape[1]
     cdef int i, j
-    with nogil:
-        for j in prange(hM):
-            for i in range(wM):
-                imMagnified[i,j] = _interpolate(im, i / magnification, j / magnification)
-
-    return imMagnified
+    cdef float _x, _y
 
 
-def shift(np.ndarray im, float dx, float dy):
+    for j in prange(hM):
+        _y = j / magnification
+        for i in range(wM):
+            _x = i / magnification
+            imM[i,j] = _interpolate(im, _x, _y)
+
+    return imM
+
+
+def shift(np.ndarray im, double dx, double dy):
     assert im.ndim == 2
     cdef np.ndarray im_new = np.asarray(_shift(im.astype(np.float32), dx, dy))
     return im_new.astype(im.dtype)
 
 
-cdef float[:,:] _shift(float[:,:] im, float dx, float dy):
+cdef float[:,:] _shift(float[:,:] im, double dx, double dy):
     cdef int w = im.shape[0]
     cdef int h = im.shape[1]
 
@@ -75,14 +75,14 @@ cdef float[:,:] _shift(float[:,:] im, float dx, float dy):
 
     cdef int i, j
     with nogil:
-        for j in prange(h):
+        for j in range(h):
             for i in range(w):
                 imShifted[i,j] = _interpolate(im, i + dx, j + dy)
 
     return imShifted
 
 
-cdef float _cubic(float x) nogil:
+cdef double _cubic(double x) nogil:
     cdef float a = 0.5  # Catmull-Rom interpolation
     cdef float z = 0
     if x < 0: 

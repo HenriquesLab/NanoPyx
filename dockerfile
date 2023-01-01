@@ -30,7 +30,9 @@ ENV LANG=C.UTF-8
 
 RUN apt-get update && \
     apt-get install -qqy  \
-    build-essential
+    build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0
 
 RUN pip3 install --no-cache-dir --upgrade pip && \
     pip3 install --no-cache-dir \
