@@ -7,7 +7,7 @@ cimport numpy as np
 
 from cython.parallel import prange
 
-cdef double _interpolate(float[:,:] image, double x, double y, int taps):
+cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     """
     Interpolate the value of a 2D image at the given coordinates using the Lanczos interpolation method.
     
@@ -55,7 +55,7 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps):
 
 
 # Lanczos kernel function
-cdef double _lanczos_kernel(double x, int taps):
+cdef double _lanczos_kernel(double x, int taps) nogil:
     """
     Calculate the Lanczos kernel (windowed sinc function) value for a given value.
     REF: https://en.wikipedia.org/wiki/Lanczos_resampling
@@ -88,8 +88,8 @@ def magnify(np.ndarray im, int magnification, int taps):
         The magnified image.
     """
     assert im.ndim == 2
-    imMagnified = _magnify(im.view(np.float32), magnification, taps)
-    return imMagnified.astype(im.dtype)
+    imMagnified = _magnify(im.astype(np.float32), magnification, taps)
+    return np.asarray(imMagnified).astype(im.dtype)
 
 
 cdef float[:,:] _magnify(float[:,:] im, int magnification, int taps):
@@ -106,15 +106,21 @@ cdef float[:,:] _magnify(float[:,:] im, int magnification, int taps):
     cdef int wM = w * magnification
     cdef int hM = h * magnification
     cdef int i, j
-    cdef float _x, _y
+    cdef float x, y
 
-    cdef float[:,:] imMagnified = np.zeros((wM, hM), dtype=np.float32)
+    cdef float[:,:] imMagnified = np.empty((wM, hM), dtype=np.float32)
 
-    for j in range(hM):
-        _y = j / magnification
-        for i in range(wM):
-            _x = i / magnification
-            imMagnified[i,j] = _interpolate(im, _x, _y, taps)
+    with nogil:
+        for j in prange(hM):
+            y = j / magnification
+            for i in range(wM):
+                x = i / magnification
+                if x == floor(x) and y == floor(y):
+                    imMagnified[i, j] = im[int(x), int(y)]
+                else:
+                    imMagnified[i, j] = _interpolate(im, x, y, taps)
+
+    return imMagnified
 
 
 def shift(np.ndarray im, double dx, double dy, int taps):
@@ -151,3 +157,5 @@ cdef float[:,:] _shift(float[:,:] im, double dx, double dy, int taps):
     for j in range(h):
         for i in range(w):
             imShifted[i,j] = _interpolate(im, i + dx, j + dy, taps)
+
+    return imShifted

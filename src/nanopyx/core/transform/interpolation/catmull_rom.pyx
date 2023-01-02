@@ -1,5 +1,7 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
 
+from libc.math cimport floor
+
 import numpy as np
 cimport numpy as np
 
@@ -67,7 +69,7 @@ def magnify(np.ndarray im, int magnification):
     """
     assert im.ndim == 2
     imMagnified = _magnify(im.astype(np.float32), magnification)
-    return imMagnified.astype(im.dtype)
+    return np.asarray(imMagnified).astype(im.dtype)
 
 
 cdef float[:,:] _magnify(float[:,:] im, int magnification):
@@ -85,15 +87,21 @@ cdef float[:,:] _magnify(float[:,:] im, int magnification):
     cdef int wM = im.shape[0] * magnification
     cdef int hM = im.shape[1] * magnification
     cdef int i, j
-    cdef float _x, _y
+    cdef float x, y
 
-    cdef float[:,:] imMagnified = np.zeros((im.shape[0] * magnification, im.shape[1] * magnification), dtype=np.float32)
+    cdef float[:,:] imMagnified = np.empty((im.shape[0] * magnification, im.shape[1] * magnification), dtype=np.float32)
 
-    for j in range(hM):
-        _y = j / magnification
-        for i in range(wM):
-            _x = i / magnification
-            imMagnified[i,j] = _interpolate(im, _x, _y)
+    with nogil:
+        for j in prange(hM):
+            y = j / magnification
+            for i in range(wM):
+                x = i / magnification
+                if x == floor(x) and y == floor(y):
+                    imMagnified[i, j] = im[int(x), int(y)]
+                else:
+                    imMagnified[i, j] = _interpolate(im, x, y)
+
+    return imMagnified
 
 
 def shift(np.ndarray im, double dx, double dy):
@@ -134,6 +142,7 @@ cdef float[:,:] _shift(float[:,:] im, double dx, double dy):
         for i in range(w):
             imShifted[i,j] = _interpolate(im, i + dx, j + dy)
 
+    return imShifted
 
 cdef double _cubic(double x) nogil:
     """

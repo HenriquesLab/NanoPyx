@@ -1,6 +1,6 @@
 #!/bin/bash -c python3
 
-import os
+import os, sys
 
 
 def find_files(root_dir, extension):
@@ -28,15 +28,19 @@ def main():
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
     }
 
+    print(sys.argv)
+    if len(sys.argv) > 1:
+        selection = int(sys.argv[1])-1
 
-    # print the options
-    print("What do you want to do:")
-    for i, option in enumerate(options.keys()):
-        cmd = options[option]
-        print(f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}")
+    else:
+        # print the options
+        print("What do you want to do:")
+        for i, option in enumerate(options.keys()):
+            cmd = options[option]
+            print(f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}")
 
-    # get the user's selection
-    selection = int(input("Enter your selection: ")) - 1
+        # get the user's selection
+        selection = int(input("Enter your selection: ")) - 1
 
     # print the selected option
     cmd = list(options.values())[selection]
