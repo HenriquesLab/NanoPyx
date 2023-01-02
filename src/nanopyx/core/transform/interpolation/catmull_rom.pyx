@@ -6,12 +6,29 @@ cimport numpy as np
 from cython.parallel import prange
 
 def interpolate(np.ndarray im, double x, double y) -> float:
+    """
+    Interpolate image using Catmull-Rom interpolation.
+
+    im (np.ndarray): image to interpolate.
+    x (float): x-coordinate to interpolate at.
+    y (float): y-coordinate to interpolate at.
+
+    Returns:
+    Interpolated pixel value (float).
+    """
     return _interpolate(im.view(np.float32), x, y).astype(im.dtype)
 
 
 cdef double _interpolate(float[:,:] im, double x, double y) nogil:
     """
-    Carryout Catmull-Rom interpolation, 
+    Interpolate image using Catmull-Rom interpolation.
+
+    im (np.ndarray): image to interpolate.
+    x (float): x-coordinate to interpolate at.
+    y (float): y-coordinate to interpolate at.
+
+    Returns:
+    Interpolated pixel value (float).
     """
     cdef int w = im.shape[0]
     cdef int h = im.shape[1]
@@ -39,50 +56,94 @@ cdef double _interpolate(float[:,:] im, double x, double y) nogil:
 
 
 def magnify(np.ndarray im, int magnification):
+    """
+    Magnify image.
+
+    im (np.ndarray): image to magnify.
+    magnification (int): magnification factor.
+
+    Returns:
+    Magnified image (np.ndarray).
+    """
     assert im.ndim == 2
-    imMagnified = np.empty((im.shape[0] * magnification, im.shape[1] * magnification), dtype=np.float32)
-    _magnify(im.astype(np.float32), imMagnified, magnification)
+    imMagnified = _magnify(im.astype(np.float32), magnification)
     return imMagnified.astype(im.dtype)
 
 
-cdef float[:,:] _magnify(float[:,:] im, float[:,:] imM, int magnification) nogil:
-    cdef int wM = imM.shape[0]
-    cdef int hM = imM.shape[1]
+cdef float[:,:] _magnify(float[:,:] im, int magnification):
+    """
+    Magnify image using Catmull-Rom interpolation.
+
+    im (np.ndarray): image to magnify.
+    imM (np.ndarray): magnified image.
+    magnification (int): magnification factor.
+
+    Returns:
+    Magnified image (np.ndarray).
+    """
+
+    cdef int wM = im.shape[0] * magnification
+    cdef int hM = im.shape[1] * magnification
     cdef int i, j
     cdef float _x, _y
 
+    cdef float[:,:] imMagnified = np.zeros((im.shape[0] * magnification, im.shape[1] * magnification), dtype=np.float32)
 
-    for j in prange(hM):
+    for j in range(hM):
         _y = j / magnification
         for i in range(wM):
             _x = i / magnification
-            imM[i,j] = _interpolate(im, _x, _y)
-
-    return imM
+            imMagnified[i,j] = _interpolate(im, _x, _y)
 
 
 def shift(np.ndarray im, double dx, double dy):
+    """
+    Shift image.
+
+    im (np.ndarray): image to shift.
+    dx (float): shift along x-axis.
+    dy (float): shift along y-axis.
+
+    Returns:
+    Shifted image (np.ndarray).
+    """
     assert im.ndim == 2
-    cdef np.ndarray im_new = np.asarray(_shift(im.astype(np.float32), dx, dy))
-    return im_new.astype(im.dtype)
+    imShifted = _shift(im.view(np.float32), dx, dy)
+    return imShifted.astype(im.dtype)
 
 
 cdef float[:,:] _shift(float[:,:] im, double dx, double dy):
+    """
+    Shift image using Catmull-Rom interpolation.
+
+    im (np.ndarray): image to shift.
+    imShifted (np.ndarray): shifted image.
+    dx (float): shift along x-axis.
+    dy (float): shift along y-axis.
+
+    Returns:
+    Shifted image (np.ndarray).
+    """
     cdef int w = im.shape[0]
     cdef int h = im.shape[1]
-
-    cdef float[:,:] imShifted = np.empy((w, h), dtype=np.float32)
-
     cdef int i, j
-    with nogil:
-        for j in range(h):
-            for i in range(w):
-                imShifted[i,j] = _interpolate(im, i + dx, j + dy)
 
-    return imShifted
+    cdef float[:,:] imShifted = np.zeros((w, h), dtype=np.float32)
+
+    for j in range(h):
+        for i in range(w):
+            imShifted[i,j] = _interpolate(im, i + dx, j + dy)
 
 
 cdef double _cubic(double x) nogil:
+    """
+    Cubic function used in Catmull-Rom interpolation.
+
+    x (float): input value.
+
+    Returns:
+    Output value of cubic function (float).
+    """
     cdef float a = 0.5  # Catmull-Rom interpolation
     cdef float z = 0
     if x < 0: 

@@ -7,6 +7,9 @@ from .interpolation.catmull_rom cimport _shift
 
 
 def translate_array(float[:, :, :] img_arr, float[:, :] drift_t):
+    """
+    Translate an array of images using the drift data.
+    """
 
     cdef int n_slices = img_arr.shape[0]
     cdef float drift_x, drift_y

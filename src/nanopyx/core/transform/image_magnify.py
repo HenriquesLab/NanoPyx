@@ -1,6 +1,7 @@
 import numpy as np
 
 from .interpolation.catmull_rom import magnify as _catmull_rom_magnify
+from .interpolation.bicubic import magnify as _bicubic_magnify
 from .interpolation.lanczos import magnify as _lanczos_magnify
 
 # from scipy.stats import \
@@ -85,3 +86,19 @@ def lanczos_zoom(image: np.ndarray, magnification: int = 2, taps: int = 3):
         np.ndarray: zoomed image.
     """
     return _lanczos_magnify(image, magnification, taps)
+
+
+def bicubic_zoom(image: np.ndarray, magnification: int = 2):
+    """
+    Zoom an image by bicubic interpolation
+
+    Args:
+        image (np.ndarray): 2D grid of pixel values.
+        magnification (float): Factor by which to multiply the dimensions of the image.
+            Must be >= 1.
+
+    Returns:
+        np.ndarray: zoomed image.
+    
+    """
+    return _bicubic_magnify(image, magnification)
