@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 import random
 
-from nanopyx.core.transform.image_add_random_noise import addSquares, addRamp
+from nanopyx.core.transform.image_add_random_noise import addSquares, addRamp, getRamp
 
 @pytest.fixture
 def random_image_with_ramp_squares():
@@ -13,3 +13,7 @@ def random_image_with_ramp_squares():
     addRamp(image, 1000)
     addSquares(image, 100, nSquares=10)
     return image
+
+@pytest.fixture
+def random_image_with_ramp():
+    return getRamp(64, 64)

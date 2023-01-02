@@ -15,10 +15,14 @@ from noise import pnoise2
 
 r = np.random.RandomState()
 
-# @cython.cdivision(True)
+
 cdef double random() nogil:
+    """
+    Returns a random value between 0 and 1.
+    """
     # not thread safe since it depends on a time seed
     return float(rand()) / float(RAND_MAX)
+
 
 cdef double logFactorial(int x) nogil:
     """
@@ -38,6 +42,9 @@ cdef double logFactorial(int x) nogil:
         return ans
 
 cdef int poissonSmall(double mean) nogil:
+    """
+    Returns a poisson distributed random value with the specified mean using an algorithm based on the factorial function. This method is more efficient for small means.
+    """
     cdef double L = exp(-mean)
     cdef double p = 1.
     cdef int k = 1
@@ -50,8 +57,11 @@ cdef int poissonSmall(double mean) nogil:
     
     return k - 1
 
-# @cython.cdivision(True)
+
 cdef int poissonLarge(double mean) nogil:
+    """
+    Returns a poisson distributed random value with the specified mean using the rejection method PA. This method is more efficient for large means.
+    """
     # "Rejection method PA" from "The Computer Generation of
     # Poisson Random Variables" by A. C. Atkinson,
     # Journal of the Royal Statistical Society Series C
@@ -82,13 +92,19 @@ cdef int poissonLarge(double mean) nogil:
             return n
 
 cdef int poissonValue(double mean) nogil:
+    """
+    Returns a poisson distributed random value with the specified mean. Uses a different algorithm for small and large means.
+    """
     if mean < 100:
         return poissonSmall(mean)
     else:
         return poissonLarge(mean)
 
-# @cython.cdivision(True)
+
 cdef double normalValue() nogil:
+    """
+    Returns a normally distributed random value with mean 0 and standard deviation 1.
+    """
     cdef double u = random() * 2 - 1
     cdef double v = random() * 2 - 1
     cdef double r = u * u + v * v
@@ -97,10 +113,11 @@ cdef double normalValue() nogil:
     cdef double c = sqrt(-2 * log(r) / r)
     return u * c
 
-# @cython.boundscheck(False)
-# @cython.wraparound(False)
+
 def addMixedGaussianPoissonNoise(float[:,:] image, double gaussSigma, double gaussMean):
-    # consider using with arr.ravel() to get a flattened view of the array
+    """
+    Add mixed Gaussian-Poisson noise to an image
+    """
 
     cdef float v
     cdef int i, j
@@ -115,17 +132,28 @@ def addMixedGaussianPoissonNoise(float[:,:] image, double gaussSigma, double gau
                 image[i,j] = v
 
 def addMixedGaussianPoissonNoise2(np.ndarray image, double gaussSigma, double gaussMean):
+    """
+    Add mixed Gaussian-Poisson noise to an image
+    """
     shape = []
     for i in range(image.ndim):
         shape.append(image.shape[i])
     image[:] = np.clip(r.poisson(image)+r.normal(scale=gaussSigma, size=tuple(shape), loc=gaussMean), 0, 65535)
 
+
 def addPerlinNoise(float[:,:] image, int amp=100, float f = 100, int octaves = 1, float persistence = 0.5, float lacunarity = 2., float repeatx = 1024, float repeaty = 1024, int base = 0):
+    """
+    Add perlin noise to an image
+    """
     for j in range(image.shape[1]):
         for i in range(image.shape[0]):
             image[i, j] += amp * pnoise2(i/f, j/f, octaves, persistence, lacunarity, repeatx, repeaty, base)
 
+
 def addSquares(float[:,:] image, float vmax=100, float vmin=0, int nSquares=100):
+    """
+    Add random squares to an image
+    """
     
     cdef int w = image.shape[0]
     cdef int h = image.shape[1]
@@ -151,7 +179,9 @@ def addSquares(float[:,:] image, float vmax=100, float vmin=0, int nSquares=100)
     return image
 
 def addRamp(float[:,:] image, float vmax=100, float vmin=0):
-
+    """
+    Adds a ramp from vmin to vmax to the image
+    """
     cdef int w = image.shape[0]
     cdef int h = image.shape[1]
     cdef float v
@@ -162,6 +192,15 @@ def addRamp(float[:,:] image, float vmax=100, float vmin=0):
             v = float(j)/h * (vmax-vmin) + vmin
             for i in range(w):
                 image[i, j] += v
+
+
+def getRamp(int w, int h, float vmax=100, float vmin=0):
+    """
+    Returns a 2D array of size (w, h) with a ramp from vmin to vmax
+    """
+    cdef float[:,:] image = np.zeros((w, h), dtype='float32')
+    addRamp(image, vmax, vmin)
+    return np.asarray(image)
 
 
 def test_logFactorial():

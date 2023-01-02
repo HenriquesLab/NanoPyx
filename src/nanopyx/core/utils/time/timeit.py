@@ -20,9 +20,9 @@ def timeit2(func):
         end = time.time()
         delta = end - start
         if delta < 10**-4:
-            msg = f"{func.__name__} took {delta/10**-6:.6f} nseconds"
+            msg = f"{func.__name__} took {delta/1e-6:.6f} nseconds"
         elif delta < 10**-1:
-            msg = f"{func.__name__} took {delta/10**-3:.6f} mseconds"
+            msg = f"{func.__name__} took {delta/1e-3:.6f} mseconds"
         else:
             msg = f"{func.__name__} took {delta:.6f} seconds"
         print(msg)
