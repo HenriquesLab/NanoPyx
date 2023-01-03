@@ -59,9 +59,6 @@ RUN pip3 install --no-cache-dir \
     jupyterlab_tabnine \
     jupyterlab-simpledark
 
-# Set jupyter theme
-# RUN jupyter labextension install jupyterlab_onedarkpro
-
 # copy content of current directory to inside docker container
 ENV BUILD_DIR=/nanopyx
 COPY . ${BUILD_DIR}

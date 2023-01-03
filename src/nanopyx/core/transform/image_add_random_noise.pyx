@@ -150,6 +150,15 @@ def addPerlinNoise(float[:,:] image, int amp=100, float f = 100, int octaves = 1
             image[i, j] += amp * pnoise2(i/f, j/f, octaves, persistence, lacunarity, repeatx, repeaty, base)
 
 
+def getPerlinNoise(w, h, amp=100, f = 100, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
+    """
+    Return a perlin noise image
+    """
+    image = np.zeros((w, h), dtype='float32')
+    addPerlinNoise(image, amp, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
+    return image
+
+
 def addSquares(float[:,:] image, float vmax=100, float vmin=0, int nSquares=100):
     """
     Add random squares to an image
@@ -198,9 +207,9 @@ def getRamp(int w, int h, float vmax=100, float vmin=0):
     """
     Returns a 2D array of size (w, h) with a ramp from vmin to vmax
     """
-    cdef float[:,:] image = np.zeros((w, h), dtype='float32')
+    image = np.zeros((w, h), dtype='float32')
     addRamp(image, vmax, vmin)
-    return np.asarray(image)
+    return image
 
 
 def test_logFactorial():
