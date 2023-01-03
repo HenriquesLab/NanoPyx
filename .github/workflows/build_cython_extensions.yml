@@ -91,7 +91,6 @@ jobs:
 
       - name: Build and test wheels
         env:
-          CIBW_BEFORE_ALL: ["pipi ins"]
           CONFTEST_PATH: ${{ github.workspace }}/conftest.py
           CONFTEST_NAME: conftest.py
           CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
