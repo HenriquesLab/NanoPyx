@@ -20,7 +20,11 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     Returns:
         The interpolated value at the given coordinates.
     """
-    
+    cdef int x0 = int(x)
+    cdef int y0 = int(y)
+    if x == x0 and y == y0:
+        return image[y0, x0]
+
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
     cdef double x_factor, y_factor
@@ -101,7 +105,7 @@ cdef float[:,:] _magnify(float[:,:] image, int magnification, int taps):
         magnification (int): The magnification factor.
         taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
     """
-    cdef int i, j, _x, _y
+    cdef int i, j
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
     cdef int w2 = int(w * magnification)
@@ -113,14 +117,9 @@ cdef float[:,:] _magnify(float[:,:] image, int magnification, int taps):
     with nogil:
         for i in prange(w2):
             x = i / magnification
-            _x = int(x)
             for j in range(h2):
                 y = j / magnification
-                _y = int(y)
-                if x == _x and y == _y:
-                    imMagnified[j, i] = image[_y, _x]
-                else:
-                    imMagnified[j, i] = _interpolate(image, x, y, taps)
+                imMagnified[j, i] = _interpolate(image, x, y, taps)
     
     return imMagnified
 

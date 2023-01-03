@@ -21,19 +21,24 @@ def interpolate(np.ndarray im, double x, double y) -> float:
     return _interpolate(im.view(np.float32), x, y).astype(im.dtype)
 
 
-cdef double _interpolate(float[:,:] im, double x, double y) nogil:
+cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     """
     Interpolate image using Catmull-Rom interpolation.
 
-    im (np.ndarray): image to interpolate.
+    image (np.ndarray): image to interpolate.
     x (float): x-coordinate to interpolate at.
     y (float): y-coordinate to interpolate at.
 
     Returns:
     Interpolated pixel value (float).
     """
-    cdef int w = im.shape[1]
-    cdef int h = im.shape[0]
+    cdef int x0 = int(x)
+    cdef int y0 = int(y)
+    if x == x0 and y == y0:
+        return image[y0, x0]
+
+    cdef int w = image.shape[1]
+    cdef int h = image.shape[0]
 
     if x<0 or x>=w or y<0 or y>=h:
         return 0
@@ -51,7 +56,7 @@ cdef double _interpolate(float[:,:] im, double x, double y) nogil:
             u = u0 - 1 + i
             _u = max(0, min(u, w-1))
             _v = max(0, min(v, h-1))
-            p = p + im[_v, _u] * _cubic(x - (u + 0.5))
+            p = p + image[_v, _u] * _cubic(x - (u + 0.5))
         q = q + p * _cubic(y - (v + 0.5))
 
     #if isnan(q) or isinf(q):
@@ -85,7 +90,7 @@ cdef float[:,:] _magnify(float[:,:] image, int magnification):
     Returns:
     Magnified image (np.ndarray).
     """
-    cdef int i, j, _x, _y
+    cdef int i, j
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
     cdef int w2 = int(w * magnification)
@@ -97,14 +102,9 @@ cdef float[:,:] _magnify(float[:,:] image, int magnification):
     with nogil:
         for i in prange(w2):
             x = i / magnification
-            _x = int(x)
             for j in range(h2):
                 y = j / magnification
-                _y = int(y)
-                if x == _x and y == _y:
-                    imMagnified[j, i] = image[_y, _x]
-                else:
-                    imMagnified[j, i] = _interpolate(image, x, y)
+                imMagnified[j, i] = _interpolate(image, x, y)
     
     return imMagnified
 
