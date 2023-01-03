@@ -91,6 +91,7 @@ jobs:
 
       - name: Build and test wheels
         env:
+          CIBW_BEFORE_TEST_LINUX: "yum install zlib-devel"
           CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
                             OPENBLAS_NUM_THREADS=2
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
