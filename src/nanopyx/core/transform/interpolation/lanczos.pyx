@@ -21,8 +21,8 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
         The interpolated value at the given coordinates.
     """
     
-    cdef int w = image.shape[0]
-    cdef int h = image.shape[1]
+    cdef int w = image.shape[1]
+    cdef int h = image.shape[0]
     cdef double x_factor, y_factor
     cdef int i, j
     
@@ -48,7 +48,7 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
 
             # Add the contribution from this tap to the interpolation
             weight = x_factor * y_factor
-            interpolation += image[i, j] * weight
+            interpolation += image[j, i] * weight
             weight_sum += weight
     
     return float(interpolation / weight_sum)
@@ -92,34 +92,36 @@ def magnify(np.ndarray im, int magnification, int taps):
     return np.asarray(imMagnified).astype(im.dtype)
 
 
-cdef float[:,:] _magnify(float[:,:] im, int magnification, int taps):
+cdef float[:,:] _magnify(float[:,:] image, int magnification, int taps):
     """
     Magnify a 2D image using the Lanczos interpolation method.
     
     Parameters:
-        im (np.ndarray): The 2D image to magnify.
+        image (np.ndarray): The 2D image to magnify.
         magnification (int): The magnification factor.
         taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
     """
-    cdef int w = im.shape[0]
-    cdef int h = im.shape[1]
-    cdef int wM = w * magnification
-    cdef int hM = h * magnification
-    cdef int i, j
+    cdef int i, j, _x, _y
+    cdef int w = image.shape[1]
+    cdef int h = image.shape[0]
+    cdef int w2 = int(w * magnification)
+    cdef int h2 = int(h * magnification)
     cdef float x, y
 
-    cdef float[:,:] imMagnified = np.empty((wM, hM), dtype=np.float32)
+    cdef float[:,:] imMagnified = np.empty((h2, w2), dtype=np.float32)
 
     with nogil:
-        for j in prange(hM):
-            y = j / magnification
-            for i in range(wM):
-                x = i / magnification
-                if x == floor(x) and y == floor(y):
-                    imMagnified[i, j] = im[int(x), int(y)]
+        for i in prange(w2):
+            x = i / magnification
+            _x = int(x)
+            for j in range(h2):
+                y = j / magnification
+                _y = int(y)
+                if x == _x and y == _y:
+                    imMagnified[j, i] = image[_y, _x]
                 else:
-                    imMagnified[i, j] = _interpolate(im, x, y, taps)
-
+                    imMagnified[j, i] = _interpolate(image, x, y, taps)
+    
     return imMagnified
 
 
@@ -133,9 +135,9 @@ def shift(np.ndarray im, double dx, double dy, int taps):
         dy (float): The amount to shift the image in the y direction.
         taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
     """
-    assert im.ndim == 2    
-    imShifted = _shift(im.view(np.float32), dx, dy, taps)
-    return imShifted.astype(im.dtype)
+    assert im.ndim == 2
+    imShifted = _shift(im.astype(np.float32), dx, dy, taps)
+    return np.asarray(imShifted).astype(im.dtype)
 
 
 cdef float[:,:] _shift(float[:,:] im, double dx, double dy, int taps):
@@ -148,14 +150,21 @@ cdef float[:,:] _shift(float[:,:] im, double dx, double dy, int taps):
         dy (float): The amount to shift the image in the y direction.
         taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
     """
-    cdef int w = im.shape[0]
-    cdef int h = im.shape[1]
+    cdef int w = im.shape[1]
+    cdef int h = im.shape[0]
     cdef int i, j
+    cdef int _dx = int(dx)
+    cdef int _dy = int(dy)
 
-    cdef float[:,:] imShifted = np.zeros((w, h), dtype=np.float32)
+    cdef float[:,:] imShifted = np.zeros((h, w), dtype=np.float32)
 
-    for j in range(h):
-        for i in range(w):
-            imShifted[i,j] = _interpolate(im, i + dx, j + dy, taps)
+    cdef int x_start = max(0, _dx)
+    cdef int y_start = max(0, _dy)
+    cdef int x_end = min(w, w + _dx)
+    cdef int y_end = min(h, h + _dy)
+    
+    for i in range(x_start, x_end):
+        for j in range(y_start, y_end):
+            imShifted[j,i] = _interpolate(im, i - dx, j - dy, taps)
 
-    return imShifted
+    return imShifted 

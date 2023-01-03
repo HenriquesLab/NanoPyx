@@ -32,13 +32,11 @@ cdef double _interpolate(float[:,:] im, double x, double y) nogil:
     Returns:
     Interpolated pixel value (float).
     """
-    cdef int w = im.shape[0]
-    cdef int h = im.shape[1]
-    cdef int _x = int(x)
-    cdef int _y = int(y)
+    cdef int w = im.shape[1]
+    cdef int h = im.shape[0]
 
-    if x<0 or x>w-1 or y<0 or y>h-1:
-        return im[_x, _y]
+    if x<0 or x>=w or y<0 or y>=h:
+        return 0
 
     cdef int u0 = int(x - 0.5)
     cdef int v0 = int(y - 0.5)
@@ -53,7 +51,7 @@ cdef double _interpolate(float[:,:] im, double x, double y) nogil:
             u = u0 - 1 + i
             _u = max(0, min(u, w-1))
             _v = max(0, min(v, h-1))
-            p = p + im[_u, _v] * _cubic(x - (u + 0.5))
+            p = p + im[_v, _u] * _cubic(x - (u + 0.5))
         q = q + p * _cubic(y - (v + 0.5))
 
     #if isnan(q) or isinf(q):
@@ -88,13 +86,13 @@ cdef float[:,:] _magnify(float[:,:] image, int magnification):
     Magnified image (np.ndarray).
     """
     cdef int i, j, _x, _y
-    cdef int w = image.shape[0]
-    cdef int h = image.shape[1]
+    cdef int w = image.shape[1]
+    cdef int h = image.shape[0]
     cdef int w2 = int(w * magnification)
     cdef int h2 = int(h * magnification)
     cdef float x, y
 
-    cdef float[:,:] imMagnified = np.empty((w2, h2), dtype=np.float32)
+    cdef float[:,:] imMagnified = np.empty((h2, w2), dtype=np.float32)
 
     with nogil:
         for i in prange(w2):
@@ -104,9 +102,9 @@ cdef float[:,:] _magnify(float[:,:] image, int magnification):
                 y = j / magnification
                 _y = int(y)
                 if x == _x and y == _y:
-                    imMagnified[i, j] = image[_x, _y]
+                    imMagnified[j, i] = image[_y, _x]
                 else:
-                    imMagnified[i, j] = _interpolate(image, x, y)
+                    imMagnified[j, i] = _interpolate(image, x, y)
     
     return imMagnified
 
@@ -139,22 +137,24 @@ cdef float[:,:] _shift(float[:,:] im, double dx, double dy):
     Returns:
     Shifted image (np.ndarray).
     """
-    cdef int w = im.shape[0]
-    cdef int h = im.shape[1]
+    cdef int w = im.shape[1]
+    cdef int h = im.shape[0]
     cdef int i, j
+    cdef int _dx = int(dx)
+    cdef int _dy = int(dy)
 
-    cdef float[:,:] imShifted = np.zeros((w, h), dtype=np.float32)
+    cdef float[:,:] imShifted = np.zeros((h, w), dtype=np.float32)
 
-    cdef int x_start = int(fmax(0, dx))
-    cdef int y_start = int(fmax(0, dy))
-    cdef int x_end = int(fmin(w, w + dx))
-    cdef int y_end = int(fmin(h, h + dy))
+    cdef int x_start = max(0, _dx)
+    cdef int y_start = max(0, _dy)
+    cdef int x_end = min(w, w + _dx)
+    cdef int y_end = min(h, h + _dy)
+    
+    for i in range(x_start, x_end):
+        for j in range(y_start, y_end):
+            imShifted[j,i] = _interpolate(im, i - dx, j - dy)
 
-    for j in range(0, h):
-        for i in range(0, w):
-            imShifted[i,j] = _interpolate(im, i - dx, j - dy)
-
-    return imShifted
+    return imShifted 
 
 cdef double _cubic(double x) nogil:
     """

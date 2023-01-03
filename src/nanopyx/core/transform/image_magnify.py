@@ -1,4 +1,3 @@
-
 import numpy as np
 from cv2 import INTER_LANCZOS4
 from cv2 import resize as cv2_resize
@@ -134,5 +133,6 @@ def cv2_zoom(image: np.ndarray, magnification: int = 2):
 
     """
 
-    return cv2_resize(image, None, fx=magnification, fy=magnification, interpolation = INTER_LANCZOS4)
-
+    return cv2_resize(
+        image, None, fx=magnification, fy=magnification, interpolation=INTER_LANCZOS4
+    )
