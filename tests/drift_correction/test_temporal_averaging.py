@@ -20,6 +20,6 @@ def test_no_averaging_with_roi(random_timelapse_w_drift):
     x0, y0, x1, y1 = 10, 10, 100, 100
     estimator.estimator_table.params["roi"] = x0, y0, x1, y1
     img = random_timelapse_w_drift[:, y0:y1+1, x0:x1+1]
-    avg_img = estimator.compute_temporal_averaging(random_timelapse_w_drift)
+    avg_img = estimator.compute_temporal_averaging(img)
 
     assert img.shape == avg_img.shape
