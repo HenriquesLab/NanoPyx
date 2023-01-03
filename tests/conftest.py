@@ -21,4 +21,4 @@ def random_image_with_ramp():
 
 @pytest.fixture
 def random_timelapse_w_drift():
-    return generate_timelapse_drift(n_objects=5, shape=(50, 150, 150), drift=1)
+    return generate_timelapse_drift(n_objects=5, shape=(200, 150, 150), drift=1)
