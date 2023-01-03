@@ -1,4 +1,4 @@
-name: Build
+name: Build Cython Extensions
 
 on: [push, pull_request]
 
