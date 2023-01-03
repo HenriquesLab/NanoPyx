@@ -21,9 +21,15 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     Returns:
         Interpolated pixel value (float).
     """
+    cdef int w = image.shape[0]
+    cdef int h = image.shape[1]
+    cdef int _x = int(x)
+    cdef int _y = int(y)
+
+    if x<0 or x>w-1 or y<0 or y>h-1:
+        return image[_x, _y]
+
     cdef int i, j
-    cdef int m = image.shape[0]
-    cdef int n = image.shape[1]
     cdef int x0 = int(x)
     cdef int y0 = int(y)
     cdef double dx = x - x0
@@ -46,7 +52,9 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
 
     for i in range(4):
         for j in range(4):
-            result += a[i] * b[j] * image[(x0-1+i)%m][(y0-1+j)%n]
+            _x = max(0, min((x0-1+i)%w, w-1))
+            _y = max(0, min((y0-1+j)%h, h-1))
+            result += a[i] * b[j] * image[_x, _y]
 
     return result
 
@@ -78,7 +86,7 @@ cdef float[:,:] _magnify(float[:,:] image, float magnification):
     Returns:
     Magnified image (np.ndarray).
     """
-    cdef int i, j
+    cdef int i, j, _x, _y
     cdef int w = image.shape[0]
     cdef int h = image.shape[1]
     cdef int w2 = int(w * magnification)
@@ -90,10 +98,12 @@ cdef float[:,:] _magnify(float[:,:] image, float magnification):
     with nogil:
         for i in prange(w2):
             x = i / magnification
+            _x = int(x)
             for j in range(h2):
                 y = j / magnification
-                if x == floor(x) and y == floor(y):
-                    imMagnified[i, j] = image[int(x), int(y)]
+                _y = int(y)
+                if x == _x and y == _y:
+                    imMagnified[i, j] = image[_x, _y]
                 else:
                     imMagnified[i, j] = _interpolate(image, x, y)
     

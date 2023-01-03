@@ -1,6 +1,6 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
 
-from libc.math cimport floor
+from libc.math cimport floor, isnan, isinf, fmax, fmin
 
 import numpy as np
 cimport numpy as np
@@ -37,22 +37,27 @@ cdef double _interpolate(float[:,:] im, double x, double y) nogil:
     cdef int _x = int(x)
     cdef int _y = int(y)
 
-    if x<0.5 or x>w-1.5 or y<0.5 or y>h-1.5:
+    if x<0 or x>w-1 or y<0 or y>h-1:
         return im[_x, _y]
-    
+
     cdef int u0 = int(x - 0.5)
     cdef int v0 = int(y - 0.5)
     cdef double q = 0
     cdef double p
-    cdef int v, u, i, j
+    cdef int v, u, i, j, _u, _v
 
     for j in range(4):
         v = v0 - 1 + j
         p = 0
         for i in range(4):
             u = u0 - 1 + i
-            p = p + im[u, v] * _cubic(x - (u + 0.5))
+            _u = max(0, min(u, w-1))
+            _v = max(0, min(v, h-1))
+            p = p + im[_u, _v] * _cubic(x - (u + 0.5))
         q = q + p * _cubic(y - (v + 0.5))
+
+    #if isnan(q) or isinf(q):
+    #    return 0.
 
     return float(q)
 
@@ -72,35 +77,37 @@ def magnify(np.ndarray im, int magnification):
     return np.asarray(imMagnified).astype(im.dtype)
 
 
-cdef float[:,:] _magnify(float[:,:] im, int magnification):
+cdef float[:,:] _magnify(float[:,:] image, int magnification):
     """
     Magnify image using Catmull-Rom interpolation.
 
-    im (np.ndarray): image to magnify.
-    imM (np.ndarray): magnified image.
+    image (np.ndarray): image to magnify.
     magnification (int): magnification factor.
 
     Returns:
     Magnified image (np.ndarray).
     """
-
-    cdef int wM = im.shape[0] * magnification
-    cdef int hM = im.shape[1] * magnification
-    cdef int i, j
+    cdef int i, j, _x, _y
+    cdef int w = image.shape[0]
+    cdef int h = image.shape[1]
+    cdef int w2 = int(w * magnification)
+    cdef int h2 = int(h * magnification)
     cdef float x, y
 
-    cdef float[:,:] imMagnified = np.empty((im.shape[0] * magnification, im.shape[1] * magnification), dtype=np.float32)
+    cdef float[:,:] imMagnified = np.empty((w2, h2), dtype=np.float32)
 
     with nogil:
-        for j in prange(hM):
-            y = j / magnification
-            for i in range(wM):
-                x = i / magnification
-                if x == floor(x) and y == floor(y):
-                    imMagnified[i, j] = im[int(x), int(y)]
+        for i in prange(w2):
+            x = i / magnification
+            _x = int(x)
+            for j in range(h2):
+                y = j / magnification
+                _y = int(y)
+                if x == _x and y == _y:
+                    imMagnified[i, j] = image[_x, _y]
                 else:
-                    imMagnified[i, j] = _interpolate(im, x, y)
-
+                    imMagnified[i, j] = _interpolate(image, x, y)
+    
     return imMagnified
 
 
@@ -116,8 +123,8 @@ def shift(np.ndarray im, double dx, double dy):
     Shifted image (np.ndarray).
     """
     assert im.ndim == 2
-    imShifted = _shift(im.view(np.float32), dx, dy)
-    return imShifted.astype(im.dtype)
+    imShifted = _shift(im.astype(np.float32), dx, dy)
+    return np.asarray(imShifted).astype(im.dtype)
 
 
 cdef float[:,:] _shift(float[:,:] im, double dx, double dy):
@@ -138,9 +145,14 @@ cdef float[:,:] _shift(float[:,:] im, double dx, double dy):
 
     cdef float[:,:] imShifted = np.zeros((w, h), dtype=np.float32)
 
-    for j in range(h):
-        for i in range(w):
-            imShifted[i,j] = _interpolate(im, i + dx, j + dy)
+    cdef int x_start = int(fmax(0, dx))
+    cdef int y_start = int(fmax(0, dy))
+    cdef int x_end = int(fmin(w, w + dx))
+    cdef int y_end = int(fmin(h, h + dy))
+
+    for j in range(0, h):
+        for i in range(0, w):
+            imShifted[i,j] = _interpolate(im, i - dx, j - dy)
 
     return imShifted
 
@@ -155,7 +167,7 @@ cdef double _cubic(double x) nogil:
     """
     cdef float a = 0.5  # Catmull-Rom interpolation
     cdef float z = 0
-    if x < 0: 
+    if x < 0:
         x = -x
     if x < 1:
         z = x * x * (x * (-a + 2.) + (a - 3.)) + 1.
