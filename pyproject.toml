@@ -7,9 +7,12 @@ name = "nanopyx"
 version = "0.0.1"
 dynamic = ["urls", "classifiers", "authors", "requires-python", "description"]
 
+[tool.pyright]
+reportUndefinedVariable = false
+
 [tool.cibuildwheel]
-build = "*"
-skip = ""
+build = ["cp39-*", "cp310-*"]
+skip = "" # ["cp36-*", "cp37-*", "cp38-*", "cp39-*"]
 test-skip = ""
 
 archs = ["auto"]
@@ -24,7 +27,6 @@ before-all = ""
 before-build = ""
 repair-wheel-command = ""
 
-#test-command = ""
 before-test = ""
 test-requires = "pytest"
 test-extras = []
@@ -47,15 +49,10 @@ musllinux-aarch64-image = "musllinux_1_1"
 musllinux-ppc64le-image = "musllinux_1_1"
 musllinux-s390x-image = "musllinux_1_1"
 
-
 [tool.cibuildwheel.linux]
-select = "cp3{8,9,10}-*"
 repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
 repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 
 [tool.cibuildwheel.windows]
-
-[tool.pyright]
-reportUndefinedVariable = false
