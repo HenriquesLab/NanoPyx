@@ -52,7 +52,7 @@ RUN pip3 install --no-cache-dir jupyterlab && \
     jupyter serverextension enable --py jupyterlab
 
 # Install Jupyter extensions
-RUN pip3 install --no-cache-dir \ 
+RUN pip3 install --no-cache-dir \
     jupyterlab-github \
     jupyterlab-topbar \
     jupyterlab-system-monitor \
@@ -73,5 +73,4 @@ ENV SHELL=/bin/bash
 ENV NB_DIR=${BUILD_DIR}/notebooks
 # RUN mkdir -p /tmp/notebooks
 # COPY ./notebooks ${NB_DIR}
-RUN echo 'Docker!' | passwd --stdin root
 CMD jupyter lab --ip=* --port=8888 --no-browser --notebook-dir=${BUILD_DIR} --allow-root --ResourceUseDisplay.track_cpu_percent=True
