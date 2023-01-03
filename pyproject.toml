@@ -5,11 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nanopyx"
 version = "0.0.1"
-dynamic = ["urls", "classifiers", "authors", "requires-python", "description", "readme"]
-
-[tool.cibuildwheel]
-test-requires = "pytest"
-test-command = "pytest {project}/tests"
+dynamic = ["urls", "classifiers", "authors", "requires-python", "description"]
 
 [tool.cibuildwheel]
 build = "*"
@@ -28,10 +24,11 @@ before-all = ""
 before-build = ""
 repair-wheel-command = ""
 
-test-command = ""
+#test-command = ""
 before-test = ""
-test-requires = []
+test-requires = "pytest"
 test-extras = []
+test-command = "pytest {project}/tests"
 
 container-engine = "docker"
 

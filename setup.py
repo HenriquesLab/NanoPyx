@@ -126,9 +126,6 @@ elif sys.platform == "darwin":
     # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
     # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
     # EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
-    if "macOS" in pltform and "arm" in pltform:
-        EXTRA_COMPILE_ARGS += ["-mcpu=apple-m1", "-Xpreprocessor"]
-        EXTRA_LING_ARGS += ["-Xpreprocessor"]
     if use_openmp_support:
         EXTRA_COMPILE_ARGS += ["-fopenmp"] #["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
         EXTRA_LING_ARGS += ["-fopenmp"] # ["-Xpreprocessor", "-fopenmp"]
