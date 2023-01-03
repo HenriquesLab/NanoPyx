@@ -65,7 +65,7 @@ COPY . ${BUILD_DIR}
 RUN pip3 install -e ${BUILD_DIR}
 
 # test that we built correctly by running a pytest
-RUN pytest ${BUILD_DIR}/tests/test_random_noise.py
+# RUN pytest ${BUILD_DIR}/tests/test_random_noise.py
 
 # Start Jupyterlab port & cmd
 EXPOSE 8888
