@@ -23,7 +23,7 @@
 # Install base resources and nanopyx #
 ######################################
 
-FROM python:3.10-slim AS nanopyx 
+FROM python:3.10-slim AS nanopyx
 
 ENV TZ=Europe/London
 ENV LANG=C.UTF-8
@@ -76,5 +76,5 @@ ENV SHELL=/bin/bash
 ENV NB_DIR=${BUILD_DIR}/notebooks
 # RUN mkdir -p /tmp/notebooks
 # COPY ./notebooks ${NB_DIR}
+RUN echo 'Docker!' | passwd --stdin root
 CMD jupyter lab --ip=* --port=8888 --no-browser --notebook-dir=${BUILD_DIR} --allow-root --ResourceUseDisplay.track_cpu_percent=True
-
