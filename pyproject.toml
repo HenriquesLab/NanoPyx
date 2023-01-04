@@ -1,11 +1,75 @@
 [build-system]
-requires = ["setuptools>=42", "wheel>=0.38.4", "cython>=0.29.0", "numpy>=1.19.0"]
+requires = [
+    "setuptools>=42",
+    "wheel>=0.38.4",
+    "cython>=0.29.0",
+    "numpy>=1.19.0",
+]
 build-backend = "setuptools.build_meta"
 
 [project]
+# For an example see REF: https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 name = "nanopyx"
 version = "0.0.1"
-dynamic = ["urls", "classifiers", "authors", "requires-python", "description"]
+description = "Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { file = "LICENSE.txt" }
+keywords = [
+    "NanoJ",
+    "Super-Resolution Microscopy",
+    "Fluorescence",
+    "BioImage Analysis",
+]
+authors = [
+    { name = "Ricardo Henriques", email = "ricardo.jv.henriques@gmail.com" },
+    { name = "Bruno Saraiva", email = "bruno.msaraiva2@gmail.com" },
+]
+maintainers = [{ name = "Bruno Saraiva", email = "bruno.msaraiva2@gmail.com" }]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    #"setuptools>=42",
+    "cython>=0.29.32",
+    "wheel>=0.38.4",
+    "numpy>=1.22",
+    "scipy>=1.8",
+    #"pandas>=1.5.2",
+    "tifffile>=2022.5.4",
+    "matplotlib>=3.5",
+    "seaborn>=0.12.1",
+    "scikit-image>=0.19.2",
+    "plotly>=5.11.0",
+    "nbformat>=4.2.0",
+    "noise>=1.2.2",
+    "pyyaml>=6.0",
+    "wget>=3.2",
+    "onedrivedownloader>=1.1.3",
+    "tqdm>=4.64.1",
+    "stackview>=0.3.8",
+    "lmfit>=1.1.0",
+    "opencv-python>=4.7.0.68",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest > 7.1",
+  "pytest-cov[all]"
+]
+#doc = [
+#  "sphinx",
+#  "furo"
+#]
+
+[project.urls]
+#homepage = "https://example.com"
+#documentation = "https://readthedocs.org"
+repository = "https://github.com/HenriquesLab/NanoPyx"
+#changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
+bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
 [tool.pyright]
 reportUndefinedVariable = false

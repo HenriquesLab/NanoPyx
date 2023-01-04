@@ -1,21 +1,3 @@
-"""Build and Install NanoPyx helper file
-
-This module is particularly designed to help build Cython extensions.
-Note that any .py containing "# nanopyx-cythonize: True" will be automatically identified as a Pure-Python Cython extension
-
-Example:
-    To build cython extensions
-        $ python setup.py build_ext --inplace 
-
-Initial creation by:
-- Ricardo Henriques, December 2022
-Modified by:
-- Bruno Saraiva, December 2022
-
-Todo:
-    * Nothing yet
-"""
-
 import os
 import os.path
 import platform
@@ -24,50 +6,37 @@ import sys
 
 from Cython.Build import cythonize
 from setuptools import Extension, setup
+import setuptools
+
 
 def run_command(command: str) -> str:
-    result = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return result.stdout.decode('utf-8').strip()
+    result = subprocess.run(
+        command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    return result.stdout.decode("utf-8").strip()
+
 
 def is_xcode_installed() -> bool:
     try:
-        result = subprocess.run(['xcode-select', '--print-path'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(
+            ["xcode-select", "--print-path"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
         return result.returncode == 0
     except:
         return False
+
 
 def is_homebrew_installed() -> bool:
     try:
-        result = subprocess.run(['which', 'brew'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(
+            ["which", "brew"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         return result.returncode == 0
     except:
         return False
 
-# if 'CC' in os.environ:
-#     print("Using CC={}".format(os.environ['CC']))
-# else:
-#     # os.environ["CC"] = "gcc"
-#     print("Using CC={} (set by setup.py)".format(os.environ['CC']))
-
-# Just a basic platform check to engage any platform specific tasks we may need
-# Possible values for sys.platform
-# ┍━━━━━━━━━━━━━━━━━━━━━┯━━━━━━━━━━━━━━━━━━━━━┑
-# │ System              │ Value               │
-# ┝━━━━━━━━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━━━━━━━━┥
-# │ Linux               │ linux or linux2 (*) │
-# │ Windows             │ win32               │
-# │ Windows/Cygwin      │ cygwin              │
-# │ Windows/MSYS2       │ msys                │
-# │ Mac OS X            │ darwin              │
-# │ OS/2                │ os2                 │
-# │ OS/2 EMX            │ os2emx              │
-# │ RiscOS              │ riscos              │
-# │ AtheOS              │ atheos              │
-# │ FreeBSD 7           │ freebsd7            │
-# │ FreeBSD 8           │ freebsd8            │
-# │ FreeBSD N           │ freebsdN            │
-# │ OpenBSD 6           │ openbsd6            │
-# ┕━━━━━━━━━━━━━━━━━━━━━┷━━━━━━━━━━━━━━━━━━━━━┙
 
 if sys.platform == "win32":
     from distutils import msvccompiler
@@ -89,19 +58,25 @@ elif sys.platform == "darwin":
         if is_homebrew_installed():
             print("\t - brew instalation detected...")
             brew_list = run_command("brew list").split()
-            packages = ['gcc', 'llvm', 'libomp']
+            packages = ["gcc", "llvm", "libomp"]
             for package in packages:
                 if package in brew_list:
                     print(f"\t - {package} instalation detected...")
                 else:
-                    print(f"\t - {package} instalation not detected: consider running 'brew install {' '.join(packages)}'")
+                    print(
+                        f"\t - {package} instalation not detected: consider running 'brew install {' '.join(packages)}'"
+                    )
                     use_openmp_support = False
                     break
         else:
-            print("\t - brew instalation not detected, consider installing from https://brew.sh/")
+            print(
+                "\t - brew instalation not detected, consider installing from https://brew.sh/"
+            )
             use_openmp_support = False
     else:
-        print("\t - xcode instalation not detected, consider installing from the App Store")
+        print(
+            "\t - xcode instalation not detected, consider installing from the App Store"
+        )
         use_openmp_support = False
 
     if use_openmp_support:
@@ -116,7 +91,9 @@ elif sys.platform == "darwin":
                 os.environ["CC"] = gcc_cmd
                 found = True
         if not found:
-            print("GCC not detected on standard directory, looking in brew install folders")
+            print(
+                "GCC not detected on standard directory, looking in brew install folders"
+            )
             gcc_list = run_command("ls /opt/homebrew/Cellar/gcc/").split()
             for version in versions:
                 for gcc_dir in gcc_list:
@@ -138,8 +115,10 @@ elif sys.platform == "darwin":
     # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
     # EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
     if use_openmp_support:
-        EXTRA_COMPILE_ARGS += ["-fopenmp"] #["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
-        EXTRA_LING_ARGS += ["-fopenmp"] # ["-Xpreprocessor", "-fopenmp"]
+        EXTRA_COMPILE_ARGS += [
+            "-fopenmp"
+        ]  # ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
+        EXTRA_LING_ARGS += ["-fopenmp"]  # ["-Xpreprocessor", "-fopenmp"]
 
 elif sys.platform.startswith("linux"):
     INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
@@ -195,9 +174,12 @@ def collect_extensions():
 
     return collected_extensions
 
+
 setup(
-    name="nanopyx",
+    build_ext={"inplace": 1},
     ext_modules=collect_extensions(),
-    package_data={'': ['**/*.jpg', '**/*.yaml']},
+    package_dir={"": "src"},
+    packages=setuptools.find_packages(where="src"),
+    package_data={"": ["**/*.jpg", "**/*.yaml"]},
     zip_safe=False,
 )
