@@ -5,6 +5,23 @@ cimport numpy as np
 from cython.parallel import prange
 
 
+def calculate_ppmcc(np.ndarray im1, np.ndarray im2, int shift_x, int shift_y):
+    return _calculate_ppmcc(im1.astype(np.float32), im2.astype(np.float32), shift_x, shift_y)
+
+cdef float _calculate_ppmcc(float[:, :] im1, float[:, :] im2, int shift_x, int shift_y):
+    cdef int w = im1.shape[1]
+    cdef int h = im1.shape[0]
+    cdef int new_w = w - abs(shift_x)
+    cdef int new_h = h - abs(shift_y)
+
+    cdef int x0 = max(0, -shift_x)
+    cdef int y0 = max(0, -shift_y)
+    cdef int x1 = x0 + shift_x
+    cdef int y1 = y0 + shift_y
+
+    return _pearson_correlation(im1[y0:y0+new_h, x0:x0+new_w], im2[y1:y1+new_h, x1:x1+new_w])
+
+
 def pearson_correlation(np.ndarray im1, np.ndarray im2):
     return _pearson_correlation(im1.astype(np.float32), im2.astype(np.float32))
 

@@ -1,7 +1,9 @@
 import numpy as np
 
 from ..transform.fft.helper_functions import make_even_square, check_even_square
-from ..analysis.image_statistics import calculate_ppmcc
+from ..analysis.pearson_correlation import calculate_ppmcc
+from ..utils.time.timeit import timeit2
+
 
 
 class CrossCorrelationMap(object):
@@ -11,6 +13,7 @@ class CrossCorrelationMap(object):
         self.img_stack = None
         self.normalize = True
 
+    @timeit2
     def _calculate_ccm(self, index):
 
         img_slice = self.img_stack[index]
