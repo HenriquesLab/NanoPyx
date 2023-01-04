@@ -1,7 +1,5 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
 
-from libc.math cimport floor, fmin
-
 import numpy as np
 cimport numpy as np
 
@@ -29,7 +27,7 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
     
-    if x<0 or x>=w or y<0 or y>=h:
+    if x<-1 or x>w or y<-1 or y>h:
         return 0
 
     cdef int i, j, _x, _y

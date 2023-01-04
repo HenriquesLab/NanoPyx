@@ -40,7 +40,7 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
 
-    if x<0 or x>=w or y<0 or y>=h:
+    if x<-1 or x>w or y<-1 or y>h:
         return 0
 
     cdef int u0 = int(x - 0.5)
