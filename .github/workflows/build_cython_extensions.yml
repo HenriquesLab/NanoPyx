@@ -1,6 +1,8 @@
 name: Build Cython Extensions
 
-on: [push, pull_request]
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
 
 jobs:
   build_wheels:
@@ -78,40 +80,41 @@ jobs:
             platform_id: macosx_arm64
 
     steps:
-      - name: Checkout nanopyx
+      - 
+        name: Checkout nanopyx
         uses: actions/checkout@v3
 
-      - name: Setup Python
+      - 
+        name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'  # update once build dependencies are available
 
-      - name: Install cibuildwheel
+      - 
+        name: Install cibuildwheel
         run: python -m pip install cibuildwheel>=2.11.4
 
-      - name: Build and test wheels
+      - 
+        name: Build and test wheels
         env:
           CIBW_BEFORE_ALL_LINUX: "yum install opencv opencv-devel opencv-python"
           CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
                             OPENBLAS_NUM_THREADS=2
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
+          CIBW_BUILD_VERBOSITY: 1
           CIBW_ARCHS: all
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
 
           # Run the package tests using `pytest`
           CIBW_TEST_COMMAND: pytest {package}/tests
-
           CIBW_TEST_SKIP: "*-macosx_arm64"
-          #CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: bash build_tools/github/repair_windows_wheels.sh {wheel} {dest_dir}
-          #CIBW_BEFORE_TEST_WINDOWS: bash build_tools/github/build_minimal_windows_image.sh ${{ matrix.python }}
           CIBW_TEST_REQUIRES: pytest threadpoolctl
-          #CIBW_TEST_COMMAND_WINDOWS: bash {project}/build_tools/github/test_windows_wheels.sh ${{ matrix.python }}
-          CIBW_BUILD_VERBOSITY: 1
-
+          
         run: python -m cibuildwheel --output-dir wheelhouse
 
-      - name: Store artifacts
+      - 
+        name: Store artifacts
         uses: actions/upload-artifact@v3
         with:
           path: wheelhouse/*.whl
