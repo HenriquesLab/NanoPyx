@@ -55,7 +55,6 @@ class DriftEstimator(object):
             img_ref = None
 
         self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
-        imwrite("/Users/bsaraiva/Code/NanoPyx/ccm.tif", self.cross_correlation_map)
         self.get_shifts_from_ccm()
         if self.estimator_table.params["time_averaging"] > 1:
 
