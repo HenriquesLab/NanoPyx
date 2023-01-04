@@ -91,7 +91,7 @@ jobs:
 
       - name: Build and test wheels
         env:
-          CIBW_BEFORE_TEST_LINUX: "yum install zlib-devel"
+          CIBW_BEFORE_ALL_LINUX: "yum install opencv opencv-devel opencv-python"
           CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
                             OPENBLAS_NUM_THREADS=2
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
@@ -102,7 +102,7 @@ jobs:
           # Run the package tests using `pytest`
           CIBW_TEST_COMMAND: pytest {package}/tests
 
-          #CIBW_TEST_SKIP: "*-macosx_arm64"
+          CIBW_TEST_SKIP: "*-macosx_arm64"
           #CIBW_REPAIR_WHEEL_COMMAND_WINDOWS: bash build_tools/github/repair_windows_wheels.sh {wheel} {dest_dir}
           #CIBW_BEFORE_TEST_WINDOWS: bash build_tools/github/build_minimal_windows_image.sh ${{ matrix.python }}
           CIBW_TEST_REQUIRES: pytest threadpoolctl
