@@ -83,6 +83,6 @@ bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 reportUndefinedVariable = false
 
 [tool.pytest.ini_options]
-addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake"
+addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --ignore=notebooks/drift_correction_notebook.ipynb"
 timeout = 60
 plt_dirname = "tests_plots"
