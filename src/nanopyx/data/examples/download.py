@@ -6,7 +6,6 @@ from urllib.request import ProxyHandler, build_opener, install_opener
 import numpy as np
 import wget
 import yaml
-import zarr
 from onedrivedownloader import download as onedrive_download
 
 from nanopyx.core.io.zip_image_loader import ZipTiffIterator
@@ -175,14 +174,14 @@ class ExampleDataManager:
 
         return file_path
 
-    def get_zarr(self, dataset_name: str) -> zarr.hierarchy.Group:
-        """
-        Downloads the zarr dataset and returns the zarr group
-        """
-        self._show_citation_notice(dataset_name)
-        file_path = self.download_zarr(dataset_name)
-        z = zarr.open(file_path, mode="r")
-        return z
+    # def get_zarr(self, dataset_name: str) -> zarr.hierarchy.Group:
+    #     """
+    #     Downloads the zarr dataset and returns the zarr group
+    #     """
+    #     self._show_citation_notice(dataset_name)
+    #     file_path = self.download_zarr(dataset_name)
+    #     z = zarr.open(file_path, mode="r")
+    #     return z
 
     def get_ZipTiffIterator(self, dataset_name: str, as_ndarray: False) -> ZipTiffIterator:
         """
