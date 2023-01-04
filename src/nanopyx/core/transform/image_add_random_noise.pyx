@@ -154,7 +154,7 @@ def getPerlinNoise(w, h, amp=100, f = 100, octaves = 1, persistence = 0.5, lacun
     """
     Return a perlin noise image
     """
-    image = np.zeros((w, h), dtype='float32')
+    image = np.zeros((w, h), dtype=np.float32)
     addPerlinNoise(image, amp, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
     return image
 
@@ -169,10 +169,10 @@ def addSquares(float[:,:] image, float vmax=100, float vmin=0, int nSquares=100)
     cdef int n, i, j, x0, x1, y0, y1
     cdef float v
 
-    cdef int[:] x0_arr = np.random.randint(low=0, high=w-1, size=nSquares, dtype='int32')
-    cdef int[:] x1_arr = np.random.randint(low=0, high=w-1, size=nSquares, dtype='int32')
-    cdef int[:] y0_arr = np.random.randint(low=0, high=h-1, size=nSquares, dtype='int32')
-    cdef int[:] y1_arr = np.random.randint(low=0, high=h-1, size=nSquares, dtype='int32')
+    cdef int[:] x0_arr = np.random.randint(low=0, high=w-1, size=nSquares, dtype=np.int32)
+    cdef int[:] x1_arr = np.random.randint(low=0, high=w-1, size=nSquares, dtype=np.int32)
+    cdef int[:] y0_arr = np.random.randint(low=0, high=h-1, size=nSquares, dtype=np.int32)
+    cdef int[:] y1_arr = np.random.randint(low=0, high=h-1, size=nSquares, dtype=np.int32)
     
     with nogil:
         for n in prange(nSquares):

@@ -1,10 +1,14 @@
 
-import pytest
-import numpy as np
 import random
 
-from nanopyx.core.transform.image_add_random_noise import addSquares, addRamp, getRamp
+import numpy as np
+import pytest
+
+from nanopyx.core.transform.image_add_random_noise import (addRamp, addSquares,
+                                                           getRamp)
 from nanopyx.core.utils.imagegenerator.beads import generate_timelapse_drift
+from nanopyx.data.examples.download import ExampleDataManager
+
 
 @pytest.fixture
 def random_image_with_ramp_squares():
@@ -22,3 +26,7 @@ def random_image_with_ramp():
 @pytest.fixture
 def random_timelapse_w_drift():
     return generate_timelapse_drift(n_objects=5, shape=(200, 150, 150), drift=1)
+
+@pytest.fixture
+def downloader():
+    return ExampleDataManager()
