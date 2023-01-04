@@ -41,13 +41,13 @@ class DriftCorrector(object):
         :return: aligned image array with shape (n_slices, rows, columns)
         """
         if self.estimator_table.drift_table is not None:
-            # self.image_arr = image_array
-            # corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])]
-            # return np.array(corrected_image).reshape((self.image_arr.shape[0],
-            #                                           self.image_arr.shape[1],
-            #                                           self.image_arr.shape[2]))
-            return translation.translate_array(image_array.astype(np.float32),
-                                              np.array(self.estimator_table.drift_table).astype(np.float32))
+            self.image_arr = image_array
+            corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])]
+            return np.array(corrected_image).reshape((self.image_arr.shape[0],
+                                                      self.image_arr.shape[1],
+                                                      self.image_arr.shape[2]))
+            # return np.array(translation.translate_array(image_array.astype(np.float32),
+            #                                             np.array(self.estimator_table.drift_table).astype(np.float32)))
 
         else:
             print("Missing drift calculation")
