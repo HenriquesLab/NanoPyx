@@ -33,6 +33,7 @@ def skimage_shift(image: np.ndarray, dx: float, dy: float):
     tform = AffineTransform(translation=(-dx, -dy))
     return warp(image, tform)
 
+
 @timeit2
 def cv2_shift(image: np.ndarray, dx: float, dy: float):
     return cv2.warpAffine(

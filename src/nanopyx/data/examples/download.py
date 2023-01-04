@@ -3,6 +3,7 @@ import shutil
 import tempfile
 from urllib.request import ProxyHandler, build_opener, install_opener
 
+import numpy as np
 import wget
 import yaml
 import zarr
@@ -78,16 +79,23 @@ class ExampleDataManager:
         install_opener(opener)
 
     def list_datasets(self) -> tuple[list]:
-        """Returns a list of dataset labels"""
+        """
+        Returns a list of dataset labels
+        """
         return [dataset["label"] for dataset in self._datasets]
 
     def list_datasets_nickname(self) -> tuple[list]:
-        """Returns a list of dataset labels"""
+        """
+        Returns a list of dataset labels
+        """
         return [(dataset["nickname"], dataset["label"]) for dataset in self._datasets]
 
     def get_dataset_info(self, dataset_name: str) -> dict:
         """
-        dataset_name: can be a dataset label or nickname
+        Returns a dictionary with information about the dataset
+
+        Parameters
+            dataset_name (str): can be a dataset label or nickname
         """
         for dataset in self._datasets:
             if dataset_name in (dataset["label"], dataset["nickname"]):
@@ -95,7 +103,9 @@ class ExampleDataManager:
         raise ValueError(f"{dataset_name} not found in example datasets")
 
     def _download(self, url, file_path, download_type=None, unzip=False):
-        if os.path.exists(file_path): # or os.path.exists(os.path.splitext(file_path)[0]):
+        if os.path.exists(
+            file_path
+        ):  # or os.path.exists(os.path.splitext(file_path)[0]):
             # raise Warning(f"already exists, no need to download: {file_path}")
             return
 
@@ -128,6 +138,10 @@ class ExampleDataManager:
             shutil.copyfile(info["info_path"], info_path)
 
     def download_zarr(self, dataset_name: str) -> str:
+        """
+        Downloads the zarr dataset and returns the path to the zarr file
+        """
+
         info = self.get_dataset_info(dataset_name)
         path = os.path.join(self._to_download_path, info["label"])
 
@@ -135,7 +149,7 @@ class ExampleDataManager:
         file_path_zarr = os.path.join(path, "dataset.zarr")
         if os.path.exists(file_path_zarr):
             return file_path_zarr
-        
+
         url = info["zarr_url"]
         download_type = info["zarr_url_type"]
         self._copy_auxiliary_files(info)
@@ -145,6 +159,9 @@ class ExampleDataManager:
         return file_path_zarr
 
     def download_tiff_sequence(self, dataset_name: str) -> str:
+        """
+        Downloads the tiff sequence and returns the path to the zip file
+        """
         info = self.get_dataset_info(dataset_name)
         path = os.path.join(self._to_download_path, info["label"])
 
@@ -158,21 +175,51 @@ class ExampleDataManager:
 
         return file_path
 
-    def get_zarr(self, dataset_name: str):
+    def get_zarr(self, dataset_name: str) -> zarr.hierarchy.Group:
+        """
+        Downloads the zarr dataset and returns the zarr group
+        """
+        self._show_citation_notice(dataset_name)
         file_path = self.download_zarr(dataset_name)
-        print(file_path)
         z = zarr.open(file_path, mode="r")
         return z
 
-    def get_ZipTiffIterator(self, dataset_name: str) -> ZipTiffIterator:
+    def get_ZipTiffIterator(self, dataset_name: str, as_ndarray: False) -> ZipTiffIterator:
+        """
+        Downloads the tiff sequence and returns the ZipTiffIterator
+
+        Parameters
+            dataset_name (str): can be a dataset label or nickname
+            as_ndarray (bool): if True, returns a numpy array instead of a ZipTiffIterator
+        """
+        self._show_citation_notice(dataset_name)
         file_path = self.download_tiff_sequence(dataset_name)
         zti = ZipTiffIterator(file_path)
-        return zti
+        if not as_ndarray:
+            return zti      
+        else:
+            arr = np.asarray(zti)
+            zti.close()
+            return arr
 
     def get_thumbnail(self, dataset_name: str) -> str:
+        """
+        Returns the path to the thumbnail
+        """
         info = self.get_dataset_info(dataset_name)
         return info["thumbnail_path"]
 
     def clear_downloads(self):
+        """
+        Deletes all downloaded datasets
+        """
         if os.path.exists(self._temp_dir):
             shutil.rmtree(self._temp_dir)
+
+    def _show_citation_notice(self, dataset_name: str):
+        info = self.get_dataset_info(dataset_name)
+        if info["reference"] not in [None, ""]:
+            print(
+                f"If you find the '{dataset_name}' dataset useful, please cite: "
+                + f"{info['reference']} - {info['reference_doi']}"
+            )
