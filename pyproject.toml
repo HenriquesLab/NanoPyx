@@ -62,8 +62,10 @@ test = [
   "pytest-icdiff >= 0.6",
   "pytest-clarity >= 1.0.1",
   "pytest-timeout >= 2.1.0",
-  "pytest-cython >= 0.2.0",
-  "pytest-plt >= 1.1.0"
+  "pytest-plt >= 1.1.0",
+  "pytest-xdist >= 3.1.0",
+  "pytest-sugar >= 0.9.6",
+  "nbmake >= 1.3.5",
 ]
 #doc = [
 #  "sphinx",
@@ -81,6 +83,6 @@ bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 reportUndefinedVariable = false
 
 [tool.pytest.ini_options]
-addopts = "-vv --emoji --cov=nanopyx --plots"
-timeout = 30
+addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake"
+timeout = 60
 plt_dirname = "tests_plots"
