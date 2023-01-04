@@ -108,11 +108,22 @@ elif sys.platform == "darwin":
         gcc_list = run_command("ls /usr/local/bin/").split()
         # Lets try to set the correct gcc version for compilation
         versions = ["12", "11", "10", "9"]
+        found = False
         for version in versions:
             gcc_cmd = f"gcc-{version}"
             if gcc_cmd in gcc_list:
                 print(f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'")
                 os.environ["CC"] = gcc_cmd
+                found = True
+        if not found:
+            print("GCC not detected on standard directory, looking in brew install folders")
+            gcc_list = run_command("ls /opt/homebrew/Cellar/gcc/").split()
+            for version in versions:
+                for gcc_dir in gcc_list:
+                    if version in gcc_dir:
+                        gcc_cmd = f"gcc-{version}"
+                        print(f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'")
+                        os.environ["CC"] = gcc_cmd
 
     # brew install gcc llvm libomp
     # sudo xcode-select install
