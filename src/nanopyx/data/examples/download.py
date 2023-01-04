@@ -183,7 +183,7 @@ class ExampleDataManager:
     #     z = zarr.open(file_path, mode="r")
     #     return z
 
-    def get_ZipTiffIterator(self, dataset_name: str, as_ndarray: False) -> ZipTiffIterator:
+    def get_ZipTiffIterator(self, dataset_name: str, as_ndarray: bool = False) -> ZipTiffIterator:
         """
         Downloads the tiff sequence and returns the ZipTiffIterator
 
