@@ -31,6 +31,7 @@ class CrossCorrelationMap(object):
             slice_ccm = self._normalize_ccm(img_ref, img_slice, slice_ccm)
         return slice_ccm[0:slice_ccm.shape[0]-1, 0:slice_ccm.shape[1]-1]
 
+    @timeit2
     def _normalize_ccm(self, img_ref, img_curr, slice_ccm):
         
         w = slice_ccm.shape[1]

@@ -4,6 +4,8 @@ from scipy.interpolate import interp2d
 from skimage.filters import gaussian
 from skimage.transform import EuclideanTransform, warp
 
+from ..time.timeit import timeit
+
 
 def generate_random_position(n_rows, n_cols):
 
@@ -34,6 +36,7 @@ def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float16):
 
     return img
 
+@timeit
 def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float16, drift=None,
                              drift_mode="directional"):
 
@@ -65,6 +68,7 @@ def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float1
 
     return img
 
+@timeit
 def generate_channel_misalignment(n_objects=10, shape=(2, 300, 300), dtype=np.float16, misalignment=None,
                                   n_blocks=3, misalignment_mode='heterogeneous'):
 

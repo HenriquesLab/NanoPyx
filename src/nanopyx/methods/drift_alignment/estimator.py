@@ -7,6 +7,7 @@ from .estimator_table import DriftEstimatorTable
 from .corrector import DriftCorrector
 from ...core.ccm.cross_correlation_map import CrossCorrelationMap
 from ...core.ccm.estimate_shift import GetMaxOptimizer
+from ...core.utils.time.timeit import timeit
 
 
 class DriftEstimator(object):
@@ -19,6 +20,7 @@ class DriftEstimator(object):
         self.drift_y = None
 
 
+    @timeit
     def estimate(self, image_array, **kwargs):
         self.set_estimator_params(**kwargs)
 
@@ -79,7 +81,6 @@ class DriftEstimator(object):
             return tmp
         else:
             return None
-        
 
     def compute_temporal_averaging(self, image_arr):
         n_slices = image_arr.shape[0]
