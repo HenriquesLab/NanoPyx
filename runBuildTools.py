@@ -21,6 +21,7 @@ def main():
         "Clean files": f"rm {clean_files}",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Install nanopyx in developer mode": "pip3 install -e .",
+        "Install nanopyx test packages": "pip install -e .[test]",
         "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",
         "Build nanopyx source distribution": "python3 setup.py sdist",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",

@@ -12,8 +12,8 @@ from nanopyx.data.examples.download import ExampleDataManager
 
 @pytest.fixture
 def random_image_with_ramp_squares():
-    w = random.randint(1, 32)
-    h = random.randint(1, 32)
+    w = random.randint(3, 32)
+    h = random.randint(3, 32)
     image = np.zeros((w, h), dtype="float32")
     addRamp(image, 1000)
     addSquares(image, 100, nSquares=10)

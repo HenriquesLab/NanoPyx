@@ -55,8 +55,8 @@ cdef class CalculateRadiality:
         Note that Gx and Gy are initialized but zeroed
         """
 
-        cdef int w = imRaw.shape[0]
-        cdef int h = imRaw.shape[1]
+        cdef int w = imRaw.shape[1]
+        cdef int h = imRaw.shape[0]
         cdef int i, j, sampleIter
         cdef float x0, y0, xc, yc, GMag, xRing, yRing
 
@@ -69,15 +69,15 @@ cdef class CalculateRadiality:
  
         for j in range(1, h-1):
             for i in range(1, w-1):
-                imGx[i,j] = -imRaw[i-1,j]+imRaw[i+1,j]
-                imGy[i,j] = -imRaw[i,j-1]+imRaw[i,j+1]
+                imGx[j,i] = -imRaw[j,i-1]+imRaw[j,i+1]
+                imGy[j,i] = -imRaw[j-1,i]+imRaw[j+1,i]
 
         for j in range((1 + self.border) * self.magnification, (h - 1 - self.border) * self.magnification):
             for i in range((1 + self.border) * self.magnification, (w - 1 - self.border) * self.magnification):
                 xc = i + 0.5 + shiftX * self.magnification
                 yc = j + 0.5 + shiftY * self.magnification
 
-                imIW[i,j] = _interpolate(imRaw, xc / self.magnification, yc / self.magnification)
+                imIW[j,i] = _interpolate(imRaw, xc / self.magnification, yc / self.magnification)
 
                 # Output
                 CGH = 0
@@ -108,10 +108,10 @@ cdef class CalculateRadiality:
                     CGH = DivDFactor
                 
                 if self.doIntensityWeighting:
-                    imRad[i,j] = CGH
+                    imRad[j,i] = CGH
 
                 else:
-                    imRad[i,j] = CGH * imIW[i,j]
+                    imRad[j,i] = CGH * imIW[j,i]
 
                 
     cdef float _calculateDk(self, float x, float y, float xc, float yc, float vGx, float vGy, float vGx2Gy2) nogil:
