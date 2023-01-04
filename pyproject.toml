@@ -56,8 +56,14 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-  "pytest > 7.1",
-  "pytest-cov[all]"
+  "pytest >= 7.1",
+  "pytest-cov >= 4.0.0",
+  "pytest-emoji >= 0.2.0",
+  "pytest-icdiff >= 0.6",
+  "pytest-clarity >= 1.0.1",
+  "pytest-timeout >= 2.1.0",
+  "pytest-cython >= 0.2.0",
+  "pytest-plt >= 1.1.0"
 ]
 #doc = [
 #  "sphinx",
@@ -73,3 +79,8 @@ bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
 [tool.pyright]
 reportUndefinedVariable = false
+
+[tool.pytest.ini_options]
+addopts = "-vv --emoji --cov=nanopyx --plots"
+timeout = 30
+plt_dirname = "tests_plots"

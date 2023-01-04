@@ -7,7 +7,7 @@ from nanopyx.core.transform.image_magnify import (bicubic_zoom,
                                                   scipy_zoom, skimage_zoom)
 
 
-def test_fourier_zoom(random_image_with_ramp):
+def test_fourier_zoom(random_image_with_ramp, plt):
     imageDownsampled = rebin2d(random_image_with_ramp, 2, mode="mean")
     assert imageDownsampled.shape[0] == random_image_with_ramp.shape[0] / 2
     assert imageDownsampled.shape[1] == random_image_with_ramp.shape[1] / 2
@@ -17,8 +17,14 @@ def test_fourier_zoom(random_image_with_ramp):
     assert imageMagnified.shape[1] == random_image_with_ramp.shape[1]
     np.testing.assert_allclose(imageMagnified, random_image_with_ramp, rtol=10, atol=10)
 
+    plt.figure()
+    f, axarr = plt.subplots(1,3) 
+    axarr[0].imshow(random_image_with_ramp)
+    axarr[1].imshow(imageMagnified)
+    axarr[2].imshow(random_image_with_ramp-imageMagnified)
 
-def test_catmull_rom_zoom(random_image_with_ramp):
+
+def test_catmull_rom_zoom(random_image_with_ramp, plt):
     imageDownsampled = rebin2d(random_image_with_ramp, 2, mode="mean")
     assert imageDownsampled.shape[0] == random_image_with_ramp.shape[0] / 2
     assert imageDownsampled.shape[1] == random_image_with_ramp.shape[1] / 2
@@ -28,8 +34,14 @@ def test_catmull_rom_zoom(random_image_with_ramp):
     assert imageMagnified.shape[1] == random_image_with_ramp.shape[1]
     np.testing.assert_allclose(imageMagnified, random_image_with_ramp, rtol=10, atol=10)
 
+    plt.figure()
+    f, axarr = plt.subplots(1,3) 
+    axarr[0].imshow(random_image_with_ramp)
+    axarr[1].imshow(imageMagnified)
+    axarr[2].imshow(random_image_with_ramp-imageMagnified)
 
-def test_lanczos_zoom(random_image_with_ramp):
+
+def test_lanczos_zoom(random_image_with_ramp, plt):
     imageDownsampled = rebin2d(random_image_with_ramp, 2, mode="mean")
     assert imageDownsampled.shape[0] == random_image_with_ramp.shape[0] / 2
     assert imageDownsampled.shape[1] == random_image_with_ramp.shape[1] / 2
@@ -39,8 +51,14 @@ def test_lanczos_zoom(random_image_with_ramp):
     assert imageMagnified.shape[1] == random_image_with_ramp.shape[1]
     np.testing.assert_allclose(imageMagnified, random_image_with_ramp, rtol=10, atol=10)
 
+    plt.figure()
+    f, axarr = plt.subplots(1,3) 
+    axarr[0].imshow(random_image_with_ramp)
+    axarr[1].imshow(imageMagnified)
+    axarr[2].imshow(random_image_with_ramp-imageMagnified)
 
-def test_bicubic_zoom(random_image_with_ramp):
+
+def test_bicubic_zoom(random_image_with_ramp, plt):
     imageDownsampled = rebin2d(random_image_with_ramp, 2, mode="mean")
     assert imageDownsampled.shape[0] == random_image_with_ramp.shape[0] / 2
     assert imageDownsampled.shape[1] == random_image_with_ramp.shape[1] / 2
@@ -50,8 +68,14 @@ def test_bicubic_zoom(random_image_with_ramp):
     assert imageMagnified.shape[1] == random_image_with_ramp.shape[1]
     np.testing.assert_allclose(imageMagnified, random_image_with_ramp, rtol=10, atol=10)
 
+    plt.figure()
+    f, axarr = plt.subplots(1,3) 
+    axarr[0].imshow(random_image_with_ramp)
+    axarr[1].imshow(imageMagnified)
+    axarr[2].imshow(random_image_with_ramp-imageMagnified)
 
-def test_scipy_zoom(random_image_with_ramp):
+
+def test_scipy_zoom(random_image_with_ramp, plt):
     imageDownsampled = rebin2d(random_image_with_ramp, 2, mode="mean")
     assert imageDownsampled.shape[0] == random_image_with_ramp.shape[0] / 2
     assert imageDownsampled.shape[1] == random_image_with_ramp.shape[1] / 2
@@ -61,8 +85,13 @@ def test_scipy_zoom(random_image_with_ramp):
     assert imageMagnified.shape[1] == random_image_with_ramp.shape[1]
     np.testing.assert_allclose(imageMagnified, random_image_with_ramp, rtol=10, atol=10)
 
+    plt.figure()
+    f, axarr = plt.subplots(1,3) 
+    axarr[0].imshow(random_image_with_ramp)
+    axarr[1].imshow(imageMagnified)
+    axarr[2].imshow(random_image_with_ramp-imageMagnified)
 
-def test_skimage_zoom(random_image_with_ramp):
+def test_skimage_zoom(random_image_with_ramp, plt):
     imageDownsampled = rebin2d(random_image_with_ramp, 2, mode="mean")
     assert imageDownsampled.shape[0] == random_image_with_ramp.shape[0] / 2
     assert imageDownsampled.shape[1] == random_image_with_ramp.shape[1] / 2
@@ -72,8 +101,14 @@ def test_skimage_zoom(random_image_with_ramp):
     assert imageMagnified.shape[1] == random_image_with_ramp.shape[1]
     np.testing.assert_allclose(imageMagnified, random_image_with_ramp, rtol=10, atol=10)
 
+    plt.figure()
+    f, axarr = plt.subplots(1,3) 
+    axarr[0].imshow(random_image_with_ramp)
+    axarr[1].imshow(imageMagnified)
+    axarr[2].imshow(random_image_with_ramp-imageMagnified)
 
-def test_cv2_zoom(random_image_with_ramp):
+
+def test_cv2_zoom(random_image_with_ramp, plt):
     imageDownsampled = rebin2d(random_image_with_ramp, 2, mode="mean")
     assert imageDownsampled.shape[0] == random_image_with_ramp.shape[0] / 2
     assert imageDownsampled.shape[1] == random_image_with_ramp.shape[1] / 2
@@ -82,3 +117,9 @@ def test_cv2_zoom(random_image_with_ramp):
     assert imageMagnified.shape[0] == random_image_with_ramp.shape[0]
     assert imageMagnified.shape[1] == random_image_with_ramp.shape[1]
     np.testing.assert_allclose(imageMagnified, random_image_with_ramp, rtol=10, atol=10)
+
+    plt.figure()
+    f, axarr = plt.subplots(1,3) 
+    axarr[0].imshow(random_image_with_ramp)
+    axarr[1].imshow(imageMagnified)
+    axarr[2].imshow(random_image_with_ramp-imageMagnified)
