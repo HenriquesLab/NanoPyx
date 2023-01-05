@@ -30,7 +30,8 @@ class DriftCorrector(object):
         """
         drift_x = self.estimator_table.drift_table[slice_idx][1]
         drift_y = self.estimator_table.drift_table[slice_idx][2]
-        return cv2_shift(np.array(self.image_arr[slice_idx]), drift_x, drift_y)
+        transformation_matrix = EuclideanTransform(rotation=0, translation=(drift_y, drift_x))
+        return warp(self.image_arr[slice_idx], transformation_matrix.inverse, order=3, preserve_range=True)
 
     @timeit
     def apply_correction(self, image_array):
@@ -41,13 +42,13 @@ class DriftCorrector(object):
         :return: aligned image array with shape (n_slices, rows, columns)
         """
         if self.estimator_table.drift_table is not None:
-            self.image_arr = image_array
-            corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])]
-            return np.array(corrected_image).reshape((self.image_arr.shape[0],
-                                                      self.image_arr.shape[1],
-                                                      self.image_arr.shape[2]))
-            # return np.array(translation.translate_array(image_array.astype(np.float32),
-            #                                             np.array(self.estimator_table.drift_table).astype(np.float32)))
+            # self.image_arr = image_array
+            # corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])]
+            # return np.array(corrected_image).reshape((self.image_arr.shape[0],
+            #                                           self.image_arr.shape[1],
+            #                                           self.image_arr.shape[2]))
+            return np.array(translation.translate_array(image_array.astype(np.float32),
+                                                        np.array(self.estimator_table.drift_table).astype(np.float32)))
 
         else:
             print("Missing drift calculation")
