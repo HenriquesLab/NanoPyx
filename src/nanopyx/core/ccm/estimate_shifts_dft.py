@@ -37,9 +37,12 @@ def estimate_shifts_dft(imgs, upsample_factor=1):
     # Compute cross-correlation
     num_frames, num_rows, num_cols = imgs.shape
     cross_correlation = np.zeros((num_rows, num_cols, num_frames, num_frames))
-    for m in range(num_frames):
-        for n in range(num_frames):
-            cross_correlation[:, :, m, n] = fftconvolve(imgs[m], imgs[n][::-1, ::-1], mode='same')
+    with tqdm(total=num_frames, desc="Correlating image pairs", unit="pairs") as progress_bar:
+        for m in range(num_frames):
+            for n in range(num_frames):
+                cross_correlation[:, :, m, n] = fftconvolve(imgs[m], imgs[n][::-1, ::-1], mode='same')
+            progress_bar.update()
+            
     # Compute phase correlation
     cross_correlation /= np.abs(cross_correlation)
     cross_correlation = np.fft.fftshift(cross_correlation, axes=(0, 1))
