@@ -25,7 +25,7 @@ def random_image_with_ramp():
 
 @pytest.fixture
 def random_image_with_squares():
-    return getSquares(64, 128, nSquares=10)
+    return getSquares(128, 64, nSquares=10)
 
 @pytest.fixture
 def random_timelapse_w_drift():

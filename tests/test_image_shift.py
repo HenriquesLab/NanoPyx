@@ -7,10 +7,10 @@ from nanopyx.core.transform.image_shift import (bicubic_shift,
                                                 skimage_shift)
 
 
-def test_catmull_rom_shift(plt):
-    w = 64
-    h = 32
-    image = getSquares(w, h, nSquares=10)
+def test_catmull_rom_shift(random_image_with_squares, plt):
+    image = random_image_with_squares
+    w = image.shape[1]
+    h = image.shape[0]
     dx = np.random.randint(0, w) / 4 
     dy = np.random.randint(0, h) / 4
 
@@ -26,10 +26,10 @@ def test_catmull_rom_shift(plt):
     axarr[2].imshow(shifted2)
     axarr[3].imshow(delta)
 
-def test_bicubic_shift(plt):
-    w = 64
-    h = 32
-    image = getSquares(w, h, nSquares=10)
+def test_bicubic_shift(random_image_with_squares, plt):
+    image = random_image_with_squares
+    w = image.shape[1]
+    h = image.shape[0]
     dx = np.random.randint(0, w) / 4 
     dy = np.random.randint(0, h) / 4
 
@@ -45,10 +45,10 @@ def test_bicubic_shift(plt):
     axarr[2].imshow(shifted2)
     axarr[3].imshow(delta)
 
-def test_lanczos_shift(plt):
-    w = 64
-    h = 32
-    image = getSquares(w, h, nSquares=10)
+def test_lanczos_shift(random_image_with_squares, plt):
+    image = random_image_with_squares
+    w = image.shape[1]
+    h = image.shape[0]
     dx = np.random.randint(0, w) / 4 
     dy = np.random.randint(0, h) / 4
 
@@ -64,10 +64,10 @@ def test_lanczos_shift(plt):
     axarr[2].imshow(shifted2)
     axarr[3].imshow(delta)
 
-def test_scipy_shift(plt):
-    w = 64
-    h = 32
-    image = getSquares(w, h, nSquares=10)
+def test_scipy_shift(random_image_with_squares, plt):
+    image = random_image_with_squares
+    w = image.shape[1]
+    h = image.shape[0]
     dx = np.random.randint(0, w) / 4 
     dy = np.random.randint(0, h) / 4
 
@@ -83,10 +83,10 @@ def test_scipy_shift(plt):
     axarr[2].imshow(shifted2)
     axarr[3].imshow(delta)
 
-def test_skimage_shift(plt):
-    w = 64
-    h = 32
-    image = getSquares(w, h, nSquares=10)
+def test_skimage_shift(random_image_with_squares, plt):
+    image = random_image_with_squares
+    w = image.shape[1]
+    h = image.shape[0]
     dx = np.random.randint(0, w) / 4 
     dy = np.random.randint(0, h) / 4
 
@@ -102,10 +102,10 @@ def test_skimage_shift(plt):
     axarr[2].imshow(shifted2)
     axarr[3].imshow(delta)
 
-def test_cv2_shift(plt):
-    w = 64
-    h = 32
-    image = getSquares(w, h, nSquares=10)
+def test_cv2_shift(random_image_with_squares, plt):
+    image = random_image_with_squares
+    w = image.shape[1]
+    h = image.shape[0]
     dx = np.random.randint(0, w) / 4 
     dy = np.random.randint(0, h) / 4
 
@@ -121,10 +121,10 @@ def test_cv2_shift(plt):
     axarr[2].imshow(shifted2)
     axarr[3].imshow(delta)
 
-def test_cv2_shift_2(plt):
-    w = 64
-    h = 32
-    image = getSquares(w, h, nSquares=10)
+def test_cv2_shift_2(random_image_with_squares, plt):
+    image = random_image_with_squares
+    w = image.shape[1]
+    h = image.shape[0]
     dx = np.random.randint(0, w) / 4 
     dy = np.random.randint(0, h) / 4
 
