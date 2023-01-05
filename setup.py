@@ -174,6 +174,16 @@ def collect_extensions():
 
     return collected_extensions
 
+print("""
+      _   _
+     \_/-\_/
+      )   (
+     (     )
+      )   (
+     /     \\
+    (   9   ) 
+   (_\_____/_) compiling the NanoPyx library...
+""")
 
 setup(
     build_ext={"inplace": 1},

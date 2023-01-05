@@ -14,8 +14,14 @@ def find_files(root_dir, extension):
 
 def main():
 
-    clean_files = ' '.join(find_files('src', '.so')+find_files('src', '.c')+find_files('src', '.html')+find_files('src', '.profile')+find_files('notebooks', '.profile'))
-    notebook_files = ' '.join(find_files('notebooks', '.ipynb'))
+    clean_files = " ".join(
+        find_files("src", ".so")
+        + find_files("src", ".c")
+        + find_files("src", ".html")
+        + find_files("src", ".profile")
+        + find_files("notebooks", ".profile")
+    )
+    notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
         "Clean files": f"rm {clean_files}",
@@ -29,16 +35,30 @@ def main():
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
     }
 
-    print(sys.argv)
+    print("""
+                        ,.
+                        (_|,.
+                       ,' /, )_______   _
+                    __j o``-'        `.'-)'
+                   ('')     NanoPyx     '
+                    `-j                |
+                      `-._(           /
+         Oink! Oink!    |_\  |--^.  /
+        |--- nm ---|    /_]'|_| /_)_/
+                           /_]'  /_]'
+    """)
+
     if len(sys.argv) > 1:
-        selection = int(sys.argv[1])-1
+        selection = int(sys.argv[1]) - 1
 
     else:
         # print the options
         print("What do you want to do:")
         for i, option in enumerate(options.keys()):
             cmd = options[option]
-            print(f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}")
+            print(
+                f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}"
+            )
 
         # get the user's selection
         selection = int(input("Enter your selection: ")) - 1

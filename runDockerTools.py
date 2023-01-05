@@ -14,13 +14,30 @@ options = {
     "Remove nanopyx docker-image": "sudo docker rm nanopyx1 || sudo docker image rm nanopyx || sudo docker image prune -f §|| sudo docker container prune -f || sudo docker system df",
 }
 
-# print the options
-print("What do you want to do:")
-for i, option in enumerate(options.keys()):
-    print("{}. {}: [CMD]> {}".format(i + 1, option, options[option]))
+print("""
+                    ,.
+                    (_|,.
+                    ,' /, )_______   _
+                __j o``-'        `.'-)'
+                ('')     NanoPyx     '
+                `-j                |
+                    `-._(           /
+        Oink! Oink!    |_\  |--^.  /
+    |--- nm ---|    /_]'|_| /_)_/
+                        /_]'  /_]'
+""")
 
-# get the user's selection
-selection = int(input("Enter your selection: ")) - 1
+if len(sys.argv) > 1:
+    selection = int(sys.argv[1]) - 1
+
+else:
+    # print the options
+    print("What do you want to do:")
+    for i, option in enumerate(options.keys()):
+        print("{}. {}: [CMD]> {}".format(i + 1, option, options[option]))
+
+    # get the user's selection
+    selection = int(input("Enter your selection: ")) - 1
 
 # print the selected option
 cmd = list(options.values())[selection]
