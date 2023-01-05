@@ -5,15 +5,15 @@ import numpy as np
 import pytest
 
 from nanopyx.core.transform.image_add_random_noise import (addRamp, addSquares,
-                                                           getRamp)
+                                                           getRamp, getSquares)
 from nanopyx.core.utils.imagegenerator.beads import generate_timelapse_drift
 from nanopyx.data.examples.download import ExampleDataManager
 
 
 @pytest.fixture
 def random_image_with_ramp_squares():
-    w = random.randint(3, 32)
-    h = random.randint(3, 32)
+    w = random.randint(32, 64)
+    h = random.randint(32, 64)
     image = np.zeros((w, h), dtype="float32")
     addRamp(image, 1000)
     addSquares(image, 100, nSquares=10)
@@ -22,6 +22,10 @@ def random_image_with_ramp_squares():
 @pytest.fixture
 def random_image_with_ramp():
     return getRamp(64, 64)
+
+@pytest.fixture
+def random_image_with_squares():
+    return getSquares(64, 128, nSquares=10)
 
 @pytest.fixture
 def random_timelapse_w_drift():
