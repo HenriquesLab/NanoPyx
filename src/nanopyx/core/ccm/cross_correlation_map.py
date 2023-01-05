@@ -1,8 +1,8 @@
 import numpy as np
 
 from ..transform.fft.helper_functions import make_even_square, check_even_square
-#from ..analysis.pearson_correlation import calculate_ppmcc
-from ..analysis.image_statistics import calculate_ppmcc
+from ..analysis.pearson_correlation import calculate_ppmcc
+#from ..analysis.image_statistics import calculate_ppmcc
 from ..utils.time.timeit import timeit2
 
 

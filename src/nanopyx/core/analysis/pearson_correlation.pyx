@@ -28,8 +28,8 @@ def pearson_correlation(np.ndarray im1, np.ndarray im2):
 
 cdef float _pearson_correlation(float[:,:] im1, float[:,:] im2) nogil:
 
-    cdef int w = im1.shape[0]
-    cdef int h = im2.shape[0]
+    cdef int w = im1.shape[1]
+    cdef int h = im1.shape[0]
     cdef int wh = w*h
 
     cdef float mean_im1 = 0.0
@@ -43,15 +43,18 @@ cdef float _pearson_correlation(float[:,:] im1, float[:,:] im2) nogil:
 
     for j in prange(h):
         for i in range(w):
-            mean_im1 += im1[i,j]
-            mean_im2 += im2[i,j]
+            mean_im1 += im1[j, i]
+            mean_im2 += im2[j, i]
     mean_im1 /= wh
     mean_im2 /= wh
     for j in prange(h):
         for i in range(w):
-            d_im1 = im1[i,j] - mean_im1
-            d_im2 = im2[i,j] - mean_im2
+            d_im1 = im1[j, i] - mean_im1
+            d_im2 = im2[j, i] - mean_im2
             sum_im12 += d_im1 * d_im2
             sum_im11 += d_im1 * d_im1
             sum_im22 += d_im2 * d_im2
-    return sum_im12 / (sum_im11 * sum_im22)**0.5
+    if sum_im11 == 0 or sum_im22 == 0:
+        return 0
+    else:
+        return sum_im12 / (sum_im11 * sum_im22)**0.5
