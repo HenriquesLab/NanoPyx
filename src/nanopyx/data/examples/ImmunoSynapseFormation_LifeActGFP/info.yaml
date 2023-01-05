@@ -1,0 +1,18 @@
+label: ImmunoSynapseFormation_LifeActGFP
+nickname: FaceHuger
+description: | 
+  Conventional TIRF images of Jurkat T cells expressing LifeAct-GFP imaged 
+  on coverslips coated with anti-CD28 alone, antiCD3 alone or in combination (anti-CD3 and -CD28) 
+  to stimulate an immunological synapse formation. 
+  Fig 4 of the paper 'Fast live-cell conventional fluorophore nanoscopy
+  with ImageJ through super-resolution radial fluctuations'
+data_dims: "t,y,x"
+data_shape: 20000, 256, 256
+data_dtype: uint16
+reference: "Gustafsson, Culley et al, Nature Communications, 2016"
+reference_doi: "https://doi.org/10.1038/ncomms12471"
+tiff_sequence_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/ERgQbVpbCkBAlm7ZFL46m10Bsb6gz3YNk1OhY8GyiCsPDw?e=SakLDv
+tiff_sequence_url_type: "onedrive"
+tiff_sequence_size: "2.1GB"
+tiff_sequence_checksum: 
+
