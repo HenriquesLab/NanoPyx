@@ -8,6 +8,7 @@ from .corrector import DriftCorrector
 from ...core.ccm.cross_correlation_map import CrossCorrelationMap
 from ...core.ccm.estimate_shift import GetMaxOptimizer
 from ...core.utils.time.timeit import timeit
+from ...core.ccm.ccm import calculate_ccm
 
 
 class DriftEstimator(object):
@@ -49,12 +50,13 @@ class DriftEstimator(object):
             image_averages = self.compute_temporal_averaging(image_arr)
 
         # perform cross correlation map calculation
-        if self.estimator_table.params["ref_option"] == 0:
-            img_ref = image_arr[0]
-        else:
-            img_ref = None
+        # if self.estimator_table.params["ref_option"] == 0:
+        #     img_ref = image_arr[0]
+        # else:
+        #     img_ref = None
 
-        self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
+        #self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
+        self.cross_correlation_map = np.array(calculate_ccm(np.array(image_averages).astype(np.float32), self.estimator_table.params["ref_option"]))
         self.get_shifts_from_ccm()
         if self.estimator_table.params["time_averaging"] > 1:
 
