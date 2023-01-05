@@ -1,4 +1,4 @@
-from scipy.ndimage.interpolation import shift
+from scipy.ndimage import shift
 import numpy as np
 
 from ..utils.time.timeit import timeit2

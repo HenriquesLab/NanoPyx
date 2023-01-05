@@ -1,10 +1,8 @@
-from nanopyx.core.transform.image_add_random_noise import (
-    addMixedGaussianPoissonNoise,
-    getPerlinNoise,
-    getRamp,
-)
-from nanopyx.core.transform import image_add_random_noise
 import numpy as np
+
+from nanopyx.core.transform import image_add_random_noise
+from nanopyx.core.transform.image_add_random_noise import (
+    addMixedGaussianPoissonNoise, getPerlinNoise, getRamp, getSimplexNoise)
 
 
 def test_logFactorial():
@@ -24,8 +22,14 @@ def test_getRamp(plt):
 
 
 def test_getPerlinNoise(plt):
-    noise = getPerlinNoise(100, 400, f=50)
+    noise = getPerlinNoise(100, 400, f=2)
     assert np.all(noise >= 0)
+    plt.imshow(noise)
+
+
+def test_getSimplexNoise(plt):
+    noise = getSimplexNoise(100, 400, f=10)
+    # assert np.all(noise >= 0)
     plt.imshow(noise)
 
 

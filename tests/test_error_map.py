@@ -15,7 +15,7 @@ def test_error_map():
     h = 1000
     alpha = 5
     image_gt = np.ones((w, h), dtype="float32") * 1000
-    addPerlinNoise(image_gt, amp=1000, f=100, octaves=3)
+    addPerlinNoise(image_gt, amp=1000, f=10, octaves=3)
 
     image_ref = gaussian_filter(image_gt * alpha, 15)
     image_ref = rebin2d(image_ref, 10, mode="mean")

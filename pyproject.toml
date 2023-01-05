@@ -38,6 +38,7 @@ dependencies = [
     "tifffile>=2022.5.4",
     "scikit-image>=0.19.2",
     "noise>=1.2.2",
+    "opensimplex>=0.4.4",
     "pyyaml>=6.0",
     "wget>=3.2",
     "onedrivedownloader>=1.1.3",

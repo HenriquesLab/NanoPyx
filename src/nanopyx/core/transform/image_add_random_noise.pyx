@@ -12,6 +12,7 @@ import numpy as np
 cimport numpy as np
 
 from noise import pnoise2
+import opensimplex
 
 r = np.random.RandomState()
 
@@ -187,13 +188,20 @@ def addPerlinNoise(float[:,:] image, int amp=100, int offset = 100, float f = 10
     cdef double p
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
+    cdef float f_x = f / w
+    cdef float f_y = f / h
+    if w > h:
+        f_x *= w / h
+    else:
+        f_y *= h / w
+
     for j in range(h):
         for i in range(w):
-            p = pnoise2(i/f, j/f, octaves, persistence, lacunarity, repeatx, repeaty, base)
+            p = pnoise2(i * f_x, j * f_y, octaves, persistence, lacunarity, repeatx, repeaty, base)
             image[j, i] += amp * p + offset
 
 
-def getPerlinNoise(w, h, amp=100, int offset = 100, f = 100, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
+def getPerlinNoise(w, h, amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
     """
     Return a perlin noise image
 
@@ -223,6 +231,34 @@ def getPerlinNoise(w, h, amp=100, int offset = 100, f = 100, octaves = 1, persis
     image = np.zeros((w, h), dtype=np.float32)
     addPerlinNoise(image, amp, offset, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
     return image
+
+
+def getSimplexNoise(int w, int h, int f = 1):
+    """
+    Return a simplex noise image
+    REF: https://github.com/lmas/opensimplex
+
+    Parameters
+    ----------
+    w : int
+        The width of the image
+    h : int
+        The height of the image
+    f : int
+        The frequency of the noise
+    """
+
+    cdef float f_x = f
+    cdef float f_y = f
+    if w > h:
+        f_y *= w / h
+    else:
+        f_x *= h / w
+
+    x0 = np.linspace(0, f_x, num = h, dtype=np.float32)
+    y0 = np.linspace(0, f_y, num = w, dtype=np.float32)
+
+    return opensimplex.noise2array(x0, y0)
 
 
 def addSquares(float[:,:] image, float vmax=100, float vmin=0, int nSquares=100):
