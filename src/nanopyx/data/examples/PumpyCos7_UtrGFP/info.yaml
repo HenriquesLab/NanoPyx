@@ -1,0 +1,16 @@
+label: PumpyCost7_UtrGFP
+nickname: McPumpFace
+description: | 
+  HILO microscopy images of a Cos7 cell expressing UtrCH-GFP imaged every 10 min for 150 min.
+  Each 99 frames are a burst, followed by a 10 min pause.
+  Figure 4 of the paper 'Automating multimodal microscopy with NanoJ-Fluidics'.
+data_dims: "t,y,x"
+data_shape: 1485, 512, 512
+data_dtype: uint16
+reference: "Almada, Pereira et al, Nature Communications, 2019"
+reference_doi: "https://doi.org/10.1038/s41467-019-09231-9"
+tiff_sequence_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EfzLXOPRam5KhNF15FEKdr8B18nw__m61dYVMcvAOKVU0w?e=H4KMVh
+tiff_sequence_url_type: "onedrive"
+tiff_sequence_size: "642.9MB"
+tiff_sequence_checksum: 
+

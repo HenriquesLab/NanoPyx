@@ -1,12 +1,13 @@
 #!/bin/bash -c python3
 
 import os
+import sys
 
 nb_path = os.path.join(os.getcwd(), "notebooks")
 nanopyx_path = os.getcwd()
 
 options = {
-    "Build nanopyx docker-image": "sudo docker build -t henriqueslab/nanopyx:latest .",
+    "Build nanopyx docker-image": "sudo docker buildx build --platform linux/amd64,linux/arm64 -f Dockerfile -t henriqueslab/nanopyx:latest .",
     "Run jupyterlab from nanopyx docker-image": f"sudo docker run --rm --name nanopyx1 -p 8888:8888 -v {nanopyx_path}:/nanopyx henriqueslab/nanopyx:latest",  # potentially add --rm
     "Run bash from from nanopyx docker-image": "sudo docker run -it henriqueslab/nanopyx:v1 bash",  # potentially add --rm
     "Start jupyterlab from nanopyx docker-image (needs run first)": "sudo docker start nanopyx1",
@@ -14,18 +15,20 @@ options = {
     "Remove nanopyx docker-image": "sudo docker rm nanopyx1 || sudo docker image rm nanopyx || sudo docker image prune -f §|| sudo docker container prune -f || sudo docker system df",
 }
 
-print("""
-                    ,.
-                    (_|,.
+print(
+    """
+                     ,.
+                    (_| ,.
                     ,' /, )_______   _
-                __j o``-'        `.'-)'
+                 __j o``-'        `.'-)'
                 ('')     NanoPyx     '
-                `-j                |
+                 `-j                 |
                     `-._(           /
         Oink! Oink!    |_\  |--^.  /
-    |--- nm ---|    /_]'|_| /_)_/
-                        /_]'  /_]'
-""")
+       |--- nm ---|   /_]'|_| /_)_/
+                          /_]'  /_]'
+"""
+)
 
 if len(sys.argv) > 1:
     selection = int(sys.argv[1]) - 1

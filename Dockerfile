@@ -23,7 +23,7 @@
 # Install base resources and nanopyx #
 ######################################
 
-FROM python:3.10-slim AS nanopyx
+FROM --platform=$TARGETPLATFORM python:3.10-slim AS nanopyx
 
 ENV TZ=Europe/London
 ENV LANG=C.UTF-8
@@ -62,10 +62,10 @@ RUN pip3 install --no-cache-dir \
 # copy content of current directory to inside docker container
 ENV BUILD_DIR=/nanopyx
 COPY . ${BUILD_DIR}
-RUN pip3 install -e ${BUILD_DIR}
+RUN pip3 install -e ${BUILD_DIR}[jupyter,test]
 
 # test that we built correctly by running a pytest
-# RUN pytest ${BUILD_DIR}/tests/test_random_noise.py
+# RUN pytest ${BUILD_DIR}/tests
 
 # Start Jupyterlab port & cmd
 EXPOSE 8888

@@ -1,0 +1,15 @@
+label: SM_U2OS_Pereira_MTAlexaA647_V2
+nickname: Stringy
+description: | 
+    Single molecule localization microscopy dataset of U2OS cells with microtubules labelled with Alexa647
+    Acquired by Pedro Pereira at University College London, UK - circa 2015
+data_dims: "t,x,y"
+data_shape: 1000, 408, 245
+data_dtype: uint16
+reference: ""
+reference_doi: ""
+tiff_sequence_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EZLMRBJ0QlBNlW7FngvzIDUBOPbUFZ6mfv4Nma5-g96FEQ?e=0dL2P7
+tiff_sequence_url_type: "onedrive"
+tiff_sequence_size: "138.2MB"
+tiff_sequence_checksum: 
+
