@@ -4,7 +4,7 @@ from scipy.interpolate import interp2d
 from skimage.filters import gaussian
 from skimage.transform import EuclideanTransform, warp
 
-from ..time.timeit import timeit
+from ...image.blocks import assemble_frame_from_blocks
 
 
 def generate_random_position(n_rows, n_cols):
@@ -36,7 +36,6 @@ def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float16):
 
     return img
 
-@timeit
 def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float16, drift=None,
                              drift_mode="directional"):
 
@@ -68,92 +67,35 @@ def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float1
 
     return img
 
-@timeit
-def generate_channel_misalignment(n_objects=10, shape=(2, 300, 300), dtype=np.float16, misalignment=None,
-                                  n_blocks=3, misalignment_mode='heterogeneous'):
+def generate_channel_misalignment():
 
-    if misalignment is None:
-        misalignment = min(shape[1]*0.05, shape[2]*0.05)
+    n_blocks = 3
+    h = 300
+    w = 300
 
-    r_misalignment = np.linspace(-misalignment, misalignment, n_blocks)
-    c_misalignment = np.linspace(-misalignment, misalignment, n_blocks)
+    block_img = np.zeros((int(h/n_blocks), int(w/n_blocks)))
+    block_h = int(h / n_blocks)
+    block_w = int(w / n_blocks)
+    block_img[int(block_h/2), int(block_w/2)] = 1
+    block_img = gaussian(block_img, sigma=3)
 
-    img = generate_image(n_objects=n_objects, shape=shape, dtype=dtype)
-    slices, height, width = img.shape
+    ref_channel = np.zeros((h, w))
+    misaligned_blocks = []
 
-    if misalignment_mode == "constant":
-        transformation_matrix = EuclideanTransform(translation=(-misalignment, -misalignment))
-        img[1] = warp(img[1], transformation_matrix.inverse, order=3)
-    elif misalignment_mode == "heterogeneous":
-        block_width = int(img.shape[2]/n_blocks)
-        block_height = int(img.shape[1]/n_blocks)
+    for x_i in range(n_blocks):
+        for y_i in range(n_blocks):
+            ref_channel[y_i*block_h:y_i*block_h+block_h, x_i*block_w:x_i*block_w+block_w] += block_img
 
-        flow_arrows = []
+    misalignments = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
 
-        for x_i in range(n_blocks):
-            for y_i in range(n_blocks):
-                x_start = x_i * block_width
-                y_start = y_i * block_height
+    for mis in misalignments:
+        block_img = np.zeros((int(h/n_blocks), int(w/n_blocks)))
+        block_h = h / n_blocks
+        block_w = w / n_blocks
+        block_img[int(block_h/2)+mis[0], int(block_w/2)+mis[1]] = 1
+        block_img = gaussian(block_img, sigma=3)
+        misaligned_blocks.append(block_img)
 
-                vector_x = c_misalignment[y_i]
-                vector_y = r_misalignment[x_i]
-                flow_arrows.append([x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y])
+    misaligned_channel = assemble_frame_from_blocks(np.array(misaligned_blocks), 3, 3)
 
-        translation_matrix = np.zeros((height, width*2))
-        translation_matrix_x = np.zeros((height, width))
-        translation_matrix_y = np.zeros((height, width))
-
-        max_distance = sqrt(width * width + height * height)
-
-        for j in range(height):
-            for i in range(width):
-                # iterate over vectors
-                dx, dy, w_sum = 0, 0, 0
-
-                if len(flow_arrows) == 1:
-                    dx = flow_arrows[0][2]
-                    dy = flow_arrows[0][3]
-
-                else:
-                    distances = []
-                    all_distances = 0
-                    for arrow in flow_arrows:
-                        d = sqrt(pow(arrow[0] - i, 2) + pow(arrow[1] - j, 2)) + 1
-                        distances.append(d)
-                        all_distances += pow(((max_distance - d) / (max_distance * d)), 2)
-
-                    for idx, arrow in enumerate(flow_arrows):
-                        d = distances[idx]
-                        first_term = pow(((max_distance - d) / (max_distance * d)), 2)
-                        second_term = all_distances
-
-                        weight = first_term / second_term
-                        dx += arrow[2] * weight
-                        dy += arrow[3] * weight
-                        w_sum += weight
-
-                    dx = dx / w_sum
-                    dy = dy / w_sum
-
-                translation_matrix_x[j, i] = dx
-                translation_matrix_y[j, i] = dy
-
-        if n_blocks > 1:
-            translation_matrix_x = gaussian(translation_matrix_x, sigma=max(block_width, block_height/2.0))
-            translation_matrix_y = gaussian(translation_matrix_y, sigma=max(block_width, block_height/2.0))
-
-        translation_matrix[:, :width] += translation_matrix_x
-        translation_matrix[:, width:] += translation_matrix_y
-
-        x = [xi for xi in range(img[0].shape[1])]
-        y = [yi for yi in range(img[0].shape[0])]
-        z = img[0].reshape((img[0].shape[0] * img[0].shape[1]))
-        interpolator = interp2d(y, x, z, kind="quintic")
-        for y_i in range(height):
-            for x_i in range(width):
-                dx = translation_matrix[y_i, x_i]
-                dy = translation_matrix[y_i, x_i + width]
-                value = interpolator(y_i-dy, x_i-dx)
-                img[1][y_i, x_i] = value
-
-    return img
+    return np.array([ref_channel, misaligned_channel]).astype(np.float16)
