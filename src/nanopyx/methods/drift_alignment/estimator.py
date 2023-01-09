@@ -5,7 +5,6 @@ from tifffile import imwrite
 
 from .estimator_table import DriftEstimatorTable
 from .corrector import DriftCorrector
-from ...core.ccm.cross_correlation_map import CrossCorrelationMap
 from ...core.ccm.estimate_shift import GetMaxOptimizer
 from ...core.utils.time.timeit import timeit
 from ...core.ccm.ccm import calculate_ccm
@@ -49,13 +48,6 @@ class DriftEstimator(object):
             # calculates number of time blocks for averaging
             image_averages = self.compute_temporal_averaging(image_arr)
 
-        # perform cross correlation map calculation
-        # if self.estimator_table.params["ref_option"] == 0:
-        #     img_ref = image_arr[0]
-        # else:
-        #     img_ref = None
-
-        #self.cross_correlation_map = self.calculate_cross_correlation_map(img_ref, image_averages, normalize=self.estimator_table.params["normalize"])
         self.cross_correlation_map = np.array(calculate_ccm(np.array(image_averages).astype(np.float32), self.estimator_table.params["ref_option"]))
         self.get_shifts_from_ccm()
         if self.estimator_table.params["time_averaging"] > 1:
@@ -101,18 +93,6 @@ class DriftEstimator(object):
             image_averages[i] = np.mean(image_arr[t_start:t_stop, :, :], axis=0)
         return image_averages
 
-    def calculate_cross_correlation_map(self, img_ref, img_stack, normalize=True):
-        ccm_calculator = CrossCorrelationMap()
-        ccm = ccm_calculator.calculate_ccm(img_ref, img_stack, normalize)
-
-        max_drift = self.estimator_table.params["max_expected_drift"]
-        if max_drift != 0 and max_drift*2+1 < min(ccm.shape[1], ccm.shape[2]):
-            x_start = int(ccm.shape[2]/2 - max_drift)
-            y_start = int(ccm.shape[1]/2 - max_drift)
-            ccm = ccm[:, y_start:y_start+max_drift*2+1, x_start:x_start+max_drift*2+1]
-
-        return ccm
-
     def get_shift_from_ccm_slice(self, slice_index):
         slice_ccm = self.cross_correlation_map[slice_index]
 
@@ -135,7 +115,6 @@ class DriftEstimator(object):
 
         return (shift_x, shift_y)
 
-    @timeit
     def get_shifts_from_ccm(self):
 
         drift_x = []
