@@ -4,7 +4,7 @@ from skimage.filters import gaussian
 
 from .estimate_shift import GetMaxOptimizer
 from ..image.blocks import assemble_frame_from_blocks
-from ..ccm.cross_correlation_map import CrossCorrelationMap
+from ..ccm.ccm import calculate_ccm_from_ref
 
 
 def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"):
@@ -30,8 +30,7 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
             slice_crop = img_slice[y_start:y_start+block_height, x_start:x_start+block_width]
             ref_crop = img_ref[y_start:y_start+block_height, x_start:x_start+block_width]
-            ccm = CrossCorrelationMap()
-            slice_ccm = ccm.calculate_ccm(ref_crop, slice_crop, True)[0]
+            slice_ccm = calculate_ccm_from_ref([slice_crop], ref_crop, True)[0]
 
             if max_shift > 0 and max_shift*2+1 < slice_ccm.shape[0] and max_shift*2+1 < slice_ccm.shape[1]:
                 ccm_x_start = int(slice_ccm.shape[1]/2 - max_shift)
