@@ -1,6 +1,7 @@
 import numpy as np
 from cmath import sqrt
 from skimage.filters import gaussian
+from scipy.interpolate import interp2d
 
 from .estimate_shift import GetMaxOptimizer
 from ..image.blocks import assemble_frame_from_blocks
@@ -105,3 +106,87 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
     blocks = assemble_frame_from_blocks(np.array(blocks_stack), blocks_per_axis, blocks_per_axis)
 
     return translation_matrix, blocks
+
+def calculate_translation_mask_2(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"):
+
+    width = img_slice.shape[1]
+    height = img_slice.shape[0]
+
+    assert width == img_ref.shape[1]
+    assert height == img_ref.shape[0]
+
+    block_width = int(width / blocks_per_axis)
+    block_height = int(height / blocks_per_axis)
+
+    flow_arrows = []
+    blocks_stack = []
+
+    y_translation = []
+    x_translation = []
+
+    for y_i in range(blocks_per_axis):
+        for x_i in range(blocks_per_axis):
+            x_start = x_i * block_width
+            y_start = y_i * block_height
+
+            slice_crop = img_slice[y_start:y_start+block_height, x_start:x_start+block_width]
+            ref_crop = img_ref[y_start:y_start+block_height, x_start:x_start+block_width]
+            slice_ccm = np.array(calculate_ccm_from_ref(np.array([slice_crop]).astype(np.float32), np.array(ref_crop).astype(np.float32))[0])
+
+            if method == "subpixel":
+                optimizer = GetMaxOptimizer(slice_ccm)
+                max_coords = optimizer.get_max()
+                ccm_max_value = -optimizer.get_interpolated_px_value_interp2d(max_coords)
+            else:
+                max_coords = np.unravel_index(slice_ccm.argmax(), slice_ccm.shape)
+                ccm_max_value = slice_ccm[max_coords[0], max_coords[1]]
+
+            ccm_width = slice_ccm.shape[1]
+            ccm_height = slice_ccm.shape[0]
+            blocks_stack.append(slice_ccm)
+
+            if ccm_max_value >= min_similarity:
+                shift_x, shift_y = get_shift_from_ccm_slice(slice_ccm, method=method)
+                y_translation.append([y_start + max_coords[0], x_start + max_coords[1], shift_y - 0.5])
+                x_translation.append([y_start + max_coords[0], x_start + max_coords[1], shift_x - 0.5])
+
+    y_translation = np.array(y_translation)
+    x_translation = np.array(x_translation)
+    print(y_translation)
+    y_interp = interp2d(y_translation[:, 0], y_translation[:, 1], y_translation[:, 2])
+    x_interp = interp2d(x_translation[:, 0], x_translation[:, 1], x_translation[:, 2])
+
+    translation_matrix = np.zeros((height, width*2))
+    translation_matrix_x = np.zeros((height, width))
+    translation_matrix_y = np.zeros((height, width))
+
+    for j in range(translation_matrix_x.shape[0]):
+        for i in range(translation_matrix_x.shape[1]):
+            translation_matrix_x[j, i] = x_interp(j, i)
+            translation_matrix_y[j, i] = y_interp(j, i)
+
+    translation_matrix[:, :width] += translation_matrix_x
+    translation_matrix[:, width:] += translation_matrix_y
+
+    blocks = assemble_frame_from_blocks(np.array(blocks_stack), blocks_per_axis, blocks_per_axis)
+
+    return translation_matrix, blocks
+
+def get_shift_from_ccm_slice(slice_ccm, method="subpixel"):
+
+    w = slice_ccm.shape[1]
+    h = slice_ccm.shape[0]
+
+    radius_x = w / 2.0
+    radius_y = h / 2.0
+
+    if method == "subpixel":
+        optimizer = GetMaxOptimizer(slice_ccm)
+        shift_y, shift_x = optimizer.get_max()
+    elif method == "Max":
+        shift_y, shift_x = np.unravel_index(slice_ccm.argmax(), slice_ccm.shape)
+
+    shift_x = radius_x - shift_x - 0.5
+    shift_y = radius_y - shift_y - 0.5
+
+    return (shift_x, shift_y)
