@@ -1,12 +1,14 @@
 from nanopyx.methods.drift_alignment.estimator import DriftEstimator
 
+
+#TODO finish this
 def test_drift_alignment_no_temporal_averaging_previous_frame(random_timelapse_w_drift):
     estimator = DriftEstimator()
     aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=0, apply=True)
     drift_table = estimator.estimator_table.drift_table
 
-    drift_x = drift_table[1]
-    drift_y = drift_table[2]
+    drift_x = drift_table[:, 1]
+    drift_y = drift_table[:, 2]
 
     pass_test = 1
 
@@ -20,11 +22,11 @@ def test_drift_alignment_no_temporal_averaging_previous_frame(random_timelapse_w
 
 def test_drift_alignment_w_temporal_averaging_previous_frame(random_timelapse_w_drift):
     estimator = DriftEstimator()
-    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=0, time_averaging=10, apply=True)
+    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=0, time_averaging=5, apply=True)
     drift_table = estimator.estimator_table.drift_table
 
-    drift_x = drift_table[1]
-    drift_y = drift_table[2]
+    drift_x = drift_table[:, 1]
+    drift_y = drift_table[:, 2]
 
     pass_test = 1
 
@@ -37,12 +39,12 @@ def test_drift_alignment_w_temporal_averaging_previous_frame(random_timelapse_w_
     assert pass_test == 1
 
 def test_drift_alignment_no_temporal_averaging_initial_frame(random_timelapse_w_drift):
-    estimator = DriftEstimator()
+        estimator = DriftEstimator()
     aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, apply=True)
     drift_table = estimator.estimator_table.drift_table
 
-    drift_x = drift_table[1]
-    drift_y = drift_table[2]
+    drift_x = drift_table[:, 1]
+    drift_y = drift_table[:, 2]
 
     pass_test = 1
 
@@ -56,11 +58,11 @@ def test_drift_alignment_no_temporal_averaging_initial_frame(random_timelapse_w_
 
 def test_drift_alignment_w_temporal_averaging_initial_frame(random_timelapse_w_drift):
     estimator = DriftEstimator()
-    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=10, apply=True)
+    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, apply=True)
     drift_table = estimator.estimator_table.drift_table
 
-    drift_x = drift_table[1]
-    drift_y = drift_table[2]
+    drift_x = drift_table[:, 1]
+    drift_y = drift_table[:, 2]
 
     pass_test = 1
 
