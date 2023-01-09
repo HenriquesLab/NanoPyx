@@ -6,7 +6,7 @@ import pytest
 
 from nanopyx.core.transform.image_add_random_noise import (addRamp, addSquares,
                                                            getRamp, getSquares)
-from nanopyx.core.utils.imagegenerator.beads import generate_timelapse_drift
+from nanopyx.core.utils.imagegenerator.beads import generate_timelapse_drift, generate_channel_misalignment
 from nanopyx.data.examples.download import ExampleDataManager
 
 
@@ -30,6 +30,10 @@ def random_image_with_squares():
 @pytest.fixture
 def random_timelapse_w_drift():
     return generate_timelapse_drift(n_objects=5, shape=(50, 500, 500), drift=1)
+
+@pytest.fixture
+def random_channel_misalignment():
+    return generate_channel_misalignment()
 
 @pytest.fixture
 def downloader():
