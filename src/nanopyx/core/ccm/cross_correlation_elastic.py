@@ -30,7 +30,7 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
             slice_crop = img_slice[y_start:y_start+block_height, x_start:x_start+block_width]
             ref_crop = img_ref[y_start:y_start+block_height, x_start:x_start+block_width]
-            slice_ccm = calculate_ccm_from_ref([slice_crop], ref_crop, True)[0]
+            slice_ccm = np.array(calculate_ccm_from_ref(np.array([slice_crop]).astype(np.float32), np.array(ref_crop).astype(np.float32))[0])
 
             if max_shift > 0 and max_shift*2+1 < slice_ccm.shape[0] and max_shift*2+1 < slice_ccm.shape[1]:
                 ccm_x_start = int(slice_ccm.shape[1]/2 - max_shift)
