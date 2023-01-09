@@ -4,7 +4,7 @@ from .methods.channel_registration.estimator import ChannelRegistrationEstimator
 from .methods.channel_registration.corrector import ChannelRegistrationCorrector
 from .core.utils.time.timeit import timeit
 
-#TODO write tests, create simulated data for tests and write docstrings
+#TODO write docstrings for all methods and generate documentation with sphynx
 
 @timeit
 def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):

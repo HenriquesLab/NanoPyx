@@ -46,7 +46,7 @@ def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float1
     img = generate_image(n_objects=n_objects, shape=shape, dtype=dtype)
 
     if drift_mode == "directional":
-        transformation_matrix = EuclideanTransform(translation=(drift, drift))
+        transformation_matrix = EuclideanTransform(translation=(-drift, -drift))
         for i in range(shape[0]-1):
             img[i+1] = warp(img[i], transformation_matrix.inverse, order=3, preserve_range=True)
 
@@ -82,7 +82,7 @@ def generate_channel_misalignment(n_objects=10, shape=(2, 300, 300), dtype=np.fl
     slices, height, width = img.shape
 
     if misalignment_mode == "constant":
-        transformation_matrix = EuclideanTransform(translation=(misalignment, misalignment))
+        transformation_matrix = EuclideanTransform(translation=(-misalignment, -misalignment))
         img[1] = warp(img[1], transformation_matrix.inverse, order=3)
     elif misalignment_mode == "heterogeneous":
         block_width = int(img.shape[2]/n_blocks)

@@ -135,7 +135,7 @@ class DriftEstimator(object):
 
         return (shift_x, shift_y)
 
-
+    @timeit
     def get_shifts_from_ccm(self):
 
         drift_x = []
