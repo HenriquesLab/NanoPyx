@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def assemble_frame_from_blocks(blocks_stack, n_blocks_width, n_blocks_height):
+def assemble_frame_from_blocks(blocks_stack, n_blocks_height, n_blocks_width):
     assert blocks_stack.shape[0] == n_blocks_height * n_blocks_width
 
     width_b = blocks_stack.shape[2]
@@ -11,9 +11,11 @@ def assemble_frame_from_blocks(blocks_stack, n_blocks_width, n_blocks_height):
 
     reconstructed_image = np.zeros((height, width))
 
+    assert reconstructed_image.shape == (height, width)
+
     counter = 0
-    for y_i in range(n_blocks_width):
-        for x_i in range(n_blocks_height):
+    for y_i in range(n_blocks_height):
+        for x_i in range(n_blocks_width):
             reconstructed_image[y_i*height_b:y_i*height_b+height_b, x_i*width_b:x_i*width_b+width_b] += blocks_stack[counter]
             counter += 1
 
