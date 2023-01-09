@@ -1,6 +1,6 @@
 
 
-def rebin2d(arr, bin_factor, mode="sum"):
+def rebin_2d(arr, bin_factor, mode="sum"):
     """
     :param arr: numpy array with any shape as long as last two dimensions are y, x (example: time, channel, z, y, x)
     :param bin_factor: factor used to bin dimensions
