@@ -8,6 +8,9 @@ from ..analysis.pearson_correlation import calculate_ppmcc
 def calculate_ccm(np.ndarray img_stack, int ref):
     return _calculate_ccm(img_stack, ref)
 
+def calculate_ccm_from_ref(np.ndarray img_stack, np.ndarray ref):
+    return _calculate_ccm_from_ref(img_stack, ref)
+
 cdef float[:, :, :] _calculate_ccm(float[:, :, :] img_stack, int ref):
 
     if not check_even_square(np.array(img_stack).astype(np.float32)):
@@ -26,6 +29,21 @@ cdef float[:, :, :] _calculate_ccm(float[:, :, :] img_stack, int ref):
         else:
             img_ref = img_stack[max(0, i-1)]
         ccm[i] = _calculate_slice_ccm(img_ref, img_stack[i])
+
+    return ccm
+
+cdef float[:, :, :] _calculate_ccm_from_ref(float[:, :, :] img_stack, float[:, :] ref):
+
+    if not check_even_square(np.array(img_stack).astype(np.float32)):
+        img_stack = make_even_square(np.array(img_stack).astype(np.float32))
+
+    cdef int stack_w = img_stack.shape[2]
+    cdef int stack_h = img_stack.shape[1]
+    cdef int stack_n = img_stack.shape[0]
+    cdef float[:, :, :] ccm = np.zeros((stack_n, stack_h, stack_w)).astype(np.float32)
+
+    for i in range(stack_n):
+        ccm[i] = _calculate_slice_ccm(ref, img_stack[i])
 
     return ccm
 
