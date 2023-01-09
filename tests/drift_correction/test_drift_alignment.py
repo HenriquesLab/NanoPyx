@@ -1,7 +1,6 @@
 from nanopyx.methods.drift_alignment.estimator import DriftEstimator
 
 
-#TODO finish this
 def test_drift_alignment_no_temporal_averaging_previous_frame(random_timelapse_w_drift):
     estimator = DriftEstimator()
     aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=0, apply=True)
@@ -39,7 +38,7 @@ def test_drift_alignment_w_temporal_averaging_previous_frame(random_timelapse_w_
     assert pass_test == 1
 
 def test_drift_alignment_no_temporal_averaging_initial_frame(random_timelapse_w_drift):
-        estimator = DriftEstimator()
+    estimator = DriftEstimator()
     aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, apply=True)
     drift_table = estimator.estimator_table.drift_table
 
