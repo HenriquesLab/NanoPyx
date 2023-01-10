@@ -81,6 +81,7 @@ def generate_channel_misalignment():
 
     ref_channel = np.zeros((h, w))
     misaligned_blocks = []
+    misaligned_blocks_2 = []
 
     for x_i in range(n_blocks):
         for y_i in range(n_blocks):
@@ -96,6 +97,17 @@ def generate_channel_misalignment():
         block_img = gaussian(block_img, sigma=3)
         misaligned_blocks.append(block_img)
 
-    misaligned_channel = assemble_frame_from_blocks(np.array(misaligned_blocks), 3, 3)
+    misalignments.reverse()
 
-    return np.array([ref_channel, misaligned_channel]).astype(np.float16)
+    for mis in misalignments:
+        block_img = np.zeros((int(h/n_blocks), int(w/n_blocks)))
+        block_h = h / n_blocks
+        block_w = w / n_blocks
+        block_img[int(block_h/2)+mis[0], int(block_w/2)+mis[1]] = 1
+        block_img = gaussian(block_img, sigma=3)
+        misaligned_blocks_2.append(block_img)
+
+    misaligned_channel = assemble_frame_from_blocks(np.array(misaligned_blocks), 3, 3)
+    misaligned_channel_2 = assemble_frame_from_blocks(np.array(misaligned_blocks_2), 3, 3)
+
+    return np.array([ref_channel, misaligned_channel, misaligned_channel_2]).astype(np.float16)
