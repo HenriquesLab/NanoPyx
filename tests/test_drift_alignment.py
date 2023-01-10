@@ -1,4 +1,6 @@
+import nanopyx
 from nanopyx.methods.drift_alignment.estimator import DriftEstimator
+from nanopyx.methods.drift_alignment.corrector import DriftCorrector
 
 
 def test_drift_alignment_no_temporal_averaging_previous_frame(random_timelapse_w_drift):
@@ -72,4 +74,21 @@ def test_drift_alignment_w_temporal_averaging_initial_frame(random_timelapse_w_d
             pass_test = 0
 
     assert pass_test == 1
+
+def test_drift_alignment_init(random_timelapse_w_drift):
+    aligned_image = nanopyx.estimate_drift_alignment(random_timelapse_w_drift, ref_option=0, apply=True,
+                                                     save_drift_table_path="tests/")
+    nanopyx.estimate_drift_alignment(random_timelapse_w_drift, ref_option=0, apply=False,
+                                     save_drift_table_path="tests/", save_as_npy=False)
+
+    assert random_timelapse_w_drift.shape == aligned_image.shape
+
+def test_apply_drift_alignment_init(random_timelapse_w_drift):
+    estimator = DriftEstimator()
+    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, apply=True,
+                                     save_drift_table_path="/")
+    aligned_img_corrector = nanopyx.apply_drift_alignment(random_timelapse_w_drift, drift_table=estimator.estimator_table)
+    aligned_img_corrector_2 = nanopyx.apply_drift_alignment(random_timelapse_w_drift, path="tests/drift_table.npy")
+
+    assert (aligned_img==aligned_img_corrector).all() and (aligned_img==aligned_img_corrector_2).all()
 
