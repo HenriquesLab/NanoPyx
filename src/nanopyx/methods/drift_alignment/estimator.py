@@ -1,13 +1,12 @@
 import numpy as np
 from math import sqrt
 from scipy.interpolate import interp1d
-from tifffile import imwrite
 
 from .estimator_table import DriftEstimatorTable
 from .corrector import DriftCorrector
-from ...core.ccm.estimate_shift import GetMaxOptimizer
+from nanopyx.core.analysis.ccm.estimate_shift import GetMaxOptimizer
 from ...core.utils.time.timeit import timeit
-from ...core.ccm.ccm import calculate_ccm
+from ...core.analysis.ccm.ccm import calculate_ccm
 
 
 class DriftEstimator(object):

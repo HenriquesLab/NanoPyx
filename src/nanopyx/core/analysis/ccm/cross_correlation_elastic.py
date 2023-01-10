@@ -4,8 +4,8 @@ from skimage.filters import gaussian
 from scipy.interpolate import interp2d
 
 from .estimate_shift import GetMaxOptimizer
-from ..image.blocks import assemble_frame_from_blocks
-from ..ccm.ccm import calculate_ccm_from_ref
+from nanopyx.core.image.blocks import assemble_frame_from_blocks
+from .ccm import calculate_ccm_from_ref
 
 
 # def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"):

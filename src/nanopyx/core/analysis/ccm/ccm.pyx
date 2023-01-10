@@ -3,7 +3,7 @@ cimport numpy as np
 
 from cython.parallel import prange
 from .helper_functions import check_even_square, make_even_square
-from ..analysis.pearson_correlation import calculate_ppmcc
+from ..pearson_correlation import calculate_ppmcc
 
 def calculate_ccm(np.ndarray img_stack, int ref):
     return _calculate_ccm(img_stack, ref)

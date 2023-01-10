@@ -1,10 +1,9 @@
-import os
 import numpy as np
 from numpy import array
 from skimage.io import imsave
 
 from .corrector import ChannelRegistrationCorrector
-from ...core.ccm.cross_correlation_elastic import calculate_translation_mask
+from nanopyx.core.analysis.ccm.cross_correlation_elastic import calculate_translation_mask
 
 
 # this class assumes that the image is a numpy array with shape = [n_channels, height, width]
