@@ -55,6 +55,8 @@ class DriftEstimatorTable(object):
         tmp.append(self.drift_table)
         if path is None:
             path = input("Please provide a filepath to export drift table as npy") + "_drift_table.npy"
+        else:
+            path += "_drift_table.npy"
 
         np.save(path, np.array(tmp, dtype=object))
 
@@ -80,6 +82,8 @@ class DriftEstimatorTable(object):
         """
         if path is None:
             path = input("Please provide a filepath to export drift table as csv") + "_drift_table.csv"
+        else:
+            path += "_drift_table.csv"
 
         txt = ""
         for key in self.params.keys():

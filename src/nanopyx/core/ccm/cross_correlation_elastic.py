@@ -152,7 +152,6 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
     y_translation = np.array(y_translation)
     x_translation = np.array(x_translation)
-    print(y_translation)
     y_interp = interp2d(y_translation[:, 0], y_translation[:, 1], y_translation[:, 2])
     x_interp = interp2d(x_translation[:, 0], x_translation[:, 1], x_translation[:, 2])
 

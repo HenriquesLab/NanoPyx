@@ -25,15 +25,15 @@ class ChannelRegistrationEstimator(object):
 
     def save_translation_mask(self, path=None):
         if path is None:
-            path = input("Please provide a filepath to save the translation masks")
+            path = input("Please provide a filepath to save the translation masks") + "_translation_masks.tif"
 
-        imsave(path + os.sep + "translation_masks.tif", self.translation_masks)
+        imsave(path + "_translation_masks.tif", self.translation_masks)
 
     def save_ccms(self, path=None):
         if path is None:
-            path = input("Please provide a filepath to save the ccms")
+            path = input("Please provide a filepath to save the ccms") + "_ccms.tif"
 
-        imsave(path + os.sep + "ccms.tif", self.ccms)
+        imsave(path + "_ccms.tif", self.ccms)
 
     def estimate(self, img_stack: array, ref_channel: int, max_shift: float,
                  blocks_per_axis: int, min_similarity: float, method: str="subpixel",

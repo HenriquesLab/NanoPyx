@@ -25,12 +25,7 @@ def apply_drift_alignment(image_array, path=None, drift_table=None):
     else:
         corrector.estimator_table = drift_table
     corrected_img = corrector.apply_correction(image_array)
-
-    if corrected_img is not None:
-        return corrected_img
-    else:
-        print("No corrected image was generated")
-        pass
+    return corrected_img
 
 @timeit
 def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method="subpixel",
@@ -51,8 +46,4 @@ def apply_channel_registration(image_array, translation_masks=None):
     corrector = ChannelRegistrationCorrector()
     aligned_image = corrector.align_channels(image_array, translation_masks=translation_masks)
 
-    if aligned_image is not None:
-        return aligned_image
-    else:
-        print("No aligned image was generated")
-        pass
+    return aligned_image
