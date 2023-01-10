@@ -105,15 +105,18 @@ class DriftEstimatorTable(object):
 
         tmp = open(path, "r").readlines()
 
-        n_params = len(self.params.keys())
-
-        for i in range(n_params):
-            param_split = tmp[i].split(";")
+        count = 0
+        for line in tmp:
+            if line == "Drift Table\n":
+                break
+            else:
+                count += 1
+            param_split = line.split(";")
             key = param_split[0]
             value = param_split[1].split("\n")[0]
-            if value == "TRUE":
+            if value == "True":
                 value = True
-            elif value == "FALSE":
+            elif value == "False":
                 value = False
             elif value == "None":
                 value = None
@@ -125,7 +128,7 @@ class DriftEstimatorTable(object):
 
         drift_table = []
 
-        for row in tmp[n_params+2:]:
+        for row in tmp[count+2:]:
             row_split = row.split(";")
             drift_xy = float(row_split[0])
             drift_x = float(row_split[1])

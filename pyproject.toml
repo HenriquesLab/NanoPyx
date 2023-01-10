@@ -84,5 +84,5 @@ reportUndefinedVariable = false
 
 [tool.pytest.ini_options]
 addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --ignore=notebooks/drift_correction_notebook.ipynb"
-timeout = 240
+timeout = 120
 plt_dirname = "tests_plots"

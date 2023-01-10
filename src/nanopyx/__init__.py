@@ -1,3 +1,4 @@
+import numpy as np
 from .methods.drift_alignment.corrector import DriftCorrector
 from .methods.drift_alignment.estimator import DriftEstimator
 from .methods.channel_registration.estimator import ChannelRegistrationEstimator
@@ -8,6 +9,15 @@ from .core.utils.time.timeit import timeit
 
 @timeit
 def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):
+    """
+    Function use to estimate the drift in a microscopy image.
+    :param image_array: numpy array  with shape (z, y, x)
+    :param save_as_npy (optional): bool, whether to save as npy (if true) or csv (if false)
+    :param save_drift_table_path (optional): str, path to save drift table
+    :param roi (optional): in case of use should have shape (x0, y0, x1, y1)
+    :param kwargs: additional keyword arguments
+    :return: aligned image as numpy array
+    """
     estimator = DriftEstimator()
     corrected_img = estimator.estimate(image_array, roi=roi, **kwargs)
     print(save_drift_table_path)
