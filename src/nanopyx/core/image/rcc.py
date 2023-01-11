@@ -8,6 +8,7 @@ from ..analysis.ccm.ccm import calculate_ccm_from_ref
 
 
 # NOTE: rcc is now working, although slow. Due to using our verison of ccm calculation, requires an even square image
+# TODO: fix max_shift parameter
 
 def calculate_x_corr(im1: np.ndarray, im2: np.ndarray):
     ccm = calculate_ccm_from_ref(np.array([im2]).astype(np.float32), im1.astype(np.float32))[0]
