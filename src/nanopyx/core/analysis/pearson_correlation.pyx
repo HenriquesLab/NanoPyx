@@ -6,6 +6,14 @@ from cython.parallel import prange
 
 
 def calculate_ppmcc(np.ndarray im1, np.ndarray im2, int shift_x, int shift_y):
+    """
+    Calculates the Pearson's correlation between two images after applying a shift.
+    :param im1: numpy array with shape (y, x)
+    :param im2: numpy array with shape (y, x)
+    :param shift_x: int; value to shift images in x dimension
+    :param shift_y: int; value to shift images in y dimension
+    :return: float; value of Pearson's Correlation function after shifting the two images.
+    """
     return _calculate_ppmcc(im1.astype(np.float32), im2.astype(np.float32), shift_x, shift_y)
 
 cdef float _calculate_ppmcc(float[:, :] im1, float[:, :] im2, int shift_x, int shift_y):
@@ -23,6 +31,12 @@ cdef float _calculate_ppmcc(float[:, :] im1, float[:, :] im2, int shift_x, int s
 
 
 def pearson_correlation(np.ndarray im1, np.ndarray im2):
+    """
+    Calculates the Pearson's correlation between two images.
+    :param im1: numpy array with shape (y, x)
+    :param im2: numpy array with shape (y, x)
+    :return: float; value of Pearson's correlation between two images
+    """
     return _pearson_correlation(im1.astype(np.float32), im2.astype(np.float32))
 
 

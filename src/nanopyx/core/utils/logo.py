@@ -1,5 +1,8 @@
 
 def print_ascii_logo():
+    """
+    Prints the nanopyx logo. Oink! Oink!
+    """
     print("""
                          ,.
                         (_|,.

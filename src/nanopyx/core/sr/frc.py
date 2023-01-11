@@ -79,54 +79,54 @@ def _samples_at_radius(image, radius):
     ]
 
 
-def getSmoothedCurve(frcCurve):
-    sCurve = frcCurve.copy()
-    xVals = frcCurve[:][0]
-    yVals = frcCurve[:][1]
+def get_smoothed_curve(frc_curve):
+    s_curve = frc_curve.copy()
+    x_vals = frc_curve[:][0]
+    y_vals = frc_curve[:][1]
 
     # Fit a LOESS curve to the data using the UnivariateSpline class
-    loess = UnivariateSpline(xVals, yVals, k=1, s=0.1)
+    loess = UnivariateSpline(x_vals, y_vals, k=1, s=0.1)
 
     # Evaluate the LOESS curve at the interpolated x values
-    ySmoothed = loess(xVals)
+    y_smoothed = loess(x_vals)
 
-    sCurve[:][1] = ySmoothed
+    s_curve[:][1] = y_smoothed
 
-    return sCurve
+    return s_curve
 
 
-def calculate_threshold_curve(frcCurve: np.ndarray, method):
-    threshold = np.zeros(frcCurve.shape[0])
+def calculate_threshold_curve(frc_curve: np.ndarray, method):
+    threshold = np.zeros(frc_curve.shape[0])
     for i in range(threshold.shape[0]):
         if method == ThresholdMethod.HALF_BIT:
-            threshold[i] = (0.2071 * math.sqrt(frcCurve[i][2]) + 1.9102) / (
-                1.2071 * math.sqrt(frcCurve[i][2]) + 0.9102
+            threshold[i] = (0.2071 * math.sqrt(frc_curve[i][2]) + 1.9102) / (
+                    1.2071 * math.sqrt(frc_curve[i][2]) + 0.9102
             )
         elif method == ThresholdMethod.THREE_SIGMA:
-            threshold[i] = 3.0 / math.sqrt(frcCurve[i][2] / 2.0)
+            threshold[i] = 3.0 / math.sqrt(frc_curve[i][2] / 2.0)
         else:
             threshold[i] = 0.1428
     return threshold
 
 
-def getIntersections(frcCurve: np.ndarray, thresholdCurve: np.ndarray):
-    if len(frcCurve) != len(thresholdCurve):
+def get_intersections(frc_curve: np.ndarray, threshold_curve: np.ndarray):
+    if len(frc_curve) != len(threshold_curve):
         print(
             "Error: Unable to calculate FRC curve intersections due to input length mismatch."
         )
         return None
 
-    intersections = np.zeros(len(frcCurve) - 1)
+    intersections = np.zeros(len(frc_curve) - 1)
     count = 0
-    for i in range(1, len(frcCurve)):
-        y1 = frcCurve[i - 1][1]
-        y2 = frcCurve[i][1]
-        y3 = thresholdCurve[i - 1]
-        y4 = thresholdCurve[i]
+    for i in range(1, len(frc_curve)):
+        y1 = frc_curve[i - 1][1]
+        y2 = frc_curve[i][1]
+        y3 = threshold_curve[i - 1]
+        y4 = threshold_curve[i]
         if not ((y3 >= y1 and y4 < y2) or (y1 >= y3 and y2 < y4)):
             continue
-        x1 = frcCurve[i - 1][0]
-        x2 = frcCurve[i][0]
+        x1 = frc_curve[i - 1][0]
+        x2 = frc_curve[i][0]
         x3 = x1
         x4 = x2
         x1_x2 = x1 - x2
@@ -147,7 +147,7 @@ def getIntersections(frcCurve: np.ndarray, thresholdCurve: np.ndarray):
     return np.copy(intersections[:count])
 
 
-def getCorrectIntersection(intersections: np.ndarray, method):
+def get_correct_intersection(intersections: np.ndarray, method):
     if intersections is None or intersections.shape[0] == 0:
         return 0
     if method == ThresholdMethod.HALF_BIT or method == ThresholdMethod.THREE_SIGMA:
@@ -251,19 +251,19 @@ def get_interpolated_values(x, y, images, maxx):
     return values
 
 
-def calculateFireNumberFromFRCCurve(frcCurve: np.ndarray, method):
-    thresholdCurve = calculate_threshold_curve(frcCurve, method)
-    intersections = getIntersections(frcCurve, thresholdCurve)
+def calculate_fire_number_from_FRC_curve(frc_curve: np.ndarray, method):
+    threshold_curve = calculate_threshold_curve(frc_curve, method)
+    intersections = get_intersections(frc_curve, threshold_curve)
     fire = None
     if intersections is not None and intersections.shape[0] != 0:
-        spatialFrequency = getCorrectIntersection(intersections, method)
-        fire = 2 * (len(frcCurve) + 1) / spatialFrequency
+        spatial_frequency = get_correct_intersection(intersections, method)
+        fire = 2 * (len(frc_curve) + 1) / spatial_frequency
     return fire
 
 
-def calculateFireNumber(im1, im2, method):
-    frcCurve = calculate_frc_curve(im1, im2)
-    return calculateFireNumberFromFRCCurve(frcCurve, method)
+def calculate_fire_number(im1, im2, method):
+    frc_curve = calculate_frc_curve(im1, im2)
+    return calculate_fire_number_from_FRC_curve(frc_curve, method)
 
 
 def do_plot(frc_curve, smooth_frc, tm, fire, name):

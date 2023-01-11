@@ -1,7 +1,7 @@
 import hashlib
 
 
-def getChecksum(file_path: str) -> str: 
+def get_checksum(file_path: str) -> str:
 
     # Open the file in binary mode
     with open(file_path, "rb") as file:

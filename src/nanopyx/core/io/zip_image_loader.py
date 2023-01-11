@@ -37,7 +37,7 @@ class ZipTiffIterator:
         for index in range(len(self.tiff_file_names)):
             yield self[index]
 
-    def _getIm0(self):
+    def _get_im0(self):
         if self._im0 is None:
             self._im0 = self[0]
             self._shape = (
@@ -49,15 +49,15 @@ class ZipTiffIterator:
         return self._im0
 
     def get_shape(self) -> list:
-        self._getIm0()
+        self._get_im0()
         return self._shape
 
     def get_dtype(self) -> str:
-        self._getIm0()
+        self._get_im0()
         return self._dtype
 
     def get_thumb(self, save_path=None):
-        thumb = transform.resize(self._getIm0(), (64, 64))
+        thumb = transform.resize(self._get_im0(), (64, 64))
         _max = thumb.max()
         _min = thumb.min()
         thumb = (thumb.astype("float32") - _min / (_max - _min)) * 255

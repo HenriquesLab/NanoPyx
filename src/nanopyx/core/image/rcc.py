@@ -5,10 +5,10 @@ import lmfit
 from tqdm import tqdm
 
 
-def xcorr(im1: np.ndarray, im2: np.ndarray):
-    Fim1 = np.fft.fft2(im1)
-    CFim2 = np.conj(np.fft.fft2(im2))
-    return np.fft.fftshift(np.real(np.fft.ifft2((Fim1 * CFim2)))) / np.sqrt(im1.size)
+def calculate_x_corr(im1: np.ndarray, im2: np.ndarray):
+    fim1 = np.fft.fft2(im1)
+    c_fim2 = np.conj(np.fft.fft2(im2))
+    return np.fft.fftshift(np.real(np.fft.ifft2((fim1 * c_fim2)))) / np.sqrt(im1.size)
 
 
 def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int = None):
@@ -18,7 +18,7 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
         return 0, 0
 
     # Compute image correlation
-    XCorr = xcorr(im1, im2)
+    x_corr = calculate_x_corr(im1, im2)
 
     # crop XCorr based on max_shift
     w, h = im1.shape
@@ -26,11 +26,11 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
         x_border = int((w - max_shift) / 2)
         y_border = int((h - max_shift) / 2)
         if x_border > 0:
-            XCorr = XCorr[x_border:-x_border, :]
+            x_corr = x_corr[x_border:-x_border, :]
         else:
             x_border = 0
         if y_border > 0:
-            XCorr = XCorr[:, y_border:-y_border]
+            x_corr = x_corr[:, y_border:-y_border]
         else:
             y_border = 0
     else:
@@ -43,13 +43,13 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
     x, y = np.mgrid[-fit_box : fit_box + 1, -fit_box : fit_box + 1]
 
     # Find the brightest pixel and cut out the fit ROI
-    x_max_xc, y_max_xc = np.unravel_index(XCorr.argmax(), XCorr.shape)
-    FitROI = XCorr[
+    x_max_xc, y_max_xc = np.unravel_index(x_corr.argmax(), x_corr.shape)
+    fit_roi = x_corr[
         x_max_xc - fit_box : y_max_xc + fit_box + 1,
         y_max_xc - fit_box : y_max_xc + fit_box + 1,
     ]
 
-    dimensions = FitROI.shape
+    dimensions = fit_roi.shape
 
     if 0 in dimensions or dimensions[0] != dimensions[1]:
         xc, yc = 0, 0
@@ -65,12 +65,12 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
 
         # Set up initial parameters and fit
         params = lmfit.Parameters()
-        params.add("a", value=FitROI.max(), vary=True, min=0)
+        params.add("a", value=fit_roi.max(), vary=True, min=0)
         params.add("xc", value=0, vary=True)
         params.add("yc", value=0, vary=True)
         params.add("s", value=1, vary=True, min=0)
-        params.add("b", value=FitROI.min(), vary=True, min=0)
-        results = gaussian2d.fit(FitROI.flatten(), params)
+        params.add("b", value=fit_roi.min(), vary=True, min=0)
+        results = gaussian2d.fit(fit_roi.flatten(), params)
 
         # Get maximum coordinates and add offsets
         xc = results.best_values["xc"]
@@ -84,8 +84,8 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
     return -xc, -yc
 
 
-def rcc(imFrames: np.ndarray, max_shift=None) -> tuple[np.ndarray, np.ndarray]:
-    n_frames = imFrames.shape[0]
+def rcc(im_frames: np.ndarray, max_shift=None) -> tuple[np.ndarray, np.ndarray]:
+    n_frames = im_frames.shape[0]
     shifts_x = np.zeros((n_frames, n_frames))
     shifts_y = np.zeros((n_frames, n_frames))
     n_pairs = int(n_frames * (n_frames - 1) / 2)
@@ -98,7 +98,7 @@ def rcc(imFrames: np.ndarray, max_shift=None) -> tuple[np.ndarray, np.ndarray]:
             for j in range(i + 1, n_frames):
                 progress_bar.update()
                 shifts_x[i, j], shifts_y[i, j] = get_image_shift(
-                    imFrames[i], imFrames[j], 5, max_shift
+                    im_frames[i], im_frames[j], 5, max_shift
                 )
                 flag += 1
 

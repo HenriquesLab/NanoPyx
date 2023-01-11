@@ -10,7 +10,7 @@ from onedrivedownloader import download as onedrive_download
 
 from nanopyx.core.io.zip_image_loader import ZipTiffIterator
 
-from ...core.io.checksum import getChecksum
+from ...core.io.checksum import get_checksum
 
 
 class ExampleDataManager:

@@ -21,14 +21,14 @@ class ErrorMap:
         self._beta: float = 0
         self._sigma: float = 0
 
-        self.imRef: np.ndarray = None
-        self.imSR: np.ndarray = None
-        self.imSRIntensityScaledBlurred: np.ndarray = None
+        self.im_ref: np.ndarray = None
+        self.im_sr: np.ndarray = None
+        self.im_sr_intensity_scaled_blurred: np.ndarray = None
         self.imRSE: np.ndarray = None
 
     def optimise(self, imRef: np.ndarray, imSR: np.ndarray, fixedSigma=0) -> None:
-        self.imRef = imRef
-        self.imSR = imSR
+        self.im_ref = imRef
+        self.im_sr = imSR
 
         magnification = imSR.shape[0] / imRef.shape[0]
         assert magnification == imSR.shape[1] / imRef.shape[1]
@@ -45,7 +45,7 @@ class ErrorMap:
         sigma_linear = fixedSigma * magnification
         if fixedSigma == 0:
             sigma_linear = brent(
-                sigmaFunction2Optimize,
+                sigma_function_to_optimize,
                 args=(imRef, imSR),
                 brack=(0, max_sigma_boundary),
                 maxiter=1000,
@@ -55,16 +55,16 @@ class ErrorMap:
             print("RSF constrained, as no good minimum found")
 
         # GET ALPHA AND BETA
-        alpha, beta = calculateAlphaBeta(sigma_linear, imRef, imSR)
+        alpha, beta = calculate_alpha_beta(sigma_linear, imRef, imSR)
         self._alpha = alpha
         self._beta = beta
         self._sigma = sigma_linear
-        self.imSRIntensityScaledBlurred = gaussian_filter(
+        self.im_sr_intensity_scaled_blurred = gaussian_filter(
             imSR * self._alpha + self._beta, self._sigma
         )
-        self.imRSE = np.abs(self.imSRIntensityScaledBlurred - imRef)
-        self._vRSE = np.mean((self.imSRIntensityScaledBlurred - imRef) ** 2) ** 0.5
-        self._vRSP = pearson_correlation(self.imSRIntensityScaledBlurred, imRef)
+        self.imRSE = np.abs(self.im_sr_intensity_scaled_blurred - imRef)
+        self._vRSE = np.mean((self.im_sr_intensity_scaled_blurred - imRef) ** 2) ** 0.5
+        self._vRSP = pearson_correlation(self.im_sr_intensity_scaled_blurred, imRef)
 
     def getRSE(self) -> float:
         return self._vRSE
@@ -72,11 +72,11 @@ class ErrorMap:
     def getRSP(self) -> float:
         return self._vRSP
 
-    def getSigma(self) -> float:
+    def get_sigma(self) -> float:
         return self._sigma
 
 
-def calculateAlphaBeta(
+def calculate_alpha_beta(
     sigma: float, imRef: np.ndarray, imSR: np.ndarray
 ) -> tuple[float, float]:
     """Gaussian blurs imSR image and calculates linear regressino again imRef
@@ -94,8 +94,8 @@ def calculateAlphaBeta(
     return slope, intercept
 
 
-def sigmaFunction2Optimize(sigma: float, imRef: np.ndarray, imSR: np.ndarray) -> float:
-    alpha, beta = calculateAlphaBeta(sigma, imRef, imSR)
-    imSRIntensityScaledBlurred = gaussian_filter(imSR * alpha + beta, sigma)
-    rmse = np.mean((imSRIntensityScaledBlurred - imRef) ** 2) ** 0.5
+def sigma_function_to_optimize(sigma: float, imRef: np.ndarray, imSR: np.ndarray) -> float:
+    alpha, beta = calculate_alpha_beta(sigma, imRef, imSR)
+    im_sr_intensity_scaled_blurred = gaussian_filter(imSR * alpha + beta, sigma)
+    rmse = np.mean((im_sr_intensity_scaled_blurred - imRef) ** 2) ** 0.5
     return rmse

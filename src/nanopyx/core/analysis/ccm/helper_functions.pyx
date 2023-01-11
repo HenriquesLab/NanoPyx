@@ -2,6 +2,11 @@ import numpy as np
 cimport numpy as np
 
 def check_even_square(np.ndarray image_arr):
+    """
+    Function used to check if an image array is an even square.
+    :param image_arr: numpy array with shape (t, y, x)
+    :return: bool, True if an image array is an even square
+    """
     return _check_even_square(image_arr)
 
 cdef bint _check_even_square(float[:, :, :] image_arr):
@@ -16,6 +21,11 @@ cdef bint _check_even_square(float[:, :, :] image_arr):
     return True
 
 def get_closest_even_square_size(np.ndarray image_arr):
+    """
+    Function used to calculate the closest even square.
+    :param image_arr: numpy array with shape (t, y, x); image to be cropped
+    :return: int; value of dimensions to be used for cropping
+    """
     return _get_closest_even_square_size(image_arr)
 
 cdef int _get_closest_even_square_size(float[:, :, :] image_arr):
@@ -30,6 +40,11 @@ cdef int _get_closest_even_square_size(float[:, :, :] image_arr):
 
 
 def make_even_square(np.ndarray image_arr):
+    """
+    Function used to crop an image array into an even square.
+    :param image_arr: numpy array with shape (t, y, x); image to be cropped
+    :return: numpy array with shape (t, y, x)
+    """
     return _make_even_square(image_arr)
 
 cdef float[:, :, :] _make_even_square(float[:, :, :] image_arr):

@@ -8,6 +8,12 @@ from ...image.blocks import assemble_frame_from_blocks
 
 
 def generate_random_position(n_rows, n_cols):
+    """
+    Generates a random position given number of rows and columns.
+    :param n_rows: int; number of rows
+    :param n_cols: int; number of columns
+    :return: int, int; random position constrained to 0.1 and 0.9 of n_rows and n_cols
+    """
 
     min_r = int(n_rows * 0.1)
     max_r = int(n_rows * 0.9)
@@ -21,6 +27,13 @@ def generate_random_position(n_rows, n_cols):
     return r, c
 
 def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float16):
+    """
+    Generates a random image with objects in random positions
+    :param n_objects: int; number of objects to generate
+    :param shape: tuple; with shape (z, y, x)
+    :param dtype: data type to be used in the generated numpy array
+    :return: numpy array with shape (z, y, x) and defined data type and n_objects
+    """
 
     img = np.zeros(shape).astype(dtype)
 
@@ -38,6 +51,16 @@ def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float16):
 
 def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float16, drift=None,
                              drift_mode="directional"):
+    """
+    Generate random timelapse image with drift over time.
+    :param n_objects: int; number of objects to generate
+    :param shape: tuple; with shape (t, y, x)
+    :param dtype: data type to be used in the generated numpy array
+    :param drift: None or int; number of pixels corresponding to drift between frames. If None, automatic drift is
+    calculated based on 0.02 of image dimensions.
+    :param drift_mode: str; "directional" (default) or "random";
+    :return: numpy array with shape (t, y, x) and defined data type and n_objects
+    """
 
     if drift is None:
         drift = min(shape[1]*0.02, shape[2]*0.02)
@@ -68,6 +91,11 @@ def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float1
     return img
 
 def generate_channel_misalignment():
+    """
+    Generates an image with shape (3, 300, 300) with 1 object centered on each 3x3 block of the image.
+    Slices corresponding to channel 2 and 3 are shifted relative to channel 1.
+    :return: numpy array of shape (3, 300, 300) corresponding to a random image with misalignment between channels.
+    """
 
     n_blocks = 3
     h = 300

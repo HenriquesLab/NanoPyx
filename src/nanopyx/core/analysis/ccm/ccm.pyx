@@ -1,11 +1,19 @@
 import numpy as np
 cimport numpy as np
 
-from cython.parallel import prange
 from .helper_functions import check_even_square, make_even_square
 from ..pearson_correlation import calculate_ppmcc
 
 def calculate_ccm(np.ndarray img_stack, int ref):
+    """
+    Function used to generate a cross correlation matrix of an image stack.
+    Cross correlation is calculated using either the first image of the stack or the previous image.
+    Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two
+    images.
+    :param img_stack: numpy array with shape (t, y, x)
+    :param ref: either 0 or 1, 0 is used to calculate the ccm based on the first frame, 1 used to calculate based on the previous frame
+    :return: numpy array with shape (t, y, x), corresponding to the cross correlation matrix
+    """
     return _calculate_ccm(img_stack, ref)
 
 cdef float[:, :, :] _calculate_ccm(float[:, :, :] img_stack, int ref):
@@ -30,6 +38,15 @@ cdef float[:, :, :] _calculate_ccm(float[:, :, :] img_stack, int ref):
     return ccm
 
 def calculate_ccm_from_ref(np.ndarray img_stack, np.ndarray img_ref):
+    """
+    Function used to generate a cross correlation matrix of an image stack.
+    Cross correlation is calculated using a static image frame.
+    Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two
+    images.
+    :param img_stack: numpy array with shape (t, y, x)
+    :param img_ref: numpy array with shape (y, x)
+    :return: numpy array with shape (t, y, x), corresponding to the cross correlation matrix
+    """
     return _calculate_ccm_from_ref(img_stack, img_ref)
 
 cdef float[:, :, :] _calculate_ccm_from_ref(float[:, :, :] img_stack, float[:, :] img_ref):
