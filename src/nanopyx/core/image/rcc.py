@@ -4,11 +4,15 @@ import numpy as np
 import lmfit
 from tqdm import tqdm
 
+from ..analysis.ccm.ccm import calculate_ccm_from_ref
+
+
+# NOTE: rcc is now working, although slow. Due to using our verison of ccm calculation, requires an even square image
 
 def calculate_x_corr(im1: np.ndarray, im2: np.ndarray):
-    fim1 = np.fft.fft2(im1)
-    c_fim2 = np.conj(np.fft.fft2(im2))
-    return np.fft.fftshift(np.real(np.fft.ifft2((fim1 * c_fim2)))) / np.sqrt(im1.size)
+    ccm = calculate_ccm_from_ref(np.array([im2]).astype(np.float32), im1.astype(np.float32))[0]
+
+    return np.array(ccm)
 
 
 def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int = None):
@@ -70,7 +74,8 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
         params.add("yc", value=0, vary=True)
         params.add("s", value=1, vary=True, min=0)
         params.add("b", value=fit_roi.min(), vary=True, min=0)
-        results = gaussian2d.fit(fit_roi.flatten(), params)
+        tmp = fit_roi.flatten()
+        results = gaussian2d.fit(tmp, params)
 
         # Get maximum coordinates and add offsets
         xc = results.best_values["xc"]
