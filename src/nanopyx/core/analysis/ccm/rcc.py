@@ -90,6 +90,7 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
 
 
 def rcc(im_frames: np.ndarray, max_shift=None) -> tuple[np.ndarray, np.ndarray]:
+    # REF: https://github.com/yinawang28/RCC
     if not check_even_square(im_frames.astype(np.float32)):
         im_frames = np.array(make_even_square(im_frames.astype(np.float32)))
     n_frames = im_frames.shape[0]
