@@ -87,14 +87,14 @@ def test_apply_drift_alignment_init(random_timelapse_w_drift):
     estimator = DriftEstimator()
     aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, apply=True,
                                      save_drift_table_path="tests/")
-    aligned_img_corrector = apply_drift_alignment(random_timelapse_w_drift,
-                                                                                  drift_table=estimator.estimator_table)
+    aligned_img_corrector = apply_drift_alignment(random_timelapse_w_drift, drift_table=estimator.estimator_table)
 
     assert np.array_equal(aligned_img, aligned_img_corrector)
 
 def test_apply_drift_alignment_init_previous_drift_table(random_timelapse_w_drift):
     estimator = DriftEstimator()
-    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, apply=True)
+    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, max_expected_drift=100,
+                                     apply=True)
     estimator.save_drift_table(save_as_npy=False, path="tests/")
     aligned_img_corrector_2 = apply_drift_alignment(random_timelapse_w_drift, path="tests/_drift_table.csv")
 
@@ -108,3 +108,9 @@ def test_apply_drift_alignment_init_previous_drift_table_npy(random_timelapse_w_
 
     assert np.array_equal(aligned_img, aligned_img_corrector_2)
 
+def test_estimate_drift_alignment_init_rcc(random_timelapse_w_drift):
+    estimator = DriftEstimator()
+    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=10, max_expected_drift=100,
+                                     shift_calc_method="rcc", apply=True)
+
+    assert (random_timelapse_w_drift.shape == aligned_img.shape)
