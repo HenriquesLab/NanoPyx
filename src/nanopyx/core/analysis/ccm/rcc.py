@@ -4,10 +4,9 @@ import numpy as np
 import lmfit
 from tqdm import tqdm
 
-from ..analysis.ccm.ccm import calculate_ccm_from_ref
+from .ccm import calculate_ccm_from_ref
+from .helper_functions import check_even_square, make_even_square
 
-
-# NOTE: rcc is now working, although slow. Due to using our verison of ccm calculation, requires an even square image
 # TODO: fix max_shift parameter
 
 def calculate_x_corr(im1: np.ndarray, im2: np.ndarray):
@@ -27,7 +26,7 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
 
     # crop XCorr based on max_shift
     w, h = im1.shape
-    if max_shift is not None:
+    if max_shift > 0:
         x_border = int((w - max_shift) / 2)
         y_border = int((h - max_shift) / 2)
         if x_border > 0:
@@ -91,6 +90,8 @@ def get_image_shift(im1: np.ndarray, im2: np.ndarray, box: int, max_shift: int =
 
 
 def rcc(im_frames: np.ndarray, max_shift=None) -> tuple[np.ndarray, np.ndarray]:
+    if not check_even_square(im_frames.astype(np.float32)):
+        im_frames = np.array(make_even_square(im_frames.astype(np.float32)))
     n_frames = im_frames.shape[0]
     shifts_x = np.zeros((n_frames, n_frames))
     shifts_y = np.zeros((n_frames, n_frames))

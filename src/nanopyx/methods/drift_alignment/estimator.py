@@ -7,6 +7,7 @@ from .corrector import DriftCorrector
 from nanopyx.core.analysis.ccm.estimate_shift import GetMaxOptimizer
 from ...core.utils.time.timeit import timeit
 from ...core.analysis.ccm.ccm import calculate_ccm
+from ...core.analysis.ccm.rcc import rcc
 
 
 class DriftEstimator(object):
@@ -38,7 +39,7 @@ class DriftEstimator(object):
         if self.estimator_table.params["time_averaging"] < 1:
             self.estimator_table.params["time_averaging"] = 1
         elif self.estimator_table.params["time_averaging"] > int(n_slices/2):
-            self.estimator_table.params["time_averaging"] =  int(n_slices/2)
+            self.estimator_table.params["time_averaging"] = int(n_slices/2)
 
         # case of no temporal averaging
         if self.estimator_table.params["time_averaging"] == 1:
@@ -47,8 +48,21 @@ class DriftEstimator(object):
             # calculates number of time blocks for averaging
             image_averages = self.compute_temporal_averaging(image_arr)
 
-        self.cross_correlation_map = np.array(calculate_ccm(np.array(image_averages).astype(np.float32), self.estimator_table.params["ref_option"]))
-        self.get_shifts_from_ccm()
+        method = self.estimator_table.params["shift_calc_method"]
+
+        if method == "rcc":
+            shifts = rcc(image_averages, max_shift=self.estimator_table.params["max_expected_drift"])
+            self.drift_x = shifts[0]
+            self.drift_y = shifts[1]
+        else:
+            self.cross_correlation_map = np.array(calculate_ccm(np.array(image_averages).astype(np.float32), self.estimator_table.params["ref_option"]))
+            max_shift = self.estimator_table.params["max_expected_drift"]
+            if max_shift > 0 and max_shift*2+1 < self.cross_correlation_map.shape[1] and max_shift*2+1 < self.cross_correlation_map.shape[2]:
+                ccm_x_start = int(self.cross_correlation_map.shape[1]/2 - max_shift)
+                ccm_y_start = int(self.cross_correlation_map.shape[0]/2 - max_shift)
+                slice_ccm = self.cross_correlation_map[ccm_y_start:ccm_y_start+(max_shift*2), ccm_x_start:ccm_x_start+(max_shift*2)]
+            self.get_shifts_from_ccm()
+
         if self.estimator_table.params["time_averaging"] > 1:
 
             print("Interpolating time points")
