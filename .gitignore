@@ -9,7 +9,7 @@ dist
 __pycache__
 *.egg-info
 *.so
-*.html
 .DS_Store
 .gitignore
 *.c
+src/**/*.html
