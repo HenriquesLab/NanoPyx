@@ -1,4 +1,5 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3
+# nanopyx: autogen-pxd=True
 # code based on NanoJ-Core/Core/src/nanoj/core2/NanoJRandomNoise.java
 
 from libc.stdlib cimport rand, RAND_MAX

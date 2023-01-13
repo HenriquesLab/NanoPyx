@@ -14,8 +14,41 @@ def find_files(root_dir, extension):
         for dir in dirs:
             dir_path = os.path.join(root, dir)
             if os.listdir(dir_path) == []:
+                print("Removing empty directory: ", dir_path)
                 os.rmdir(dir_path)
     return target_files
+
+def autogenerate_pxd_files(filename):
+    """Autogenerate pxd files from pyx files"""
+    
+    ext = os.path.splitext(filename)[1]
+    assert ext == ".pyx", "File must be a pyx file"
+
+    autogen = False
+    cdefs = []
+
+    # read the pyx file
+    with open(filename, "r") as f:
+        pyx_file = f.read()
+        lines = pyx_file.splitlines()
+
+
+        for line in lines:
+            if line.startswith("# nanopyx:") and "autogen-pxd=False" in line:
+                return
+            elif line.startswith("# nanopyx:") and "autogen-pxd=True" in line:
+                autogen = True
+            elif line.startswith("cdef") and line.endswith(":") and "class" not in line:
+                cdefs.append(line[:-1])
+
+    if not autogen:
+        return
+
+    # write the pxd file
+    pxd_filename = os.path.splitext(filename)[0] + ".pxd"
+    with open(pxd_filename, "w") as f:
+        print("Autogenerating pxd file: ", pxd_filename)
+        f.write("\n".join(cdefs))
 
 
 def main():
@@ -27,8 +60,12 @@ def main():
         + find_files("src", ".html")
         + find_files("src", ".profile")
         + find_files("notebooks", ".profile")
-        
     )
+
+    pyx_files = find_files("src", ".pyx")
+    for file in pyx_files:
+        autogenerate_pxd_files(file)
+
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
