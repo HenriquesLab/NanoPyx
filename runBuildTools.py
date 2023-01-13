@@ -4,27 +4,35 @@ import os, sys
 
 
 def find_files(root_dir, extension):
-    pyx_files = []
+    target_files = []
     for root, dirs, files in os.walk(root_dir):
         for file in files:
             if file.endswith(extension):
-                pyx_files.append(os.path.join(root, file))
-    return pyx_files
+                target_files.append(os.path.join(root, file))
+
+        # auto remove empty directories
+        for dir in dirs:
+            dir_path = os.path.join(root, dir)
+            if os.listdir(dir_path) == []:
+                os.rmdir(dir_path)
+    return target_files
 
 
 def main():
 
     clean_files = " ".join(
         find_files("src", ".so")
+        + find_files("src", ".pyc")
         + find_files("src", ".c")
         + find_files("src", ".html")
         + find_files("src", ".profile")
         + find_files("notebooks", ".profile")
+        
     )
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
-        "Clean files": f"rm {clean_files}",
+        "Clean files": f"rm {clean_files}" if len(clean_files) > 0 else "echo 'No files to clean'",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Install nanopyx in developer mode": "pip3 install -e .",
         "Install nanopyx test packages": "pip install -e .[test]",
