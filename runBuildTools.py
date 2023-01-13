@@ -14,6 +14,7 @@ def find_files(root_dir, extension):
         for dir in dirs:
             dir_path = os.path.join(root, dir)
             if os.listdir(dir_path) == []:
+                print("Removing empty directory: ", dir_path)
                 os.rmdir(dir_path)
     return target_files
 
