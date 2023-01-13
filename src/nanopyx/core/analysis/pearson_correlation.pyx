@@ -1,5 +1,7 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
 
+from libc.math cimport fabs
+
 import numpy as np
 cimport numpy as np
 from cython.parallel import prange
@@ -16,11 +18,11 @@ def calculate_ppmcc(np.ndarray im1, np.ndarray im2, int shift_x, int shift_y):
     """
     return _calculate_ppmcc(im1.astype(np.float32), im2.astype(np.float32), shift_x, shift_y)
 
-cdef float _calculate_ppmcc(float[:, :] im1, float[:, :] im2, int shift_x, int shift_y):
+cdef float _calculate_ppmcc(float[:, :] im1, float[:, :] im2, int shift_x, int shift_y) nogil:
     cdef int w = im1.shape[1]
     cdef int h = im1.shape[0]
-    cdef int new_w = w - abs(shift_x)
-    cdef int new_h = h - abs(shift_y)
+    cdef int new_w = int(w - fabs(shift_x))
+    cdef int new_h = int(h - fabs(shift_y))
 
     cdef int x0 = max(0, -shift_x)
     cdef int y0 = max(0, -shift_y)
