@@ -18,9 +18,10 @@ def find_files(root_dir, extension):
                 os.rmdir(dir_path)
     return target_files
 
+
 def autogenerate_pxd_files(filename):
     """Autogenerate pxd files from pyx files"""
-    
+
     ext = os.path.splitext(filename)[1]
     assert ext == ".pyx", "File must be a pyx file"
 
@@ -40,10 +41,9 @@ def autogenerate_pxd_files(filename):
                     ignore = True
                 elif "# autogen_pxd - ignore end" in line:
                     ignore = False
-                
+
                 if line.startswith("from") or ignore:
                     cdefs.append(line)
-                
 
     cdefs.append("")
 
@@ -59,8 +59,12 @@ def autogenerate_pxd_files(filename):
                 autogen = True
             elif line.startswith("cdef class"):
                 cdefs.append("")
-                cdefs.append(line)            
-            elif (line.startswith("cdef") or line.startswith("    cdef")) and line.endswith(":") and ")" in line:
+                cdefs.append(line)
+            elif (
+                (line.startswith("cdef") or line.startswith("    cdef"))
+                and line.endswith(":")
+                and ")" in line
+            ):
                 cdefs.append(line[:-1])
 
         cdefs.append("")
@@ -95,7 +99,9 @@ def main():
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
-        "Clean files": f"rm {clean_files}" if len(clean_files) > 0 else "echo 'No files to clean'",
+        "Clean files": f"rm {clean_files}"
+        if len(clean_files) > 0
+        else "echo 'No files to clean'",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Install nanopyx in developer mode": "pip3 install -e .",
         "Install nanopyx test packages": "pip install -e .[test]",
@@ -105,7 +111,8 @@ def main():
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
     }
 
-    print("""
+    print(
+        """
                          ,.
                         (_|,.
                        ,' /, )_______   _
@@ -116,7 +123,8 @@ def main():
          Oink! Oink!     |_\  |--^.  /
         |--- nm ---|    /_]'|_| /_)_/
                             /_]'  /_]'
-    """)
+    """
+    )
 
     if len(sys.argv) > 1:
         selection = int(sys.argv[1]) - 1
