@@ -23,13 +23,21 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     Returns:
         The interpolated value at the given coordinates.
     """
-    cdef int x0 = int(x)
-    cdef int y0 = int(y)
-    if x == x0 and y == y0:
-        return image[y0, x0]
 
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
+
+    # return 0 if x and y positions do not exist in image
+    if not 0 <= x < w and not 0 <= y < h:
+        return 0
+
+    cdef int x0 = int(x)
+    cdef int y0 = int(y)    
+
+    # do not interpolate if x and y positions exist in image
+    if x == x0 and y == y0:
+        return image[y0, x0]
+
     cdef double x_factor, y_factor
     cdef int i, j
     

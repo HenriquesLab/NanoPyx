@@ -2,7 +2,7 @@ from scipy.ndimage import shift
 import numpy as np
 
 from ..utils.time.timeit import timeit2
-from .interpolation import bicubic, bilinear, catmull_rom, lanczos
+from .interpolation import bicubic, bilinear, nearest_neighbor, catmull_rom, lanczos
 
 from skimage.transform import AffineTransform, warp
 import cv2
@@ -31,6 +31,11 @@ def bilinear_shift(image: np.ndarray, dx: float, dy: float):
     interpolator = bilinear.Interpolator(image)
     return interpolator.shift(dx, dy)
     
+
+@timeit2
+def nearest_neighbor_shift(image: np.ndarray, dx: float, dy: float):
+    interpolator = nearest_neighbor.Interpolator(image)
+    return interpolator.shift(dx, dy)
 
 @timeit2
 def scipy_shift(image: np.ndarray, dx: float, dy: float):

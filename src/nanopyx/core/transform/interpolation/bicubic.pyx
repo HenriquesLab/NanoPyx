@@ -24,18 +24,22 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
         Interpolated pixel value (float).
     """
 
-    cdef:
-        int x0 = int(x)
-        int y0 = int(y)
-        int w = image.shape[1]
-        int h = image.shape[0]
-    
+    cdef int w = image.shape[1]
+    cdef int h = image.shape[0]
+
+    # return 0 if x and y positions do not exist in image
+    if not 0 <= x < w and not 0 <= y < h:
+        return 0
+
+    cdef int x0 = int(x)
+    cdef int y0 = int(y)    
+
     # do not interpolate if x and y positions exist in image
-    if x == x0 and y == y0 and x0 >= 0 and x0 < w and y0 >= 0 and y0 < h:
+    if x == x0 and y == y0:
         return image[y0, x0]
 
-    if x0 < 1 or x0 > w - 3 or y0 < 1 or y0 > h - 3:
-        return _interpolate_bilinear(image, x, y)
+    #if x0 < 1 or x0 > w - 3 or y0 < 1 or y0 > h - 3:
+    #    return _interpolate_bilinear(image, x, y)
 
     cdef:
         int i, j, _x, _y
@@ -60,10 +64,10 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
 
     for i in range(4):
         for j in range(4):
-            _x = (x0-1+i) % w
-            _y = (y0-1+j) % h
-            # _x = max(0, min((x0-1+i)%w, w-1))
-            # _y = max(0, min((y0-1+j)%h, h-1))
+            # _x = (x0-1+i) % w
+            # _y = (y0-1+j) % h
+            _x = max(0, min((x0-1+i)%w, w-1))
+            _y = max(0, min((y0-1+j)%h, h-1))
             result += a[i] * b[j] * image[_y, _x]
 
     return result

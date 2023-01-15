@@ -1,13 +1,11 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
 # nanopyx: autogen_pxd=True
 
-from libc.math cimport floor, isnan, isinf, fmax, fmin
-
 import numpy as np
 cimport numpy as np
 
-from cython.parallel import prange
 from .nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
+
 
 def interpolate(np.ndarray im, double x, double y) -> float:
     """
@@ -34,16 +32,20 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     Returns:
     Interpolated pixel value (float).
     """
-    cdef int x0 = int(x)
-    cdef int y0 = int(y)
-    if x == x0 and y == y0:
-        return image[y0, x0]
 
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
 
-    if x<-1 or x>w or y<-1 or y>h:
+    # return 0 if x and y positions do not exist in image
+    if not 0 <= x < w and not 0 <= y < h:
         return 0
+
+    cdef int x0 = int(x)
+    cdef int y0 = int(y)    
+
+    # do not interpolate if x and y positions exist in image
+    #if x == x0 and y == y0:
+    #    return image[y0, x0]
 
     cdef int u0 = int(x - 0.5)
     cdef int v0 = int(y - 0.5)
@@ -85,6 +87,7 @@ cdef double _cubic(double x) nogil:
     elif x < 2:
         z = -a * x * x * x + 5. * a * x * x - 8. * a * x + 4.0 * a
     return z
+
 
 cdef class Interpolator(InterpolatorNearestNeighbor):
 

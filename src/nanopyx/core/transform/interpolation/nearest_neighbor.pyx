@@ -26,21 +26,22 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
         The interpolated value.
     """
 
-    cdef:
-        int ix = int(x)
-        int iy = int(y)
-        int w = image.shape[1]
-        int h = image.shape[0]
+    cdef int w = image.shape[1]
+    cdef int h = image.shape[0]
 
-    if 0 <= ix < w and 0 <= iy < h:
-        return image[iy, ix]
+    # return 0 if x and y positions do not exist in image
+    if not 0 <= x < w and not 0 <= y < h:
+        return 0
 
-    return 0
+    cdef int x0 = int(x)
+    cdef int y0 = int(y)    
+
+    return image[y0, x0]
 
 
 cdef class Interpolator:
 
-    def __init__(self, float[:,:] image):
+    def __init__(self, np.ndarray image):
         """
         Interpolate a 2D array
 
@@ -49,9 +50,10 @@ cdef class Interpolator:
         image : 2D array
             The image to interpolate.
         """
-        self.image = image
+        self.image = image.view(np.float32)
         self.w = image.shape[1]
         self.h = image.shape[0]
+        self.original_dtype = image.dtype
 
 
     cdef float _interpolate(self, float x, float y) nogil:
@@ -70,7 +72,7 @@ cdef class Interpolator:
             Magnified image (np.ndarray).
         """
         imMagnified = self._magnify(magnification)
-        return np.asarray(imMagnified)
+        return np.asarray(imMagnified).astype(self.original_dtype)
 
 
     cdef float[:,:] _magnify(self, float magnification):
@@ -104,7 +106,7 @@ cdef class Interpolator:
             Shifted image (np.ndarray).
         """
         imShifted = self._shift(dx, dy)
-        return np.asarray(imShifted)
+        return np.asarray(imShifted).astype(self.original_dtype)
 
 
     cdef float[:,:] _shift(self, float dx, float dy):

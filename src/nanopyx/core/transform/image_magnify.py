@@ -5,7 +5,7 @@ from scipy.ndimage import zoom
 from skimage.transform import rescale
 
 from ..utils.time.timeit import timeit2
-from .interpolation import bicubic, bilinear, catmull_rom, fft_zoom, lanczos
+from .interpolation import bicubic, bilinear, catmull_rom, fft_zoom, lanczos, nearest_neighbor
 
 # from scipy.stats import \
 #    linregress  # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html
@@ -100,6 +100,23 @@ def bilinear_zoom(image: np.ndarray, magnification: int = 2):
 
     """
     interpolator = bilinear.Interpolator(image)
+    return interpolator.magnify(magnification)
+
+@timeit2
+def nearest_neighbor_zoom(image: np.ndarray, magnification: int = 2):
+    """
+    Zoom an image by nearest neighbor interpolation
+
+    Args:
+        image (np.ndarray): 2D grid of pixel values.
+        magnification (float): Factor by which to multiply the dimensions of the image.
+            Must be >= 1.
+
+    Returns:
+        np.ndarray: zoomed image.
+
+    """
+    interpolator = nearest_neighbor.Interpolator(image)
     return interpolator.magnify(magnification)
 
 
