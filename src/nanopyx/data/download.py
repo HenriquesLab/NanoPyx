@@ -8,13 +8,13 @@ import wget
 import yaml
 from onedrivedownloader import download as onedrive_download
 
-from nanopyx.core.io.zip_image_loader import ZipTiffIterator
+from ..core.io.zip_image_loader import ZipTiffIterator
+from ..core.io.checksum import get_checksum
 
-from ...core.io.checksum import get_checksum
-
+from .examples import get_path as get_examples_path
 
 class ExampleDataManager:
-    _base_bath = os.path.split(__file__)[0]
+    _base_bath = get_examples_path()
     _temp_dir = os.path.join(tempfile.gettempdir(), "nanopix_data")
     _to_download_path = None
 
@@ -136,27 +136,6 @@ class ExampleDataManager:
         if not os.path.exists(info_path):
             shutil.copyfile(info["info_path"], info_path)
 
-    def download_zarr(self, dataset_name: str) -> str:
-        """
-        Downloads the zarr dataset and returns the path to the zarr file
-        """
-
-        info = self.get_dataset_info(dataset_name)
-        path = os.path.join(self._to_download_path, info["label"])
-
-        file_path_zip = os.path.join(path, "dataset.zarr.zip")
-        file_path_zarr = os.path.join(path, "dataset.zarr")
-        if os.path.exists(file_path_zarr):
-            return file_path_zarr
-
-        url = info["zarr_url"]
-        download_type = info["zarr_url_type"]
-        self._copy_auxiliary_files(info)
-        self._download(url, file_path_zip, download_type, unzip=True)
-        info["zarr_path"] = file_path_zarr
-
-        return file_path_zarr
-
     def download_tiff_sequence(self, dataset_name: str) -> str:
         """
         Downloads the tiff sequence and returns the path to the zip file
@@ -174,16 +153,9 @@ class ExampleDataManager:
 
         return file_path
 
-    # def get_zarr(self, dataset_name: str) -> zarr.hierarchy.Group:
-    #     """
-    #     Downloads the zarr dataset and returns the zarr group
-    #     """
-    #     self._show_citation_notice(dataset_name)
-    #     file_path = self.download_zarr(dataset_name)
-    #     z = zarr.open(file_path, mode="r")
-    #     return z
-
-    def get_ZipTiffIterator(self, dataset_name: str, as_ndarray: bool = False) -> ZipTiffIterator:
+    def get_ZipTiffIterator(
+        self, dataset_name: str, as_ndarray: bool = False
+    ) -> ZipTiffIterator:
         """
         Downloads the tiff sequence and returns the ZipTiffIterator
 
@@ -195,7 +167,7 @@ class ExampleDataManager:
         file_path = self.download_tiff_sequence(dataset_name)
         zti = ZipTiffIterator(file_path)
         if not as_ndarray:
-            return zti      
+            return zti
         else:
             arr = np.asarray(zti)
             zti.close()

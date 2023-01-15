@@ -67,10 +67,9 @@ jupyter = [
     "nbformat>=4.2.0",
     "plotly>=5.11.0",
 ]
-#doc = [
-#  "sphinx",
-#  "furo"
-#]
+doc = [
+    "pdoc>=12.3.1"
+]
 
 [project.urls]
 #homepage = "https://example.com"
@@ -83,6 +82,7 @@ bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 reportUndefinedVariable = false
 
 [tool.pytest.ini_options]
-addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --ignore=notebooks/drift_correction_notebook.ipynb"
+addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-glob='src/nanopyx/**/*.py' --ignore=notebooks/drift_correction_notebook.ipynb"
 timeout = 240
 plt_dirname = "tests_plots"
+doctest_encoding = "latin1"

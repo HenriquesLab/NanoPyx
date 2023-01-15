@@ -1,4 +1,4 @@
-from nanopyx.data.examples.download import ExampleDataManager
+from nanopyx.data.download import ExampleDataManager
 from nanopyx.core.io.zip_image_loader import ZipTiffIterator
 
 

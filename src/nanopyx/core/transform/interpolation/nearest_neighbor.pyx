@@ -41,7 +41,7 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
 
 cdef class Interpolator:
 
-    def __init__(self, np.ndarray image):
+    def __init__(self, image):
         """
         Interpolate a 2D array
 
@@ -50,11 +50,18 @@ cdef class Interpolator:
         image : 2D array
             The image to interpolate.
         """
-        self.image = image.view(np.float32)
+
+        assert image.ndim == 2, "image must be 2D"
+        
+        if type(image) is np.ndarray:
+            self.image = image.view(np.float32)
+            self.original_dtype = image.dtype
+        else: # assume its a memoryview
+            self.image = image
+            self.original_dtype = np.float32
+
         self.w = image.shape[1]
         self.h = image.shape[0]
-        self.original_dtype = image.dtype
-
 
     cdef float _interpolate(self, float x, float y) nogil:
         return _interpolate(self.image, x, y)
@@ -77,16 +84,16 @@ cdef class Interpolator:
 
     cdef float[:,:] _magnify(self, float magnification):
         cdef int i, j
-        cdef int w2 = int(self.w * magnification)
-        cdef int h2 = int(self.h * magnification)
+        cdef int wM = int(self.w * magnification)
+        cdef int hM = int(self.h * magnification)
         cdef float x, y
 
-        cdef float[:,:] imMagnified = np.empty((h2, w2), dtype=np.float32)
+        cdef float[:,:] imMagnified = np.empty((hM, wM), dtype=np.float32)
 
         with nogil:
-            for i in prange(w2):
+            for i in prange(wM):
                 x = i / magnification
-                for j in range(h2):
+                for j in range(hM):
                     y = j / magnification
                     imMagnified[j, i] = self._interpolate(x, y)
         
@@ -110,12 +117,12 @@ cdef class Interpolator:
 
 
     cdef float[:,:] _shift(self, float dx, float dy):
+        
+        cdef float[:,:] imShifted = np.zeros((self.h, self.w), dtype=np.float32)
+        
         cdef int i, j
         cdef int _dx = int(dx)
         cdef int _dy = int(dy)
-
-        cdef float[:,:] imShifted = np.zeros((self.h, self.w), dtype=np.float32)
-
         cdef int x_start = max(0, _dx)
         cdef int y_start = max(0, _dy)
         cdef int x_end = min(self.w, self.w + _dx)

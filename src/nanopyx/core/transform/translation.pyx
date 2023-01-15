@@ -15,12 +15,10 @@ def translate_array(float[:, :, :] img_arr, float[:, :] drift_t):
 
     cdef int n_slices = img_arr.shape[0]
     cdef float drift_x, drift_y
-    cdef float[:,:] tmp
 
     for i in range(n_slices):
         drift_x = drift_t[i][1]
         drift_y = drift_t[i][2]
-        tmp = Interpolator(img_arr[i])._shift(drift_y, drift_x)
-        img_arr[i,  :, :] = tmp
+        img_arr[i,  :, :] = Interpolator(img_arr[i])._shift(drift_y, drift_x)
 
     return img_arr

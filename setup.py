@@ -183,7 +183,7 @@ print("""
       )   (
      /     \\
     (   9   ) 
-   (_\_____/_) compiling the NanoPyx library...
+   (_\_____/_) compiling the 🔬🐷 NanoPyx library... 
 """)
 
 # cython options
