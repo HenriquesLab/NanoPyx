@@ -13,6 +13,7 @@ from ..core.io.checksum import get_checksum
 
 from .examples import get_path as get_examples_path
 
+
 class ExampleDataManager:
     _base_bath = get_examples_path()
     _temp_dir = os.path.join(tempfile.gettempdir(), "nanopix_data")
@@ -20,8 +21,12 @@ class ExampleDataManager:
 
     def __init__(self, to_download_path: str = None):
         """
-        If to_download_path is None, a temporary directory will be created.
-        Note that it will not be automatically deleted.
+        Helper class for downloading example test data
+
+        :param to_download_path: path to download the data to. If to_download_path is None, a temporary directory will be created. Note that it will not be automatically deleted.
+        :type to_download_path: str, optional
+        :raises ValueError: If to_download_path is not None and does not exist
+
         To clear downloads use self._clear_download()
         """
 
@@ -79,22 +84,24 @@ class ExampleDataManager:
 
     def list_datasets(self) -> tuple[list]:
         """
-        Returns a list of dataset labels
+        :return: list of dataset labels
         """
         return [dataset["label"] for dataset in self._datasets]
 
     def list_datasets_nickname(self) -> tuple[list]:
         """
-        Returns a list of dataset labels
+        :return: list of dataset nicknames
         """
-        return [(dataset["nickname"], dataset["label"]) for dataset in self._datasets]
+        return [
+            (dataset["nickname"], dataset["label"])
+            for dataset in self._datasets
+        ]
 
     def get_dataset_info(self, dataset_name: str) -> dict:
         """
-        Returns a dictionary with information about the dataset
-
-        Parameters
-            dataset_name (str): can be a dataset label or nickname
+        :param dataset_name: can be a dataset label or nickname
+        :type dataset_name: str
+        :return: dictionary with information about the dataset
         """
         for dataset in self._datasets:
             if dataset_name in (dataset["label"], dataset["nickname"]):
@@ -139,6 +146,10 @@ class ExampleDataManager:
     def download_tiff_sequence(self, dataset_name: str) -> str:
         """
         Downloads the tiff sequence and returns the path to the zip file
+
+        :param dataset_name: can be a dataset label or nickname
+        :type dataset_name: str
+        :return: path to the zip file
         """
         info = self.get_dataset_info(dataset_name)
         path = os.path.join(self._to_download_path, info["label"])
@@ -159,9 +170,11 @@ class ExampleDataManager:
         """
         Downloads the tiff sequence and returns the ZipTiffIterator
 
-        Parameters
-            dataset_name (str): can be a dataset label or nickname
-            as_ndarray (bool): if True, returns a numpy array instead of a ZipTiffIterator
+        :param dataset_name: can be a dataset label or nickname
+        :type dataset_name: str
+        :param as_ndarray: if True, returns a numpy array instead of a ZipTiffIterator
+        :type as_ndarray: bool
+        :return: ZipTiffIterator or numpy array
         """
         self._show_citation_notice(dataset_name)
         file_path = self.download_tiff_sequence(dataset_name)
@@ -176,6 +189,10 @@ class ExampleDataManager:
     def get_thumbnail(self, dataset_name: str) -> str:
         """
         Returns the path to the thumbnail
+
+        :param dataset_name: can be a dataset label or nickname
+        :type dataset_name: str
+        :return: path to the thumbnail
         """
         info = self.get_dataset_info(dataset_name)
         return info["thumbnail_path"]

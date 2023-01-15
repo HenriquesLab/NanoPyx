@@ -1,3 +1,7 @@
+"""
+Combination of functions for shifting an image, using several interpolation methods.
+"""
+
 from scipy.ndimage import shift
 import numpy as np
 

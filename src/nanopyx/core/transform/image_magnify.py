@@ -1,14 +1,20 @@
+"""
+Combination of functions for zooming an image, using several interpolation methods.
+"""
+
 import numpy as np
-from cv2 import INTER_LANCZOS4
-from cv2 import resize as cv2_resize
 from scipy.ndimage import zoom
 from skimage.transform import rescale
 
 from ..utils.time.timeit import timeit2
-from .interpolation import bicubic, bilinear, catmull_rom, fft_zoom, lanczos, nearest_neighbor
-
-# from scipy.stats import \
-#    linregress  # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html
+from .interpolation import (
+    bicubic,
+    bilinear,
+    catmull_rom,
+    fft_zoom,
+    lanczos,
+    nearest_neighbor,
+)
 
 
 @timeit2
@@ -16,13 +22,9 @@ def fourier_zoom_2d(image: np.ndarray, magnification: float = 2):
     """
     Zoom an image by zero-padding its Discrete Fourier transform.
 
-    Args:
-        image (np.ndarray): 2D grid of pixel values.
-        magnification (float): Factor by which to multiply the dimensions of the image.
-            Must be >= 1.
-
-    Returns:
-        np.ndarray: zoomed image.
+    :param image: 2D grid of pixel values.
+    :param magnification: Factor by which to multiply the dimensions of the image.
+    :return: zoomed image.
 
     REF: based on https://github.com/centreborelli/fourier
     Credit goes to Carlo de Franchis <carlo.de-franchis@ens-paris-saclay.fr>
@@ -102,6 +104,7 @@ def bilinear_zoom(image: np.ndarray, magnification: int = 2):
     interpolator = bilinear.Interpolator(image)
     return interpolator.magnify(magnification)
 
+
 @timeit2
 def nearest_neighbor_zoom(image: np.ndarray, magnification: int = 2):
     """
@@ -170,7 +173,13 @@ def cv2_zoom(image: np.ndarray, magnification: int = 2):
         np.ndarray: zoomed image.
 
     """
+    from cv2 import INTER_LANCZOS4
+    from cv2 import resize as cv2_resize
 
     return cv2_resize(
-        image, None, fx=magnification, fy=magnification, interpolation=INTER_LANCZOS4
+        image,
+        None,
+        fx=magnification,
+        fy=magnification,
+        interpolation=INTER_LANCZOS4,
     )

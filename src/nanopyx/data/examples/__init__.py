@@ -1,11 +1,16 @@
 """
-Place-holder for containing the example test data
+Placeholder for containing the example test data. Within this package folder is the metadata information for each test dataset. 
 
-Use the `download` module as the main mechanism for downloading the example data.
+For example
 
-""" 
+>>> import os, glob
+>>> path = get_path()
+>>> "/".join(path.split(os.path.sep)[-3:])
+'nanopyx/data/examples'
+"""
 
 import os
+
 
 def get_path():
     """
