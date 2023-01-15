@@ -5,7 +5,7 @@ from scipy.ndimage import zoom
 from skimage.transform import rescale
 
 from ..utils.time.timeit import timeit2
-from .interpolation import bicubic, catmull_rom, fft_zoom, lanczos
+from .interpolation import bicubic, bilinear, catmull_rom, fft_zoom, lanczos
 
 # from scipy.stats import \
 #    linregress  # https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html
@@ -45,7 +45,8 @@ def catmull_rom_zoom(image: np.ndarray, magnification: int = 2):
 
     REF: based on https://github.com/HenriquesLab/NanoJ-SRRF/blob/master/SRRF/src/nanoj/srrf/java/SRRF.java
     """
-    return catmull_rom.magnify(image, magnification)
+    interpolator = catmull_rom.Interpolator(image)
+    return interpolator.magnify(magnification)
 
 
 @timeit2
@@ -62,7 +63,8 @@ def lanczos_zoom(image: np.ndarray, magnification: int = 2, taps: int = 3):
     Returns:
         np.ndarray: zoomed image.
     """
-    return lanczos.magnify(image, magnification, taps)
+    interpolator = lanczos.Interpolator(image, taps)
+    return interpolator.magnify(magnification)
 
 
 @timeit2
@@ -79,7 +81,26 @@ def bicubic_zoom(image: np.ndarray, magnification: int = 2):
         np.ndarray: zoomed image.
 
     """
-    return bicubic.magnify(image, magnification)
+    interpolator = bicubic.Interpolator(image)
+    return interpolator.magnify(magnification)
+
+
+@timeit2
+def bilinear_zoom(image: np.ndarray, magnification: int = 2):
+    """
+    Zoom an image by bilinear interpolation
+
+    Args:
+        image (np.ndarray): 2D grid of pixel values.
+        magnification (float): Factor by which to multiply the dimensions of the image.
+            Must be >= 1.
+
+    Returns:
+        np.ndarray: zoomed image.
+
+    """
+    interpolator = bilinear.Interpolator(image)
+    return interpolator.magnify(magnification)
 
 
 @timeit2

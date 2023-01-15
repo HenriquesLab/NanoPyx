@@ -1,6 +1,7 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
 
 from libc.math cimport sqrt, pi, floor, fabs, cos, sin
+from libc.stdlib cimport free
 
 import numpy as np
 cimport numpy as np
@@ -31,6 +32,11 @@ cdef class CalculateRadiality:
             for angleIter in range(self.nRingCoordinates):
                 self.xRingCoordinates[angleIter] = cos(angleStep * angleIter) * self.ringRadius
                 self.yRingCoordinates[angleIter] = sin(angleStep * angleIter) * self.ringRadius
+
+    def __dealloc__(self):
+        if self.xRingCoordinates is not NULL:
+            free(self.xRingCoordinates)
+            free(self.yRingCoordinates)
 
     def calculate(self, im: np.ndarray):
         assert im.ndim == 3

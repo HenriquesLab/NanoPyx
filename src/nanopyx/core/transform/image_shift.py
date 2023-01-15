@@ -2,7 +2,7 @@ from scipy.ndimage import shift
 import numpy as np
 
 from ..utils.time.timeit import timeit2
-from .interpolation import bicubic, catmull_rom, lanczos
+from .interpolation import bicubic, bilinear, catmull_rom, lanczos
 
 from skimage.transform import AffineTransform, warp
 import cv2
@@ -10,18 +10,27 @@ import cv2
 
 @timeit2
 def catmull_rom_shift(image: np.ndarray, dx: float, dy: float):
-    return catmull_rom.shift(image, dx, dy)
+    interpolator = catmull_rom.Interpolator(image)
+    return interpolator.shift(dx, dy)
 
 
 @timeit2
 def lanczos_shift(image: np.ndarray, dx: float, dy: float, taps: int = 3):
-    return lanczos.shift(image, dx, dy, taps)
+    interpolator = lanczos.Interpolator(image, taps)
+    return interpolator.shift(dx, dy)
 
 
 @timeit2
 def bicubic_shift(image: np.ndarray, dx: float, dy: float):
-    return bicubic.shift(image, dx, dy)
+    interpolator = bicubic.Interpolator(image)
+    return interpolator.shift(dx, dy)
 
+
+@timeit2
+def bilinear_shift(image: np.ndarray, dx: float, dy: float):
+    interpolator = bilinear.Interpolator(image)
+    return interpolator.shift(dx, dy)
+    
 
 @timeit2
 def scipy_shift(image: np.ndarray, dx: float, dy: float):

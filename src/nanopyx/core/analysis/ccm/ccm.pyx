@@ -1,4 +1,4 @@
-# nanopyx: autogen-pxd=True
+# nanopyx: autogen_pxd=True
 
 import numpy as np
 cimport numpy as np

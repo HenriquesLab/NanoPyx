@@ -1,5 +1,5 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
-# nanopyx: autogen-pxd=True
+# nanopyx: autogen_pxd=True
 
 from libc.math cimport fabs
 

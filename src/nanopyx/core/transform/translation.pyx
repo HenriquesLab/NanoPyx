@@ -5,7 +5,7 @@ cimport numpy as np
 
 from cython.parallel import prange
 
-from .interpolation.catmull_rom cimport _shift
+from .interpolation.catmull_rom cimport Interpolator
 
 
 def translate_array(float[:, :, :] img_arr, float[:, :] drift_t):
@@ -20,7 +20,7 @@ def translate_array(float[:, :, :] img_arr, float[:, :] drift_t):
     for i in range(n_slices):
         drift_x = drift_t[i][1]
         drift_y = drift_t[i][2]
-        tmp = _shift(img_arr[i], drift_y, drift_x)
+        tmp = Interpolator(img_arr[i])._shift(drift_y, drift_x)
         img_arr[i,  :, :] = tmp
 
     return img_arr

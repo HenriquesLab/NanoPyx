@@ -1,4 +1,5 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True
+# nanopyx: autogen_pxd=False
 
 from libc.math cimport pi, fabs, sin, floor, ceil, M_PI
 
@@ -6,6 +7,8 @@ import numpy as np
 cimport numpy as np
 
 from cython.parallel import prange
+
+from .nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
 
 cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     """
@@ -79,91 +82,11 @@ cdef double _lanczos_kernel(double x, int taps) nogil:
         return 0.0
 
 
-def magnify(np.ndarray im, int magnification, int taps):
-    """
-    Magnify a 2D image using the Lanczos interpolation method.
-    
-    Parameters:
-        im (np.ndarray): The 2D image to magnify.
-        magnification (int): The magnification factor.
-        taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
-        
-    Returns:
-        The magnified image.
-    """
-    assert im.ndim == 2
-    imMagnified = _magnify(im.astype(np.float32), magnification, taps)
-    return np.asarray(imMagnified).astype(im.dtype)
+cdef class Interpolator(InterpolatorNearestNeighbor):
 
+    def __init__(self, image, int taps=3):
+        super().__init__(image)
+        self.taps = taps
 
-cdef float[:,:] _magnify(float[:,:] image, int magnification, int taps):
-    """
-    Magnify a 2D image using the Lanczos interpolation method.
-    
-    Parameters:
-        image (np.ndarray): The 2D image to magnify.
-        magnification (int): The magnification factor.
-        taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
-    """
-    cdef int i, j
-    cdef int w = image.shape[1]
-    cdef int h = image.shape[0]
-    cdef int w2 = int(w * magnification)
-    cdef int h2 = int(h * magnification)
-    cdef float x, y
-
-    cdef float[:,:] imMagnified = np.empty((h2, w2), dtype=np.float32)
-
-    with nogil:
-        for i in prange(w2):
-            x = i / magnification
-            for j in range(h2):
-                y = j / magnification
-                imMagnified[j, i] = _interpolate(image, x, y, taps)
-    
-    return imMagnified
-
-
-def shift(np.ndarray im, double dx, double dy, int taps):
-    """
-    Shift a 2D image using the Lanczos interpolation method.
-
-    Parameters:
-        im (np.ndarray): The 2D image to shift.
-        dx (float): The amount to shift the image in the x direction.
-        dy (float): The amount to shift the image in the y direction.
-        taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
-    """
-    assert im.ndim == 2
-    imShifted = _shift(im.astype(np.float32), dx, dy, taps)
-    return np.asarray(imShifted).astype(im.dtype)
-
-
-cdef float[:,:] _shift(float[:,:] im, double dx, double dy, int taps):
-    """
-    Shift a 2D image using the Lanczos interpolation method.
-
-    Parameters:
-        im (np.ndarray): The 2D image to shift.
-        dx (float): The amount to shift the image in the x direction.
-        dy (float): The amount to shift the image in the y direction.
-        taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
-    """
-    cdef int w = im.shape[1]
-    cdef int h = im.shape[0]
-    cdef int i, j
-    cdef int _dx = int(dx)
-    cdef int _dy = int(dy)
-
-    cdef float[:,:] imShifted = np.zeros((h, w), dtype=np.float32)
-
-    cdef int x_start = max(0, _dx)
-    cdef int y_start = max(0, _dy)
-    cdef int x_end = min(w, w + _dx)
-    cdef int y_end = min(h, h + _dy)
-    
-    for i in range(x_start, x_end):
-        for j in range(y_start, y_end):
-            imShifted[j,i] = _interpolate(im, i - dx, j - dy, taps)
-
-    return imShifted 
+    cdef float _interpolate(self, float x, float y) nogil:
+        return _interpolate(self.image, x, y, self.taps)

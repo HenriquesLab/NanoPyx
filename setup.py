@@ -5,6 +5,7 @@ import subprocess
 import sys
 
 from Cython.Build import cythonize
+from Cython.Compiler import Options
 from setuptools import Extension, setup
 import setuptools
 
@@ -184,6 +185,10 @@ print("""
     (   9   ) 
    (_\_____/_) compiling the NanoPyx library...
 """)
+
+# cython options
+# REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options
+Options.cimport_from_pyx = False
 
 setup(
     build_ext={"inplace": 1},

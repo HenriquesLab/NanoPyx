@@ -24,31 +24,57 @@ def autogenerate_pxd_files(filename):
     ext = os.path.splitext(filename)[1]
     assert ext == ".pyx", "File must be a pyx file"
 
+    pxd_filename = os.path.splitext(filename)[0] + ".pxd"
+
     autogen = False
     cdefs = []
+
+    # extract pre-existing pxd imports
+    if os.path.exists(pxd_filename):
+        with open(pxd_filename, "r") as f:
+            pxd_file = f.read()
+            lines = pxd_file.splitlines()
+            ignore = False
+            for line in lines:
+                if "# autogen_pxd - ignore start" in line:
+                    ignore = True
+                elif "# autogen_pxd - ignore end" in line:
+                    ignore = False
+                
+                if line.startswith("from") or ignore:
+                    cdefs.append(line)
+                
+
+    cdefs.append("")
 
     # read the pyx file
     with open(filename, "r") as f:
         pyx_file = f.read()
         lines = pyx_file.splitlines()
 
-
         for line in lines:
-            if line.startswith("# nanopyx:") and "autogen-pxd=False" in line:
+            if line.startswith("# nanopyx:") and "autogen_pxd=False" in line:
                 return
-            elif line.startswith("# nanopyx:") and "autogen-pxd=True" in line:
+            elif line.startswith("# nanopyx:") and "autogen_pxd=True" in line:
                 autogen = True
-            elif line.startswith("cdef") and line.endswith(":") and "class" not in line:
+            elif line.startswith("cdef class"):
+                cdefs.append("")
+                cdefs.append(line)            
+            elif (line.startswith("cdef") or line.startswith("    cdef")) and line.endswith(":") and ")" in line:
                 cdefs.append(line[:-1])
+
+        cdefs.append("")
 
     if not autogen:
         return
 
     # write the pxd file
-    pxd_filename = os.path.splitext(filename)[0] + ".pxd"
-    with open(pxd_filename, "w") as f:
-        print("Autogenerating pxd file: ", pxd_filename)
-        f.write("\n".join(cdefs))
+    pxd_text = "\n".join(cdefs)
+
+    if not os.path.exists(pxd_filename) or open(pxd_filename).read() != pxd_text:
+        with open(pxd_filename, "w") as f:
+            print("Autogenerating pxd file: ", pxd_filename)
+            f.write("\n".join(cdefs))
 
 
 def main():
@@ -75,7 +101,6 @@ def main():
         "Install nanopyx test packages": "pip install -e .[test]",
         "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",
         "Build nanopyx source distribution": "python3 setup.py sdist",
-        "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Install coding tools": "pip install cython-lint",
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
     }
