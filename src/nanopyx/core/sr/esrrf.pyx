@@ -43,12 +43,12 @@ cdef class CalculateRGC:
 
         cdef int n
         for n in range(nFrames):
-            self.SingleFrameRGCMap(imRaw[n,:,:], imRad[n,:,:], imInt[n,:,:], imGx[n,:,:], imGy[n,:,:])
+            self.single_frame_RGC_map(imRaw[n,:,:], imRad[n,:,:], imInt[n,:,:], imGx[n,:,:], imGy[n,:,:])
 
         return imRad, imInt, imGx, imGy
 
 
-    cdef void SingleFrameRGCMap(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy):
+    cdef void single_frame_RGC_map(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy):
         cdef int w = imRaw.shape[0]
         cdef int h = imRaw.shape[1]
         cdef int magnification = self.magnification
@@ -56,7 +56,7 @@ cdef class CalculateRGC:
 
         imInt[:,:] = cv2_zoom(imRaw, self.magnification) # using the OpenCV2 interpolation
 
-        self._calculateGrad(imInt, imGx, imGy) # calculate gradients of the interpolated image
+        self._calculate_grad(imInt, imGx, imGy) # calculate gradients of the interpolated image
 
         for yM in range(magnification, h * magnification):
             for xM in range(magnification, w * magnification):
@@ -67,7 +67,7 @@ cdef class CalculateRGC:
 
 
 
-    cdef void _calculateGrad(self, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy): # Calculate gradients via Robert's cross
+    cdef void _calculate_grad(self, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy): # Calculate gradients via Robert's cross
         cdef int wInt = imInt.shape[0]
         cdef int hInt = imInt.shape[1]
 
@@ -78,7 +78,7 @@ cdef class CalculateRGC:
                 imGy[i,j] = -imInt[i,j-1] + imInt[i-1,j]
 
 
-    cdef float _calculateRGC(self, int xM, int yM, int w, int h, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy):
+    cdef float _calculateRGC(self, int xM, int yM, int w, int h, float[:,:] imGx, float[:,:] imGy):
         cdef float xc, yc
 
         cdef float vx, vy, Gx, Gy
@@ -114,7 +114,7 @@ cdef class CalculateRGC:
                             GdotR = Gx*dx + Gy*dy
 
                             if GdotR < 0: # if the vector is pointing inwards
-                                Dk = self.calculateDk(Gx, Gy, dx, dy, distance)
+                                Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
                                 RGC += Dk * distanceWeight
         RGC /= distanceWeightSum
         if RGC >= 0:
@@ -129,7 +129,7 @@ cdef class CalculateRGC:
         return (distance * exp((-distance * distance) / self.tSS)) ** 4
 
 
-    cdef float calculateDk(self, float Gx, float Gy, float dx, float dy, float distance) nogil:
+    cdef float _calculateDk(self, float Gx, float Gy, float dx, float dy, float distance) nogil:
         Dk = fabs(Gy * dx - Gx * dy) / sqrt(Gx * Gx + Gy * Gy) # GMag = sqrt(Gx*Gx + Gy*Gy)
         if isnan(Dk):
             Dk = distance
