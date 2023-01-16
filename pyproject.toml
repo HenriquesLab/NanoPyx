@@ -24,6 +24,7 @@ keywords = [
 authors = [
     { name = "Ricardo Henriques", email = "ricardo.jv.henriques@gmail.com" },
     { name = "Bruno Saraiva", email = "bruno.msaraiva2@gmail.com" },
+    { name = "Inês Cunha", email = "inescunha200@gmail.com" },
 ]
 maintainers = [{ name = "Bruno Saraiva", email = "bruno.msaraiva2@gmail.com" }]
 classifiers = [
