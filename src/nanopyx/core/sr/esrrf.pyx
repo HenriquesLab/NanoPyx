@@ -111,6 +111,7 @@ cdef class CalculateRGC:
                             Gx = _interpolate(imGx, (vx * self.magnification) / 2, (vy * self.magnification) / 2) # get interpolated value (in continuous space) via Catmull-Rom interpolation
                             Gy = _interpolate(imGy, (vx * self.magnification) / 2, (vy * self.magnification) / 2)
                             distanceWeight = self._calculateDW(distance)
+                            distanceWeightSum += distanceWeight
                             GdotR = Gx*dx + Gy*dy
 
                             if GdotR < 0: # if the vector is pointing inwards
