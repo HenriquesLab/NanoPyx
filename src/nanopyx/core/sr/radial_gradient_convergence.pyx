@@ -33,6 +33,24 @@ cdef class RadialGradientConvergence:
         self.tSO = 2 * sigma + 1
 
 
+    def calculate(self, im: np.ndarray):
+        assert im.ndim == 3
+
+        nFrames = im.shape[0]
+
+        cdef float [:,:,:] imRaw = im.astype(np.float32)
+        cdef float [:,:,:] imRad = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32)
+        cdef float [:,:,:] imInt = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32) # interpolated image
+        cdef float [:,:,:] imGx = np.zeros_like(imInt) # Gradient of the interpolated image
+        cdef float [:,:,:] imGy = np.zeros_like(imInt)
+
+        cdef int n
+        for n in range(nFrames):
+            self.single_frame_RGC_map(imRaw[n,:,:], imRad[n,:,:], imInt[n,:,:], imGx[n,:,:], imGy[n,:,:])
+
+        return imRad, imInt, imGx, imGy
+
+
     cdef void _single_frame_RGC_map(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy):
         cdef int w = imRaw.shape[1]
         cdef int h = imRaw.shape[0]
