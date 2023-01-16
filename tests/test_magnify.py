@@ -3,7 +3,7 @@ import numpy as np
 from nanopyx.core.transform.binning import rebin_2d
 from nanopyx.core.transform.image_magnify import (bicubic_zoom,
                                                   catmull_rom_zoom, cv2_zoom,
-                                                  fourier_zoom_2d, lanczos_zoom,
+                                                  fourier_zoom, lanczos_zoom,
                                                   scipy_zoom, skimage_zoom)
 
 
@@ -12,7 +12,7 @@ def test_fourier_zoom(random_image_with_ramp, plt):
     assert imageDownsampled.shape[0] == random_image_with_ramp.shape[0] / 2
     assert imageDownsampled.shape[1] == random_image_with_ramp.shape[1] / 2
 
-    imageMagnified = fourier_zoom_2d(imageDownsampled, 2)
+    imageMagnified = fourier_zoom(imageDownsampled, 2)
     assert imageMagnified.shape[0] == random_image_with_ramp.shape[0]
     assert imageMagnified.shape[1] == random_image_with_ramp.shape[1]
     np.testing.assert_allclose(imageMagnified, random_image_with_ramp, rtol=10, atol=10)
