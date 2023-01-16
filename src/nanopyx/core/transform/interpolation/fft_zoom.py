@@ -10,7 +10,6 @@ def magnify(image: np.ndarray, magnification: float = 2, enforce_same_value: boo
     :return: zoomed image
 
     REF: based on https://github.com/centreborelli/fourier
-    Credit goes to Carlo de Franchis <carlo.de-franchis@ens-paris-saclay.fr>
     """
     w, h = image.shape
 

@@ -53,7 +53,7 @@ if sys.platform == "win32":
 elif sys.platform == "darwin":
     # Lets check if homebrew is installed
     use_openmp_support = True
-    print("Checking for openmp support, to run code blazing fast!!!")
+    print("Checking for openmp support, to run code... ─=≡Σ((( つ◕ل͜◕)つ... blazing fast!!! ")
     if is_xcode_installed():
         print("\t - xcode instalation detected...")
         if is_homebrew_installed():
@@ -175,16 +175,7 @@ def collect_extensions():
 
     return collected_extensions
 
-print("""
-      _   _
-     \_/-\_/
-      )   (
-     (     )
-      )   (
-     /     \\
-    (   9   ) 
-   (_\_____/_) compiling the NanoPyx 🔬 Library... 🐷
-""")
+print("\nCompiling the NanoPyx 🔬 Library... |-- n🐷 --| \n")
 
 # cython options
 # REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options
