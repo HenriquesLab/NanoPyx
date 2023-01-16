@@ -3,18 +3,14 @@ Combination of functions for zooming an image, using several interpolation metho
 """
 
 import numpy as np
+from cv2 import INTER_LANCZOS4
+from cv2 import resize as cv2_resize
 from scipy.ndimage import zoom
 from skimage.transform import rescale
 
 from ..utils.time.timeit import timeit2
-from .interpolation import (
-    bicubic,
-    bilinear,
-    catmull_rom,
-    fft_zoom,
-    lanczos,
-    nearest_neighbor,
-)
+from .interpolation import (bicubic, bilinear, catmull_rom, fft_zoom, lanczos,
+                            nearest_neighbor)
 
 
 @timeit2
@@ -173,9 +169,6 @@ def cv2_zoom(image: np.ndarray, magnification: int = 2):
         np.ndarray: zoomed image.
 
     """
-    from cv2 import INTER_LANCZOS4
-    from cv2 import resize as cv2_resize
-
     return cv2_resize(
         image,
         None,
