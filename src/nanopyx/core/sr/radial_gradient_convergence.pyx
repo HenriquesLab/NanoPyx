@@ -4,6 +4,7 @@ from libc.math cimport sqrt, fabs, exp, isnan, floor
 
 from ..transform.interpolation.catmull_rom cimport _interpolate
 from ..transform.image_magnify import cv2_zoom as zoom
+# from ..transform.image_magnify import fourier_zoom as zoom
 
 import numpy as np
 cimport numpy as np
@@ -22,18 +23,30 @@ cdef class RadialGradientConvergence:
     cdef bint doIntensityWeighting
 
 
-    def __init__(self, magnification: int, full_width_half_maximum: float, sensitivity: float, doIntensityWeighting: bool):
+    def __init__(self, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True):
+        """
+        Calculate the Radial Gradient Convergence (RGC) of an image.
+        :param magnification: magnification of the image
+        :param radius: radius of the RGC (the PSF Full-Width-Half-Maximum)
+        :param sensitivity: sensitivity of the RGC (sharpening factor)
+        :param doIntensityWeighting: whether to do intensity weighting
+        """
         self.magnification = magnification
-        self.fwhm = full_width_half_maximum
+        self.fwhm = radius
         self.sensitivity = sensitivity
         self.doIntensityWeighting = doIntensityWeighting
         
-        cdef float sigma = full_width_half_maximum / 2.355
+        cdef float sigma = radius / 2.355
         self.tSS = 2 * sigma * sigma
         self.tSO = 2 * sigma + 1
 
 
     def calculate(self, im: np.ndarray):
+        """
+        Calculate the RGC of an image-stack.
+        :param im: the image to calculate the RGC of
+        :return: the RGC of the image
+        """
         assert im.ndim == 3
 
         nFrames = im.shape[0]
@@ -46,7 +59,7 @@ cdef class RadialGradientConvergence:
 
         cdef int n
         for n in range(nFrames):
-            self.single_frame_RGC_map(imRaw[n,:,:], imRad[n,:,:], imInt[n,:,:], imGx[n,:,:], imGy[n,:,:])
+            self._single_frame_RGC_map(imRaw[n,:,:], imRad[n,:,:], imInt[n,:,:], imGx[n,:,:], imGy[n,:,:])
 
         return imRad, imInt, imGx, imGy
 
@@ -57,12 +70,12 @@ cdef class RadialGradientConvergence:
         cdef int magnification = self.magnification
         cdef int yM, xM
 
-        imInt[:,:] = zoom(imRaw, self.magnification) # using the OpenCV2 interpolation
+        imInt[:,:] = zoom(np.asarray(imRaw), self.magnification) # using the OpenCV2 interpolation
 
         self._calculate_gradient(imInt, imGx, imGy) # calculate gradients of the interpolated image
 
         with nogil:
-            for yM in prange(magnification, h * magnification):
+            for yM in range(magnification, h * magnification):
                 for xM in range(magnification, w * magnification):
                     if self.doIntensityWeighting:
                         imRad[yM, xM] = self._calculateRGC(xM, yM, w, h, imGx, imGy)
@@ -143,6 +156,7 @@ cdef class RadialGradientConvergence:
 
     cdef float _calculateDW(self, float distance) nogil: # distance weight
         return (distance * exp((-distance * distance) / self.tSS)) ** 4
+
 
 
     cdef float _calculateDk(self, float Gx, float Gy, float dx, float dy, float distance) nogil:
