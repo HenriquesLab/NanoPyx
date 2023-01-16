@@ -61,9 +61,9 @@ cdef class CalculateRGC:
         for yM in range(magnification, h * magnification):
             for xM in range(magnification, w * magnification):
                 if self.doIntWeighting:
-                    imRad[xM, yM] = self._calculateRGC(xM, yM, w, h, imInt, imGx, imGy)
+                    imRad[xM, yM] = self._calculateRGC(xM, yM, w, h, imGx, imGy)
                 else:
-                    imRad[xM, yM] = self._calculateRGC(xM, yM, w, h, imInt, imGx, imGy) * imInt[xM, yM]
+                    imRad[xM, yM] = self._calculateRGC(xM, yM, w, h, imGx, imGy) * imInt[xM, yM]
 
 
 
