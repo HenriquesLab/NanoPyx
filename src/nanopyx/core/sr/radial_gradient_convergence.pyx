@@ -2,7 +2,7 @@
 
 from libc.math cimport sqrt, fabs, exp, isnan, floor
 
-from ..transform.interpolation.catmull_rom cimport _interpolate
+from ..transform.interpolation.catmull_rom cimport _interpolate, Interpolator
 from ..transform.image_magnify import cv2_zoom as zoom
 # from ..transform.image_magnify import fourier_zoom as zoom
 
@@ -70,17 +70,18 @@ cdef class RadialGradientConvergence:
         cdef int magnification = self.magnification
         cdef int yM, xM
 
-        imInt[:,:] = zoom(np.asarray(imRaw), self.magnification) # using the OpenCV2 interpolation
+        cdef Interpolator interpolator = Interpolator(imRaw)
+        imInt[:,:] = interpolator._magnify(self.magnification) # needs to be fixed to use FFT
 
         self._calculate_gradient(imInt, imGx, imGy) # calculate gradients of the interpolated image
 
         with nogil:
-            for yM in range(magnification, h * magnification):
+            for yM in prange(magnification, h * magnification):
                 for xM in range(magnification, w * magnification):
                     if self.doIntensityWeighting:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, w, h, imGx, imGy)
+                        imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy)
                     else:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, w, h, imGx, imGy) * imInt[xM, yM]
+                        imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy) * imInt[yM, xM]
 
 
     cdef void _calculate_gradient(self, float[:,:] image, float[:,:] imGx, float[:,:] imGy): # Calculate gradients via Robert's cross
@@ -101,7 +102,10 @@ cdef class RadialGradientConvergence:
                     # as in REF: https://github.com/HenriquesLab/NanoJ-eSRRF/blob/785c71b3bd508c938f63bb780cba47b0f1a5b2a7/resources/liveSRRF.cl under calculateGradient_2point
     
 
-    cdef float _calculateRGC(self, int xM, int yM, int w, int h, float[:,:] imGx, float[:,:] imGy) nogil:
+    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imGx, float[:,:] imGy) nogil:
+
+        cdef int w = imGx.shape[1]
+        cdef int h = imGx.shape[0]
         
         cdef float vx, vy, Gx, Gy
 
@@ -156,7 +160,6 @@ cdef class RadialGradientConvergence:
 
     cdef float _calculateDW(self, float distance) nogil: # distance weight
         return (distance * exp((-distance * distance) / self.tSS)) ** 4
-
 
 
     cdef float _calculateDk(self, float Gx, float Gy, float dx, float dy, float distance) nogil:
