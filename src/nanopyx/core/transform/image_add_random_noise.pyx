@@ -28,8 +28,7 @@ cdef double random() nogil:
 
 cdef double logFactorial(int x) nogil:
     """
-    Return the logarithm of the factorial of x. Uses Stirling's approximation for large
-    values.
+    Return the logarithm of the factorial of x. Uses Stirling's approximation for large values.
     """
     cdef double ans = 0
     cdef int i = 0
@@ -119,15 +118,9 @@ cdef double normalValue() nogil:
 def addMixedGaussianPoissonNoise(float[:,:] image, double gaussSigma, double gaussMean):
     """
     Add mixed Gaussian-Poisson noise to an image, pure cython version
-
-    Parameters
-    ----------
-    image : numpy.ndarray
-        The image to add noise to
-    gaussSigma : float
-        The standard deviation of the Gaussian noise
-    gaussMean : float
-        The mean of the Gaussian noise
+    :param image: The image to add noise to
+    :param gaussSigma: The standard deviation of the Gaussian noise
+    :param gaussMean: The mean of the Gaussian noise
     """
 
     cdef float v
@@ -145,15 +138,9 @@ def addMixedGaussianPoissonNoise(float[:,:] image, double gaussSigma, double gau
 def addMixedGaussianPoissonNoise2(np.ndarray image, double gaussSigma, double gaussMean):
     """
     Add mixed Gaussian-Poisson noise to an image, pure numpy version
-
-    Parameters
-    ----------
-    image : numpy.ndarray
-        The image to add noise to
-    gaussSigma : float
-        The standard deviation of the Gaussian noise
-    gaussMean : float
-        The mean of the Gaussian noise
+    :param image: The image to add noise to
+    :param gaussSigma: The standard deviation of the Gaussian noise
+    :param gaussMean: The mean of the Gaussian noise
     """
     shape = []
     for i in range(image.ndim):
@@ -164,27 +151,16 @@ def addMixedGaussianPoissonNoise2(np.ndarray image, double gaussSigma, double ga
 def addPerlinNoise(float[:,:] image, int amp=100, int offset = 100, float f = 100, int octaves = 1, float persistence = 0.5, float lacunarity = 2., float repeatx = 1024, float repeaty = 1024, int base = 0):
     """
     Add perlin noise to an image
-
-    Parameters
-    ----------
-    image : numpy.ndarray
-        The image to add noise to
-    amp : int
-        The amplitude of the noise
-    offset : int
-        The offset of the noise
-    f : float
-        The frequency of the noise
-    octaves : int
-        The number of octaves
-    persistence : float
-        The persistence of the noise
-    lacunarity : float
-        The lacunarity of the noise
-    repeatx : float
-        The repeat of the noise in the x direction
-    repeaty : float
-        The repeat of the noise in the y direction
+    :param image: The image to add noise to
+    :param amp: The amplitude of the noise
+    :param offset: The offset of the noise
+    :param f: The frequency of the noise
+    :param octaves: The number of octaves
+    :param persistence: The persistence of the noise
+    :param lacunarity: The lacunarity of the noise
+    :param repeatx: The repeat of the noise in the x direction
+    :param repeaty: The repeat of the noise in the y direction
+    :param base: The base of the noise
     """
     cdef double p
     cdef int w = image.shape[1]
@@ -205,29 +181,18 @@ def addPerlinNoise(float[:,:] image, int amp=100, int offset = 100, float f = 10
 def getPerlinNoise(w, h, amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
     """
     Return a perlin noise image
-
-    Parameters
-    ----------
-    w : int
-        The width of the image
-    h : int
-        The height of the image
-    amp : int
-        The amplitude of the noise
-    offset : int
-        The offset of the noise
-    f : float
-        The frequency of the noise
-    octaves : int
-        The number of octaves of the noise
-    persistence : float
-        The persistence of the noise
-    lacunarity : float
-        The lacunarity of the noise
-    repeatx : float
-        The repeat in x of the noise
-    repeaty : float
-        The repeat in y of the noise
+    :param w: The width of the image
+    :param h: The height of the image
+    :param amp: The amplitude of the noise
+    :param offset: The offset of the noise
+    :param f: The frequency of the noise
+    :param octaves: The number of octaves
+    :param persistence: The persistence of the noise
+    :param lacunarity: The lacunarity of the noise
+    :param repeatx: The repeat of the noise in the x direction
+    :param repeaty: The repeat of the noise in the y direction
+    :param base: The base of the noise
+    :return: The perlin noise image
     """
     image = np.zeros((w, h), dtype=np.float32)
     addPerlinNoise(image, amp, offset, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
@@ -238,15 +203,10 @@ def getSimplexNoise(int w, int h, int f = 1):
     """
     Return a simplex noise image
     REF: https://github.com/lmas/opensimplex
-
-    Parameters
-    ----------
-    w : int
-        The width of the image
-    h : int
-        The height of the image
-    f : int
-        The frequency of the noise
+    :param w: The width of the image
+    :param h: The height of the image
+    :param f: The frequency of the noise
+    :return: The simplex noise image
     """
 
     cdef float f_x = f
@@ -265,17 +225,10 @@ def getSimplexNoise(int w, int h, int f = 1):
 def addSquares(float[:,:] image, float vmax=100, float vmin=0, int nSquares=100):
     """
     Add random squares to an image
-
-    Parameters
-    ----------
-    image : numpy.ndarray
-        The image to add the squares to
-    vmax : float
-        The maximum value of the squares
-    vmin : float
-        The minimum value of the squares
-    nSquares : int
-        The number of squares to add
+    :param image: The image to add the squares to
+    :param vmax: The maximum intensity value of the squares
+    :param vmin: The minimum intensity value of the squares
+    :param nSquares: The number of squares to add
     """
     
     cdef int w = image.shape[1]
@@ -305,25 +258,14 @@ def addSquares(float[:,:] image, float vmax=100, float vmin=0, int nSquares=100)
 def getSquares(int w, int h, float vmax=100, float vmin=0, int nSquares=100):
     """
     Return an image with random squares
-
-    Parameters
-    ----------
-    w : int
-        Width of the image
-    h : int
-        Height of the image
-    vmax : float
-        Maximum value of the squares
-    vmin : float
-        Minimum value of the squares
-    nSquares : int
-        Number of squares to add
-
-    Returns
-    -------
-    image : np.ndarray
-        Image with random squares
+    :param w: The width of the image
+    :param h: The height of the image
+    :param vmax: The maximum intensity value of the squares
+    :param vmin: The minimum intensity value of the squares
+    :param nSquares: The number of squares to add
+    :return: The image with random squares
     """
+
     image = np.zeros((w, h), dtype='float32')
     addSquares(image, vmax, vmin, nSquares)
     return image
@@ -332,16 +274,11 @@ def getSquares(int w, int h, float vmax=100, float vmin=0, int nSquares=100):
 def addRamp(float[:,:] image, float vmax=100, float vmin=0):
     """
     Adds a ramp from vmin to vmax to the image
-
-    Parameters
-    ---------- 
-    image : numpy.ndarray
-        The image to add the ramp to
-    vmax : float
-        The maximum value of the ramp
-    vmin : float
-        The minimum value of the ramp
+    :param image: The image to add the ramp to
+    :param vmax: The maximum intensity value of the ramp
+    :param vmin: The minimum intensity value of the ramp
     """
+
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
     cdef float v
@@ -357,17 +294,11 @@ def addRamp(float[:,:] image, float vmax=100, float vmin=0):
 def getRamp(int w, int h, float vmax=100, float vmin=0):
     """
     Returns a 2D array of size (w, h) with a ramp from vmin to vmax
-
-    Parameters
-    ----------
-    w : int
-        Width of the image
-    h : int
-        Height of the image
-    vmax : float
-        Maximum value of the ramp
-    vmin : float
-        Minimum value of the ramp
+    :param w: The width of the image
+    :param h: The height of the image
+    :param vmax: The maximum intensity value of the ramp
+    :param vmin: The minimum intensity value of the ramp
+    :return: The image with the ramp
     """
     image = np.zeros((w, h), dtype='float32')
     addRamp(image, vmax, vmin)

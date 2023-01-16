@@ -93,14 +93,13 @@
     
             <div class="docstring"><p>Add mixed Gaussian-Poisson noise to an image, pure cython version</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>image : numpy.ndarray
-    The image to add noise to
-gaussSigma : float
-    The standard deviation of the Gaussian noise
-gaussMean : float
-    The mean of the Gaussian noise</p>
+<ul>
+<li><strong>image</strong>:  The image to add noise to</li>
+<li><strong>gaussSigma</strong>:  The standard deviation of the Gaussian noise</li>
+<li><strong>gaussMean</strong>:  The mean of the Gaussian noise</li>
+</ul>
 </div>
 
 
@@ -117,14 +116,13 @@ gaussMean : float
     
             <div class="docstring"><p>Add mixed Gaussian-Poisson noise to an image, pure numpy version</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>image : numpy.ndarray
-    The image to add noise to
-gaussSigma : float
-    The standard deviation of the Gaussian noise
-gaussMean : float
-    The mean of the Gaussian noise</p>
+<ul>
+<li><strong>image</strong>:  The image to add noise to</li>
+<li><strong>gaussSigma</strong>:  The standard deviation of the Gaussian noise</li>
+<li><strong>gaussMean</strong>:  The mean of the Gaussian noise</li>
+</ul>
 </div>
 
 
@@ -141,26 +139,20 @@ gaussMean : float
     
             <div class="docstring"><p>Add perlin noise to an image</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>image : numpy.ndarray
-    The image to add noise to
-amp : int
-    The amplitude of the noise
-offset : int
-    The offset of the noise
-f : float
-    The frequency of the noise
-octaves : int
-    The number of octaves
-persistence : float
-    The persistence of the noise
-lacunarity : float
-    The lacunarity of the noise
-repeatx : float
-    The repeat of the noise in the x direction
-repeaty : float
-    The repeat of the noise in the y direction</p>
+<ul>
+<li><strong>image</strong>:  The image to add noise to</li>
+<li><strong>amp</strong>:  The amplitude of the noise</li>
+<li><strong>offset</strong>:  The offset of the noise</li>
+<li><strong>f</strong>:  The frequency of the noise</li>
+<li><strong>octaves</strong>:  The number of octaves</li>
+<li><strong>persistence</strong>:  The persistence of the noise</li>
+<li><strong>lacunarity</strong>:  The lacunarity of the noise</li>
+<li><strong>repeatx</strong>:  The repeat of the noise in the x direction</li>
+<li><strong>repeaty</strong>:  The repeat of the noise in the y direction</li>
+<li><strong>base</strong>:  The base of the noise</li>
+</ul>
 </div>
 
 
@@ -177,28 +169,27 @@ repeaty : float
     
             <div class="docstring"><p>Return a perlin noise image</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>w : int
-    The width of the image
-h : int
-    The height of the image
-amp : int
-    The amplitude of the noise
-offset : int
-    The offset of the noise
-f : float
-    The frequency of the noise
-octaves : int
-    The number of octaves of the noise
-persistence : float
-    The persistence of the noise
-lacunarity : float
-    The lacunarity of the noise
-repeatx : float
-    The repeat in x of the noise
-repeaty : float
-    The repeat in y of the noise</p>
+<ul>
+<li><strong>w</strong>:  The width of the image</li>
+<li><strong>h</strong>:  The height of the image</li>
+<li><strong>amp</strong>:  The amplitude of the noise</li>
+<li><strong>offset</strong>:  The offset of the noise</li>
+<li><strong>f</strong>:  The frequency of the noise</li>
+<li><strong>octaves</strong>:  The number of octaves</li>
+<li><strong>persistence</strong>:  The persistence of the noise</li>
+<li><strong>lacunarity</strong>:  The lacunarity of the noise</li>
+<li><strong>repeatx</strong>:  The repeat of the noise in the x direction</li>
+<li><strong>repeaty</strong>:  The repeat of the noise in the y direction</li>
+<li><strong>base</strong>:  The base of the noise</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>The perlin noise image</p>
+</blockquote>
 </div>
 
 
@@ -216,14 +207,19 @@ repeaty : float
             <div class="docstring"><p>Return a simplex noise image
 REF: <a href="https://github.com/lmas/opensimplex">https://github.com/lmas/opensimplex</a></p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>w : int
-    The width of the image
-h : int
-    The height of the image
-f : int
-    The frequency of the noise</p>
+<ul>
+<li><strong>w</strong>:  The width of the image</li>
+<li><strong>h</strong>:  The height of the image</li>
+<li><strong>f</strong>:  The frequency of the noise</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>The simplex noise image</p>
+</blockquote>
 </div>
 
 
@@ -240,16 +236,14 @@ f : int
     
             <div class="docstring"><p>Add random squares to an image</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>image : numpy.ndarray
-    The image to add the squares to
-vmax : float
-    The maximum value of the squares
-vmin : float
-    The minimum value of the squares
-nSquares : int
-    The number of squares to add</p>
+<ul>
+<li><strong>image</strong>:  The image to add the squares to</li>
+<li><strong>vmax</strong>:  The maximum intensity value of the squares</li>
+<li><strong>vmin</strong>:  The minimum intensity value of the squares</li>
+<li><strong>nSquares</strong>:  The number of squares to add</li>
+</ul>
 </div>
 
 
@@ -266,23 +260,21 @@ nSquares : int
     
             <div class="docstring"><p>Return an image with random squares</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>w : int
-    Width of the image
-h : int
-    Height of the image
-vmax : float
-    Maximum value of the squares
-vmin : float
-    Minimum value of the squares
-nSquares : int
-    Number of squares to add</p>
+<ul>
+<li><strong>w</strong>:  The width of the image</li>
+<li><strong>h</strong>:  The height of the image</li>
+<li><strong>vmax</strong>:  The maximum intensity value of the squares</li>
+<li><strong>vmin</strong>:  The minimum intensity value of the squares</li>
+<li><strong>nSquares</strong>:  The number of squares to add</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>image : np.ndarray
-    Image with random squares</p>
+<blockquote>
+  <p>The image with random squares</p>
+</blockquote>
 </div>
 
 
@@ -299,14 +291,13 @@ nSquares : int
     
             <div class="docstring"><p>Adds a ramp from vmin to vmax to the image</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>image : numpy.ndarray
-    The image to add the ramp to
-vmax : float
-    The maximum value of the ramp
-vmin : float
-    The minimum value of the ramp</p>
+<ul>
+<li><strong>image</strong>:  The image to add the ramp to</li>
+<li><strong>vmax</strong>:  The maximum intensity value of the ramp</li>
+<li><strong>vmin</strong>:  The minimum intensity value of the ramp</li>
+</ul>
 </div>
 
 
@@ -323,16 +314,20 @@ vmin : float
     
             <div class="docstring"><p>Returns a 2D array of size (w, h) with a ramp from vmin to vmax</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>w : int
-    Width of the image
-h : int
-    Height of the image
-vmax : float
-    Maximum value of the ramp
-vmin : float
-    Minimum value of the ramp</p>
+<ul>
+<li><strong>w</strong>:  The width of the image</li>
+<li><strong>h</strong>:  The height of the image</li>
+<li><strong>vmax</strong>:  The maximum intensity value of the ramp</li>
+<li><strong>vmin</strong>:  The minimum intensity value of the ramp</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>The image with the ramp</p>
+</blockquote>
 </div>
 
 

@@ -2,6 +2,13 @@ import hashlib
 
 
 def get_checksum(file_path: str) -> str:
+    """
+    Returns the SHA-256 checksum of the file
+    :param file_path: path to the file
+    :type file_path: str
+    :return: checksum in hexadecimal format
+    :rtype: str
+    """
 
     # Open the file in binary mode
     with open(file_path, "rb") as file:

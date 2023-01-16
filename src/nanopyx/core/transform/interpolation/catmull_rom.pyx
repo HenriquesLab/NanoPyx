@@ -9,30 +9,23 @@ from .nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
 
 def interpolate(np.ndarray im, double x, double y) -> float:
     """
-    Interpolate image using Catmull-Rom interpolation.
-
-    im (np.ndarray): image to interpolate.
-    x (float): x-coordinate to interpolate at.
-    y (float): y-coordinate to interpolate at.
-
-    Returns:
-    Interpolated pixel value (float).
+    Interpolate image using Catmull-Rom interpolation
+    :param im: image to interpolate
+    :param x: x-coordinate to interpolate at
+    :param y: y-coordinate to interpolate at
+    :return: Interpolated pixel value (float)
     """
     return _interpolate(im.view(np.float32), x, y).astype(im.dtype)
 
 
 cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     """
-    Interpolate image using Catmull-Rom interpolation.
-
-    image (np.ndarray): image to interpolate.
-    x (float): x-coordinate to interpolate at.
-    y (float): y-coordinate to interpolate at.
-
-    Returns:
-    Interpolated pixel value (float).
+    Interpolate image using Catmull-Rom interpolation
+    :param image: image to interpolate
+    :param x: x-coordinate to interpolate at
+    :param y: y-coordinate to interpolate at
+    :return: Interpolated pixel value (float)
     """
-
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
 
@@ -72,14 +65,11 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
 cdef double _cubic(double x) nogil:
     """
     Cubic function used in Catmull-Rom interpolation.
-
-    x (float): input value.
-
-    Returns:
-    Output value of cubic function (float).
+    :param x: the input value
+    :return: the output value of cubic function (double)
     """
-    cdef float a = 0.5  # Catmull-Rom interpolation
-    cdef float z = 0
+    cdef double a = 0.5  # Catmull-Rom interpolation
+    cdef double z = 0
     if x < 0:
         x = -x
     if x < 1:

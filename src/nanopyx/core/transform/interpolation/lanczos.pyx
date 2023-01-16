@@ -12,16 +12,12 @@ from .nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
 
 cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     """
-    Interpolate the value of a 2D image at the given coordinates using the Lanczos interpolation method.
-    
-    Parameters:
-        image (np.ndarray): The 2D image to interpolate.
-        x (float): The x coordinate of the point to interpolate.
-        y (float): The y coordinate of the point to interpolate.
-        taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.
-        
-    Returns:
-        The interpolated value at the given coordinates.
+    Interpolate the value of a 2D image at the given coordinates using the Lanczos interpolation method
+    :param image: The 2D image to interpolate
+    :param x: The x coordinate of the point to interpolate
+    :param y: The y coordinate of the point to interpolate
+    :param taps: The number of taps (interpolation points) to use in the Lanczos kernel
+    :return: The interpolated value at the given coordinates
     """
 
     cdef int w = image.shape[1]
@@ -74,13 +70,9 @@ cdef double _lanczos_kernel(double x, int taps) nogil:
     """
     Calculate the Lanczos kernel (windowed sinc function) value for a given value.
     REF: https://en.wikipedia.org/wiki/Lanczos_resampling
-    
-    Parameters:
-        x (float): The value for which to calculate the kernel.
-        taps (int): The number of taps (interpolation points) in the kernel.
-        
-    Returns:
-        The kernel value for the given value.
+    :param x: The value for which to calculate the kernel.
+    :param taps: The number of taps (interpolation points) in the kernel.
+    :return: The kernel value for the given value.
     """
     if x == 0:
         return 1.0
@@ -93,8 +85,19 @@ cdef double _lanczos_kernel(double x, int taps) nogil:
 cdef class Interpolator(InterpolatorNearestNeighbor):
 
     def __init__(self, image, int taps=3):
+        """
+        Interpolate the value of a 2D image at the given coordinates using the Lanczos interpolation method
+        :param image: The 2D image to interpolate
+        :param taps: The number of taps (interpolation points) to use in the Lanczos kernel
+        """
         super().__init__(image)
         self.taps = taps
 
     cdef float _interpolate(self, float x, float y) nogil:
+        """
+        Interpolate the value of a 2D image at the given coordinates using the Lanczos interpolation method
+        :param x: The x coordinate of the point to interpolate
+        :param y: The y coordinate of the point to interpolate
+        :return: The interpolated value at the given coordinates
+        """
         return _interpolate(self.image, x, y, self.taps)

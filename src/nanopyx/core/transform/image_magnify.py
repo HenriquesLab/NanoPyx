@@ -18,7 +18,7 @@ from .interpolation import (
 
 
 @timeit2
-def fourier_zoom_2d(image: np.ndarray, magnification: float = 2):
+def fourier_zoom(image: np.ndarray, magnification: float = 2):
     """
     Zoom an image by zero-padding its Discrete Fourier transform.
 

@@ -12,6 +12,11 @@ class ZipTiffIterator:
     _im0 = None
 
     def __init__(self, zip_file_path: str):
+        """
+        Iterator to sequentially open tiff files contained in a zip file
+        :param zip_file_path: path to the zip file
+        :type zip_file_path: str
+        """
         self.zip_file_path = zip_file_path
         self.zip_file = zipfile.ZipFile(zip_file_path)
         self.tiff_file_names = [
@@ -49,14 +54,29 @@ class ZipTiffIterator:
         return self._im0
 
     def get_shape(self) -> list:
+        """
+        Returns the shape of the image stack
+        :return: shape of the image stack
+        :rtype: list
+        """
         self._get_im0()
         return self._shape
 
     def get_dtype(self) -> str:
+        """
+        Returns the data type of the image stack
+        :return: data type of the image stack
+        :rtype: str
+        """
         self._get_im0()
         return self._dtype
 
     def get_thumb(self, save_path=None):
+        """
+        Saves a thumbnail (first frame) of the image stack
+        :param save_path: path to save the thumbnail
+        :type save_path: str
+        """
         thumb = transform.resize(self._get_im0(), (64, 64))
         _max = thumb.max()
         _min = thumb.min()
@@ -66,4 +86,7 @@ class ZipTiffIterator:
             skimage.io.imsave(os.path.join(save_path, "thumbnail.jpg"), thumb)
 
     def close(self):
+        """
+        Closes the zip file
+        """
         self.zip_file.close()

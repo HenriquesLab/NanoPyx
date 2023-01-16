@@ -103,6 +103,7 @@ def main():
         if len(clean_files) > 0
         else "echo 'No files to clean'",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
+        "Run pdoc": "python -m pdoc src/nanopyx -o docs",
         "Install nanopyx in developer mode": "pip3 install -e .",
         "Install nanopyx test packages": "pip install -e .[test]",
         "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",

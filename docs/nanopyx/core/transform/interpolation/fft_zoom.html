@@ -59,48 +59,43 @@
 </span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a>
 </span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="k">def</span> <span class="nf">magnify</span><span class="p">(</span><span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">magnification</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">enforce_same_value</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="sd">    Zoom an image by zero-padding its Discrete Fourier transform.</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="sd">    Args:</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">        image (np.ndarray): 2D grid of pixel values.</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">        magnification (float): Factor by which to multiply the dimensions of the image.</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd">            Must be &gt;= 1.</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">        enforce_same_value (bool): If True, the value of the original samples will be preserved.</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    Returns:</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">        np.ndarray: zoomed image.</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="sd">    Zoom an image by zero-padding its Discrete Fourier transform</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="sd">    :param image: 2D grid of pixel values</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="sd">    :param magnification: factor by which to multiply the dimensions of the image</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    :param enforce_same_value: if True, the value of the original samples will be preserved</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    :return: zoomed image</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">    REF: based on https://github.com/centreborelli/fourier</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">    Credit goes to Carlo de Franchis &lt;carlo.de-franchis@ens-paris-saclay.fr&gt;</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="sd">    REF: based on https://github.com/centreborelli/fourier</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="sd">    Credit goes to Carlo de Franchis &lt;carlo.de-franchis@ens-paris-saclay.fr&gt;</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span>
-</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>    <span class="c1"># Fourier transform with the zero-frequency component at the center</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>    <span class="n">imageFt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>    <span class="c1"># the zoom-in is performed by zero padding the Fourier transform</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>    <span class="n">wM</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">magnification</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>    <span class="n">hM</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">magnification</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>    <span class="n">x0</span> <span class="o">=</span> <span class="n">wM</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">w</span> <span class="o">//</span> <span class="mi">2</span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>    <span class="n">y0</span> <span class="o">=</span> <span class="n">hM</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">h</span> <span class="o">//</span> <span class="mi">2</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>    <span class="n">imageFtPadded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">wM</span><span class="p">,</span> <span class="n">hM</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>    <span class="n">imageFtPadded</span><span class="p">[</span><span class="n">x0</span><span class="p">:</span><span class="n">x0</span><span class="o">+</span><span class="n">w</span><span class="p">,</span> <span class="n">y0</span><span class="p">:</span><span class="n">y0</span><span class="o">+</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">imageFt</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>    <span class="c1"># apply ifftshift before taking the inverse Fourier transform</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>    <span class="n">imageM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">imageFtPadded</span><span class="p">))</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>    <span class="c1"># if the input is a real-valued image, then keep only the real part</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isrealobj</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>        <span class="n">imageM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">imageM</span><span class="p">)</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>    <span class="c1"># to preserve the values of the original samples, the L2 norm has to by multiplied by magnification*magnification</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>    <span class="n">imageM</span> <span class="o">*=</span> <span class="n">magnification</span> <span class="o">*</span> <span class="n">magnification</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a>    <span class="k">if</span> <span class="n">enforce_same_value</span><span class="p">:</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>        <span class="n">imageM</span><span class="p">[::</span><span class="n">magnification</span><span class="p">,</span> <span class="p">::</span><span class="n">magnification</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>    
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a>    <span class="c1"># return the image casted to the input data type</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a>    <span class="k">return</span> <span class="n">imageM</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>    <span class="c1"># Fourier transform with the zero-frequency component at the center</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>    <span class="n">imageFt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>
+</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>    <span class="c1"># the zoom-in is performed by zero padding the Fourier transform</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>    <span class="n">wM</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">magnification</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a>    <span class="n">hM</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">magnification</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a>    <span class="n">x0</span> <span class="o">=</span> <span class="n">wM</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">w</span> <span class="o">//</span> <span class="mi">2</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a>    <span class="n">y0</span> <span class="o">=</span> <span class="n">hM</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">h</span> <span class="o">//</span> <span class="mi">2</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a>    <span class="n">imageFtPadded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">wM</span><span class="p">,</span> <span class="n">hM</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a>    <span class="n">imageFtPadded</span><span class="p">[</span><span class="n">x0</span><span class="p">:</span><span class="n">x0</span><span class="o">+</span><span class="n">w</span><span class="p">,</span> <span class="n">y0</span><span class="p">:</span><span class="n">y0</span><span class="o">+</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">imageFt</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a>    <span class="c1"># apply ifftshift before taking the inverse Fourier transform</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>    <span class="n">imageM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">imageFtPadded</span><span class="p">))</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>    <span class="c1"># if the input is a real-valued image, then keep only the real part</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isrealobj</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>        <span class="n">imageM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">imageM</span><span class="p">)</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>    <span class="c1"># to preserve the values of the original samples, the L2 norm has to by multiplied by magnification*magnification</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>    <span class="n">imageM</span> <span class="o">*=</span> <span class="n">magnification</span> <span class="o">*</span> <span class="n">magnification</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a>    <span class="k">if</span> <span class="n">enforce_same_value</span><span class="p">:</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a>        <span class="n">imageM</span><span class="p">[::</span><span class="n">magnification</span><span class="p">,</span> <span class="p">::</span><span class="n">magnification</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a>    
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>    <span class="c1"># return the image casted to the input data type</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>    <span class="k">return</span> <span class="n">imageM</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -118,64 +113,64 @@
     <a class="headerlink" href="#magnify"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="magnify-5"><a href="#magnify-5"><span class="linenos"> 5</span></a><span class="k">def</span> <span class="nf">magnify</span><span class="p">(</span><span class="n">image</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">magnification</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">enforce_same_value</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
 </span><span id="magnify-6"><a href="#magnify-6"><span class="linenos"> 6</span></a>    <span class="sd">&quot;&quot;&quot;</span>
-</span><span id="magnify-7"><a href="#magnify-7"><span class="linenos"> 7</span></a><span class="sd">    Zoom an image by zero-padding its Discrete Fourier transform.</span>
-</span><span id="magnify-8"><a href="#magnify-8"><span class="linenos"> 8</span></a>
-</span><span id="magnify-9"><a href="#magnify-9"><span class="linenos"> 9</span></a><span class="sd">    Args:</span>
-</span><span id="magnify-10"><a href="#magnify-10"><span class="linenos">10</span></a><span class="sd">        image (np.ndarray): 2D grid of pixel values.</span>
-</span><span id="magnify-11"><a href="#magnify-11"><span class="linenos">11</span></a><span class="sd">        magnification (float): Factor by which to multiply the dimensions of the image.</span>
-</span><span id="magnify-12"><a href="#magnify-12"><span class="linenos">12</span></a><span class="sd">            Must be &gt;= 1.</span>
-</span><span id="magnify-13"><a href="#magnify-13"><span class="linenos">13</span></a><span class="sd">        enforce_same_value (bool): If True, the value of the original samples will be preserved.</span>
-</span><span id="magnify-14"><a href="#magnify-14"><span class="linenos">14</span></a>
-</span><span id="magnify-15"><a href="#magnify-15"><span class="linenos">15</span></a><span class="sd">    Returns:</span>
-</span><span id="magnify-16"><a href="#magnify-16"><span class="linenos">16</span></a><span class="sd">        np.ndarray: zoomed image.</span>
+</span><span id="magnify-7"><a href="#magnify-7"><span class="linenos"> 7</span></a><span class="sd">    Zoom an image by zero-padding its Discrete Fourier transform</span>
+</span><span id="magnify-8"><a href="#magnify-8"><span class="linenos"> 8</span></a><span class="sd">    :param image: 2D grid of pixel values</span>
+</span><span id="magnify-9"><a href="#magnify-9"><span class="linenos"> 9</span></a><span class="sd">    :param magnification: factor by which to multiply the dimensions of the image</span>
+</span><span id="magnify-10"><a href="#magnify-10"><span class="linenos">10</span></a><span class="sd">    :param enforce_same_value: if True, the value of the original samples will be preserved</span>
+</span><span id="magnify-11"><a href="#magnify-11"><span class="linenos">11</span></a><span class="sd">    :return: zoomed image</span>
+</span><span id="magnify-12"><a href="#magnify-12"><span class="linenos">12</span></a>
+</span><span id="magnify-13"><a href="#magnify-13"><span class="linenos">13</span></a><span class="sd">    REF: based on https://github.com/centreborelli/fourier</span>
+</span><span id="magnify-14"><a href="#magnify-14"><span class="linenos">14</span></a><span class="sd">    Credit goes to Carlo de Franchis &lt;carlo.de-franchis@ens-paris-saclay.fr&gt;</span>
+</span><span id="magnify-15"><a href="#magnify-15"><span class="linenos">15</span></a><span class="sd">    &quot;&quot;&quot;</span>
+</span><span id="magnify-16"><a href="#magnify-16"><span class="linenos">16</span></a>    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span>
 </span><span id="magnify-17"><a href="#magnify-17"><span class="linenos">17</span></a>
-</span><span id="magnify-18"><a href="#magnify-18"><span class="linenos">18</span></a><span class="sd">    REF: based on https://github.com/centreborelli/fourier</span>
-</span><span id="magnify-19"><a href="#magnify-19"><span class="linenos">19</span></a><span class="sd">    Credit goes to Carlo de Franchis &lt;carlo.de-franchis@ens-paris-saclay.fr&gt;</span>
-</span><span id="magnify-20"><a href="#magnify-20"><span class="linenos">20</span></a><span class="sd">    &quot;&quot;&quot;</span>
-</span><span id="magnify-21"><a href="#magnify-21"><span class="linenos">21</span></a>    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span>
-</span><span id="magnify-22"><a href="#magnify-22"><span class="linenos">22</span></a>
-</span><span id="magnify-23"><a href="#magnify-23"><span class="linenos">23</span></a>    <span class="c1"># Fourier transform with the zero-frequency component at the center</span>
-</span><span id="magnify-24"><a href="#magnify-24"><span class="linenos">24</span></a>    <span class="n">imageFt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
-</span><span id="magnify-25"><a href="#magnify-25"><span class="linenos">25</span></a>
-</span><span id="magnify-26"><a href="#magnify-26"><span class="linenos">26</span></a>    <span class="c1"># the zoom-in is performed by zero padding the Fourier transform</span>
-</span><span id="magnify-27"><a href="#magnify-27"><span class="linenos">27</span></a>    <span class="n">wM</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">magnification</span>
-</span><span id="magnify-28"><a href="#magnify-28"><span class="linenos">28</span></a>    <span class="n">hM</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">magnification</span>
-</span><span id="magnify-29"><a href="#magnify-29"><span class="linenos">29</span></a>    <span class="n">x0</span> <span class="o">=</span> <span class="n">wM</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">w</span> <span class="o">//</span> <span class="mi">2</span>
-</span><span id="magnify-30"><a href="#magnify-30"><span class="linenos">30</span></a>    <span class="n">y0</span> <span class="o">=</span> <span class="n">hM</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">h</span> <span class="o">//</span> <span class="mi">2</span>
-</span><span id="magnify-31"><a href="#magnify-31"><span class="linenos">31</span></a>    <span class="n">imageFtPadded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">wM</span><span class="p">,</span> <span class="n">hM</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
-</span><span id="magnify-32"><a href="#magnify-32"><span class="linenos">32</span></a>    <span class="n">imageFtPadded</span><span class="p">[</span><span class="n">x0</span><span class="p">:</span><span class="n">x0</span><span class="o">+</span><span class="n">w</span><span class="p">,</span> <span class="n">y0</span><span class="p">:</span><span class="n">y0</span><span class="o">+</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">imageFt</span>
-</span><span id="magnify-33"><a href="#magnify-33"><span class="linenos">33</span></a>
-</span><span id="magnify-34"><a href="#magnify-34"><span class="linenos">34</span></a>    <span class="c1"># apply ifftshift before taking the inverse Fourier transform</span>
-</span><span id="magnify-35"><a href="#magnify-35"><span class="linenos">35</span></a>    <span class="n">imageM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">imageFtPadded</span><span class="p">))</span>
-</span><span id="magnify-36"><a href="#magnify-36"><span class="linenos">36</span></a>
-</span><span id="magnify-37"><a href="#magnify-37"><span class="linenos">37</span></a>    <span class="c1"># if the input is a real-valued image, then keep only the real part</span>
-</span><span id="magnify-38"><a href="#magnify-38"><span class="linenos">38</span></a>    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isrealobj</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
-</span><span id="magnify-39"><a href="#magnify-39"><span class="linenos">39</span></a>        <span class="n">imageM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">imageM</span><span class="p">)</span>
-</span><span id="magnify-40"><a href="#magnify-40"><span class="linenos">40</span></a>
-</span><span id="magnify-41"><a href="#magnify-41"><span class="linenos">41</span></a>    <span class="c1"># to preserve the values of the original samples, the L2 norm has to by multiplied by magnification*magnification</span>
-</span><span id="magnify-42"><a href="#magnify-42"><span class="linenos">42</span></a>    <span class="n">imageM</span> <span class="o">*=</span> <span class="n">magnification</span> <span class="o">*</span> <span class="n">magnification</span>
-</span><span id="magnify-43"><a href="#magnify-43"><span class="linenos">43</span></a>
-</span><span id="magnify-44"><a href="#magnify-44"><span class="linenos">44</span></a>    <span class="k">if</span> <span class="n">enforce_same_value</span><span class="p">:</span>
-</span><span id="magnify-45"><a href="#magnify-45"><span class="linenos">45</span></a>        <span class="n">imageM</span><span class="p">[::</span><span class="n">magnification</span><span class="p">,</span> <span class="p">::</span><span class="n">magnification</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
-</span><span id="magnify-46"><a href="#magnify-46"><span class="linenos">46</span></a>    
-</span><span id="magnify-47"><a href="#magnify-47"><span class="linenos">47</span></a>    <span class="c1"># return the image casted to the input data type</span>
-</span><span id="magnify-48"><a href="#magnify-48"><span class="linenos">48</span></a>    <span class="k">return</span> <span class="n">imageM</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+</span><span id="magnify-18"><a href="#magnify-18"><span class="linenos">18</span></a>    <span class="c1"># Fourier transform with the zero-frequency component at the center</span>
+</span><span id="magnify-19"><a href="#magnify-19"><span class="linenos">19</span></a>    <span class="n">imageFt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fftshift</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">fft2</span><span class="p">(</span><span class="n">image</span><span class="p">))</span>
+</span><span id="magnify-20"><a href="#magnify-20"><span class="linenos">20</span></a>
+</span><span id="magnify-21"><a href="#magnify-21"><span class="linenos">21</span></a>    <span class="c1"># the zoom-in is performed by zero padding the Fourier transform</span>
+</span><span id="magnify-22"><a href="#magnify-22"><span class="linenos">22</span></a>    <span class="n">wM</span> <span class="o">=</span> <span class="n">w</span> <span class="o">*</span> <span class="n">magnification</span>
+</span><span id="magnify-23"><a href="#magnify-23"><span class="linenos">23</span></a>    <span class="n">hM</span> <span class="o">=</span> <span class="n">h</span> <span class="o">*</span> <span class="n">magnification</span>
+</span><span id="magnify-24"><a href="#magnify-24"><span class="linenos">24</span></a>    <span class="n">x0</span> <span class="o">=</span> <span class="n">wM</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">w</span> <span class="o">//</span> <span class="mi">2</span>
+</span><span id="magnify-25"><a href="#magnify-25"><span class="linenos">25</span></a>    <span class="n">y0</span> <span class="o">=</span> <span class="n">hM</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">h</span> <span class="o">//</span> <span class="mi">2</span>
+</span><span id="magnify-26"><a href="#magnify-26"><span class="linenos">26</span></a>    <span class="n">imageFtPadded</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">wM</span><span class="p">,</span> <span class="n">hM</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">)</span>
+</span><span id="magnify-27"><a href="#magnify-27"><span class="linenos">27</span></a>    <span class="n">imageFtPadded</span><span class="p">[</span><span class="n">x0</span><span class="p">:</span><span class="n">x0</span><span class="o">+</span><span class="n">w</span><span class="p">,</span> <span class="n">y0</span><span class="p">:</span><span class="n">y0</span><span class="o">+</span><span class="n">h</span><span class="p">]</span> <span class="o">=</span> <span class="n">imageFt</span>
+</span><span id="magnify-28"><a href="#magnify-28"><span class="linenos">28</span></a>
+</span><span id="magnify-29"><a href="#magnify-29"><span class="linenos">29</span></a>    <span class="c1"># apply ifftshift before taking the inverse Fourier transform</span>
+</span><span id="magnify-30"><a href="#magnify-30"><span class="linenos">30</span></a>    <span class="n">imageM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifft2</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">fft</span><span class="o">.</span><span class="n">ifftshift</span><span class="p">(</span><span class="n">imageFtPadded</span><span class="p">))</span>
+</span><span id="magnify-31"><a href="#magnify-31"><span class="linenos">31</span></a>
+</span><span id="magnify-32"><a href="#magnify-32"><span class="linenos">32</span></a>    <span class="c1"># if the input is a real-valued image, then keep only the real part</span>
+</span><span id="magnify-33"><a href="#magnify-33"><span class="linenos">33</span></a>    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isrealobj</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+</span><span id="magnify-34"><a href="#magnify-34"><span class="linenos">34</span></a>        <span class="n">imageM</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">imageM</span><span class="p">)</span>
+</span><span id="magnify-35"><a href="#magnify-35"><span class="linenos">35</span></a>
+</span><span id="magnify-36"><a href="#magnify-36"><span class="linenos">36</span></a>    <span class="c1"># to preserve the values of the original samples, the L2 norm has to by multiplied by magnification*magnification</span>
+</span><span id="magnify-37"><a href="#magnify-37"><span class="linenos">37</span></a>    <span class="n">imageM</span> <span class="o">*=</span> <span class="n">magnification</span> <span class="o">*</span> <span class="n">magnification</span>
+</span><span id="magnify-38"><a href="#magnify-38"><span class="linenos">38</span></a>
+</span><span id="magnify-39"><a href="#magnify-39"><span class="linenos">39</span></a>    <span class="k">if</span> <span class="n">enforce_same_value</span><span class="p">:</span>
+</span><span id="magnify-40"><a href="#magnify-40"><span class="linenos">40</span></a>        <span class="n">imageM</span><span class="p">[::</span><span class="n">magnification</span><span class="p">,</span> <span class="p">::</span><span class="n">magnification</span><span class="p">]</span> <span class="o">=</span> <span class="n">image</span>
+</span><span id="magnify-41"><a href="#magnify-41"><span class="linenos">41</span></a>    
+</span><span id="magnify-42"><a href="#magnify-42"><span class="linenos">42</span></a>    <span class="c1"># return the image casted to the input data type</span>
+</span><span id="magnify-43"><a href="#magnify-43"><span class="linenos">43</span></a>    <span class="k">return</span> <span class="n">imageM</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">image</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
 </span></pre></div>
 
 
-            <div class="docstring"><p>Zoom an image by zero-padding its Discrete Fourier transform.</p>
+            <div class="docstring"><p>Zoom an image by zero-padding its Discrete Fourier transform</p>
 
-<p>Args:
-    image (np.ndarray): 2D grid of pixel values.
-    magnification (float): Factor by which to multiply the dimensions of the image.
-        Must be &gt;= 1.
-    enforce_same_value (bool): If True, the value of the original samples will be preserved.</p>
+<h6 id="parameters">Parameters</h6>
 
-<p>Returns:
-    np.ndarray: zoomed image.</p>
+<ul>
+<li><strong>image</strong>:  2D grid of pixel values</li>
+<li><strong>magnification</strong>:  factor by which to multiply the dimensions of the image</li>
+<li><strong>enforce_same_value</strong>:  if True, the value of the original samples will be preserved</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<blockquote>
+  <p>zoomed image</p>
+</blockquote>
 
 <p>REF: based on <a href="https://github.com/centreborelli/fourier">https://github.com/centreborelli/fourier</a>
-Credit goes to Carlo de Franchis <a href="&#x6d;&#x61;&#x69;l&#x74;&#x6f;&#58;&#x63;&#x61;&#x72;&#x6c;&#x6f;&#46;&#100;&#x65;-&#x66;&#x72;&#x61;&#110;&#x63;&#x68;&#105;&#115;&#x40;&#101;&#x6e;&#115;&#45;p&#97;&#x72;&#x69;&#115;&#x2d;s&#97;c&#x6c;&#x61;&#121;&#x2e;&#102;r">&#x63;&#x61;&#x72;&#x6c;&#x6f;&#46;&#100;&#x65;-&#x66;&#x72;&#x61;&#110;&#x63;&#x68;&#105;&#115;&#x40;&#101;&#x6e;&#115;&#45;p&#97;&#x72;&#x69;&#115;&#x2d;s&#97;c&#x6c;&#x61;&#121;&#x2e;&#102;r</a></p>
+Credit goes to Carlo de Franchis <a href="mai&#108;&#x74;o&#58;&#99;&#97;&#114;&#108;&#x6f;&#x2e;&#x64;&#101;&#45;&#x66;r&#x61;&#110;&#99;&#104;&#x69;&#x73;&#64;&#101;&#x6e;&#x73;&#x2d;&#112;&#x61;&#114;i&#x73;&#45;&#115;&#97;&#x63;&#108;&#97;&#x79;&#x2e;&#x66;&#114;">&#99;&#97;&#114;&#108;&#x6f;&#x2e;&#x64;&#101;&#45;&#x66;r&#x61;&#110;&#99;&#104;&#x69;&#x73;&#64;&#101;&#x6e;&#x73;&#x2d;&#112;&#x61;&#114;i&#x73;&#45;&#115;&#97;&#x63;&#108;&#97;&#x79;&#x2e;&#x66;&#114;</a></p>
 </div>
 
 

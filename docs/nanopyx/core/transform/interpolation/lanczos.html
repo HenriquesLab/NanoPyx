@@ -31,10 +31,13 @@
         <h2>API Documentation</h2>
             <ul class="memberlist">
             <li>
-                    <a class="function" href="#magnify">magnify</a>
-            </li>
-            <li>
-                    <a class="function" href="#shift">shift</a>
+                    <a class="class" href="#Interpolator">Interpolator</a>
+                            <ul class="memberlist">
+                        <li>
+                                <a class="function" href="#Interpolator.__init__">Interpolator</a>
+                        </li>
+                </ul>
+
             </li>
     </ul>
 
@@ -57,49 +60,49 @@
                 
                 
             </section>
-                <section id="magnify">
-                    <div class="attr function">
+                <section id="Interpolator">
+                    <div class="attr class">
             
-        <span class="def">def</span>
-        <span class="name">magnify</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span><span class="return-annotation">):</span></span>
+    <span class="def">class</span>
+    <span class="name">Interpolator</span><wbr>(<span class="base"><a href="nearest_neighbor.html#Interpolator">nanopyx.core.transform.interpolation.nearest_neighbor.Interpolator</a></span>):
 
         
     </div>
-    <a class="headerlink" href="#magnify"></a>
+    <a class="headerlink" href="#Interpolator"></a>
     
-            <div class="docstring"><p>Magnify a 2D image using the Lanczos interpolation method.</p>
+    
 
-<p>Parameters:
-    im (np.ndarray): The 2D image to magnify.
-    magnification (int): The magnification factor.
-    taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.</p>
-
-<p>Returns:
-    The magnified image.</p>
-</div>
-
-
-                </section>
-                <section id="shift">
-                    <div class="attr function">
+                            <div id="Interpolator.__init__" class="classattr">
+                                <div class="attr function">
             
-        <span class="def">def</span>
-        <span class="name">shift</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">unknown</span></span><span class="return-annotation">):</span></span>
+        <span class="name">Interpolator</span><span class="signature pdoc-code condensed">()</span>
 
         
     </div>
-    <a class="headerlink" href="#shift"></a>
+    <a class="headerlink" href="#Interpolator.__init__"></a>
     
-            <div class="docstring"><p>Shift a 2D image using the Lanczos interpolation method.</p>
+            <div class="docstring"><p>Interpolate the value of a 2D image at the given coordinates using the Lanczos interpolation method</p>
 
-<p>Parameters:
-    im (np.ndarray): The 2D image to shift.
-    dx (float): The amount to shift the image in the x direction.
-    dy (float): The amount to shift the image in the y direction.
-    taps (int): The number of taps (interpolation points) to use in the Lanczos kernel.</p>
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>image</strong>:  The 2D image to interpolate</li>
+<li><strong>taps</strong>:  The number of taps (interpolation points) to use in the Lanczos kernel</li>
+</ul>
 </div>
 
 
+                            </div>
+                            <div class="inherited">
+                                <h5>Inherited Members</h5>
+                                <dl>
+                                    <div><dt><a href="nearest_neighbor.html#Interpolator">nanopyx.core.transform.interpolation.nearest_neighbor.Interpolator</a></dt>
+                                <dd id="Interpolator.magnify" class="function"><a href="nearest_neighbor.html#Interpolator.magnify">magnify</a></dd>
+                <dd id="Interpolator.shift" class="function"><a href="nearest_neighbor.html#Interpolator.shift">shift</a></dd>
+
+            </div>
+                                </dl>
+                            </div>
                 </section>
     </main>
 <script>

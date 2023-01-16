@@ -29,6 +29,7 @@
 
         <h2>Submodules</h2>
         <ul>
+                <li><a href="data/download.html">download</a></li>
                 <li><a href="data/examples.html">examples</a></li>
         </ul>
 
@@ -46,10 +47,57 @@
                     <h1 class="modulename">
 <a href="./../nanopyx.html">nanopyx</a><wbr>.data    </h1>
 
-                
-                
-                
-                
+                        <div class="docstring"><p>Contains helper methods for downloading and loading example test data</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn"><a href="data/download.html">nanopyx.data.download</a></span> <span class="kn">import</span> <span class="n">ExampleDataManager</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">downloader</span> <span class="o">=</span> <span class="n">ExampleDataManager</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">datasets</span> <span class="o">=</span> <span class="n">downloader</span><span class="o">.</span><span class="n">list_datasets</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot; - &quot;</span><span class="o">+</span><span class="n">dataset</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">datasets</span><span class="p">]))</span>
+<span class="go"> - LongContinuous_UtrGFP</span>
+<span class="go"> - PumpyCost7_UtrGFP</span>
+<span class="go"> - SMLMS2013_HDTubulinAlexa647</span>
+<span class="go"> - SM_U2OS_Pereira_MTAlexaA647_V1</span>
+<span class="go"> - ShortContinuous_UtrGFP</span>
+<span class="go"> - EMBL_TubulinGFP</span>
+<span class="go"> - ImmunoSynapseFormation_LifeActGFP</span>
+<span class="go"> - SM_U2OS_Pereira_MTAlexaA647_V2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">thumbnail_path</span> <span class="o">=</span> <span class="n">downloader</span><span class="o">.</span><span class="n">get_thumbnail</span><span class="p">(</span><span class="s2">&quot;LongContinuous_UtrGFP&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s2">&quot;/&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot;...&quot;</span><span class="p">]</span><span class="o">+</span><span class="n">thumbnail_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">5</span><span class="p">:])</span>
+<span class="go">&#39;.../nanopyx/data/examples/LongContinuous_UtrGFP/thumbnail.jpg&#39;</span>
+</code></pre>
+</div>
+</div>
+
+                        <input id="mod-data-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+
+                        <label class="view-source-button" for="mod-data-view-source"><span>View Source</span></label>
+
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="sd">Contains helper methods for downloading and loading example test data</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="sd">&gt;&gt;&gt; from nanopyx.data.download import ExampleDataManager</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="sd">&gt;&gt;&gt; downloader = ExampleDataManager()</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="sd">&gt;&gt;&gt; datasets = downloader.list_datasets()</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="sd">&gt;&gt;&gt; print(&quot;\\n&quot;.join([&quot; - &quot;+dataset for dataset in datasets]))</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="sd"> - LongContinuous_UtrGFP</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd"> - PumpyCost7_UtrGFP</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd"> - SMLMS2013_HDTubulinAlexa647</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd"> - SM_U2OS_Pereira_MTAlexaA647_V1</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd"> - ShortContinuous_UtrGFP</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd"> - EMBL_TubulinGFP</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd"> - ImmunoSynapseFormation_LifeActGFP</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd"> - SM_U2OS_Pereira_MTAlexaA647_V2</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="sd">&gt;&gt;&gt; thumbnail_path = downloader.get_thumbnail(&quot;LongContinuous_UtrGFP&quot;)</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="sd">&gt;&gt;&gt; import os</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="sd">&gt;&gt;&gt; &quot;/&quot;.join([&quot;...&quot;]+thumbnail_path.split(os.path.sep)[-5:])</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="sd">&#39;.../nanopyx/data/examples/LongContinuous_UtrGFP/thumbnail.jpg&#39;</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a><span class="sd">    </span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span></pre></div>
+
+
             </section>
     </main>
 <script>

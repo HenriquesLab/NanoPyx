@@ -3,16 +3,11 @@ import numpy as np
 
 def magnify(image: np.ndarray, magnification: float = 2, enforce_same_value: bool = True):
     """
-    Zoom an image by zero-padding its Discrete Fourier transform.
-
-    Args:
-        image (np.ndarray): 2D grid of pixel values.
-        magnification (float): Factor by which to multiply the dimensions of the image.
-            Must be >= 1.
-        enforce_same_value (bool): If True, the value of the original samples will be preserved.
-
-    Returns:
-        np.ndarray: zoomed image.
+    Zoom an image by zero-padding its Discrete Fourier transform
+    :param image: 2D grid of pixel values
+    :param magnification: factor by which to multiply the dimensions of the image
+    :param enforce_same_value: if True, the value of the original samples will be preserved
+    :return: zoomed image
 
     REF: based on https://github.com/centreborelli/fourier
     Credit goes to Carlo de Franchis <carlo.de-franchis@ens-paris-saclay.fr>

@@ -12,19 +12,10 @@ from .nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
 # bilinear spline interpolation of a 2D array
 cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     """
-    Bilinear spline interpolation of a 2D array.
-
-    Parameters
-    ----------
-    image : 2D array
-        The image to be interpolated.
-    x, y : float
-        The coordinates at which to interpolate the image.
-
-    Returns
-    -------
-    value : float
-        The interpolated value of the image at the given coordinates.
+    Bilinear spline interpolation of a 2D array
+    :param image: The image to be interpolated
+    :param x, y: The coordinates at which to interpolate the image
+    :return: The interpolated value of the image at the given coordinates
     """
 
     cdef int w = image.shape[1]

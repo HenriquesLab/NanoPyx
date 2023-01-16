@@ -9,21 +9,11 @@ from cython.parallel import prange
 # nearest-neighbor interpolation of a 2D array
 cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     """
-    Interpolate a 2D array using nearest-neighbor interpolation.
-
-    Parameters
-    ----------
-    image : 2D array
-        The image to interpolate.
-    x : float
-        The x coordinate to interpolate at.
-    y : float
-        The y coordinate to interpolate at.
-    
-    Returns
-    -------
-    float
-        The interpolated value.
+    Interpolate a 2D array using nearest-neighbor interpolation
+    :param image: 2D array to interpolate
+    :param x: x position to interpolate
+    :param y: y position to interpolate
+    :return: interpolated value
     """
 
     cdef int w = image.shape[1]
@@ -44,11 +34,7 @@ cdef class Interpolator:
     def __init__(self, image):
         """
         Interpolate a 2D array
-
-        Parameters
-        ----------
-        image : 2D array
-            The image to interpolate.
+        :param image: 2D array to interpolate
         """
 
         assert image.ndim == 2, "image must be 2D"
@@ -63,20 +49,22 @@ cdef class Interpolator:
         self.w = image.shape[1]
         self.h = image.shape[0]
 
+
     cdef float _interpolate(self, float x, float y) nogil:
+        """
+        Interpolate a 2D array using nearest-neighbor interpolation
+        :param x: x position to interpolate
+        :param y: y position to interpolate
+        :return: interpolated value
+        """
         return _interpolate(self.image, x, y)
 
 
     def magnify(self, int magnification) -> np.ndarray:
         """
-        Magnify an image by a factor of magnification.
-
-        Parameters:
-            im (np.ndarray): image to magnify.
-            magnification (int): magnification factor.
-
-        Returns:
-            Magnified image (np.ndarray).
+        Magnify an image by a factor of magnification
+        :param magnification: magnification factor
+        :return: magnified image
         """
         imMagnified = self._magnify(magnification)
         return np.asarray(imMagnified).astype(self.original_dtype)
@@ -102,15 +90,10 @@ cdef class Interpolator:
 
     def shift(self, double dx, double dy) -> np.ndarray:
         """
-        Shift an image by (dx, dy) using interpolation.
-
-        Parameters:
-            im (np.ndarray): image to shift.
-            dx (float): shift along x-axis.
-            dy (float): shift along y-axis.
-
-        Returns:
-            Shifted image (np.ndarray).
+        Shift an image by (dx, dy) using interpolation
+        :param dx: shift along x-axis
+        :param dy: shift along y-axis
+        :return: shifted image
         """
         imShifted = self._shift(dx, dy)
         return np.asarray(imShifted).astype(self.original_dtype)
