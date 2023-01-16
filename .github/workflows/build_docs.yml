@@ -1,4 +1,4 @@
-name: website
+name: Build Docs Website
 
 # build the documentation whenever there are new commits on main
 on:
