@@ -1,7 +1,7 @@
 """
 Contains helper methods for downloading and loading example test data
 
->>> from nanopyx.data.download import ExampleDataManager
+>>> from .download import ExampleDataManager
 >>> downloader = ExampleDataManager()
 >>> datasets = downloader.list_datasets()
 >>> print("\\n".join([" - "+dataset for dataset in datasets]))
