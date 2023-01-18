@@ -50,18 +50,18 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-  "pytest >= 7.1",
-  "pytest-cov >= 4.0.0",
-  "pytest-emoji >= 0.2.0",
-  "pytest-icdiff >= 0.6",
-  "pytest-clarity >= 1.0.1",
-  "pytest-timeout >= 2.1.0",
-  "pytest-plt >= 1.1.0",
-  "pytest-xdist >= 3.1.0",
-  "pytest-sugar >= 0.9.6",
-  "pytest-cython >= 0.2.0",
-  "nbmake >= 1.3.5",
-]
+    "pytest >= 7.1",
+    "pytest-cov >= 4.0.0",
+    "pytest-emoji >= 0.2.0",
+    "pytest-icdiff >= 0.6",
+    "pytest-clarity >= 1.0.1",
+    "pytest-timeout >= 2.1.0",
+    "pytest-plt >= 1.1.0",
+    "pytest-xdist >= 3.1.0",
+    "pytest-sugar >= 0.9.6",
+    "pytest-cython >= 0.2.0",
+    "nbmake >= 1.3.5",
+    ]
 jupyter = [
     "matplotlib>=3.5",
     "seaborn>=0.12.1",
@@ -70,7 +70,11 @@ jupyter = [
     "plotly>=5.11.0",
 ]
 doc = [
-    "pdoc>=12.3.1"
+    "pdoc>=12.3.2"
+]
+
+developer = [
+    "pyx2pxd>=0.1.1",
 ]
 
 [project.urls]

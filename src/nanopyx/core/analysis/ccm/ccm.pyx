@@ -1,4 +1,4 @@
-# nanopyx: autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
 import numpy as np
 cimport numpy as np
@@ -20,7 +20,7 @@ def calculate_ccm(np.ndarray img_stack, int ref):
     """
     return _calculate_ccm(img_stack, ref)
 
-@cython.boundscheck(False)
+
 cdef float[:, :, :] _calculate_ccm(float[:, :, :] img_stack, int ref):
 
     if not _check_even_square(img_stack):
@@ -44,7 +44,7 @@ cdef float[:, :, :] _calculate_ccm(float[:, :, :] img_stack, int ref):
 
     return ccm
 
-@cython.boundscheck(False)
+
 def calculate_ccm_from_ref(np.ndarray img_stack, np.ndarray img_ref):
     """
     Function used to generate a cross correlation matrix of an image stack.
@@ -58,7 +58,7 @@ def calculate_ccm_from_ref(np.ndarray img_stack, np.ndarray img_ref):
     return _calculate_ccm_from_ref(img_stack, img_ref)
 
 
-@cython.boundscheck(False)
+
 cdef float[:, :, :] _calculate_ccm_from_ref(float[:, :, :] img_stack, float[:, :] img_ref):
 
     if not _check_even_square(img_stack):
@@ -87,8 +87,7 @@ cdef float[:, :] _calculate_slice_ccm(float[:, :] img_ref, float[:, :] img_slice
 
     return ccm_slice[0:ccm_slice.shape[0], 0:ccm_slice.shape[1]]
 
-@cython.cdivision(True)
-@cython.boundscheck(False)
+
 cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :] ccm_slice) nogil:
     """
     Function used to normalize the cross correlation matrix.
