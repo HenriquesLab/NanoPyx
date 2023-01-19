@@ -13,7 +13,7 @@ Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light mi
 ## What is the NanoPyx 🔬 Library?
 
 NanoPyx is a library specialized in the analysis of light microscopy and super-resolution data.
-It is a successor to NanoJ, which is a Java library for the analysis of super-resolution microscopy data.
+It is a successor to [NanoJ](https://github.com/HenriquesLab/NanoJ-Core), which is a Java library for the analysis of super-resolution microscopy data.
 
 NanoPyx focuses on performance, by heavily exploiting cython aided multiprocessing and simplicity. It implements methods for the bioimage analysis field, with a special emphasis on those developed by the [Henriques Laboratory](https://henriqueslab.github.io/).
 
