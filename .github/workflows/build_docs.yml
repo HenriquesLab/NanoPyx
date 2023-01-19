@@ -2,12 +2,8 @@ name: Build Docs Website
 
 # build the documentation whenever there are new commits on main
 on:
-  push:
-    branches:
-      - main
-    # Alternative: only build for tags.
-    # tags:
-    #   - '*'
+  release:
+    types: [published]
 
 # security: restrict permissions for CI jobs.
 permissions:
