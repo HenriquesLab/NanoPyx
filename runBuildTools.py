@@ -1,6 +1,8 @@
 #!/bin/bash -c python3
 
-import os, sys
+import os
+import sys
+from inspect import isfunction
 
 
 def find_files(root_dir, extension):
@@ -19,6 +21,21 @@ def find_files(root_dir, extension):
     return target_files
 
 
+def update_gitignore():
+    gitignore_lines = open(".gitignore", "r").read().splitlines()
+    ignores = [
+        ".coverage*",
+        "tests",
+        "tests_plots",
+    ]
+    for ignore in ignores:
+        if ignore not in gitignore_lines:
+            gitignore_lines.append(ignore)
+
+    with open(".gitignore", "w") as f:
+        f.write("\n".join(gitignore_lines))
+
+
 def main():
 
     clean_files = " ".join(
@@ -30,7 +47,6 @@ def main():
         + find_files("notebooks", ".profile")
     )
 
-
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     options = {
         "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
@@ -39,6 +55,7 @@ def main():
         if len(clean_files) > 0
         else "echo 'No files to clean'",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
+        "Update .gitignore": update_gitignore,
         "Run pdoc": "python -m pdoc src/nanopyx -o docs",
         "Install nanopyx in developer mode": "pip3 install -e .[developer, test]",
         "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",
@@ -70,9 +87,12 @@ def main():
         print("What do you want to do:")
         for i, option in enumerate(options.keys()):
             cmd = options[option]
-            print(
-                f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}"
-            )
+            if type(cmd) == str:
+                print(
+                    f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}"
+                )
+            elif isfunction(cmd):
+                print(f"{i+1}) {option}: [FUNCTION]> {repr(cmd)}")
 
         # get the user's selection
         selection = int(input("Enter your selection: ")) - 1
@@ -80,8 +100,10 @@ def main():
     # print the selected option
     cmd = list(options.values())[selection]
     print(f"- Running command: {repr(cmd)}")
-    os.system(cmd)
-
+    if type(cmd) == str:
+        os.system(cmd)
+    elif isfunction(cmd):
+        cmd()
 
 if __name__ == "__main__":
     main()
