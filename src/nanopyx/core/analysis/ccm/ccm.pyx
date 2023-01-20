@@ -92,7 +92,7 @@ cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :]
     """
     Function used to normalize the cross correlation matrix.
 
-     The code above does the following:
+    The code above does the following:
     1. Find the maximum and minimum values of the cross-correlation matrix
     2. Calculate the maximum and minimum PPMCC
     3. Normalize the matrix values to the PPMCC values
