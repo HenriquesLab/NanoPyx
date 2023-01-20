@@ -199,3 +199,5 @@ setup(
     package_data={"": ["**/*.jpg", "**/*.yaml"]},
     zip_safe=False,
 )
+
+print("\nInfinite Improbability Drive engaged... 🚀")
