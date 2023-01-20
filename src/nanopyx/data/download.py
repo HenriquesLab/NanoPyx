@@ -86,7 +86,7 @@ class ExampleDataManager:
         """
         :return: list of dataset labels
         """
-        return [dataset["label"] for dataset in self._datasets]
+        return sorted([dataset["label"] for dataset in self._datasets])
 
     def list_datasets_nickname(self) -> tuple[list]:
         """
