@@ -25,8 +25,10 @@ def update_gitignore():
     gitignore_lines = open(".gitignore", "r").read().splitlines()
     ignores = [
         ".coverage*",
-        "tests",
         "tests_plots",
+        "*.csv",
+        "*.npy",
+        "*.profile"
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
