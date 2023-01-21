@@ -1,22 +1,26 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=False
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
-from libc.math cimport sqrt, pi, floor, fabs, cos, sin
+"""
+Python reimplementation of the Radiality Transform from the original SRRF paper
+Paper: https://www.nature.com/articles/ncomms12471
+Original code: https://github.com/HenriquesLab/NanoJ-SRRF/blob/master/SRRF/src/nanoj/srrf/java/SRRF.java
+"""
+
+from libc.math cimport sqrt, pi, fabs, cos, sin
 from libc.stdlib cimport free
 
 import numpy as np
 cimport numpy as np
 
-from nanopyx.core.transform.interpolation.catmull_rom cimport _interpolate
+from .interpolation.catmull_rom cimport _interpolate
 
 from cython.parallel import prange
 
-# code based on https://github.com/HenriquesLab/NanoJ-SRRF/blob/master/SRRF/src/nanoj/srrf/java/SRRF.java
-
 cdef class Radiality:
-    cdef int magnification, symmetryAxis, border, nRingCoordinates
-    cdef float ringRadius, psfWidth, gradRadius
-    cdef bint doIntegrateLagTimes, radialityPositivityConstraint, doIntensityWeighting
-    cdef float[12] xRingCoordinates, yRingCoordinates
+    # autogen_pxd: cdef int magnification, symmetryAxis, border, nRingCoordinates
+    # autogen_pxd: cdef float ringRadius, psfWidth, gradRadius
+    # autogen_pxd: cdef bint doIntegrateLagTimes, radialityPositivityConstraint, doIntensityWeighting
+    # autogen_pxd: cdef float[12] xRingCoordinates, yRingCoordinates
 
     def __init__(self, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
         """
