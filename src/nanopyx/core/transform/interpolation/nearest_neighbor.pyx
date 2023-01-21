@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=False
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
 import numpy as np
 cimport numpy as np
@@ -29,6 +29,10 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
 
 
 cdef class Interpolator:
+
+    # autogen_pxd: cdef float[:,:] image
+    # autogen_pxd: cdef int w, h
+    # autogen_pxd: cdef object original_dtype
 
     def __init__(self, image):
         """
