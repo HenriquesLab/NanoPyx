@@ -84,7 +84,7 @@ bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 reportUndefinedVariable = false
 
 [tool.pytest.ini_options]
-addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --doctest-cython --ignore=setup.py --ignore=notebooks/drift_correction_notebook.ipynb --ignore-glob=run*Tools.py"
+addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/"
 timeout = 240
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
