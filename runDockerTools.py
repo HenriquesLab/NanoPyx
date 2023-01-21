@@ -13,6 +13,7 @@ options = {
     "Start jupyterlab from nanopyx docker-image (needs run first)": "sudo docker start nanopyx1",
     "Stop jupyterlab from nanopyx docker-image": "sudo docker stop nanopyx1",
     "Remove nanopyx docker-image": "sudo docker rm nanopyx1 || sudo docker image rm nanopyx || sudo docker image prune -f §|| sudo docker container prune -f || sudo docker system df",
+    "Fix issues on mac": "rm ~/.docker/config.json"
 }
 
 print(
