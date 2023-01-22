@@ -63,11 +63,12 @@ test = [
     "nbmake >= 1.3.5",
 ]
 jupyter = [
+    "nbformat>=4.2.0",
     "matplotlib>=3.5",
     "seaborn>=0.12.1",
     "stackview>=0.5.1",
-    "nbformat>=4.2.0",
-    "plotly>=5.11.0",
+    # "plotly>=5.11.0",
+    "celluloid>=0.2.0", # https://towardsdatascience.com/the-simplest-way-of-making-gifs-and-math-videos-with-python-aec41da74c6e
 ]
 doc = ["pdoc>=12.3.2"]
 
