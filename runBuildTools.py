@@ -38,7 +38,7 @@ def update_gitignore():
         f.write("\n".join(gitignore_lines))
 
 
-def main():
+def main(mode = None):
 
     clean_files = " ".join(
         find_files("src", ".so")
@@ -51,7 +51,7 @@ def main():
 
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     options = {
-        "Build nanopyx extensions": "pyx2pxd src && python3 setup.py build_ext --inplace",
+        "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
         "Auto-generate pxd files with pyx2pxd": f"pyx2pxd src",
         "Clean files": f"rm {clean_files}"
         if len(clean_files) > 0
@@ -77,8 +77,8 @@ def main():
     """
     )
 
-    if len(sys.argv) > 1:
-        selection = int(sys.argv[1]) - 1
+    if mode is not None:
+        selection = mode
 
     else:
         # print the options
@@ -103,5 +103,11 @@ def main():
     elif isfunction(cmd):
         cmd()
 
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        modes = sys.argv[1:]
+        for mode in modes:
+            main(int(mode)-1)
+    else:
+        main()
