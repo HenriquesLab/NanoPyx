@@ -106,25 +106,44 @@ cdef double _normal_value() nogil:
     return u * c
 
 
-def add_mixed_gaussian_poisson_noise(float[:,:] image, double gauss_sigma, double gauss_mean):
+def add_mixed_gaussian_poisson_noise(image, double gauss_sigma, double gauss_mean):
     """
     Add mixed Gaussian-Poisson noise to an image, pure cython version
-    :param image: The image to add noise to
+    :param image: The image to add noise to, need to be 2D or 3D
     :param gauss_sigma: The standard deviation of the Gaussian noise
     :param gauss_mean: The mean of the Gaussian noise
     """
 
-    cdef float v
-    cdef int i, j
+    assert image.ndim == 2 or image.ndim == 3, "Only 2D and 3D images are supported"
 
-    with nogil:
-        for j in prange(image.shape[1]):
-            for i in range(image.shape[0]):
-                v = image[j,i]
-                v = _poisson_value(v) + _normal_value() * gauss_sigma + gauss_mean
-                v = fmax(v, 0)
-                v = fmin(v, 65535)
-                image[j,i] = v
+    cdef float v
+    cdef int i, j, f
+    cdef float[:,:] image_2d
+    cdef float[:,:,:] image_3d
+
+    if image.ndim == 2:
+        image_2d = image
+        with nogil:
+            for j in prange(image_2d.shape[0]):
+                for i in range(image_2d.shape[1]):
+                    v = image_2d[j,i]
+                    v = _poisson_value(v) + _normal_value() * gauss_sigma + gauss_mean
+                    v = fmax(v, 0)
+                    v = fmin(v, 65535)
+                    image_2d[j,i] = v
+    
+    else:
+        image_3d = image
+        with nogil:
+            for f in prange(image_3d.shape[0]):
+                for j in range(image_3d.shape[1]):
+                    for i in range(image_3d.shape[2]):
+                        v = image_3d[f,j,i]
+                        v = _poisson_value(v) + _normal_value() * gauss_sigma + gauss_mean
+                        v = fmax(v, 0)
+                        v = fmin(v, 65535)
+                        image_3d[f,j,i] = v
+    
 
 def add_mixed_gaussian_poisson_noise2(np.ndarray image, double gauss_sigma, double gauss_mean):
     """
