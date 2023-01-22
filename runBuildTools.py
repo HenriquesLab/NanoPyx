@@ -51,7 +51,7 @@ def main():
 
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     options = {
-        "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
+        "Build nanopyx extensions": "pyx2pxd src && python3 setup.py build_ext --inplace",
         "Auto-generate pxd files with pyx2pxd": f"pyx2pxd src",
         "Clean files": f"rm {clean_files}"
         if len(clean_files) > 0
