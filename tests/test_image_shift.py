@@ -1,6 +1,5 @@
 import numpy as np
 
-from nanopyx.core.transform.image_add_random_noise import getSquares
 from nanopyx.core.transform.image_shift import (bicubic_shift,
                                                 catmull_rom_shift, cv2_shift,
                                                 lanczos_shift, scipy_shift,

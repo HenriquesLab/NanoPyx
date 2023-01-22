@@ -1,8 +1,9 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 # code based on NanoJ-Core/Core/src/nanoj/core2/NanoJRandomNoise.java
 
-from libc.stdlib cimport rand, RAND_MAX
 from libc.math cimport pow, log, sqrt, exp, pi, floor, fabs, fmax, fmin
+
+from ..utils.random cimport _random
 
 import cython
 cimport cython
@@ -16,16 +17,7 @@ import opensimplex
 
 r = np.random.RandomState()
 
-
-cdef double random() nogil:
-    """
-    Returns a random value between 0 and 1.
-    """
-    # not thread safe since it depends on a time seed
-    return float(rand()) / float(RAND_MAX)
-
-
-cdef double logFactorial(int x) nogil:
+cdef double _log_factorial(int x) nogil:
     """
     Return the logarithm of the factorial of x. Uses Stirling's approximation for large values.
     """
@@ -41,7 +33,7 @@ cdef double logFactorial(int x) nogil:
         ans = y*log(y) + log(2.0*pi*y)/2 - y + (pow(y,-1))/12 - (pow(y,-3))/360 + (pow(y,-5))/1260 - (pow(y,-7))/1680 + (pow(y,-9))/1188
         return ans
 
-cdef int poissonSmall(double mean) nogil:
+cdef int _poisson_small(double mean) nogil:
     """
     Returns a poisson distributed random value with the specified mean using an algorithm based on the factorial function. This method is more efficient for small means.
     """
@@ -49,16 +41,16 @@ cdef int poissonSmall(double mean) nogil:
     cdef double p = 1.
     cdef int k = 1
     
-    p *= random()
+    p *= _random()
     
     while (p > L):
-        p *= random()
+        p *= _random()
         k += 1
     
     return k - 1
 
 
-cdef int poissonLarge(double mean) nogil:
+cdef int _poisson_large(double mean) nogil:
     """
     Returns a poisson distributed random value with the specified mean using the rejection method PA. This method is more efficient for large means.
     """
@@ -78,48 +70,48 @@ cdef int poissonLarge(double mean) nogil:
     cdef double u, x, v, y, temp
     cdef int n
     while (True):
-        u = random()
+        u = _random()
         x = (alpha - log((1.0 - u) / u))/beta
         n = int(floor(x + 0.5))
         if n < 0: 
             continue
-        v = random()
+        v = _random()
         y = alpha - beta*x
         temp = 1.0 + exp(y)
         lhs = y + log(v / (temp * temp))
-        rhs = k + n*log(mean) - logFactorial(n)
+        rhs = k + n*log(mean) - _log_factorial(n)
         if lhs <= rhs:
             return n
 
-cdef int poissonValue(double mean) nogil:
+cdef int _poisson_value(double mean) nogil:
     """
     Returns a poisson distributed random value with the specified mean. Uses a different algorithm for small and large means.
     """
     if mean < 100:
-        return poissonSmall(mean)
+        return _poisson_small(mean)
     else:
-        return poissonLarge(mean)
+        return _poisson_large(mean)
 
 
-cdef double normalValue() nogil:
+cdef double _normal_value() nogil:
     """
     Returns a normally distributed random value with mean 0 and standard deviation 1.
     """
-    cdef double u = random() * 2 - 1
-    cdef double v = random() * 2 - 1
+    cdef double u = _random() * 2 - 1
+    cdef double v = _random() * 2 - 1
     cdef double r = u * u + v * v
     if r == 0 or r > 1:
-        return normalValue()
+        return _normal_value()
     cdef double c = sqrt(-2 * log(r) / r)
     return u * c
 
 
-def addMixedGaussianPoissonNoise(float[:,:] image, double gaussSigma, double gaussMean):
+def add_mixed_gaussian_poisson_noise(float[:,:] image, double gauss_sigma, double gauss_mean):
     """
     Add mixed Gaussian-Poisson noise to an image, pure cython version
     :param image: The image to add noise to
-    :param gaussSigma: The standard deviation of the Gaussian noise
-    :param gaussMean: The mean of the Gaussian noise
+    :param gauss_sigma: The standard deviation of the Gaussian noise
+    :param gauss_mean: The mean of the Gaussian noise
     """
 
     cdef float v
@@ -129,25 +121,25 @@ def addMixedGaussianPoissonNoise(float[:,:] image, double gaussSigma, double gau
         for j in prange(image.shape[1]):
             for i in range(image.shape[0]):
                 v = image[j,i]
-                v = poissonValue(v) + normalValue() * gaussSigma + gaussMean
+                v = _poisson_value(v) + _normal_value() * gauss_sigma + gauss_mean
                 v = fmax(v, 0)
                 v = fmin(v, 65535)
                 image[j,i] = v
 
-def addMixedGaussianPoissonNoise2(np.ndarray image, double gaussSigma, double gaussMean):
+def add_mixed_gaussian_poisson_noise2(np.ndarray image, double gauss_sigma, double gauss_mean):
     """
     Add mixed Gaussian-Poisson noise to an image, pure numpy version
     :param image: The image to add noise to
-    :param gaussSigma: The standard deviation of the Gaussian noise
-    :param gaussMean: The mean of the Gaussian noise
+    :param gauss_sigma: The standard deviation of the Gaussian noise
+    :param gauss_mean: The mean of the Gaussian noise
     """
     shape = []
     for i in range(image.ndim):
         shape.append(image.shape[i])
-    image[:] = np.clip(r.poisson(image)+r.normal(scale=gaussSigma, size=tuple(shape), loc=gaussMean), 0, 65535)
+    image[:] = np.clip(r.poisson(image)+r.normal(scale=gauss_sigma, size=tuple(shape), loc=gauss_mean), 0, 65535)
 
 
-def addPerlinNoise(float[:,:] image, int amp=100, int offset = 100, float f = 100, int octaves = 1, float persistence = 0.5, float lacunarity = 2., float repeatx = 1024, float repeaty = 1024, int base = 0):
+def add_perlin_noise(float[:,:] image, int amp=100, int offset = 100, float f = 100, int octaves = 1, float persistence = 0.5, float lacunarity = 2., float repeatx = 1024, float repeaty = 1024, int base = 0):
     """
     Add perlin noise to an image
     :param image: The image to add noise to
@@ -177,7 +169,7 @@ def addPerlinNoise(float[:,:] image, int amp=100, int offset = 100, float f = 10
             image[j, i] += amp * p + offset
 
 
-def getPerlinNoise(w, h, amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
+def get_perlin_noise(w, h, amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
     """
     Return a perlin noise image
     :param w: The width of the image
@@ -194,11 +186,11 @@ def getPerlinNoise(w, h, amp=100, int offset = 100, f = 10, octaves = 1, persist
     :return: The perlin noise image
     """
     image = np.zeros((w, h), dtype=np.float32)
-    addPerlinNoise(image, amp, offset, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
+    add_perlin_noise(image, amp, offset, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
     return image
 
 
-def getSimplexNoise(int w, int h, int f = 1):
+def get_simplex_noise(int w, int h, int f = 1):
     """
     Return a simplex noise image
     REF: https://github.com/lmas/opensimplex
@@ -220,98 +212,6 @@ def getSimplexNoise(int w, int h, int f = 1):
 
     return opensimplex.noise2array(x0, y0)
 
-
-def addSquares(float[:,:] image, float vmax=100, float vmin=0, int nSquares=100):
-    """
-    Add random squares to an image
-    :param image: The image to add the squares to
-    :param vmax: The maximum intensity value of the squares
-    :param vmin: The minimum intensity value of the squares
-    :param nSquares: The number of squares to add
-    """
-    
-    cdef int w = image.shape[1]
-    cdef int h = image.shape[0]
-    cdef int n, i, j, x0, x1, y0, y1
-    cdef float v
-
-    cdef int[:] x0_arr = np.random.randint(low=0, high=w-1, size=nSquares, dtype=np.int32)
-    cdef int[:] x1_arr = np.random.randint(low=0, high=w-1, size=nSquares, dtype=np.int32)
-    cdef int[:] y0_arr = np.random.randint(low=0, high=h-1, size=nSquares, dtype=np.int32)
-    cdef int[:] y1_arr = np.random.randint(low=0, high=h-1, size=nSquares, dtype=np.int32)
-    
-    with nogil:
-        for n in prange(nSquares):
-            v = random() * (vmax-vmin) + vmin
-            x0 = min(x0_arr[n], x1_arr[n])
-            x1 = max(x0_arr[n], x1_arr[n])
-            y0 = min(y0_arr[n], y1_arr[n])
-            y1 = max(y0_arr[n], y1_arr[n])    
-            for j in range(y0, y1):
-                for i in range(x0, x1):
-                    image[j, i] += v
-    
-    return image
-
-
-def getSquares(int w, int h, float vmax=100, float vmin=0, int nSquares=100):
-    """
-    Return an image with random squares
-    :param w: The width of the image
-    :param h: The height of the image
-    :param vmax: The maximum intensity value of the squares
-    :param vmin: The minimum intensity value of the squares
-    :param nSquares: The number of squares to add
-    :return: The image with random squares
-    """
-
-    image = np.zeros((w, h), dtype='float32')
-    addSquares(image, vmax, vmin, nSquares)
-    return image
-
-
-def addRamp(float[:,:] image, float vmax=100, float vmin=0):
-    """
-    Adds a ramp from vmin to vmax to the image
-    :param image: The image to add the ramp to
-    :param vmax: The maximum intensity value of the ramp
-    :param vmin: The minimum intensity value of the ramp
-    """
-
-    cdef int w = image.shape[1]
-    cdef int h = image.shape[0]
-    cdef float v
-    cdef int i, j
-
-    with nogil:
-        for i in prange(w):
-            v = float(i)/w * (vmax-vmin) + vmin
-            for j in range(h):
-                image[j, i] += v
-
-
-def getRamp(int w, int h, float vmax=100, float vmin=0):
-    """
-    Returns a 2D array of size (w, h) with a ramp from vmin to vmax
-    :param w: The width of the image
-    :param h: The height of the image
-    :param vmax: The maximum intensity value of the ramp
-    :param vmin: The minimum intensity value of the ramp
-    :return: The image with the ramp
-    """
-    image = np.zeros((w, h), dtype='float32')
-    addRamp(image, vmax, vmin)
-    return image
-
-
-def test_logFactorial():
-    assert abs(logFactorial(0) - 0.0) < 1e-6
-    assert abs(logFactorial(1) - 0.0) < 1e-6
-    assert abs(logFactorial(2) - 0.6931471805599453) < 1e-6
-    assert abs(logFactorial(3) - 1.791759469228055) < 1e-6
-    assert abs(logFactorial(4) - 3.1780538303479458) < 1e-6
-    assert abs(logFactorial(5) - 4.787491742782046) < 1e-6
-    assert abs(logFactorial(6) - 6.579251212010101) < 1e-6
 
 
 

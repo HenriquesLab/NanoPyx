@@ -46,9 +46,10 @@ cdef class Radiality:
                 self.yRingCoordinates[angleIter] = sin(angleStep * angleIter) * self.ringRadius
 
     def __dealloc__(self):
-        if self.xRingCoordinates is not NULL:
-            free(self.xRingCoordinates)
-            free(self.yRingCoordinates)
+        # if self.xRingCoordinates is not NULL:
+        #     free(self.xRingCoordinates)
+        #     free(self.yRingCoordinates)
+        pass
 
     def calculate(self, image_stack: np.ndarray):
         """
@@ -68,7 +69,7 @@ cdef class Radiality:
 
         cdef int n
         with nogil:
-            for n in prange(nFrames):
+            for n in prange(nFrames): #, schedule='static', chunksize=1):
                 self._calculate_radiality(imRaw[n,:,:], imRad[n,:,:], imIW[n,:,:], imGx[n,:,:], imGy[n,:,:], 0, 0)
 
         return imRad, imIW, imGx, imGy
@@ -89,7 +90,7 @@ cdef class Radiality:
 
         # Radiality Variable
         cdef float Dk, DivDFactor = 0
- 
+
         for j in range(1, h-1):
             for i in range(1, w-1):
                 imGx[j,i] = -imRaw[j,i-1]+imRaw[j,i+1]
