@@ -8,7 +8,7 @@ def test_simple_state_transition_model(plt):
     n_particles = 100
     n_steps = 1000
     p_on = 0.01
-    p_transient_off = 0.9
+    p_transient_off = 0.1
     p_permanent_off = 0.01
 
     # Simulate the particle field

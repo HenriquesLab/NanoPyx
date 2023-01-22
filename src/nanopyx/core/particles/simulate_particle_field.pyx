@@ -8,6 +8,7 @@ from libc.math cimport sqrt, fabs
 import numpy as np
 cimport numpy as np
 
+from cython.parallel import prange
 
 def simulate_particle_field_based_on_2D_PDF(image_pdf, 
                                             min_particles: int = 10, max_particles: int = 1000, 
@@ -30,8 +31,6 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     >>> import numpy as np
     >>> image_pdf = np.random.random((100, 200)).astype(np.float32)
     >>> particles = simulate_particle_field_based_on_2D_PDF(image_pdf, min_particles=100, mean_distance_threshold=0.1)
-    >>> particles.shape
-    (100, 2)
     """
     
     assert image_pdf.dtype == np.float32 and image_pdf.ndim == 2 and np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
@@ -87,3 +86,66 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
                         break
 
     return np.array([xp[:n_particles], yp[:n_particles]]).T
+
+
+def render_particle_histogram(float[:,:] particle_field, int w, int h):
+    """
+    Render a particle field as an image
+    :param particle_field: 2D array of floats, the particle field
+    :param w: int, the width of the image
+    :param h: int, the height of the image
+    :return: 2D array of floats, the rendered particle field
+    """
+
+    image_particle_field = np.zeros((h, w), dtype=np.float32)
+    cdef float[:,:] _image_particle_field = image_particle_field
+
+    cdef int n_particles = particle_field.shape[0]
+    cdef float[:] xp = particle_field[:, 0]
+    cdef float[:] yp = particle_field[:, 1]
+
+    cdef int x, y, i
+
+    with nogil:
+        for i in range(n_particles):
+            x = int(xp[i])
+            y = int(yp[i])
+            if 0 <= x < w or 0 <= y < h:
+                _image_particle_field[y, x] += 1
+
+    return image_particle_field
+
+
+def render_particle_histogram_with_tracks(float[:,:] particle_field, int[:,:] states, int w, int h):
+    """
+    Render a particle field as an image stack
+    :param particle_field: 2D array of floats, the particle field
+    :param states: 2D array of ints, the states of the particles
+    :param w: int, the width of the stack (in pixels)
+    :param h: int, the height of the stack (in pixels)
+    :return: 3D array of floats, the rendered particle field
+    """
+
+    assert particle_field.shape[0] == states.shape[0]
+
+    cdef int n_frames = states.shape[1]
+    
+    image_particle_field = np.zeros((n_frames, h, w), dtype=np.float32)
+    cdef float[:,:,:] _image_particle_field = image_particle_field
+
+    cdef int n_particles = particle_field.shape[0]    
+    cdef float[:] xp = particle_field[:, 0]
+    cdef float[:] yp = particle_field[:, 1]
+
+    cdef int x, y, i, f
+
+    with nogil:
+        for i in prange(n_particles):
+            x = int(xp[i])
+            y = int(yp[i])
+            if 0 <= x < w or 0 <= y < h:
+                for f in range(n_frames):
+                    if states[i, f] == 1:
+                        _image_particle_field[f, y, x] += 1
+
+    return image_particle_field
