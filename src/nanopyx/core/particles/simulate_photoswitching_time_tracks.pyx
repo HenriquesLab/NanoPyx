@@ -16,7 +16,7 @@ def simple_state_transition_model(n_particles: int, n_ticks: int, p_on: double, 
     :param p_transient_off: probability of switching off transiently
     :param p_permanent_off: probability of switching off permanently
     :param initial_state: initial state of the photoswitch
-    :return: array of states
+    :return: array of states with shape (n_particles, n_ticks)
 
     States: 
         -1: bleached
