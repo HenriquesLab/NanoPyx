@@ -175,7 +175,17 @@ def collect_extensions():
 
     return collected_extensions
 
-print("\nCompiling the NanoPyx 🔬 Library... |-- n🐷 --| \n")
+print(
+        """
+  _  _               ___          
+ | \| |__ _ _ _  ___| _ \_  ___ __
+ | .` / _` | ' \/ _ \  _/ || \ \ /
+ |_|\_\__,_|_||_\___/_|  \_, /_\_\\
+                         |__/  
+     |-- n🐷 --| 🔬 Library...
+ Now compiling... hold on to your 🧢
+    """
+)
 
 # cython options
 # REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options
@@ -189,3 +199,5 @@ setup(
     package_data={"": ["**/*.jpg", "**/*.yaml"]},
     zip_safe=False,
 )
+
+print("\nInfinite Improbability Drive engaged... 🚀")
