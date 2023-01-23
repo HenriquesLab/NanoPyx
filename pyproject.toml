@@ -70,7 +70,7 @@ jupyter = [
     # "plotly>=5.11.0",
     "celluloid>=0.2.0", # https://towardsdatascience.com/the-simplest-way-of-making-gifs-and-math-videos-with-python-aec41da74c6e
 ]
-doc = ["pdoc>=12.3.2"]
+doc = ["pdoc>=12.3.1"]
 
 developer = ["pyx2pxd>=0.1.1", "mastodon.py>=1.8.0"]
 
