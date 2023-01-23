@@ -71,7 +71,7 @@ nanopyx    </h1>
 <h2 id="what-is-the-nanopyx-library">What is the NanoPyx 🔬 Library?</h2>
 
 <p>NanoPyx is a library specialized in the analysis of light microscopy and super-resolution data.
-It is a successor to NanoJ, which is a Java library for the analysis of super-resolution microscopy data.</p>
+It is a successor to <a href="https://github.com/HenriquesLab/NanoJ-Core">NanoJ</a>, which is a Java library for the analysis of super-resolution microscopy data.</p>
 
 <p>NanoPyx focuses on performance, by heavily exploiting cython aided multiprocessing and simplicity. It implements methods for the bioimage analysis field, with a special emphasis on those developed by the <a href="https://henriqueslab.github.io/">Henriques Laboratory</a>.</p>
 
@@ -87,14 +87,14 @@ It is a successor to NanoJ, which is a Java library for the analysis of super-re
 <p>You can install <code>NanoPyx</code> via [pip]:</p>
 
 <div class="pdoc-code codehilite">
-<pre><span></span><code>pip install nanopyx
+<pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>nanopyx
 </code></pre>
 </div>
 
 <p>or if you want to install with all optional dependencies</p>
 
 <div class="pdoc-code codehilite">
-<pre><span></span><code>pip install nanopyx<span class="o">[</span>all<span class="o">]</span>
+<pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>nanopyx<span class="o">[</span>all<span class="o">]</span>
 </code></pre>
 </div>
 
@@ -113,20 +113,20 @@ It is a successor to NanoJ, which is a Java library for the analysis of super-re
 </ul>
 
 <div class="pdoc-code codehilite">
-<pre><span></span><code>brew install gcc llvm libomp
+<pre><span></span><code>brew<span class="w"> </span>install<span class="w"> </span>gcc<span class="w"> </span>llvm<span class="w"> </span>libomp
 </code></pre>
 </div>
 
 <h2 id="run-in-jupyterlab-within-a-docker-container">Run in jupyterlab within a docker container</h2>
 
 <div class="pdoc-code codehilite">
-<pre><span></span><code>docker run --name nanopyx1 -p <span class="m">8888</span>:8888 henriqueslab/nanopyx:latest
+<pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--name<span class="w"> </span>nanopyx1<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>:8888<span class="w"> </span>henriqueslab/nanopyx:latest
 </code></pre>
 </div>
 
 <h2 id="contributing">Contributing</h2>
 
-<p>Contributions are very welcome. Tests can be run with [tox], please ensure
+<p>Contributions are very welcome. Tests can be run with pytest, please ensure
 the coverage at least stays the same before you submit a pull request.</p>
 
 <h2 id="license">License</h2>
@@ -146,6 +146,11 @@ the coverage at least stays the same before you submit a pull request.</p>
                         <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">1</span></a><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos">2</span></a><span class="sd">.. include:: ../../README.md</span>
 </span><span id="L-3"><a href="#L-3"><span class="linenos">3</span></a><span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">4</span></a>
+</span><span id="L-5"><a href="#L-5"><span class="linenos">5</span></a>
+</span><span id="L-6"><a href="#L-6"><span class="linenos">6</span></a><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">core</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos">7</span></a><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">data</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">8</span></a><span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">methods</span>
 </span></pre></div>
 
 

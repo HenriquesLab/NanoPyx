@@ -86,7 +86,7 @@
 </span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a>    <span class="n">_im0</span> <span class="o">=</span> <span class="kc">None</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a>
 </span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zip_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="sd">        Iterator to sequentially open tiff files contained in a zip file</span>
 </span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="sd">        :param zip_file_path: path to the zip file</span>
 </span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a><span class="sd">        :type zip_file_path: str</span>
@@ -128,7 +128,7 @@
 </span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_im0</span>
 </span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a>
 </span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a>    <span class="k">def</span> <span class="nf">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a><span class="sd">        Returns the shape of the image stack</span>
 </span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="sd">        :return: shape of the image stack</span>
 </span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a><span class="sd">        :rtype: list</span>
@@ -137,7 +137,7 @@
 </span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
 </span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a>
 </span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a>    <span class="k">def</span> <span class="nf">get_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a><span class="sd">        Returns the data type of the image stack</span>
 </span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a><span class="sd">        :return: data type of the image stack</span>
 </span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a><span class="sd">        :rtype: str</span>
@@ -146,7 +146,7 @@
 </span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span>
 </span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a>
 </span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>    <span class="k">def</span> <span class="nf">get_thumb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a><span class="sd">        Saves a thumbnail (first frame) of the image stack</span>
 </span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a><span class="sd">        :param save_path: path to save the thumbnail</span>
 </span><span id="L-78"><a href="#L-78"><span class="linenos">78</span></a><span class="sd">        :type save_path: str</span>
@@ -160,7 +160,7 @@
 </span><span id="L-86"><a href="#L-86"><span class="linenos">86</span></a>            <span class="n">skimage</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="s2">&quot;thumbnail.jpg&quot;</span><span class="p">),</span> <span class="n">thumb</span><span class="p">)</span>
 </span><span id="L-87"><a href="#L-87"><span class="linenos">87</span></a>
 </span><span id="L-88"><a href="#L-88"><span class="linenos">88</span></a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos">89</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos">89</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="L-90"><a href="#L-90"><span class="linenos">90</span></a><span class="sd">        Closes the zip file</span>
 </span><span id="L-91"><a href="#L-91"><span class="linenos">91</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="L-92"><a href="#L-92"><span class="linenos">92</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -185,7 +185,7 @@
 </span><span id="ZipTiffIterator-13"><a href="#ZipTiffIterator-13"><span class="linenos">13</span></a>    <span class="n">_im0</span> <span class="o">=</span> <span class="kc">None</span>
 </span><span id="ZipTiffIterator-14"><a href="#ZipTiffIterator-14"><span class="linenos">14</span></a>
 </span><span id="ZipTiffIterator-15"><a href="#ZipTiffIterator-15"><span class="linenos">15</span></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zip_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="ZipTiffIterator-16"><a href="#ZipTiffIterator-16"><span class="linenos">16</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator-16"><a href="#ZipTiffIterator-16"><span class="linenos">16</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator-17"><a href="#ZipTiffIterator-17"><span class="linenos">17</span></a><span class="sd">        Iterator to sequentially open tiff files contained in a zip file</span>
 </span><span id="ZipTiffIterator-18"><a href="#ZipTiffIterator-18"><span class="linenos">18</span></a><span class="sd">        :param zip_file_path: path to the zip file</span>
 </span><span id="ZipTiffIterator-19"><a href="#ZipTiffIterator-19"><span class="linenos">19</span></a><span class="sd">        :type zip_file_path: str</span>
@@ -227,7 +227,7 @@
 </span><span id="ZipTiffIterator-55"><a href="#ZipTiffIterator-55"><span class="linenos">55</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_im0</span>
 </span><span id="ZipTiffIterator-56"><a href="#ZipTiffIterator-56"><span class="linenos">56</span></a>
 </span><span id="ZipTiffIterator-57"><a href="#ZipTiffIterator-57"><span class="linenos">57</span></a>    <span class="k">def</span> <span class="nf">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-</span><span id="ZipTiffIterator-58"><a href="#ZipTiffIterator-58"><span class="linenos">58</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator-58"><a href="#ZipTiffIterator-58"><span class="linenos">58</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator-59"><a href="#ZipTiffIterator-59"><span class="linenos">59</span></a><span class="sd">        Returns the shape of the image stack</span>
 </span><span id="ZipTiffIterator-60"><a href="#ZipTiffIterator-60"><span class="linenos">60</span></a><span class="sd">        :return: shape of the image stack</span>
 </span><span id="ZipTiffIterator-61"><a href="#ZipTiffIterator-61"><span class="linenos">61</span></a><span class="sd">        :rtype: list</span>
@@ -236,7 +236,7 @@
 </span><span id="ZipTiffIterator-64"><a href="#ZipTiffIterator-64"><span class="linenos">64</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shape</span>
 </span><span id="ZipTiffIterator-65"><a href="#ZipTiffIterator-65"><span class="linenos">65</span></a>
 </span><span id="ZipTiffIterator-66"><a href="#ZipTiffIterator-66"><span class="linenos">66</span></a>    <span class="k">def</span> <span class="nf">get_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="ZipTiffIterator-67"><a href="#ZipTiffIterator-67"><span class="linenos">67</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator-67"><a href="#ZipTiffIterator-67"><span class="linenos">67</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator-68"><a href="#ZipTiffIterator-68"><span class="linenos">68</span></a><span class="sd">        Returns the data type of the image stack</span>
 </span><span id="ZipTiffIterator-69"><a href="#ZipTiffIterator-69"><span class="linenos">69</span></a><span class="sd">        :return: data type of the image stack</span>
 </span><span id="ZipTiffIterator-70"><a href="#ZipTiffIterator-70"><span class="linenos">70</span></a><span class="sd">        :rtype: str</span>
@@ -245,7 +245,7 @@
 </span><span id="ZipTiffIterator-73"><a href="#ZipTiffIterator-73"><span class="linenos">73</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dtype</span>
 </span><span id="ZipTiffIterator-74"><a href="#ZipTiffIterator-74"><span class="linenos">74</span></a>
 </span><span id="ZipTiffIterator-75"><a href="#ZipTiffIterator-75"><span class="linenos">75</span></a>    <span class="k">def</span> <span class="nf">get_thumb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="ZipTiffIterator-76"><a href="#ZipTiffIterator-76"><span class="linenos">76</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator-76"><a href="#ZipTiffIterator-76"><span class="linenos">76</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator-77"><a href="#ZipTiffIterator-77"><span class="linenos">77</span></a><span class="sd">        Saves a thumbnail (first frame) of the image stack</span>
 </span><span id="ZipTiffIterator-78"><a href="#ZipTiffIterator-78"><span class="linenos">78</span></a><span class="sd">        :param save_path: path to save the thumbnail</span>
 </span><span id="ZipTiffIterator-79"><a href="#ZipTiffIterator-79"><span class="linenos">79</span></a><span class="sd">        :type save_path: str</span>
@@ -259,7 +259,7 @@
 </span><span id="ZipTiffIterator-87"><a href="#ZipTiffIterator-87"><span class="linenos">87</span></a>            <span class="n">skimage</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">imsave</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="s2">&quot;thumbnail.jpg&quot;</span><span class="p">),</span> <span class="n">thumb</span><span class="p">)</span>
 </span><span id="ZipTiffIterator-88"><a href="#ZipTiffIterator-88"><span class="linenos">88</span></a>
 </span><span id="ZipTiffIterator-89"><a href="#ZipTiffIterator-89"><span class="linenos">89</span></a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="ZipTiffIterator-90"><a href="#ZipTiffIterator-90"><span class="linenos">90</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator-90"><a href="#ZipTiffIterator-90"><span class="linenos">90</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator-91"><a href="#ZipTiffIterator-91"><span class="linenos">91</span></a><span class="sd">        Closes the zip file</span>
 </span><span id="ZipTiffIterator-92"><a href="#ZipTiffIterator-92"><span class="linenos">92</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator-93"><a href="#ZipTiffIterator-93"><span class="linenos">93</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -279,7 +279,7 @@
     </div>
     <a class="headerlink" href="#ZipTiffIterator.__init__"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="ZipTiffIterator.__init__-15"><a href="#ZipTiffIterator.__init__-15"><span class="linenos">15</span></a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zip_file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-</span><span id="ZipTiffIterator.__init__-16"><a href="#ZipTiffIterator.__init__-16"><span class="linenos">16</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator.__init__-16"><a href="#ZipTiffIterator.__init__-16"><span class="linenos">16</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator.__init__-17"><a href="#ZipTiffIterator.__init__-17"><span class="linenos">17</span></a><span class="sd">        Iterator to sequentially open tiff files contained in a zip file</span>
 </span><span id="ZipTiffIterator.__init__-18"><a href="#ZipTiffIterator.__init__-18"><span class="linenos">18</span></a><span class="sd">        :param zip_file_path: path to the zip file</span>
 </span><span id="ZipTiffIterator.__init__-19"><a href="#ZipTiffIterator.__init__-19"><span class="linenos">19</span></a><span class="sd">        :type zip_file_path: str</span>
@@ -319,7 +319,7 @@
     </div>
     <a class="headerlink" href="#ZipTiffIterator.get_shape"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="ZipTiffIterator.get_shape-57"><a href="#ZipTiffIterator.get_shape-57"><span class="linenos">57</span></a>    <span class="k">def</span> <span class="nf">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-</span><span id="ZipTiffIterator.get_shape-58"><a href="#ZipTiffIterator.get_shape-58"><span class="linenos">58</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator.get_shape-58"><a href="#ZipTiffIterator.get_shape-58"><span class="linenos">58</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator.get_shape-59"><a href="#ZipTiffIterator.get_shape-59"><span class="linenos">59</span></a><span class="sd">        Returns the shape of the image stack</span>
 </span><span id="ZipTiffIterator.get_shape-60"><a href="#ZipTiffIterator.get_shape-60"><span class="linenos">60</span></a><span class="sd">        :return: shape of the image stack</span>
 </span><span id="ZipTiffIterator.get_shape-61"><a href="#ZipTiffIterator.get_shape-61"><span class="linenos">61</span></a><span class="sd">        :rtype: list</span>
@@ -352,7 +352,7 @@
     </div>
     <a class="headerlink" href="#ZipTiffIterator.get_dtype"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="ZipTiffIterator.get_dtype-66"><a href="#ZipTiffIterator.get_dtype-66"><span class="linenos">66</span></a>    <span class="k">def</span> <span class="nf">get_dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span id="ZipTiffIterator.get_dtype-67"><a href="#ZipTiffIterator.get_dtype-67"><span class="linenos">67</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator.get_dtype-67"><a href="#ZipTiffIterator.get_dtype-67"><span class="linenos">67</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator.get_dtype-68"><a href="#ZipTiffIterator.get_dtype-68"><span class="linenos">68</span></a><span class="sd">        Returns the data type of the image stack</span>
 </span><span id="ZipTiffIterator.get_dtype-69"><a href="#ZipTiffIterator.get_dtype-69"><span class="linenos">69</span></a><span class="sd">        :return: data type of the image stack</span>
 </span><span id="ZipTiffIterator.get_dtype-70"><a href="#ZipTiffIterator.get_dtype-70"><span class="linenos">70</span></a><span class="sd">        :rtype: str</span>
@@ -385,7 +385,7 @@
     </div>
     <a class="headerlink" href="#ZipTiffIterator.get_thumb"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="ZipTiffIterator.get_thumb-75"><a href="#ZipTiffIterator.get_thumb-75"><span class="linenos">75</span></a>    <span class="k">def</span> <span class="nf">get_thumb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-</span><span id="ZipTiffIterator.get_thumb-76"><a href="#ZipTiffIterator.get_thumb-76"><span class="linenos">76</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator.get_thumb-76"><a href="#ZipTiffIterator.get_thumb-76"><span class="linenos">76</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator.get_thumb-77"><a href="#ZipTiffIterator.get_thumb-77"><span class="linenos">77</span></a><span class="sd">        Saves a thumbnail (first frame) of the image stack</span>
 </span><span id="ZipTiffIterator.get_thumb-78"><a href="#ZipTiffIterator.get_thumb-78"><span class="linenos">78</span></a><span class="sd">        :param save_path: path to save the thumbnail</span>
 </span><span id="ZipTiffIterator.get_thumb-79"><a href="#ZipTiffIterator.get_thumb-79"><span class="linenos">79</span></a><span class="sd">        :type save_path: str</span>
@@ -423,7 +423,7 @@
     </div>
     <a class="headerlink" href="#ZipTiffIterator.close"></a>
             <div class="pdoc-code codehilite"><pre><span></span><span id="ZipTiffIterator.close-89"><a href="#ZipTiffIterator.close-89"><span class="linenos">89</span></a>    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-</span><span id="ZipTiffIterator.close-90"><a href="#ZipTiffIterator.close-90"><span class="linenos">90</span></a>        <span class="sd">&quot;&quot;&quot;</span>
+</span><span id="ZipTiffIterator.close-90"><a href="#ZipTiffIterator.close-90"><span class="linenos">90</span></a><span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator.close-91"><a href="#ZipTiffIterator.close-91"><span class="linenos">91</span></a><span class="sd">        Closes the zip file</span>
 </span><span id="ZipTiffIterator.close-92"><a href="#ZipTiffIterator.close-92"><span class="linenos">92</span></a><span class="sd">        &quot;&quot;&quot;</span>
 </span><span id="ZipTiffIterator.close-93"><a href="#ZipTiffIterator.close-93"><span class="linenos">93</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">zip_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
