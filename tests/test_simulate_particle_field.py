@@ -1,6 +1,8 @@
-from nanopyx.core.particles.simulate_particle_field import simulate_particle_field_based_on_2D_PDF, render_particle_histogram
-
 import numpy as np
+
+from nanopyx.core.particles.simulate_particle_field import (
+    get_closest_distance, render_particle_histogram,
+    simulate_particle_field_based_on_2D_PDF)
 
 
 def test_simulate_particle_field_based_on_2D_PDF(plt):
@@ -36,10 +38,13 @@ def test_simulate_particle_field_ensure_thresholds(plt):
     image_pdf = np.ones((100, 100), dtype=np.float32)
 
     # Simulate the particle field
-    particle_field = simulate_particle_field_based_on_2D_PDF(
-        image_pdf, min_particles=10, max_particles=10000, min_distance=0.01, mean_distance_threshold=0)
+    particle_field, mean_closest_distance = simulate_particle_field_based_on_2D_PDF(
+        image_pdf, min_particles=10, max_particles=10000, min_distance=0.01, mean_distance_threshold=0.1)
 
-    image_particle_field, mean_closest_distance = render_particle_histogram(particle_field, 100, 100)
+    assert mean_closest_distance > 0.1
+    assert get_closest_distance(particle_field) > 0.01
+
+    image_particle_field = render_particle_histogram(particle_field, 100, 100)
 
     # Plot the results
     f, axarr = plt.subplots(1, 2)
