@@ -9,18 +9,20 @@ import numpy as np
 cimport numpy as np
 
 from cython.parallel import prange
+from tqdm import tqdm
 
 def simulate_particle_field_based_on_2D_PDF(image_pdf, 
                                             min_particles: int = 10, max_particles: int = 1000, 
-                                            min_distance: float = 0.01, mean_distance_threshold: float = 0):
+                                            min_distance: float = 0.1, mean_distance_threshold: float = 0, int max_tries = 3):
     """
     Simulate a particle field based on a 2D probability density function (PDF)
     :param image_pdf: 2D array of floats, the PDF
     :param min_particles: int, the minimum number of particles to simulate
     :param max_particles: int, the maximum number of particles to simulate
-    :param min_distance: float, the minimum distance between particles
-    :param mean_distance_threshold: float, the mean distance between particles, if the mean distance is below this threshold, the simulation will stop
-    :return: 2D array of floats, the simulated particle field
+    :param min_distance: float, ensure that paricle distances are above minimum distance given
+    :param mean_distance_threshold: float, the mean distance between closest particles, if the mean distance is below this threshold, the simulation will stop
+    :param max_tries: int, the maximum number of tries to place particles before giving up
+    :return: (2D array of floats, mean closest distance), for the first tupple element the shape is (n_particles, 2) where the last dimension is the x and y coordinates of the simulated particle
 
     The code does the following:
     1. It samples the image PDF and places a particle at a point with a probability that is proportional to the PDF at that point.
@@ -35,63 +37,161 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     
     assert image_pdf.dtype == np.float32 and image_pdf.ndim == 2 and np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
 
-    cdef int _width = image_pdf.shape[1] - 1
-    cdef int _height = image_pdf.shape[0] - 1
     cdef float[:,:] _image_pdf = image_pdf
-
-    cdef double distance_sum = 0
-    cdef int n_particles = 0
+    
     cdef int _max_particles = max_particles
     cdef int _min_particles = min_particles
-    cdef bint passes_min_distance
+    cdef float _min_distance = min_distance
+    cdef int _max_tries = max_tries
+    cdef float _mean_distance_threshold = mean_distance_threshold
     
-    cdef float[:] xp = np.zeros(_max_particles, dtype=np.float32)
-    cdef float[:] yp = np.zeros(_max_particles, dtype=np.float32)
+    cdef float[:] xp = np.full(_max_particles, -999999, dtype=np.float32)
+    cdef float[:] yp = np.full(_max_particles, -999999, dtype=np.float32)
+    
+    cdef int n_particles = 0
+    cdef int previous_n_particles = 0
+    cdef int p
+    cdef int tries = 0
+    cdef float closest_distance, closest_distance_sum, mean_closest_distance
 
-    cdef float r, x, y, _x, _y, d, pdf 
+    # start by creating the minumal pool of particles    
+    with tqdm(total=_max_particles, desc="Generating particles", unit="particles") as progress_bar:
+        while 1:
+            with nogil:
+                n_particles = 0   
+                closest_distance_sum = 0 
+                for p in prange(_max_particles):
+                    if xp[p] < 0:
+                        _get_particle_candidate(_image_pdf, p, xp, yp, _min_distance)
+                    else:
+                        closest_distance = _get_closest_distance(xp[p], yp[p], xp, yp)
+                        if closest_distance < _min_distance:
+                            xp[p] = -999999
+                            yp[p] = -999999
+                        else:
+                            closest_distance_sum += closest_distance
+                            n_particles += 1
+
+                if n_particles > 0:
+                    mean_closest_distance = closest_distance_sum / n_particles
+
+                if n_particles == previous_n_particles:
+                    tries += 1
+                else:
+                    tries = 0
+                
+                if n_particles == _max_particles or tries == _max_tries:
+                    break
+
+                if _mean_distance_threshold > 0 and n_particles > _min_particles and mean_closest_distance < _mean_distance_threshold:
+                    # final cleaning up
+                    n_particles = 0   
+                    closest_distance_sum = 0
+                    for p in prange(_max_particles):
+                        if xp[p] >= 0:
+                            closest_distance = _get_closest_distance(xp[p], yp[p], xp, yp)
+                            if closest_distance < _min_distance:
+                                xp[p] = -999999
+                                yp[p] = -999999
+                            else:
+                                closest_distance_sum += closest_distance
+                                n_particles += 1
+                    mean_closest_distance = closest_distance_sum / n_particles
+                    break
+
+            progress_bar.update(n_particles-previous_n_particles)
+            previous_n_particles = n_particles
+
+    cdef float[:] _xp = np.zeros(n_particles, dtype=np.float32)
+    cdef float[:] _yp = np.zeros(n_particles, dtype=np.float32)
+
+    n_particles = 0
+    for p in range(_max_particles):
+        if xp[p] < 0:
+            continue
+        _xp[n_particles] = xp[p]
+        _yp[n_particles] = yp[p]
+        n_particles += 1
+
+    return np.array([_xp, _yp]).T, mean_closest_distance
+
+
+cdef bint _get_particle_candidate(float[:, :] _image_pdf, int particle_index, float[:] xp, float[:] yp, float min_distance) nogil:
+    """
+    Get a particle candidate by sampling the image PDF and placing a particle at a point with a probability that is proportional to the PDF at that point.
+    :param _image_pdf: 2D array of floats, the PDF
+    :param particle_index: int, the index of the particle to place
+    :param xp: 1D array of floats, the x coordinates of the particles
+    :param yp: 1D array of floats, the y coordinates of the particles
+    :param min_distance: float, ensure that paricle distances are above minimum distance given
+    :return: 1 if a particle was placed, 0 if not
+    """
     
+    cdef float x = _random() * (_image_pdf.shape[1] - 1)
+    cdef float y = _random() * (_image_pdf.shape[0] - 1)
+    cdef float pdf = _interpolate(_image_pdf, x, y)
+    cdef float r = _random()
+    
+    if r < pdf and _get_closest_distance(x, y, xp, yp) > min_distance:
+        xp[particle_index] = x
+        yp[particle_index] = y
+        return 1
+
+    return 0
+
+
+cdef double _get_closest_distance(float x, float y, float[:] xp, float[:] yp) nogil:
+    """
+    Get the closest distance between a point and a set of particles. 
+    Ignores particles with exact same location as x, y.
+    :param x: float, the x coordinate of the point
+    :param y: float, the y coordinate of the point
+    :param xp: 1D array of floats, the x coordinates of the particles
+    :param yp: 1D array of floats, the y coordinates of the particles
+    :return: double, the closest distance between the point and the particles
+    """
+    
+    cdef float _x, _y
+    cdef float _min_distance = 999999999999
+
+    for i in range(xp.shape[0]):
+        _x = xp[i]
+        _y = yp[i]
+
+        if _x < 0 or (x == _x and y == _y) or fabs(_x - x) > _min_distance or fabs(_y - y) > _min_distance:
+            continue
+        
+        _min_distance = min(_min_distance, sqrt((_x - x) ** 2 + (_y - y) ** 2))
+
+    return _min_distance
+
+
+def get_closest_distance(float[:,:] particle_field):
+    """
+    Get the closest distance between all particles
+    :param particle_field: 2D array of floats, the particle field
+    :return: double, the closest distance between all particles
+    """
+    
+    cdef float[:] xp = particle_field[:, 0]
+    cdef float[:] yp = particle_field[:, 1]
+
+    cdef float closest_distance = 999999999999
+    cdef int p
+
     with nogil:
-        while n_particles < _max_particles:
-            x = _random() * _width
-            y = _random() * _height
-            pdf = _interpolate(_image_pdf, x, y)
-            if pdf == 0:
+        for p in range(xp.shape[0]):
+            if xp[p] < 0:
                 continue
+            closest_distance = min(closest_distance, _get_closest_distance(xp[p], yp[p], xp, yp))
 
-            r = _random()
-            if r < pdf:
-                passes_min_distance = 1
-                for i in range(n_particles):
-                    _x = xp[i]
-                    _y = yp[i]
-                    if fabs(_x - x) > min_distance or fabs(_y - y) > min_distance:
-                        continue
-                    d = sqrt((_x - x) ** 2 + (_y - y) ** 2)
-                    if d < min_distance:
-                        passes_min_distance = 0
-                        break
-                if passes_min_distance == 0:
-                    continue
-
-                xp[n_particles] = x
-                yp[n_particles] = y
-                n_particles += 1
-            
-                if n_particles > _min_particles and mean_distance_threshold > 0:
-                    distance_sum = 0
-                    for i in range(n_particles):
-                        for j in range(i):
-                            distance_sum += sqrt((xp[i] - xp[j]) ** 2 + (yp[i] - yp[j]) ** 2)
-                    if distance_sum / n_particles ** 2 < mean_distance_threshold:
-                        break
-
-    return np.array([xp[:n_particles], yp[:n_particles]]).T
-
+    return closest_distance
+    
 
 def render_particle_histogram(float[:,:] particle_field, int w, int h):
     """
     Render a particle field as an image
-    :param particle_field: 2D array of floats, the particle field
+    :param particle_field: 2D array of floats, the particle field with shape (n_particles, 2) where the last dimension is the x and y coordinates of the particle
     :param w: int, the width of the image
     :param h: int, the height of the image
     :return: 2D array of floats, the rendered particle field

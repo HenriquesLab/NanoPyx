@@ -200,4 +200,4 @@ setup(
     zip_safe=False,
 )
 
-print("\nInfinite Improbability Drive engaged... 🚀")
+print("\nInfinite Improbability Drive ready to engage... 🚀")
