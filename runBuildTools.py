@@ -29,6 +29,7 @@ def update_gitignore():
     ignores = [
         ".gitignore",
         ".idea",
+        ".venv",
         ".vscode",
         ".pytest_cache",
         "venv",
@@ -78,11 +79,16 @@ def main(mode = None):
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Update .gitignore": update_gitignore,
         "Run pdoc": "python -m pdoc src/nanopyx -o docs",
-        "Install nanopyx in developer mode": "pip3 install -e .[developer, test]",
+        "Install nanopyx in developer mode": "pip3 install -e '.[all]'",
         "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",
         "Build nanopyx source distribution": "python3 setup.py sdist",
         "Install coding tools": "pip install cython-lint",
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
+        "Create venv:": "python3 -m venv .venv",
+        "Activate venv:": "source .venv/bin/activate",
+        "Deactivate venv:": "deactivate",
+        "Remove venv:": "rm -rf .venv",
+        "Run tests": "pytest",
     }
 
     print(
