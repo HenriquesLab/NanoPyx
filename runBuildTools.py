@@ -25,8 +25,10 @@ def update_gitignore():
     gitignore_lines = open(".gitignore", "r").read().splitlines()
     ignores = [
         ".coverage*",
-        "tests",
         "tests_plots",
+        "*.csv",
+        "*.npy",
+        "*.profile"
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
@@ -36,7 +38,7 @@ def update_gitignore():
         f.write("\n".join(gitignore_lines))
 
 
-def main():
+def main(mode = None):
 
     clean_files = " ".join(
         find_files("src", ".so")
@@ -75,8 +77,8 @@ def main():
     """
     )
 
-    if len(sys.argv) > 1:
-        selection = int(sys.argv[1]) - 1
+    if mode is not None:
+        selection = mode
 
     else:
         # print the options
@@ -101,5 +103,11 @@ def main():
     elif isfunction(cmd):
         cmd()
 
+
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        modes = sys.argv[1:]
+        for mode in modes:
+            main(int(mode)-1)
+    else:
+        main()

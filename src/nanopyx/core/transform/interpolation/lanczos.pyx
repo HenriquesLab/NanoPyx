@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=False
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
 from libc.math cimport pi, fabs, sin, floor, ceil, M_PI
 
@@ -82,6 +82,7 @@ cdef double _lanczos_kernel(double x, int taps) nogil:
 
 
 cdef class Interpolator(InterpolatorNearestNeighbor):
+    # autogen_pxd: cdef int taps
 
     def __init__(self, image, int taps=3):
         """

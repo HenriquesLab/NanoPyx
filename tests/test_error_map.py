@@ -3,9 +3,9 @@ from scipy.ndimage import gaussian_filter
 
 from nanopyx.core.sr.error_map import ErrorMap
 from nanopyx.core.transform.binning import rebin_2d
-from nanopyx.core.transform.image_add_random_noise import (
-    addMixedGaussianPoissonNoise,
-    addPerlinNoise,
+from nanopyx.core.image.add_random_noise import (
+    add_mixed_gaussian_poisson_noise,
+    add_perlin_noise,
 )
 
 
@@ -15,11 +15,11 @@ def test_error_map():
     h = 1000
     alpha = 5
     image_gt = np.ones((w, h), dtype="float32") * 1000
-    addPerlinNoise(image_gt, amp=1000, f=10, octaves=3)
+    add_perlin_noise(image_gt, amp=1000, f=10, octaves=3)
 
     image_ref = gaussian_filter(image_gt * alpha, 15)
     image_ref = rebin_2d(image_ref, 10, mode="mean")
-    addMixedGaussianPoissonNoise(image_ref, 10, 10)
+    add_mixed_gaussian_poisson_noise(image_ref, 10, 10)
 
     image_sr = image_gt.copy()
     image_sr = gaussian_filter(image_sr, 3)

@@ -32,7 +32,8 @@ RUN apt-get update && \
     apt-get install -qqy  \
     build-essential \
     libgl1-mesa-glx \
-    libglib2.0-0
+    libglib2.0-0 \
+    git
 
 RUN pip3 install --no-cache-dir --upgrade pip && \
     pip3 install --no-cache-dir \
