@@ -22,7 +22,10 @@ def find_files(root_dir, extension):
 
 
 def update_gitignore():
-    gitignore_lines = open(".gitignore", "r").read().splitlines()
+    try:
+        gitignore_lines = open(".gitignore", "r").read().splitlines()
+    except FileNotFoundError:
+        gitignore_lines = []
     ignores = [
         ".gitignore",
         ".idea",
