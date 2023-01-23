@@ -6,7 +6,7 @@ import pytest
 
 from nanopyx.core.transform.image_add_random_noise import (addRamp, addSquares,
                                                            getRamp, getSquares)
-from nanopyx.core.utils.imagegenerator.beads import generate_timelapse_drift, generate_channel_misalignment
+from nanopyx.core.image.generate.beads import generate_timelapse_drift, generate_channel_misalignment
 from nanopyx.data.download import ExampleDataManager
 
 

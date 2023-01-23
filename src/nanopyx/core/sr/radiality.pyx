@@ -6,7 +6,7 @@ from libc.stdlib cimport free
 import numpy as np
 cimport numpy as np
 
-from nanopyx.core.transform.interpolation.catmull_rom cimport _interpolate
+from ..transform.interpolation.catmull_rom cimport _interpolate
 
 from cython.parallel import prange
 

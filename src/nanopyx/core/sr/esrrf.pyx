@@ -5,9 +5,9 @@ from libc.math cimport sqrt, fabs, exp, isnan
 import numpy as np
 cimport numpy as np
 
-from nanopyx.core.transform.interpolation.catmull_rom cimport _interpolate
+from ..transform.interpolation.catmull_rom cimport _interpolate
 from skimage.transform import rescale as ski_rescale
-from nanopyx.core.transform.image_magnify import *
+from ..transform.image_magnify import *
 
 import cython
 from cython.parallel import prange
