@@ -24,11 +24,27 @@ def find_files(root_dir, extension):
 def update_gitignore():
     gitignore_lines = open(".gitignore", "r").read().splitlines()
     ignores = [
+        ".gitignore",
+        ".idea",
+        ".vscode",
+        ".pytest_cache",
+        "venv",
+        "build",
+        "dist",
+        ".ipynb_checkpoints",
+        "__pycache__",
+        "*.egg-info",
+        "*.so",
+        "*.c",
+        "src/**/*.html",
         ".coverage*",
         "tests_plots",
         "*.csv",
         "*.npy",
-        "*.profile"
+        "*.profile",
+        "*.tif",
+        ".DS_Store",
+        ".coverage"
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
