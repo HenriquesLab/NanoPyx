@@ -6,7 +6,7 @@ import pytest
 
 from nanopyx.core.image.add_squares import add_squares, get_squares
 from nanopyx.core.image.add_ramp import add_ramp, get_ramp
-from nanopyx.core.utils.imagegenerator.beads import generate_timelapse_drift, generate_channel_misalignment
+from nanopyx.core.image.generate.beads import generate_timelapse_drift, generate_channel_misalignment
 from nanopyx.data.download import ExampleDataManager
 
 
