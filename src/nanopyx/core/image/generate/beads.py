@@ -4,7 +4,7 @@ from scipy.interpolate import interp2d
 from skimage.filters import gaussian
 from skimage.transform import EuclideanTransform, warp
 
-from ...image.blocks import assemble_frame_from_blocks
+from ..blocks import assemble_frame_from_blocks
 
 
 def generate_random_position(n_rows, n_cols):
