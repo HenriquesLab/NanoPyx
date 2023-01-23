@@ -59,7 +59,7 @@ docker run --name nanopyx1 -p 8888:8888 henriqueslab/nanopyx:latest
 
 ## Contributing
 
-Contributions are very welcome. Tests can be run with [tox], please ensure
+Contributions are very welcome. Tests can be run with pytest, please ensure
 the coverage at least stays the same before you submit a pull request.
 
 ## License
@@ -72,9 +72,6 @@ Distributed under the terms of the [GNU GPL v2.0] license,
 If you encounter any problems, please [file an issue] along with a detailed description.
 
 [gnu gpl v2.0]: http://www.gnu.org/licenses/gpl-2.0.txt
-[apache software license 2.0]: http://www.apache.org/licenses/LICENSE-2.0
-[mozilla public license 2.0]: https://www.mozilla.org/media/MPL/2.0/index.txt
 [file an issue]: https://github.com/HenriquesLab/NanoPyx/issues
-[tox]: https://tox.readthedocs.io/en/latest/
 [pip]: https://pypi.org/project/pip/
 [pypi]: https://pypi.org/
