@@ -47,4 +47,10 @@ jobs:
     - 
       name: Test with pytest
       run: |
-        pytest
+        pytest --cov .
+    -
+      name: Upload coverage reports to Codecov
+      run: |
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ./codecov 
