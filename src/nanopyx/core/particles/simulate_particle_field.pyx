@@ -2,6 +2,7 @@
 
 from ..utils.random cimport _random
 from ..transform.interpolation.catmull_rom cimport _interpolate
+from ..image.add_gaussians cimport _render_erf_gaussian
 
 from libc.math cimport sqrt, fabs
 
@@ -249,3 +250,36 @@ def render_particle_histogram_with_tracks(float[:,:] particle_field, int[:,:] st
                         _image_particle_field[f, y, x] += 1
 
     return image_particle_field
+
+
+def render_particle_gaussians_with_tracks(float[:,:] particle_field, int[:,:] states, int w, int h, double amplitude, double sigma_x, double sigma_y):
+
+    assert particle_field.shape[0] == states.shape[0]
+
+    cdef int n_frames = states.shape[1]
+    
+    image_particle_field = np.zeros((n_frames, h, w), dtype=np.float32)
+    cdef float[:,:,:] _image_particle_field = image_particle_field
+
+    cdef int n_particles = particle_field.shape[0]    
+    cdef float[:] xp = particle_field[:, 0]
+    cdef float[:] yp = particle_field[:, 1]
+
+    cdef int x, y, i, f, b, b_stop
+
+    # break into 100 particles at a time
+    with tqdm(total=n_particles, desc="Rendering particles", unit="particles") as progress_bar:
+        for b in range(0, n_particles, 100):    
+            with nogil:
+                b_stop = min(b + 100, n_particles)
+                for i in prange(b, b_stop):
+                    x = int(xp[i])
+                    y = int(yp[i])
+                    if 0 <= x < w or 0 <= y < h:
+                        for f in range(n_frames):
+                            if states[i, f] == 1:
+                                _render_erf_gaussian(_image_particle_field[f], x, y, amplitude, sigma_x, sigma_y)
+            progress_bar.update(100)
+                            
+    return image_particle_field
+

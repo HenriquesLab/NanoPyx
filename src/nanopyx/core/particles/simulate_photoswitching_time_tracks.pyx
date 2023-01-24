@@ -6,8 +6,9 @@ import numpy as np
 cimport numpy as np
 
 from cython.parallel import prange
+from tqdm import tqdm
 
-def simple_state_transition_model(n_particles: int, n_ticks: int, p_on: double, p_transient_off: double, p_permanent_off: double, initial_state: int = 1) -> np.ndarray:
+def simple_state_transition_model(int n_particles, int n_ticks, double p_on, double p_transient_off, double p_permanent_off, int initial_state = 1) -> np.ndarray:
     """
     Simple photoswitching state transition model
     :param n_particles: number of particles
@@ -40,11 +41,17 @@ def simple_state_transition_model(n_particles: int, n_ticks: int, p_on: double, 
         >>> states = simple_state_transition_model(n_ticks, n_particles, p_on, p_transient_off, p_permanent_off, initial_state)
     """
     cdef int[:,:] states = np.zeros((n_particles, n_ticks), dtype=np.int32)
-    cdef int i
+    cdef int i, b, b_stop
     cdef int _initial_state = initial_state
-    with nogil:
-        for i in prange(states.shape[0]):
-            _simple_state_transition_model(states[i,:], p_on, p_transient_off, p_permanent_off, _initial_state)
+
+    # break it down to 100 tracks at a time
+    with tqdm(total=n_particles, desc="Tracing", unit="particles") as progress_bar:
+        for b in range(0, n_particles, 100):
+            with nogil:
+                b_stop = min(b + 100, n_particles)
+                for i in prange(b, b_stop):
+                    _simple_state_transition_model(states[i,:], p_on, p_transient_off, p_permanent_off, _initial_state)
+            progress_bar.update(100)
     return np.asarray(states)
     
 
