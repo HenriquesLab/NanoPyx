@@ -78,7 +78,7 @@ class ErrorMap:
 
 def calculate_alpha_beta(
     sigma: float, imRef: np.ndarray, imSR: np.ndarray
-) -> tuple[float, float]:
+) -> tuple:
     """Gaussian blurs imSR image and calculates linear regressino again imRef
 
     Args:

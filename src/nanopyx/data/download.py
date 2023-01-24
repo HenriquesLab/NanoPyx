@@ -82,13 +82,13 @@ class ExampleDataManager:
         ]
         install_opener(opener)
 
-    def list_datasets(self) -> tuple[list]:
+    def list_datasets(self) -> tuple:
         """
         :return: list of dataset labels
         """
         return sorted([dataset["label"] for dataset in self._datasets])
 
-    def list_datasets_nickname(self) -> tuple[list]:
+    def list_datasets_nickname(self) -> tuple:
         """
         :return: list of dataset nicknames
         """
