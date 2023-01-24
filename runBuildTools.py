@@ -108,7 +108,7 @@ def main(mode = None):
  | .` / _` | ' \/ _ \  _/ || \ \ /
  |_|\_\__,_|_||_\___/_|  \_, /_\_\\
                          |__/  
-     |-- n🐷 --| 🔬 Library...
+     |-- NanoPyx --| Nanoscopy Library...
     """
     )
 

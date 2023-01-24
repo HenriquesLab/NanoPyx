@@ -182,8 +182,8 @@ print(
  | .` / _` | ' \/ _ \  _/ || \ \ /
  |_|\_\__,_|_||_\___/_|  \_, /_\_\\
                          |__/  
-     |-- n🐷 --| 🔬 Library...
- Now compiling... hold on to your 🧢
+     |-- NanoPyx --| Nanoscopy Library...
+ Now compiling... hold on to your seats!
     """
 )
 
@@ -200,4 +200,4 @@ setup(
     zip_safe=False,
 )
 
-print("\nInfinite Improbability Drive ready to engage... 🚀")
+print("\nInfinite Improbability Drive ready to engage... ")
