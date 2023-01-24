@@ -50,10 +50,10 @@ jobs:
         pytest --emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ .
 
     - 
-      name: upload to codecoverage.io
-      with:
-        token: ${{ secrets.BMS_CODECOV_TOKEN }} # not required for public repos
+      name: upload to codecoverage # not required for public repos
       run: |
         curl -Os https://uploader.codecov.io/latest/linux/codecov
         chmod +x codecov
-        ./codecov 
+        ./codecov
+      with:
+        token: ${{ secrets.BMS_CODECOV_TOKEN }}
