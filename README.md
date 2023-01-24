@@ -1,10 +1,15 @@
+# Under Development, currently in alpha stage
+Implementations of drift alignment and channel registration should be working, remaining features are under development and/or broken (for now)
+
 # NanoPyx
 
 [![License](https://img.shields.io/pypi/l/nanopyx.svg?color=green)](https://github.com/HenriquesLab/NanoPyx/blob/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/nanopyx.svg?color=green)](https://pypi.org/project/nanopyx)
 [![Python Version](https://img.shields.io/pypi/pyversions/nanopyx.svg?color=green)](https://python.org)
-[![tests](https://github.com/HenriquesLab/NanoPyx/workflows/tests/badge.svg)](https://github.com/HenriquesLab/NanoPyx/actions)
+[![tests](https://github.com/HenriquesLab/NanoPyx/workflows/python-package-test/badge.svg?color=green)](https://github.com/HenriquesLab/NanoPyx/actions)
 [![codecov](https://codecov.io/gh/HenriquesLab/NanoPyx/branch/main/graph/badge.svg)](https://codecov.io/gh/HenriquesLab/NanoPyx)
+[![Downloads](https://img.shields.io/pypi/dm/nanopyx)](https://pypi.org/project/nanopyx)
+[![Docs](https://img.shields.io/badge/documentation-link-blueviolet)](https://henriqueslab.github.io/NanoPyx)
 
 Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging
 
