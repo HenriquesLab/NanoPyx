@@ -78,7 +78,7 @@ class EasyGui:
         self._widgets[tag] = widgets.Text(
             *args, **kwargs, layout=self._layout, style=self._style)
 
-    def add_int_slider(self, tag, *args, remember_value=False, **kwards):
+    def add_int_slider(self, tag, *args, remember_value=False, **kwargs):
         """
         Add a integer slider widget to the container.
         :param tag: tag to identify the widget
@@ -87,11 +87,11 @@ class EasyGui:
         :param kwargs: kwargs for the widget
         """
         if remember_value and tag in self.cfg:
-            kwards["value"] = self.cfg[tag]
+            kwargs["value"] = self.cfg[tag]
         self._widgets[tag] = widgets.IntSlider(
-            *args, **kwards, layout=self._layout, style=self._style)
+            *args, **kwargs, layout=self._layout, style=self._style)
 
-    def add_float_slider(self, tag, *args, remember_value=False, **kwards):
+    def add_float_slider(self, tag, *args, remember_value=False, **kwargs):
         """
         Add a float slider widget to the container.
         :param tag: tag to identify the widget
@@ -100,9 +100,9 @@ class EasyGui:
         :param kwargs: kwargs for the widget
         """
         if remember_value and tag in self.cfg:
-            kwards["value"] = self.cfg[tag]
+            kwargs["value"] = self.cfg[tag]
         self._widgets[tag] = widgets.FloatSlider(
-            *args, **kwards, layout=self._layout, style=self._style)
+            *args, **kwargs, layout=self._layout, style=self._style)
 
     def add_checkbox(self, tag, *args, remember_value=False, **kwargs):
         """
@@ -113,7 +113,7 @@ class EasyGui:
         :param kwargs: kwargs for the widget
         """
         if remember_value and tag in self.cfg:
-            kwards["value"] = self.cfg[tag]
+            kwargs["value"] = self.cfg[tag]
         self._widgets[tag] = widgets.Checkbox(
             *args, **kwargs, layout=self._layout, style=self._style)
 
@@ -126,7 +126,7 @@ class EasyGui:
         :param kwargs: kwargs for the widget
         """
         if remember_value and tag in self.cfg:
-            kwards["value"] = self.cfg[tag]
+            kwargs["value"] = self.cfg[tag]
         self._widgets[tag] = widgets.IntText(
             *args, **kwargs, layout=self._layout, style=self._style)
 
