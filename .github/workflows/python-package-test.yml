@@ -34,7 +34,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest
-        pip3 install -e .[all]
+        pip3 install -e .[jupyter,test,doc,developer]
 
     - 
       name: Lint with flake8
