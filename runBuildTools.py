@@ -1,6 +1,7 @@
 #!/bin/bash -c python3
 
 import os
+import shutil
 import sys
 from inspect import isfunction
 
@@ -47,7 +48,8 @@ def update_gitignore():
         "*.profile",
         "*.tif",
         ".DS_Store",
-        ".coverage"
+        ".coverage",
+        "*.pyd"
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
@@ -66,22 +68,29 @@ def main(mode = None):
         + find_files("src", ".html")
         + find_files("src", ".profile")
         + find_files("notebooks", ".profile")
+        + find_files("src", ".pyd") # Windows .dll-like file
     )
+
+    python_call = shutil.which("python")
+    if sys.platform == "win32":
+        remove_call = 'del'
+    else:
+        remove_call = 'rm'
 
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     options = {
-        "Build nanopyx extensions": "python3 setup.py build_ext --inplace",
+        "Build nanopyx extensions": f"{python_call} setup.py build_ext --inplace",
         "Auto-generate pxd files with pyx2pxd": f"pyx2pxd src",
-        "Clean files": f"rm {clean_files}"
+        "Clean files": f"{remove_call} {clean_files}"
         if len(clean_files) > 0
         else "echo 'No files to clean'",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Update .gitignore": update_gitignore,
-        "Run pdoc": "python -m pdoc src/nanopyx -o docs",
+        "Run pdoc": f"{python_call} -m pdoc src/nanopyx -o docs",
         "Install nanopyx in developer mode": "pip3 install -e .[developer, test]",
-        "Build nanopyx binary distribution": "python3 setup.py bdist_wheel",
-        "Build nanopyx source distribution": "python3 setup.py sdist",
-        "Install coding tools": "pip install cython-lint",
+        "Build nanopyx binary distribution": f"{python_call} setup.py bdist_wheel",
+        "Build nanopyx source distribution": f"{python_call} setup.py sdist",
+        "Install coding tools": "pip3 install cython-lint",
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
     }
 
