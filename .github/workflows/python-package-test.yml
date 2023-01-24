@@ -48,12 +48,13 @@ jobs:
       name: Test with pytest
       run: |
         pytest --emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ .
-    
-    - uses: actions/checkout@master
-    - uses: codecov/codecov-action@v3
+
+    - 
+      name: upload to codecoverage.io
       with:
         token: ${{ secrets.BMS_CODECOV_TOKEN }} # not required for public repos
         files: ./coverage.xml # optional
-        flags: pytest # optional
-        fail_ci_if_error: true # optional (default = false)
-        verbose: true # optional (default = false)
+      run: |
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ./codecov 
