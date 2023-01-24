@@ -69,6 +69,7 @@ jupyter = [
     "stackview>=0.5.1",
     # "plotly>=5.11.0",
     "celluloid>=0.2.0", # https://towardsdatascience.com/the-simplest-way-of-making-gifs-and-math-videos-with-python-aec41da74c6e
+    "jupyterlab>=3.5.3"
 ]
 doc = ["pdoc>=12.3.1"]
 
