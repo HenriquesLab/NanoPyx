@@ -53,8 +53,7 @@ jobs:
       name: upload to codecoverage.io
       with:
         token: ${{ secrets.BMS_CODECOV_TOKEN }} # not required for public repos
-        files: ./coverage.xml # optional
-        run: |
-          curl -Os https://uploader.codecov.io/latest/linux/codecov
-          chmod +x codecov
-          ./codecov 
+      run: |
+        curl -Os https://uploader.codecov.io/latest/linux/codecov
+        chmod +x codecov
+        ./codecov 
