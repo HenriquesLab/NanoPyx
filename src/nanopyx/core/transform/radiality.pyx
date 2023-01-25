@@ -61,16 +61,22 @@ cdef class Radiality:
 
         cdef int nFrames = image_stack.shape[0]
 
-        cdef float [:,:,:] imRaw = image_stack.astype(np.float32)
-        cdef float [:,:,:] imGx = np.zeros_like(imRaw)
-        cdef float [:,:,:] imGy = np.zeros_like(imRaw)
-        cdef float [:,:,:] imRad = np.zeros((image_stack.shape[0], image_stack.shape[1]*self.magnification, image_stack.shape[2]*self.magnification), dtype=np.float32)
-        cdef float [:,:,:] imIW = np.zeros((image_stack.shape[0], image_stack.shape[1]*self.magnification, image_stack.shape[2]*self.magnification), dtype=np.float32)
+        imRaw = image_stack.astype(np.float32)
+        imGx = np.zeros_like(imRaw)
+        imGy = np.zeros_like(imRaw)
+        imRad = np.zeros((image_stack.shape[0], image_stack.shape[1]*self.magnification, image_stack.shape[2]*self.magnification), dtype=np.float32)
+        imIW = np.zeros((image_stack.shape[0], image_stack.shape[1]*self.magnification, image_stack.shape[2]*self.magnification), dtype=np.float32)
 
         cdef int n
+        cdef float[:,:,:] _imRaw = imRaw
+        cdef float[:,:,:] _imGx = imGx
+        cdef float[:,:,:] _imGy = imGy
+        cdef float[:,:,:] _imRad = imRad
+        cdef float[:,:,:] _imIW = imIW
+
         with nogil:
             for n in prange(nFrames): #, schedule='static', chunksize=1):
-                self._calculate_radiality(imRaw[n,:,:], imRad[n,:,:], imIW[n,:,:], imGx[n,:,:], imGy[n,:,:], 0, 0)
+                self._calculate_radiality(_imRaw[n,:,:], _imRad[n,:,:], _imIW[n,:,:], _imGx[n,:,:], _imGy[n,:,:], 0, 0)
 
         return imRad, imIW, imGx, imGy
 
