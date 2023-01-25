@@ -141,13 +141,13 @@ jobs:
         name: artifact
         path: dist
 
-    - uses: pypa/gh-action-pypi-publish@v1.5.0
+    - uses: pypa/gh-action-pypi-publish@v1.6.4
       with:
         user: __token__
         password: ${{ secrets.BMS_DEPLOY_TESTPYPI_TOKEN }}
         repository_url: https://test.pypi.org/legacy/
 
-    # - uses: pypa/gh-action-pypi-publish@v1.5.0
+    # - uses: pypa/gh-action-pypi-publish@v1.6.4
     #   with:
     #     user: __token__
     #     password: ${{ secrets.BMS_DEPLOY_PYPI_TOKEN }}
