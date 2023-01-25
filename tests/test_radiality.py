@@ -8,6 +8,6 @@ def test_radiality(downloader, plt):
     r = Radiality(magnification=2, ringRadius=0.5)
     imRad, imIW, imGx, imGy = r.calculate(dataset)
 
-    plt.imshow(imRad, interpolation='none')
+    plt.imshow(imRad.mean(0), interpolation='none')
     plt.title('Radiality')
     return True
