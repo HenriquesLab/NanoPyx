@@ -19,6 +19,7 @@ jobs:
         with:
           python-version: '3.9'
           cache: 'pip' # cache pips to accelerate builds
+          cache-dependency-path: '.github/requirements.txt'
 
       # ADJUST THIS: install all dependencies (including pdoc)
       - run: pip install -e .[doc]

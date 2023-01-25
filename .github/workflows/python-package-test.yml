@@ -29,6 +29,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip' # cache pips to accelerate builds
+        cache-dependency-path: '.github/requirements.txt'
 
     - 
       name: Install dependencies

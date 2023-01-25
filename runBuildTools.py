@@ -30,7 +30,7 @@ def update_gitignore():
     ignores = [
         ".gitignore",
         ".idea",
-        ".venv",
+        ".venv*",
         ".vscode",
         ".pytest_cache",
         "venv",
@@ -60,7 +60,37 @@ def update_gitignore():
         f.write("\n".join(gitignore_lines))
 
 
-def main(mode = None):
+def extract_requirements_from_pyproject():
+    requirements = []
+    with open("pyproject.toml", "r") as f:
+        txt = f.read()
+        # find dependency requirements list
+        start = txt.find("dependencies = [")+15
+        end = txt.find("]\n", start)+1
+        requirements += eval(txt[start:end])
+        # find test requirements list
+        start = txt.find("test = [")+7
+        end = txt.find("]\n", start)+1
+        requirements += eval(txt[start:end])
+        # find jupyter requirements list
+        start = txt.find("jupyter = [")+10
+        end = txt.find("]\n", start)+1
+        requirements += eval(txt[start:end])
+        # find doc requirements list
+        start = txt.find("doc = [")+6
+        end = txt.find("]\n", start)+1
+        requirements += eval(txt[start:end])
+        # find developer requirements list
+        start = txt.find("developer = [")+12
+        end = txt.find("]\n", start)+1
+        requirements += eval(txt[start:end])
+    requirements = [line for line in requirements if not "nanopyx" in line]
+    with open(os.path.join(".github", "requirements.txt"), "w") as f:
+        f.write("\n".join(requirements))
+
+
+def main(mode=None):
+    extract_requirements_from_pyproject()
 
     clean_files = " ".join(
         find_files("src", ".so")
@@ -69,7 +99,7 @@ def main(mode = None):
         + find_files("src", ".html")
         + find_files("src", ".profile")
         + find_files("notebooks", ".profile")
-        + find_files("src", ".pyd") # Windows .dll-like file
+        + find_files("src", ".pyd")  # Windows .dll-like file
     )
 
     python_call = shutil.which("python")
@@ -87,9 +117,10 @@ def main(mode = None):
         if len(clean_files) > 0
         else "echo 'No files to clean'",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
+        "Generate .github/requirements.txt": extract_requirements_from_pyproject,
         "Update .gitignore": update_gitignore,
         "Run pdoc": f"{python_call} -m pdoc src/nanopyx -o docs",
-        "Install nanopyx in developer mode": "pip3 install -e '.[jupyter,test,doc,developer]'",
+        "Install nanopyx in developer mode": "pip3 install -e '.[all]'",
         "Build nanopyx binary distribution": f"{python_call} setup.py bdist_wheel",
         "Build nanopyx source distribution": f"{python_call} setup.py sdist",
         "Install coding tools": "pip3 install cython-lint",
