@@ -47,7 +47,7 @@ jobs:
     - 
       name: Test with pytest
       run: |
-        pytest --emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ .
+        pytest
         coverage xml
 
     - uses: codecov/codecov-action@v3
