@@ -79,6 +79,7 @@ def main(mode = None):
         remove_call = 'rm'
 
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
+    notebook_files += " ".join(find_files("tests", ".ipynb"))
     options = {
         "Build nanopyx extensions": f"{python_call} setup.py build_ext --inplace",
         "Auto-generate pxd files with pyx2pxd": f"pyx2pxd src",
