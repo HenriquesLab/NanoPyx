@@ -17,7 +17,7 @@ def test_simple_state_transition_model(plt):
 
     # Plot the results
     plt.imshow(particle_field, interpolation='none')
-    plt.title('Particle field')
-    plt.xlabel('X')
-    plt.ylabel('Y')
+    plt.title('Particle Intensity Tracks')
+    plt.xlabel('Time-Traces')
+    plt.ylabel('Particle')
 
