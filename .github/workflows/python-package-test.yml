@@ -50,11 +50,9 @@ jobs:
         pytest --emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ .
         coverage xml
 
-    - uses: actions/checkout@master
     - uses: codecov/codecov-action@v3
       with:
-        token: ${{ secrets.BMS_CODECOV_TOKEN }} # not required for public repos
-        files: ./coverage.xml # optional
+        files: coverage.xml # optional
         flags: pytests # optional
         fail_ci_if_error: false # optional (default = false)
         verbose: true # optional (default = false)
