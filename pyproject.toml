@@ -25,6 +25,7 @@ authors = [
     { name = "Ricardo Henriques", email = "ricardo.jv.henriques@gmail.com" },
     { name = "Bruno Saraiva", email = "bruno.msaraiva2@gmail.com" },
     { name = "Inês Cunha", email = "inescunha200@gmail.com" },
+    { name = "António Brito", email = "antmsbrito95@gmail.com"},
 ]
 maintainers = [{ name = "Bruno Saraiva", email = "bruno.msaraiva2@gmail.com" }]
 classifiers = [
@@ -76,8 +77,8 @@ doc = ["pdoc>=12.3.1"]
 developer = ["pyx2pxd>=0.1.1", "mastodon.py>=1.8.0"]
 
 [project.urls]
-#homepage = "https://example.com"
-#documentation = "https://readthedocs.org"
+homepage = "https://github.com/HenriquesLab/NanoPyx"
+documentation = "https://henriqueslab.github.io/nanopyx"
 repository = "https://github.com/HenriquesLab/NanoPyx"
 #changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
