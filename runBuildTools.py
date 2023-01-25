@@ -125,7 +125,6 @@ def main(mode=None):
         "Build nanopyx source distribution": f"{python_call} setup.py sdist",
         "Install coding tools": "pip3 install cython-lint",
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
-
         "Create venv:": "python3 -m venv .venv",
         "Activate venv:": "source .venv/bin/activate",
         "Deactivate venv:": "deactivate",
