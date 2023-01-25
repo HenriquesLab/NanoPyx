@@ -24,8 +24,8 @@ NanoPyx focuses on performance, by heavily exploiting cython aided multiprocessi
 
 Currently it implements the following approaches:
 
-- A reimplementation of the NanoJ drift correction
-- ...
+- A reimplementation of the NanoJ drift correction and channel registration methods
+- More to come soon™
 
 ## Installation
 
@@ -64,8 +64,8 @@ docker run --name nanopyx1 -p 8888:8888 henriqueslab/nanopyx:latest
 
 ## Contributing
 
-Contributions are very welcome. Tests can be run with pytest, please ensure
-the coverage at least stays the same before you submit a pull request.
+Contributions are very welcome.  
+Please read our [Contribution Guidelines](https://github.com/HenriquesLab/NanoPyx/blob/main/CONTRIBUTING.md) to know how to proceed.
 
 ## License
 
