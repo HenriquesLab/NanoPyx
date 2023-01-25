@@ -6,7 +6,7 @@ We also reserve the right to not accept contributions that add no meaningful cha
 ## **Contributions:**
 
 
-### **1. Report Bugs**
+### 🐛 **1. Report Bugs**
 
 Report bugs at https://github.com/HenriquesLab/NanoPyx/issues.
 
@@ -16,13 +16,13 @@ If you are reporting a bug, please include:
 * Any details about your local setup that might be helpful in troubleshooting.
 * Detailed steps to reproduce the bug.
 
-### **2. Fix Bugs**
+### 🐞 **2. Fix Bugs**
 
 Look through the GitHub issues for bugs. Anything tagged with "bug"
 and "help wanted" is open to whoever wants to implement it.
 
 
-### **3. Submit Feedback**
+### 🗣️ **3. Submit Feedback**
 
 The best way to send feedback is to file an issue at https://github.com/HenriquesLab/NanoPyx/issues.
 
@@ -61,7 +61,7 @@ Ready to contribute? Here's how to set up **nanopyx** for local development.
 
 7. Submit a pull request through the GitHub website.
 
-## Pull Request Guidelines
+## **Pull Request Guidelines**
 
 Before you submit a pull request, check that it meets these guidelines:
 
