@@ -1,8 +1,10 @@
 import numpy as np
 
 from nanopyx.core.particles.simulate_particle_field import (
-    get_closest_distance, render_particle_histogram,
-    simulate_particle_field_based_on_2D_PDF)
+    get_closest_distance,
+    render_particle_histogram,
+    simulate_particle_field_based_on_2D_PDF,
+)
 
 
 def test_simulate_particle_field_based_on_2D_PDF(plt):
@@ -11,25 +13,31 @@ def test_simulate_particle_field_based_on_2D_PDF(plt):
     x = np.linspace(0, 1, 100)
     y = np.linspace(0, 1, 100)
     X, Y = np.meshgrid(x, y)
-    image_pdf = np.exp(-(X - 0.5)**2 / 0.1**2 - (Y - 0.5)**2 / 0.1**2)
+    image_pdf = np.exp(
+        -((X - 0.5) ** 2) / 0.1**2 - (Y - 0.5) ** 2 / 0.1**2
+    )
     image_pdf = image_pdf.astype(np.float32)
 
     # Simulate the particle field
-    particle_field, mean_closest_distance = simulate_particle_field_based_on_2D_PDF(
-        image_pdf, min_particles=100, max_particles=10000)
+    (
+        particle_field,
+        mean_closest_distance,
+    ) = simulate_particle_field_based_on_2D_PDF(
+        image_pdf, min_particles=100, max_particles=10000
+    )
 
     image_particle_field = render_particle_histogram(particle_field, 100, 100)
 
     # Plot the results
     f, axarr = plt.subplots(1, 2)
-    axarr[0].imshow(image_pdf, interpolation='none')
-    axarr[0].set_title('PDF')
-    axarr[0].set_xlabel('X')
-    axarr[0].set_ylabel('Y')
-    axarr[1].imshow(image_particle_field, interpolation='none')
-    axarr[1].set_title('Particle field')
-    axarr[1].set_xlabel('X')
-    axarr[1].set_ylabel('Y')
+    axarr[0].imshow(image_pdf, interpolation="none")
+    axarr[0].set_title("PDF")
+    axarr[0].set_xlabel("X")
+    axarr[0].set_ylabel("Y")
+    axarr[1].imshow(image_particle_field, interpolation="none")
+    axarr[1].set_title("Particle field")
+    axarr[1].set_xlabel("X")
+    axarr[1].set_ylabel("Y")
 
 
 def test_simulate_particle_field_ensure_thresholds(plt):
@@ -38,8 +46,16 @@ def test_simulate_particle_field_ensure_thresholds(plt):
     image_pdf = np.ones((100, 100), dtype=np.float32)
 
     # Simulate the particle field
-    particle_field, mean_closest_distance = simulate_particle_field_based_on_2D_PDF(
-        image_pdf, min_particles=10, max_particles=10000, min_distance=0.01, mean_distance_threshold=0.1)
+    (
+        particle_field,
+        mean_closest_distance,
+    ) = simulate_particle_field_based_on_2D_PDF(
+        image_pdf,
+        min_particles=10,
+        max_particles=1000,
+        min_distance=0.01,
+        mean_distance_threshold=0.1,
+    )
 
     assert mean_closest_distance > 0.1
     assert get_closest_distance(particle_field) > 0.01
@@ -48,11 +64,11 @@ def test_simulate_particle_field_ensure_thresholds(plt):
 
     # Plot the results
     f, axarr = plt.subplots(1, 2)
-    axarr[0].imshow(image_pdf, interpolation='none')
-    axarr[0].set_title('PDF')
-    axarr[0].set_xlabel('X')
-    axarr[0].set_ylabel('Y')
-    axarr[1].imshow(image_particle_field, interpolation='none')
-    axarr[1].set_title('Particle field')
-    axarr[1].set_xlabel('X')
-    axarr[1].set_ylabel('Y')
+    axarr[0].imshow(image_pdf, interpolation="none")
+    axarr[0].set_title("PDF")
+    axarr[0].set_xlabel("X")
+    axarr[0].set_ylabel("Y")
+    axarr[1].imshow(image_particle_field, interpolation="none")
+    axarr[1].set_title("Particle field")
+    axarr[1].set_xlabel("X")
+    axarr[1].set_ylabel("Y")

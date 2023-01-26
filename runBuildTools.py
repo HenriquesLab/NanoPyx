@@ -50,7 +50,7 @@ def update_gitignore():
         "*.tif",
         ".DS_Store",
         ".coverage",
-        "*.pyd"
+        "*.pyd",
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
@@ -65,26 +65,26 @@ def extract_requirements_from_pyproject():
     with open("pyproject.toml", "r") as f:
         txt = f.read()
         # find dependency requirements list
-        start = txt.find("dependencies = [")+15
-        end = txt.find("]\n", start)+1
+        start = txt.find("dependencies = [") + 15
+        end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
         # find test requirements list
-        start = txt.find("test = [")+7
-        end = txt.find("]\n", start)+1
+        start = txt.find("test = [") + 7
+        end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
         # find jupyter requirements list
-        start = txt.find("jupyter = [")+10
-        end = txt.find("]\n", start)+1
+        start = txt.find("jupyter = [") + 10
+        end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
         # find doc requirements list
-        start = txt.find("doc = [")+6
-        end = txt.find("]\n", start)+1
+        start = txt.find("doc = [") + 6
+        end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
         # find developer requirements list
-        start = txt.find("developer = [")+12
-        end = txt.find("]\n", start)+1
+        start = txt.find("developer = [") + 12
+        end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
-    requirements = [line for line in requirements if not "nanopyx" in line]
+    requirements = [line for line in requirements if "nanopyx" not in line]
     with open(os.path.join(".github", "requirements.txt"), "w") as f:
         f.write("\n".join(requirements))
 
@@ -103,9 +103,9 @@ def main(mode=None):
 
     python_call = shutil.which("python")
     if sys.platform == "win32":
-        remove_call = 'del'
+        remove_call = "del"
     else:
-        remove_call = 'rm'
+        remove_call = "rm"
 
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     notebook_files += " ".join(find_files("tests", ".ipynb"))
@@ -173,6 +173,6 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         modes = sys.argv[1:]
         for mode in modes:
-            main(int(mode)-1)
+            main(int(mode) - 1)
     else:
         main()
