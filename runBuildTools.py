@@ -90,7 +90,6 @@ def extract_requirements_from_pyproject():
 
 
 def main(mode=None):
-    extract_requirements_from_pyproject()
 
     clean_files = " ".join(
         find_files("src", ".so")

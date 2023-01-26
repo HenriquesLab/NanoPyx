@@ -8,8 +8,8 @@ data_shape: 1000, 408, 245
 data_dtype: uint16
 reference: ""
 reference_doi: ""
-tiff_sequence_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EZLMRBJ0QlBNlW7FngvzIDUBOPbUFZ6mfv4Nma5-g96FEQ?e=0dL2P7
-tiff_sequence_url_type: "onedrive"
+tiff_sequence_url: https://drive.google.com/file/d/1D7FcVjohqsgvHwRQUg0ecMpHJYTQNdan/view?usp=share_link
+tiff_sequence_url_type: "gdrive"
 tiff_sequence_size: "138.2MB"
 tiff_sequence_checksum: 
 

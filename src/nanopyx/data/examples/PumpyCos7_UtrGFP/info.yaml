@@ -9,8 +9,8 @@ data_shape: 1485, 512, 512
 data_dtype: uint16
 reference: "Almada, Pereira et al, Nature Communications, 2019"
 reference_doi: "https://doi.org/10.1038/s41467-019-09231-9"
-tiff_sequence_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EfzLXOPRam5KhNF15FEKdr8B18nw__m61dYVMcvAOKVU0w?e=H4KMVh
-tiff_sequence_url_type: "onedrive"
+tiff_sequence_url: https://drive.google.com/file/d/1amhp3ON1KAsyK0Cqpi_Uq0y7YL-WWqCT/view?usp=share_link
+tiff_sequence_url_type: "gdrive"
 tiff_sequence_size: "642.9MB"
 tiff_sequence_checksum: 
 

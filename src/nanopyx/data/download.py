@@ -1,16 +1,18 @@
 import os
 import shutil
 import tempfile
+import zipfile
 from urllib.request import ProxyHandler, build_opener, install_opener
 
 import numpy as np
 import wget
 import yaml
+from gdown import download as gdrive_download
 from onedrivedownloader import download as onedrive_download
 
-from ..core.io.zip_image_loader import ZipTiffIterator
 from ..core.io.checksum import get_checksum
-
+from ..core.io.zip_image_loader import ZipTiffIterator
+from ..core.utils.url_checker import url_checker
 from .examples import get_path as get_examples_path
 
 
@@ -124,6 +126,8 @@ class ExampleDataManager:
 
         if download_type == "onedrive":
             onedrive_download(url, file_path, unzip=unzip, clean=True)
+        elif download_type == "gdrive":
+            gdrive_download(url, file_path, fuzzy=True, quiet=False)
         else:
             wget.download(url=url, out=file_path)
 
@@ -178,7 +182,13 @@ class ExampleDataManager:
         """
         self._show_citation_notice(dataset_name)
         file_path = self.download_tiff_sequence(dataset_name)
-        zti = ZipTiffIterator(file_path)
+        try:
+            zti = ZipTiffIterator(file_path)
+        except zipfile.BadZipFile:
+            self.clear_downloads()
+            # try once more
+            file_path = self.download_tiff_sequence(dataset_name)
+            zti = ZipTiffIterator(file_path)
         if not as_ndarray:
             return zti
         else:
@@ -211,3 +221,4 @@ class ExampleDataManager:
                 f"If you find the '{dataset_name}' dataset useful, please cite: "
                 + f"{info['reference']} - {info['reference_doi']}"
             )
+            

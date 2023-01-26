@@ -15,8 +15,8 @@ data_shape: 5900, 128, 128
 data_dtype: uint16
 reference: "Culley et al, The International Journal of Biochemistry & Cell Biology, 2018"
 reference_doi: "https://doi.org/10.1016/j.biocel.2018.05.014"
-tiff_sequence_url: https://igcgulbenkianpt-my.sharepoint.com/:u:/g/personal/rjhenriques_igc_gulbenkian_pt/EeDDWRJDMudAqnubk__kMq4BoqOgCl4ZOX3SFY7aSQ4Bsw?e=m6heE4
-tiff_sequence_url_type: onedrive
+tiff_sequence_url: https://drive.google.com/file/d/1SNLTM5-ZxxWAA9l2Q0DVyyd83H1mkpLP/view?usp=share_link
+tiff_sequence_url_type: gdrive
 tiff_sequence_size: "1.71GB"
 tiff_sequence_checksum: 
 
