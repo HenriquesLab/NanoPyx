@@ -7,6 +7,8 @@ from .estimate_shift import GetMaxOptimizer
 from ...image.blocks import assemble_frame_from_blocks
 from ...transform.image_magnify import catmull_rom_zoom_xy
 
+# TODO: fix for when similarity is lower than minimum
+
 
 def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"):
     """
@@ -37,8 +39,8 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
     blocks_stack = []
 
-    y_translation = []
-    x_translation = []
+    y_translation = np.empty((blocks_per_axis, blocks_per_axis))
+    x_translation = np.empty((blocks_per_axis, blocks_per_axis))
 
     for y_i in range(blocks_per_axis):
         for x_i in range(blocks_per_axis):
@@ -70,17 +72,15 @@ def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, m
 
             if ccm_max_value >= min_similarity:
                 shift_x, shift_y = get_shift_from_ccm_slice(slice_ccm, method=method)
-                y_translation.append([shift_y - 0.5])
-                x_translation.append([shift_x - 0.5])
+                y_translation[y_i, x_i] = shift_y - 0.5
+                x_translation[y_i, x_i] = shift_x - 0.5
 
     y_translation = np.array(y_translation).astype(np.float32).reshape((blocks_per_axis, blocks_per_axis))
     x_translation = np.array(x_translation).astype(np.float32).reshape((blocks_per_axis, blocks_per_axis))
-    print(y_translation, x_translation)
 
     translation_matrix = np.empty((height, width*2))
     translation_matrix_x = catmull_rom_zoom_xy(x_translation, magnification_y=int(height/blocks_per_axis), magnification_x=int(width/blocks_per_axis))
     translation_matrix_y = catmull_rom_zoom_xy(y_translation, magnification_y=int(height/blocks_per_axis), magnification_x=int(width/blocks_per_axis))
-    print(translation_matrix_x.shape, translation_matrix_y.shape)
 
     translation_matrix[:, :width] += translation_matrix_x
     translation_matrix[:, width:] += translation_matrix_y
