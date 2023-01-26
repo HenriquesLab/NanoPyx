@@ -1,6 +1,5 @@
 import numpy as np
 from math import sqrt
-from scipy.interpolate import interp2d
 from skimage.filters import gaussian
 from skimage.transform import EuclideanTransform, warp
 

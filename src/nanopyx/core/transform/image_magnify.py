@@ -38,6 +38,9 @@ def catmull_rom_zoom(image: np.ndarray, magnification: int = 2) -> np.ndarray:
     interpolator = catmull_rom.Interpolator(image)
     return interpolator.magnify(magnification)
 
+def catmull_rom_zoom_xy(image: np.ndarray, magnification_y: int = 2, magnification_x: int = 2) -> np.ndarray:
+    interpolator = catmull_rom.Interpolator(image)
+    return interpolator.magnify_xy(magnification_y, magnification_x)
 
 @timeit2
 def lanczos_zoom(

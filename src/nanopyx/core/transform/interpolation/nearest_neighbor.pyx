@@ -62,7 +62,6 @@ cdef class Interpolator:
         """
         return _interpolate(self.image, x, y)
 
-
     def magnify(self, int magnification) -> np.ndarray:
         """
         Magnify an image by a factor of magnification
@@ -90,6 +89,31 @@ cdef class Interpolator:
         
         return imMagnified
 
+    def magnify_xy(self, int magnification_y, int magnification_x) -> np.ndarray:
+        """
+        Magnify an image by a factor of magnification
+        :param magnification: magnification factor
+        :return: magnified image
+        """
+        imMagnified = self._magnify_xy(magnification_y, magnification_x)
+        return np.asarray(imMagnified).astype(self.original_dtype)
+
+    cdef float[:,:] _magnify_xy(self, float magnification_y, float magnification_x):
+        cdef int i, j
+        cdef int wM = int(self.w * magnification_x)
+        cdef int hM = int(self.h * magnification_y)
+        cdef float x, y
+
+        cdef float[:,:] imMagnified = np.empty((hM, wM), dtype=np.float32)
+
+        with nogil:
+            for i in prange(wM):
+                x = i / magnification_x
+                for j in range(hM):
+                    y = j / magnification_y
+                    imMagnified[j, i] = self._interpolate(x, y)
+        
+        return imMagnified
 
     def shift(self, double dx, double dy) -> np.ndarray:
         """
