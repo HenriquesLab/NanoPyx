@@ -14,7 +14,7 @@ def interpolate(np.ndarray im, double x, double y) -> float:
     :param y: y-coordinate to interpolate at
     :return: Interpolated pixel value (float)
     """
-    return _interpolate(im.view(np.float32), x, y).astype(im.dtype)
+    return _interpolate(im.view(np.float32), x, y)
 
 
 cdef double _interpolate(float[:,:] image, double x, double y) nogil:
