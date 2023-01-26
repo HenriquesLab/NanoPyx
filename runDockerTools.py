@@ -32,7 +32,7 @@ if len(sys.argv) > 1:
 
 else:
     # print the options
-    print("What do you want to do:")
+    print("(⌐⊙_⊙) what do you want to do?")
     for i, option in enumerate(options.keys()):
         print("{}. {}: [CMD]> {}".format(i + 1, option, options[option]))
 
@@ -43,3 +43,4 @@ else:
 cmd = list(options.values())[selection]
 print(f"- Running command: {repr(cmd)}")
 os.system(cmd)
+print("\n(•_•) ( •_•)>⌐■-■\n(⌐■_■) Ready to rock!!")

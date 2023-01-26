@@ -147,7 +147,7 @@ def main(mode=None):
 
     else:
         # print the options
-        print("What do you want to do:")
+        print("(⌐⊙_⊙) what do you want to do?")
         for i, option in enumerate(options.keys()):
             cmd = options[option]
             if type(cmd) == str:
@@ -176,3 +176,4 @@ if __name__ == "__main__":
             main(int(mode) - 1)
     else:
         main()
+    print("\n(•_•) ( •_•)>⌐■-■\n(⌐■_■) Ready to rock!!")
