@@ -30,15 +30,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
         cache: 'pip' # cache pips to accelerate builds
         cache-dependency-path: '**/requirements.txt'
-
-    # test pip cache
-    - name: Check versions
-      run: pip freeze
-    - name: Install dependencies
-      run: pip install -r .github/requirements.txt
-    - name: Check versions
-      run: pip freeze
-
+        
     - 
       name: Install dependencies
       run: |
