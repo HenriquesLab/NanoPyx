@@ -23,7 +23,7 @@
 # Install base resources and nanopyx #
 ######################################
 
-FROM --platform=$TARGETPLATFORM python:3.10-slim AS nanopyx
+FROM --platform=$TARGETPLATFORM python:3.11-slim AS nanopyx
 
 ENV TZ=Europe/London
 ENV LANG=C.UTF-8
