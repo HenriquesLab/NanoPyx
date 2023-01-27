@@ -121,9 +121,9 @@ before-all = ""
 before-build = ""
 repair-wheel-command = ""
 
-test-command = ""
+test-command = "pytest"
 before-test = ""
-test-requires = []
+test-requires = ["nanopyx[test]"]
 test-extras = []
 
 container-engine = "docker"
