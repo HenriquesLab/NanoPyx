@@ -121,7 +121,7 @@ before-all = ""
 before-build = ""
 repair-wheel-command = ""
 
-test-command = "pytest"
+test-command = "pytest {project}/tests"
 before-test = ""
 test-requires = ["nanopyx[test]"]
 test-extras = []
@@ -152,3 +152,4 @@ repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 
 [tool.cibuildwheel.windows]
+test-command = "pytest {project}\\tests"
