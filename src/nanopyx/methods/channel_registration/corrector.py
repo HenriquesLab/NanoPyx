@@ -40,7 +40,7 @@ class ChannelRegistrationCorrector(object):
                     for x_i in range(width):
                         dx = translation_mask[y_i, x_i]
                         dy = translation_mask[y_i, x_i + width]
-                        value = interpolate(img_slice, y_i-dy, x_i-dx)
+                        value = interpolate(img_slice, x_i-dx, y_i-dy)
                         self.aligned_stack[channel][y_i, x_i] = value
 
         return self.aligned_stack.astype(input_d_type)
