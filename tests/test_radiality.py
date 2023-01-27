@@ -10,4 +10,4 @@ def test_radiality(downloader, plt):
 
     plt.imshow(imRad.mean(0), interpolation='none')
     plt.title('Radiality')
-    return True
+
