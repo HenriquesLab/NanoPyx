@@ -115,7 +115,7 @@ filterwarnings = [
 [tool.flake8]
 # https://pypi.org/project/Flake8-pyproject/
 # https://flake8.pycqa.org/en/latest/user/configuration.html
-filename = ["*.pyx", "*.px*"]
+filename = [".py", "*.pyx", "*.px*"]
 exclude = [".eggs", "*.egg,build"]
 ignore = ["E901", "E225", "E226", "E227"]
 max-line-length = 120
