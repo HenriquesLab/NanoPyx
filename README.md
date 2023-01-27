@@ -6,7 +6,7 @@ Implementations of drift alignment and channel registration should be working, r
 [![License](https://img.shields.io/pypi/l/nanopyx.svg?color=green)](https://github.com/HenriquesLab/NanoPyx/blob/main/LICENSE.txt)
 [![PyPI](https://img.shields.io/pypi/v/nanopyx.svg?color=green)](https://pypi.org/project/nanopyx)
 [![Python Version](https://img.shields.io/pypi/pyversions/nanopyx.svg?color=green)](https://python.org)
-[![tests](https://github.com/HenriquesLab/NanoPyx/actions/workflows/python-package-test.yml/badge.svg)](https://github.com/HenriquesLab/NanoPyx/actions/workflows/python-package-test.yml)
+[![tests](https://github.com/HenriquesLab/NanoPyx/actions/workflows/test_package.yml/badge.svg)](https://github.com/HenriquesLab/NanoPyx/actions/workflows/python-package-test.yml)
 [![codecov](https://codecov.io/gh/HenriquesLab/NanoPyx/branch/main/graph/badge.svg)](https://codecov.io/gh/HenriquesLab/NanoPyx)
 [![Downloads](https://img.shields.io/pypi/dm/nanopyx)](https://pypi.org/project/nanopyx)
 [![Docs](https://img.shields.io/badge/documentation-link-blueviolet)](https://henriqueslab.github.io/NanoPyx)
