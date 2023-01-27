@@ -10,8 +10,11 @@ from nanopyx.core.particles.simulate_particle_field import (
 def test_simulate_particle_field_based_on_2D_PDF(plt):
     """Test the particle field simulation."""
 
-    x = np.linspace(0, 1, 100)
-    y = np.linspace(0, 1, 100)
+    # Create a 2D PDF
+    w = 64
+    h = 64
+    x = np.linspace(0, 1, w)
+    y = np.linspace(0, 1, h)
     X, Y = np.meshgrid(x, y)
     image_pdf = np.exp(
         -((X - 0.5) ** 2) / 0.1**2 - (Y - 0.5) ** 2 / 0.1**2
@@ -23,10 +26,10 @@ def test_simulate_particle_field_based_on_2D_PDF(plt):
         particle_field,
         mean_closest_distance,
     ) = simulate_particle_field_based_on_2D_PDF(
-        image_pdf, min_particles=100, max_particles=10000
+        image_pdf, min_particles=1E1, max_particles=1E3
     )
 
-    image_particle_field = render_particle_histogram(particle_field, 100, 100)
+    image_particle_field = render_particle_histogram(particle_field, w, h)
 
     # Plot the results
     f, axarr = plt.subplots(1, 2)

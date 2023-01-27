@@ -16,23 +16,17 @@ options = {
     "Fix issues on mac": "rm ~/.docker/config.json"
 }
 
-print(
-        """
-  _  _               ___          
- | \| |__ _ _ _  ___| _ \_  ___ __
- | .` / _` | ' \/ _ \  _/ || \ \ /
- |_|\_\__,_|_||_\___/_|  \_, /_\_\\
-                         |__/  
-    |-- NanoPyx --| Nanoscopy Library...
-    """
-)
+# Show the logo
+with open("logo_ascii.txt", "r") as f:
+    print(f.read())
+
 
 if len(sys.argv) > 1:
     selection = int(sys.argv[1]) - 1
 
 else:
     # print the options
-    print("What do you want to do:")
+    print("(⌐⊙_⊙) what do you want to do?")
     for i, option in enumerate(options.keys()):
         print("{}. {}: [CMD]> {}".format(i + 1, option, options[option]))
 
@@ -43,3 +37,4 @@ else:
 cmd = list(options.values())[selection]
 print(f"- Running command: {repr(cmd)}")
 os.system(cmd)
+print("\n(•_•) ( •_•)>⌐■-■\n(⌐■_■) Ready to rock!!")

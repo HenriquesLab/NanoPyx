@@ -25,7 +25,7 @@ def is_xcode_installed() -> bool:
             stderr=subprocess.PIPE,
         )
         return result.returncode == 0
-    except:
+    except Exception:
         return False
 
 
@@ -35,7 +35,7 @@ def is_homebrew_installed() -> bool:
             ["which", "brew"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         return result.returncode == 0
-    except:
+    except Exception:
         return False
 
 
@@ -175,17 +175,10 @@ def collect_extensions():
 
     return collected_extensions
 
-print(
-        """
-  _  _               ___          
- | \| |__ _ _ _  ___| _ \_  ___ __
- | .` / _` | ' \/ _ \  _/ || \ \ /
- |_|\_\__,_|_||_\___/_|  \_, /_\_\\
-                         |__/  
-    |-- NanoPyx --| Nanoscopy Library...
- Now compiling... (⌐⊙_⊙) hold on to your seats!
-    """
-)
+
+# Show the logo
+with open("logo_ascii.txt", "r") as f:
+    print(f.read())
 
 # cython options
 # REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options
@@ -199,5 +192,3 @@ setup(
     package_data={"": ["**/*.jpg", "**/*.yaml"]},
     zip_safe=False,
 )
-
-print("\n(•_•) ( •_•)>⌐■-■\n(⌐■_■) Ready to rock!!")

@@ -131,23 +131,16 @@ def main(mode=None):
         "Run tests": "pytest",
     }
 
-    print(
-        """
-  _  _               ___          
- | \| |__ _ _ _  ___| _ \_  ___ __
- | .` / _` | ' \/ _ \  _/ || \ \ /
- |_|\_\__,_|_||_\___/_|  \_, /_\_\\
-                         |__/  
-    |-- NanoPyx --| Nanoscopy Library...
-    """
-    )
+    # Show the logo
+    with open("logo_ascii.txt", "r") as f:
+        print(f.read())
 
     if mode is not None:
         selection = mode
 
     else:
         # print the options
-        print("What do you want to do:")
+        print("(⌐⊙_⊙) what do you want to do?")
         for i, option in enumerate(options.keys()):
             cmd = options[option]
             if type(cmd) == str:
@@ -176,3 +169,4 @@ if __name__ == "__main__":
             main(int(mode) - 1)
     else:
         main()
+    print("\n(•_•) ( •_•)>⌐■-■\n(⌐■_■) Ready to rock!!")

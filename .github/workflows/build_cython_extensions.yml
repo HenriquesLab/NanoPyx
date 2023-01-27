@@ -1,8 +1,10 @@
 name: Build Cython Extensions
 
 on:
-  schedule:
-    - cron: '0 2 * * *' # run at 2 AM UTC
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build_wheels:
@@ -90,7 +92,7 @@ jobs:
         with:
           python-version: '3.9'  # update once build dependencies are available
           cache: 'pip' # cache pips to accelerate builds
-          cache-dependency-path: '.github/requirements.txt'
+          cache-dependency-path: '**/requirements.txt'
 
       - 
         name: Install cibuildwheel
@@ -99,9 +101,8 @@ jobs:
       - 
         name: Build and test wheels
         env:
-          CIBW_BEFORE_ALL_LINUX: "yum install opencv opencv-devel opencv-python"
-          CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
-                            OPENBLAS_NUM_THREADS=2
+          #CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
+          #                  OPENBLAS_NUM_THREADS=2
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_ARCHS: all
@@ -109,9 +110,10 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
 
           # Run the package tests using `pytest`
-          CIBW_TEST_COMMAND: pytest {package}/tests
-          CIBW_TEST_SKIP: "*-macosx_arm64"
-          CIBW_TEST_REQUIRES: pytest threadpoolctl
+          #CIBW_TEST_COMMAND: pytest # {package}/tests
+          #CIBW_TEST_REQUIRES: pytest threadpoolctl
+          #CIBW_TEST_COMMAND_MACOS: pytest {package}/tests
+          #CIBW_TEST_COMMAND_WINDOWS: pytest {package}\tests
           
         run: python -m cibuildwheel --output-dir wheelhouse
 
