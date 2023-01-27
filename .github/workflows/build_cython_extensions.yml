@@ -1,8 +1,10 @@
 name: Build Cython Extensions
 
 on:
-  schedule:
-    - cron: '0 2 * * *' # run at 2 AM UTC
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build_wheels:
@@ -90,7 +92,7 @@ jobs:
         with:
           python-version: '3.9'  # update once build dependencies are available
           cache: 'pip' # cache pips to accelerate builds
-          cache-dependency-path: '.github/requirements.txt'
+          cache-dependency-path: '**/requirements.txt'
 
       - 
         name: Install cibuildwheel
