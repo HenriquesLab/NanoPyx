@@ -131,16 +131,9 @@ def main(mode=None):
         "Run tests": "pytest",
     }
 
-    print(
-        """
-  _  _               ___          
- | \| |__ _ _ _  ___| _ \_  ___ __
- | .` / _` | ' \/ _ \  _/ || \ \ /
- |_|\_\__,_|_||_\___/_|  \_, /_\_\\
-                         |__/  
-    |-- NanoPyx --| Nanoscopy Library...
-    """
-    )
+    # Show the logo
+    with open("logo_ascii.txt", "r") as f:
+        print(f.read())
 
     if mode is not None:
         selection = mode

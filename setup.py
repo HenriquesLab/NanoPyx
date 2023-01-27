@@ -175,17 +175,10 @@ def collect_extensions():
 
     return collected_extensions
 
-print(
-        """
-  _  _               ___          
- | \| |__ _ _ _  ___| _ \_  ___ __
- | .` / _` | ' \/ _ \  _/ || \ \ /
- |_|\_\__,_|_||_\___/_|  \_, /_\_\\
-                         |__/  
-    |-- NanoPyx --| Nanoscopy Library...
- Now compiling... hold on to your seats!
-    """
-)
+
+# Show the logo
+with open("logo_ascii.txt", "r") as f:
+    print(f.read())
 
 # cython options
 # REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options
