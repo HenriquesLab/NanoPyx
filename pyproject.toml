@@ -85,6 +85,17 @@ repository = "https://github.com/HenriquesLab/NanoPyx"
 #changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
+[tool.black]
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
 [tool.pyright]
 reportUndefinedVariable = false
 
@@ -93,6 +104,13 @@ addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --do
 timeout = 600
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
+# Filters are standard python warning filters as described here:
+# https://docs.python.org/3/library/warnings.html#the-warnings-filter
+filterwarnings = [
+    "ignore:.*distutils.*:DeprecationWarning:.*",
+    "ignore:.*distutils.*:UserWarning:.*",
+    "ignore:.*The 'u' format is deprecated.*:DeprecationWarning:pywintypes",
+]
 
 [tool.flake8]
 # https://pypi.org/project/Flake8-pyproject/
@@ -105,8 +123,8 @@ max-line-length = 120
 
 [tool.cibuildwheel]
 # https://cibuildwheel.readthedocs.io/en/stable/options/
+skip = ["pp*"] #, "*musllinux*", "cp310-win32*"]
 build = "*"
-skip = ""
 test-skip = "*-macosx_arm64"
 
 archs = ["auto"]
@@ -121,7 +139,7 @@ before-all = ""
 before-build = ""
 repair-wheel-command = ""
 
-test-command = "pytest {project}/tests"
+test-command = "pytest -n=0 {project}/tests"
 before-test = ""
 test-requires = ["nanopyx[test]"]
 test-extras = []
@@ -149,7 +167,21 @@ before-all = "yum install opencv opencv-devel opencv-python"
 repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
+archs = ["universal2"]
+before-all = ["brew install gcc llvm libomp"]
 repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 
+[tool.cibuildwheel.macos.environment]
+CMAKE_OSX_ARCHITECTURES = "arm64;x86_64"
+MACOSX_DEPLOYMENT_TARGET = "10.14"
+LDFLAGS="-L/usr/local/lib"
+CXX="/usr/local/opt/llvm/bin/clang++"
+CC="/usr/local/opt/llvm/bin/clang"
+
 [tool.cibuildwheel.windows]
-test-command = "pytest {project}\\tests"
+test-command = "pytest -n=0 {project}\\tests"
+before-build = "pip install delvewheel"
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
+
+[tool.cibuildwheel.windows.environment]
+SETUPTOOLS_USE_DISTUTILS="stdlib"
