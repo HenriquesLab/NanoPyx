@@ -2,6 +2,7 @@ from .corrector import DriftCorrector
 from .estimator import DriftEstimator
 from ...core.utils.time.timeit import timeit
 
+
 @timeit
 def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):
     """
@@ -21,6 +22,7 @@ def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_pat
         return corrected_img
     else:
         pass
+
 
 @timeit
 def apply_drift_alignment(image_array, path=None, drift_table=None):

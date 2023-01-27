@@ -22,9 +22,9 @@ class DriftEstimatorTable(object):
         self.params["shift_calc_method"] = "Max Fitting"
         self.params["use_roi"] = False
         self.params["roi"] = None
-        self.params["show_ccm"] = True # used for napari
-        self.params["show_drift_plot"] = True # used for napari
-        self.params["show_drift_table"] = True # used for napari
+        self.params["show_ccm"] = True  # used for napari
+        self.params["show_drift_plot"] = True  # used for napari
+        self.params["show_drift_table"] = True  # used for napari
         self.params["comments"] = None
 
         self.drift_table = None
@@ -56,7 +56,7 @@ class DriftEstimatorTable(object):
         if path is None:
             path = input("Please provide a filepath to export drift table as npy") + "_drift_table.npy"
         else:
-            path += "_drift_table.npy"
+            path = os.path.join(path, "_drift_table.npy")
 
         np.save(path, np.array(tmp, dtype=object))
 
@@ -83,7 +83,7 @@ class DriftEstimatorTable(object):
         if path is None:
             path = input("Please provide a filepath to export drift table as csv") + "_drift_table.csv"
         else:
-            path += "_drift_table.csv"
+            path = os.path.join(path, "_drift_table.csv")
 
         txt = ""
         for key in self.params.keys():

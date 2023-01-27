@@ -19,7 +19,6 @@ class DriftEstimator(object):
         self.drift_x = None
         self.drift_y = None
 
-
     @timeit
     def estimate(self, image_array, **kwargs):
         self.set_estimator_params(**kwargs)
@@ -27,7 +26,7 @@ class DriftEstimator(object):
         n_slices = image_array.shape[0]
 
         # x0, y0, x1, y1 correspond to the exact coordinates of the roi to be used or full image dims and should be a tuple
-        if self.estimator_table.params["use_roi"] and self.estimator_table.params["roi"] is not None: # crops image to roi
+        if self.estimator_table.params["use_roi"] and self.estimator_table.params["roi"] is not None:  # crops image to roi
             print(self.estimator_table.params["use_roi"], self.estimator_table.params["roi"])
             x0, y0, x1, y1 = tuple(self.estimator_table.params["roi"])
             image_arr = image_array[:, y0:y1+1, x0:x1+1]

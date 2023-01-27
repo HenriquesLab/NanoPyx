@@ -6,7 +6,7 @@ import numpy as np
 cimport numpy as np
 
 
-def add_ramp(float[:,:] image, float vmax=100, float vmin=0):
+def add_ramp(image, float vmax=100, float vmin=0):
     """
     Adds a ramp from vmin to vmax to the image
     :param image: The image to add the ramp to
@@ -18,12 +18,13 @@ def add_ramp(float[:,:] image, float vmax=100, float vmin=0):
     cdef int h = image.shape[0]
     cdef float v
     cdef int i, j
+    cdef float[:,:] image_view = image.view(np.float32)
 
     with nogil:
         for i in prange(w):
             v = float(i)/w * (vmax-vmin) + vmin
             for j in range(h):
-                image[j, i] += v
+                image_view[j, i] += v
 
 
 def get_ramp(int w, int h, float vmax=100, float vmin=0):
