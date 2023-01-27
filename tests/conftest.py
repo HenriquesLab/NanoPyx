@@ -14,7 +14,7 @@ from nanopyx.data.download import ExampleDataManager
 def random_image_with_ramp_squares():
     w = random.randint(32, 64)
     h = random.randint(32, 64)
-    image = np.zeros((w, h), dtype=np.float16)
+    image = np.zeros((w, h), dtype="float32")
     add_ramp(image, 1000)
     add_squares(image, 100, nSquares=10)
     return image
