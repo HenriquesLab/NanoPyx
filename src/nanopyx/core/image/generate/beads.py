@@ -25,7 +25,7 @@ def generate_random_position(n_rows, n_cols):
 
     return r, c
 
-def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float16):
+def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float32):
     """
     Generates a random image with objects in random positions
     :param n_objects: int; number of objects to generate
@@ -41,14 +41,14 @@ def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float16):
 
     for i in range(n_objects):
         r, c = generate_random_position(n_rows, n_cols)
-        img[:, r, c] = np.finfo(np.float16).max
+        img[:, r, c] = np.finfo(np.float32).max
 
     for i in range(img.shape[0]):
         img[i] = gaussian(img[i], sigma=3)
 
     return img
 
-def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float16, drift=None,
+def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float32, drift=None,
                              drift_mode="directional"):
     """
     Generate random timelapse image with drift over time.
@@ -137,4 +137,4 @@ def generate_channel_misalignment():
     misaligned_channel = assemble_frame_from_blocks(np.array(misaligned_blocks), 3, 3)
     misaligned_channel_2 = assemble_frame_from_blocks(np.array(misaligned_blocks_2), 3, 3)
 
-    return np.array([ref_channel, misaligned_channel, misaligned_channel_2]).astype(np.float16)
+    return np.array([ref_channel, misaligned_channel, misaligned_channel_2]).astype(np.float32)
