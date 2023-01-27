@@ -1,7 +1,6 @@
 import numpy as np
 from math import sqrt
 from skimage.filters import gaussian
-from scipy.interpolate import interp2d, RectBivariateSpline
 
 from .ccm import calculate_ccm_from_ref
 from .estimate_shift import GetMaxOptimizer
