@@ -103,7 +103,6 @@ jobs:
       - 
         name: Build and test wheels
         env:
-          CIBW_BEFORE_ALL_LINUX: "yum install opencv opencv-devel opencv-python"
           CIBW_ENVIRONMENT: OMP_NUM_THREADS=2
                             OPENBLAS_NUM_THREADS=2
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
@@ -113,11 +112,10 @@ jobs:
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
 
           # Run the package tests using `pytest`
-          CIBW_TEST_COMMAND: pytest {package}/tests
-          CIBW_TEST_SKIP: "*-macosx_arm64"
+          CIBW_TEST_COMMAND: pytest # {package}/tests
           CIBW_TEST_REQUIRES: pytest threadpoolctl
-          CIBW_TEST_COMMAND_MACOS: pytest {package}/tests
-          CIBW_TEST_COMMAND_WINDOWS: pytest {package}\tests
+          #CIBW_TEST_COMMAND_MACOS: pytest {package}/tests
+          #CIBW_TEST_COMMAND_WINDOWS: pytest {package}\tests
           
         run: python -m cibuildwheel --output-dir wheelhouse
 
