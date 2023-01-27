@@ -98,7 +98,7 @@ elif sys.platform == "darwin":
             gcc_list = run_command("ls /opt/homebrew/Cellar/gcc/").split()
             for version in versions:
                 for gcc_dir in gcc_list:
-                    if version in gcc_dir:
+                    if version in sorted(gcc_dir):
                         gcc_cmd = f"gcc-{version}"
                         print(f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'")
                         os.environ["CC"] = gcc_cmd
