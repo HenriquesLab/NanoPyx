@@ -116,6 +116,8 @@ jobs:
           CIBW_TEST_COMMAND: pytest {package}/tests
           CIBW_TEST_SKIP: "*-macosx_arm64"
           CIBW_TEST_REQUIRES: pytest threadpoolctl
+          CIBW_TEST_COMMAND_MACOS: pytest {package}/tests
+          CIBW_TEST_COMMAND_WINDOWS: pytest {package}\tests
           
         run: python -m cibuildwheel --output-dir wheelhouse
 
