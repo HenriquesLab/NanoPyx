@@ -122,7 +122,7 @@ elif sys.platform == "darwin":
         EXTRA_LING_ARGS += ["-fopenmp"]  # ["-Xpreprocessor", "-fopenmp"]
 
 elif sys.platform.startswith("linux"):
-    INCLUDE_DIRS = ["/usr/local/include", "/usr/include", "/usr/include/python3.10"]
+    INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
     LIBRARY_DIRS = ["/usr/local/lib", "/usr/lib"]
     EXTRA_COMPILE_ARGS = ["-O3", "-march=native", "-fopenmp"]
     EXTRA_LING_ARGS = ["-fopenmp"]

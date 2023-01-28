@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8-dev", "3.9-dev", "3.10-dev", "3.11-dev"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         
     steps:
     -
@@ -36,6 +36,7 @@ jobs:
     - 
       name: Install dependencies
       run: |
+        export C_INCLUDE_PATH='/usr/include/python3.10'
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest
         pip3 install -e '.[all]'
