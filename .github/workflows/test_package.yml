@@ -3,40 +3,29 @@
 
 name: Pytest
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+# on:
+#   push:
+#     branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
+
+on: [push]
 
 jobs:
   test:
-
-    runs-on: self-hosted
-    # runs-on: ubuntu-latest
-    
     strategy:
-      fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
-        
+        py_versions: [py311, py310, py39, py38]
+    runs-on: [self-hosted, ${{ matrix.py_versions }}]
+    
     steps:
     -
       name: Checkout
       uses: actions/checkout@v3
 
     - 
-      name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip' # cache pips to accelerate builds
-        cache-dependency-path: '**/requirements.txt'
-        
-    - 
       name: Install dependencies
       run: |
-        export C_INCLUDE_PATH='/usr/include/python3.10'
         python -m pip install --upgrade pip
         python -m pip install flake8 pytest
         pip3 install -e '.[all]'

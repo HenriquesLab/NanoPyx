@@ -1,0 +1,54 @@
+################################################################################################
+# Sets up a GitHub Actions Runner ready for NanoPyx                                            #
+# Check: https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners #
+################################################################################################
+
+
+FROM --platform=$TARGETPLATFORM python:3.9-slim AS nanopyx-gha-runner-py39
+
+# set the github runner version
+ENV PY_VER="py39"
+ARG RUNNER_VERSION="2.301.1"
+
+ENV TZ=Europe/London
+ENV LANG=C.UTF-8
+
+# Install needed apt packages
+RUN apt-get update -y && \
+    apt-get install -qqy  \
+    build-essential \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    lsb-release \
+    git \
+    curl \
+    ca-certificates \
+    jq \
+    systemctl
+    # python3-dev \
+    # libpython3-dev \
+
+# Install pip packages
+COPY requirements.txt .
+
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r requirements.txt
+
+# add a non-sudo user
+RUN useradd -m docker
+
+ENV RUNNER_PATH="/home/docker/actions-runner"
+# cd into the user directory, download and unzip the github actions runner
+RUN mkdir $RUNNER_PATH && cd $RUNNER_PATH \
+    && curl -O -L https://github.com/actions/runner/releases/download/v${RUNNER_VERSION}/actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz \
+    && tar xzf ./actions-runner-linux-x64-${RUNNER_VERSION}.tar.gz
+
+# change ownership to non-sudo user
+RUN chown -R docker ~docker 
+RUN ${RUNNER_PATH}/bin/installdependencies.sh
+
+ENV RUNNER_ALLOW_RUNASROOT=1
+
+# set the entrypoint to the start.sh script
+WORKDIR $RUNNER_PATH
+

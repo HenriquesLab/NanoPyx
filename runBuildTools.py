@@ -85,7 +85,7 @@ def extract_requirements_from_pyproject():
         end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
     requirements = [line for line in requirements if "nanopyx" not in line]
-    with open(os.path.join(".github", "requirements.txt"), "w") as f:
+    with open(os.path.join(".docker", "requirements.txt"), "w") as f:
         f.write("\n".join(requirements))
 
 
@@ -116,7 +116,7 @@ def main(mode=None):
         if len(clean_files) > 0
         else "echo 'No files to clean'",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
-        "Generate .github/requirements.txt": extract_requirements_from_pyproject,
+        "Generate .docker/gha_runners/requirements.txt": extract_requirements_from_pyproject,
         "Update .gitignore": update_gitignore,
         "Run pdoc": f"{python_call} -m pdoc src/nanopyx -o docs",
         "Install nanopyx in developer mode": "pip3 install -e '.[all]'",
