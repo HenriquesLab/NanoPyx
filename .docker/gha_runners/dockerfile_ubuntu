@@ -3,11 +3,9 @@
 # Check: https://docs.github.com/en/actions/hosting-your-own-runners/about-self-hosted-runners #
 ################################################################################################
 
-
-FROM --platform=$TARGETPLATFORM python:3.10-slim AS nanopyx-gha-runner-py310
+FROM --platform=$TARGETPLATFORM ubuntu:latest AS nanopyx-gha-runner-ubuntu
 
 # set the github runner version
-ENV PY_VER="py310"
 ARG RUNNER_VERSION="2.301.1"
 
 ENV TZ=Europe/London
@@ -28,12 +26,6 @@ RUN apt-get update -y && \
     # python3-dev \
     # libpython3-dev \
 
-# Install pip packages
-COPY requirements.txt .
-
-RUN pip3 install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir -r requirements.txt
-
 # add a non-sudo user
 RUN useradd -m docker
 
@@ -49,6 +41,4 @@ RUN ${RUNNER_PATH}/bin/installdependencies.sh
 
 ENV RUNNER_ALLOW_RUNASROOT=1
 
-# set the entrypoint to the start.sh script
 WORKDIR $RUNNER_PATH
-

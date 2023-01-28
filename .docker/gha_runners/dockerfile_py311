@@ -23,7 +23,8 @@ RUN apt-get update -y && \
     git \
     curl \
     ca-certificates \
-    jq 
+    jq \
+    systemctl
     # python3-dev \
     # libpython3-dev \
 
@@ -50,4 +51,4 @@ ENV RUNNER_ALLOW_RUNASROOT=1
 
 # set the entrypoint to the start.sh script
 WORKDIR $RUNNER_PATH
-CMD ["run.sh"]
+
