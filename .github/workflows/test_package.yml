@@ -16,7 +16,8 @@ jobs:
     strategy:
       matrix:
         py_versions: [py311, py310, py39, py38]
-    runs-on: [self-hosted, ${{ matrix.py_versions }}]
+        
+    runs-on: ${{ matrix.py_versions }}
     
     steps:
     -
