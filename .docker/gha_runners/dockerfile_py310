@@ -24,15 +24,8 @@ RUN apt-get update -y && \
     curl \
     ca-certificates \
     jq \
-    systemctl
-    # python3-dev \
-    # libpython3-dev \
-
-# Install pip packages
-COPY requirements.txt .
-
-RUN pip3 install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir -r requirements.txt
+    systemctl \
+    htop
 
 # add a non-sudo user
 RUN useradd -m docker
@@ -47,9 +40,15 @@ RUN mkdir $RUNNER_PATH && cd $RUNNER_PATH \
 RUN chown -R docker ~docker 
 RUN ${RUNNER_PATH}/bin/installdependencies.sh
 
-ENV RUNNER_ALLOW_RUNASROOT=1
+# Install pip packages
+COPY requirements.txt .
 
+RUN pip3 install --no-cache-dir --upgrade pip && \
+    pip3 install --no-cache-dir -r requirements.txt
+
+ENV RUNNER_ALLOW_RUNASROOT=1
 WORKDIR $RUNNER_PATH
 # Next stop is to run: docker run -it --name gha-runner-p310 henriqueslab/nanopyx-gha-runner-py310:latest bash
 # Then follow: https://github.com/HenriquesLab/NanoPyx/settings/actions/runners/new?arch=x64&os=linux
 # Don't forget to install as service at the end by running ./svc.sh 
+ENTRYPOINT ["tail", "-f", "/dev/null"]

@@ -22,7 +22,8 @@ RUN apt-get update -y && \
     curl \
     ca-certificates \
     jq \
-    systemctl
+    systemctl \
+    htop
 
 # add a non-sudo user
 RUN useradd -m docker
@@ -43,3 +44,4 @@ WORKDIR $RUNNER_PATH
 # Next stop is to run: docker run -it --name gha-runner-ubuntu henriqueslab/nanopyx-gha-runner-ubuntu:latest bash
 # Then follow: https://github.com/HenriquesLab/NanoPyx/settings/actions/runners/new?arch=x64&os=linux
 # Don't forget to install as service at the end by running ./svc.sh 
+ENTRYPOINT ["tail", "-f", "/dev/null"]
