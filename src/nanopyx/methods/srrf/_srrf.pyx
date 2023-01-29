@@ -5,6 +5,8 @@ from ...core.transform.radiality cimport Radiality
 import numpy as np
 cimport numpy as np
 
+from tqdm import tqdm
+
 cdef class SRRF:
     cdef Radiality radiality
     cdef float[:] _shift_x, _shift_y
@@ -36,15 +38,18 @@ cdef class SRRF:
         data_srrf = []
         data_intensity = []
 
-        for i in range(dataset.shape[0] // frames_per_timepoint):
-            data_block = dataset[i*frames_per_timepoint:(i+1)*frames_per_timepoint]
+        with tqdm(total=dataset.shape[0] // frames_per_timepoint, desc="Calculating SRRF", unit="frame") as pbar:
+            for i in range(dataset.shape[0] // frames_per_timepoint):
+                data_block = dataset[i*frames_per_timepoint:(i+1)*frames_per_timepoint]
 
-            data_block_radiality, data_block_intensity = self.radiality.calculate(data_block)[:2]
+                data_block_radiality, data_block_intensity = self.radiality.calculate(data_block)[:2]
 
-            data_block_srrf = np.asarray(data_block_radiality).mean(axis=0)
-            data_block_intensity = np.asarray(data_block_intensity).mean(axis=0)
-            
-            data_srrf.append(data_block_srrf)
-            data_intensity.append(data_block_intensity)
+                data_block_srrf = np.asarray(data_block_radiality).mean(axis=0)
+                data_block_intensity = np.asarray(data_block_intensity).mean(axis=0)
+                
+                data_srrf.append(data_block_srrf)
+                data_intensity.append(data_block_intensity)
+
+                pbar.update(1)
 
         return np.asarray(data_srrf), np.asarray(data_intensity)

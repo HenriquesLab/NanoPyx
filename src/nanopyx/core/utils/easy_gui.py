@@ -86,7 +86,7 @@ class EasyGui:
         :param remember_value: remember the last value
         :param kwargs: kwargs for the widget
         """
-        if remember_value and tag in self.cfg:
+        if remember_value and tag in self.cfg and kwargs['min'] <= self.cfg[tag] <= kwargs['max']:
             kwargs["value"] = self.cfg[tag]
         self._widgets[tag] = widgets.IntSlider(
             *args, **kwargs, layout=self._layout, style=self._style)
