@@ -22,11 +22,8 @@ def test_simulate_particle_field_based_on_2D_PDF(plt):
     image_pdf = image_pdf.astype(np.float32)
 
     # Simulate the particle field
-    (
-        particle_field,
-        mean_closest_distance,
-    ) = simulate_particle_field_based_on_2D_PDF(
-        image_pdf, min_particles=1E1, max_particles=1E3
+    particle_field, mean_closest_distance = simulate_particle_field_based_on_2D_PDF(
+        image_pdf, min_particles=1, max_particles=1E3
     )
 
     image_particle_field = render_particle_histogram(particle_field, w, h)
