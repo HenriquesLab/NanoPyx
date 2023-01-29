@@ -32,7 +32,7 @@ RUN apt-get update -y && \
 COPY requirements.txt .
 
 RUN pip3 install --no-cache-dir --upgrade pip && \
-    pip3 install --no-cache-dir -r .docker/gha-runners/requirements.txt
+    pip3 install --no-cache-dir -r requirements.txt
 
 # add a non-sudo user
 RUN useradd -m docker
