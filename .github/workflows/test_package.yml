@@ -6,6 +6,11 @@ name: Pytest
 on:
   push:
     branches: [ "main" ]
+    paths:
+      # only run if src or tests changes
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore
+      - 'src/**' 
+      - 'tests/**' 
   pull_request:
     branches: [ "main" ]
 
