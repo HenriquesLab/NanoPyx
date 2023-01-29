@@ -40,3 +40,6 @@ RUN ${RUNNER_PATH}/bin/installdependencies.sh
 ENV RUNNER_ALLOW_RUNASROOT=1
 
 WORKDIR $RUNNER_PATH
+# Next stop is to run: docker run -it --name gha-runner-ubuntu henriqueslab/nanopyx-gha-runner-ubuntu:latest bash
+# Then follow: https://github.com/HenriquesLab/NanoPyx/settings/actions/runners/new?arch=x64&os=linux
+# Don't forget to install as service at the end by running ./svc.sh 
