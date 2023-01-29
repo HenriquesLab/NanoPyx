@@ -28,6 +28,11 @@ cdef class SRRF:
 
     def calculate(self, dataset: np.ndarray, int frames_per_timepoint):
 
+        if frames_per_timepoint == 0:
+            frames_per_timepoint = dataset.shape[0]
+        elif frames_per_timepoint > dataset.shape[0]:
+            frames_per_timepoint = dataset.shape[0]
+
         data_srrf = []
         data_intensity = []
 

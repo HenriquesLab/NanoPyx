@@ -62,9 +62,9 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
                 n_particles = 0   
                 closest_distance_sum = 0 
                 for p in prange(_max_particles):
-                    if xp[p] < 0:
+                    if xp[p] < 0: # particle not yet placed
                         _get_particle_candidate(_image_pdf, p, xp, yp, _min_distance)
-                    else:
+                    else: # particle already placed, check that it doesnt break distance rule
                         closest_distance = _get_closest_distance(xp[p], yp[p], xp, yp)
                         if closest_distance < _min_distance:
                             xp[p] = -999999
