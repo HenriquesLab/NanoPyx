@@ -3,7 +3,17 @@ name: Build Docker Image
 on:
   schedule:
     - cron: '0 2 * * 0' # run at 2 AM UTC on Sundays
-
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
 jobs:
   build_docker:
     runs-on: [self-hosted, ubuntu]
