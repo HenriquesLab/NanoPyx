@@ -22,7 +22,7 @@ permissions:
 jobs:
   # Build the documentation and upload the static HTML files as an artifact.
   build:
-    runs-on: [py39]
+    runs-on: [self-hosted, py39]
     steps:
       - uses: actions/checkout@v3
 
