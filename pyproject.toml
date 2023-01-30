@@ -98,6 +98,7 @@ exclude = '''
 
 [tool.pyright]
 reportUndefinedVariable = false
+reportMissingImports = false
 
 [tool.pytest.ini_options]
 addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/"

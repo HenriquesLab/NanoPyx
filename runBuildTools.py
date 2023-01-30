@@ -4,9 +4,25 @@ import os
 import shutil
 import sys
 from inspect import isfunction
+import subprocess
 
 
-def find_files(root_dir, extension):
+def run_cmd(command: str):
+    """
+    Run a command in the shell
+    :param command: command to run
+    """
+    print(f"Running command: {command}")
+    subprocess.run(command, shell=True, check=True)
+
+
+def find_files(root_dir: str, extension: str) -> list:
+    """
+    Find all files with a given extension in a directory
+    :param root_dir: root directory to search
+    :param extension: file extension to search for
+    :return: list of files
+    """
     target_files = []
     for root, dirs, files in os.walk(root_dir):
         for file in files:
@@ -23,6 +39,9 @@ def find_files(root_dir, extension):
 
 
 def update_gitignore():
+    """
+    Update the .gitignore file with common ignores
+    """
     try:
         gitignore_lines = open(".gitignore", "r").read().splitlines()
     except FileNotFoundError:
@@ -61,6 +80,10 @@ def update_gitignore():
 
 
 def extract_requirements_from_pyproject():
+    """
+    Extract the dependencies from pyproject.toml
+    Saves into .docker/gha_runners/requirements.txt
+    """
     requirements = []
     with open("pyproject.toml", "r") as f:
         txt = f.read()
@@ -91,7 +114,7 @@ def extract_requirements_from_pyproject():
 
 def main(mode=None):
 
-    clean_files = " ".join(
+    files2clean = " ".join(
         find_files("src", ".so")
         + find_files("src", ".pyc")
         + find_files("src", ".c")
@@ -111,9 +134,9 @@ def main(mode=None):
     notebook_files += " ".join(find_files("tests", ".ipynb"))
     options = {
         "Build nanopyx extensions": f"{python_call} setup.py build_ext --inplace",
-        "Auto-generate pxd files with pyx2pxd": f"pyx2pxd src",
-        "Clean files": f"{remove_call} {clean_files}"
-        if len(clean_files) > 0
+        "Auto-generate pxd files with pyx2pxd": "pyx2pxd src",
+        "Clean files": f"{remove_call} {files2clean}"
+        if len(files2clean) > 0
         else "echo 'No files to clean'",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Generate .docker/gha_runners/requirements.txt": extract_requirements_from_pyproject,
@@ -157,7 +180,7 @@ def main(mode=None):
     cmd = list(options.values())[selection]
     print(f"- Running command: {repr(cmd)}")
     if type(cmd) == str:
-        os.system(cmd)
+        run_cmd(cmd)
     elif isfunction(cmd):
         cmd()
 

@@ -1,4 +1,5 @@
 # Under Development, currently in alpha stage
+
 Implementations of drift alignment and channel registration should be working, remaining features are under development and/or broken (for now)
 
 # NanoPyx
@@ -43,13 +44,15 @@ pip install 'nanopyx[all]'
 
 To install latest development version :
 
-    pip install git+https://github.com/HenriquesLab/NanoPyx.git
+```shell
+pip install git+https://github.com/HenriquesLab/NanoPyx.git
+```
 
 ### Notes for Mac users
 
 If you wish to compile the NanoPyx library from source, you will need to install the following dependencies:
 
-- Homebrew from https://brew.sh/
+- Homebrew from <https://brew.sh/>
 - gcc, llvm and libomp from Homebrew through the command:
 
 ```shell
@@ -79,4 +82,9 @@ If you encounter any problems, please [file an issue] along with a detailed desc
 [gnu gpl v2.0]: http://www.gnu.org/licenses/gpl-2.0.txt
 [file an issue]: https://github.com/HenriquesLab/NanoPyx/issues
 [pip]: https://pypi.org/project/pip/
-[pypi]: https://pypi.org/
+
+## Development at a glance
+
+## [![Repography logo](https://images.repography.com/logo.svg)](https://repography.com) / Structure
+
+[![Structure](https://images.repography.com/33651790/HenriquesLab/NanoPyx/structure/6USKh-PjgkYlbiepDRN9aThOShl3TNx_VkIycH0M6e0/Sqp8CSmE3HObh4_sa8_-IsUByYshpCVQpMuu1E_Fwiw_table.svg)](https://github.com/HenriquesLab/NanoPyx)
