@@ -1,4 +1,4 @@
-name: Build Docs Website
+name: Build Docs Website - Test if it works
 
 # build the documentation whenever there are new commits on main
 on:
