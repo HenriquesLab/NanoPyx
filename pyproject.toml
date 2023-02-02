@@ -76,7 +76,7 @@ jupyter = [
     "jupyterlab>=3.5.3",
 ]
 doc = ["pdoc>=12.3.1", "nanopyx[jupyter,developer]"]
-developer = ["pyx2pxd>=0.1.1", "mastodon.py>=1.8.0"]
+developer = ["build>=0.10.0", "pyx2pxd>=0.1.1", "mastodon.py>=1.8.0"]
 
 [project.urls]
 homepage = "https://github.com/HenriquesLab/NanoPyx"
@@ -118,13 +118,13 @@ filterwarnings = [
 # https://flake8.pycqa.org/en/latest/user/configuration.html
 filename = [".py", "*.pyx", "*.px*"]
 exclude = [".eggs", "*.egg,build"]
-ignore = ["E901", "E225", "E226", "E227"]
+ignore = ["E901", "E225", "E226", "E227", "W503"]
 max-line-length = 120
 
 
 [tool.cibuildwheel]
 # https://cibuildwheel.readthedocs.io/en/stable/options/
-skip = ["pp*"] #, "*musllinux*", "cp310-win32*"]
+skip = ["pp*"]               #, "*musllinux*", "cp310-win32*"]
 build = "*"
 test-skip = "*-macosx_arm64"
 
@@ -186,4 +186,4 @@ before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.windows.environment]
-SETUPTOOLS_USE_DISTUTILS="stdlib"
+SETUPTOOLS_USE_DISTUTILS = "stdlib"

@@ -53,7 +53,9 @@ if sys.platform == "win32":
 elif sys.platform == "darwin":
     # Lets check if homebrew is installed
     use_openmp_support = True
-    print("Checking for openmp support, to run code... ─=≡Σ((( つ◕ل͜◕)つ... blazing fast!!! ")
+    print(
+        "Checking for openmp support, to run code... ─=≡Σ((( つ◕ل͜◕)つ... blazing fast!!! "
+    )
     if is_xcode_installed():
         print("\t - xcode instalation detected...")
         if is_homebrew_installed():
@@ -100,7 +102,9 @@ elif sys.platform == "darwin":
                 for gcc_dir in gcc_list:
                     if version in sorted(gcc_dir):
                         gcc_cmd = f"gcc-{version}"
-                        print(f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'")
+                        print(
+                            f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'"
+                        )
                         os.environ["CC"] = gcc_cmd
 
     # brew install gcc llvm libomp
@@ -157,7 +161,8 @@ def collect_extensions():
         if file.endswith(".pyx")
         or (
             file.endswith(".py")
-            and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read()
+            and "# nanopyx-cythonize: True\n"
+            in open(os.path.join(dir, file)).read()
         )
     ]
 
@@ -177,8 +182,17 @@ def collect_extensions():
 
 
 # Show the logo
-with open("logo_ascii.txt", "r") as f:
-    print(f.read())
+print(
+    r"""
+  _  _               ___
+ | \| |__ _ _ _  ___| _ \_  ___ __
+ | .` / _` | ' \/ _ \  _/ || \ \ /
+ |_|\_\__,_|_||_\___/_|  \_, /_\_\
+                      *|<|__/==/==
+  |-- Python Nanoscopy Library --|
+
+"""
+)
 
 # cython options
 # REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options

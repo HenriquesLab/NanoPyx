@@ -108,7 +108,9 @@ def extract_requirements_from_pyproject():
         end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
     requirements = [line for line in requirements if "nanopyx" not in line]
-    with open(os.path.join(".docker", "gha_runners", "requirements.txt"), "w") as f:
+    with open(
+        os.path.join(".docker", "gha_runners", "requirements.txt"), "w"
+    ) as f:
         f.write("\n".join(requirements))
 
 
@@ -152,6 +154,7 @@ def main(mode=None):
         "Deactivate venv:": "deactivate",
         "Remove venv:": "rm -rf .venv",
         "Run tests": "pytest",
+        "Run build": "python -m build",
     }
 
     # Show the logo
