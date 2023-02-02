@@ -114,7 +114,7 @@ def test_apply_drift_alignment_init_previous_drift_table(random_timelapse_w_drif
 def test_apply_drift_alignment_init_previous_drift_table_npy(random_timelapse_w_drift):
     estimator = DriftEstimator()
     aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, apply=True)
-    estimator.save_drift_table(save_as_npy=True, path="test/")
+    estimator.save_drift_table(save_as_npy=True, path="tests/")
     aligned_img_corrector_2 = apply_drift_alignment(random_timelapse_w_drift, path=os.path.join("tests", "_drift_table.npy"))
 
     assert np.array_equal(aligned_img, aligned_img_corrector_2)
