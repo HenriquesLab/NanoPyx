@@ -52,6 +52,7 @@ dependencies = [
 
 [project.optional-dependencies]
 all = ["nanopyx[test,jupyter,doc,developer]"]
+developer = ["build>=0.10.0", "pyx2pxd>=0.1.1", "mastodon.py>=1.8.0"]
 test = [
     "pytest>=7.1",
     "pytest-cov>= 4.0.0",
@@ -76,7 +77,6 @@ jupyter = [
     "jupyterlab>=3.5.3",
 ]
 doc = ["pdoc>=12.3.1", "nanopyx[jupyter,developer]"]
-developer = ["build>=0.10.0", "pyx2pxd>=0.1.1", "mastodon.py>=1.8.0"]
 
 [project.urls]
 homepage = "https://github.com/HenriquesLab/NanoPyx"
@@ -101,7 +101,7 @@ reportUndefinedVariable = false
 reportMissingImports = false
 
 [tool.pytest.ini_options]
-addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/"
+addopts = "--emoji --cov=nanopyx -n=auto --plots --nbmake --nbmake-timeout=600 --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/"
 timeout = 600
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
