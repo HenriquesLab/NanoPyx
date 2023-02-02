@@ -9,5 +9,7 @@ img_1 = np.sum(img[:250], axis=0)
 img_2 = np.sum(img[250:], axis=0)
 
 fire_calculator = FIRECalculator()
-fire = fire_calculator.calculate_fire_number(img_1, img_2, "Fixed 1/7")
+fire_fixed = fire_calculator.calculate_fire_number(img_1, img_2, "Fixed 1/7")
+fire_hb = fire_calculator.calculate_fire_number(img_1, img_2, "Half-bit")
+fire_3s = fire_calculator.calculate_fire_number(img_1, img_2, "Three sigma")
 
