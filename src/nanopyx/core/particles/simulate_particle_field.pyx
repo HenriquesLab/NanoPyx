@@ -46,8 +46,12 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     cdef int _max_tries = max_tries
     cdef float _mean_distance_threshold = mean_distance_threshold
     
-    cdef float[:] xp = np.full(_max_particles, -999999, dtype=np.float32)
-    cdef float[:] yp = np.full(_max_particles, -999999, dtype=np.float32)
+    xp = np.full(_max_particles, -999999, dtype=np.float32)
+    yp = np.full(_max_particles, -999999, dtype=np.float32)
+    cdef float[:] _xp = xp  # xp exists in python land, _xp in c land as memoryview
+    cdef float[:] _yp = yp  # same as above
+
+    cdef long[:] particles_not_set, particles_set
     
     cdef int n_particles = 0
     cdef int previous_n_particles = 0
@@ -58,63 +62,50 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     # start by creating the minumal pool of particles    
     with tqdm(total=_max_particles, desc="Generating particles", unit="particles") as progress_bar:
         while 1:
+            particles_not_set = np.nonzero(xp < 0)[0]  # get the index for the parciles not yet set
+            with nogil:
+                for p in prange(particles_not_set.shape[0]):
+                    _get_particle_candidate(_image_pdf, p, _xp, _yp, _min_distance)  # find some particles
+            particles_set = np.nonzero(xp >= 0)[0]  # get the index for the parciles already set
             with nogil:
                 n_particles = 0   
-                closest_distance_sum = 0 
-                for p in prange(_max_particles):
-                    if xp[p] < 0: # particle not yet placed
-                        _get_particle_candidate(_image_pdf, p, xp, yp, _min_distance)
-                    else: # particle already placed, check that it doesnt break distance rule
-                        closest_distance = _get_closest_distance(xp[p], yp[p], xp, yp)
-                        if closest_distance < _min_distance:
-                            xp[p] = -999999
-                            yp[p] = -999999
-                        else:
-                            closest_distance_sum += closest_distance
-                            n_particles += 1
+                closest_distance_sum = 0
+                for p in prange(particles_set.shape[0]):
+                    closest_distance = _get_closest_distance(_xp[p], _yp[p], _xp, _yp)
+                    if closest_distance < _min_distance:  # kickout particles found too close
+                        _xp[p] = -999999
+                        _yp[p] = -999999
+                    else:  # count the particles that are not kicked out
+                        closest_distance_sum += closest_distance
+                        n_particles += 1
 
+                # calculate the mean distance
                 if n_particles > 0:
                     mean_closest_distance = closest_distance_sum / n_particles
 
+                # check if the number of particles changed, if not increment the number of tries
                 if n_particles == previous_n_particles:
                     tries += 1
                 else:
                     tries = 0
                 
+                # too many tries without change in the number of parciles
                 if n_particles == _max_particles or tries == _max_tries:
                     break
 
+                # check if the mean distance is below the threshold
                 if _mean_distance_threshold > 0 and n_particles > _min_particles and mean_closest_distance < _mean_distance_threshold:
-                    # final cleaning up
-                    n_particles = 0   
-                    closest_distance_sum = 0
-                    for p in prange(_max_particles):
-                        if xp[p] >= 0:
-                            closest_distance = _get_closest_distance(xp[p], yp[p], xp, yp)
-                            if closest_distance < _min_distance:
-                                xp[p] = -999999
-                                yp[p] = -999999
-                            else:
-                                closest_distance_sum += closest_distance
-                                n_particles += 1
-                    mean_closest_distance = closest_distance_sum / n_particles
                     break
 
             progress_bar.update(n_particles-previous_n_particles)
             previous_n_particles = n_particles
 
-    cdef float[:] _xp = np.zeros(n_particles, dtype=np.float32)
-    cdef float[:] _yp = np.zeros(n_particles, dtype=np.float32)
+    # keep only set particles
+    particles_set = np.nonzero(xp >= 0)[0]
+    xp = xp[particles_set]
+    yp = yp[particles_set]
 
-    n_particles = 0
-    for p in range(_max_particles):
-        if xp[p] < 0:
-            continue
-        _xp[n_particles] = xp[p]
-        _yp[n_particles] = yp[p]
-        n_particles += 1
-
-    return np.array([_xp, _yp]).T, mean_closest_distance
+    return np.array([xp, yp]).T, mean_closest_distance
 
 
 cdef bint _get_particle_candidate(float[:, :] _image_pdf, int particle_index, float[:] xp, float[:] yp, float min_distance) nogil:
