@@ -40,3 +40,4 @@ def apply_drift_alignment(image_array, path=None, drift_table=None):
         corrector.estimator_table = drift_table
     corrected_img = corrector.apply_correction(image_array)
     return corrected_img
+    

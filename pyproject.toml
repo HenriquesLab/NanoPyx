@@ -52,7 +52,13 @@ dependencies = [
 
 [project.optional-dependencies]
 all = ["nanopyx[test,jupyter,doc,developer]"]
-developer = ["build>=0.10.0", "pyx2pxd>=0.1.1", "mastodon.py>=1.8.0"]
+developer = [
+    "build>=0.10.0",
+    "pyx2pxd>=0.1.1",
+    "mastodon.py>=1.8.0",
+    "black>=23.1.0",
+    "flake8>=6.0.0",
+]
 test = [
     "pytest>=7.1",
     "pytest-cov>= 4.0.0",
