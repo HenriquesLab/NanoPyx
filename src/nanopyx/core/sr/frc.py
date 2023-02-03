@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import pandas as pd
 from math import pi
 from skimage.draw import circle_perimeter
 from ..transform.padding import pad_w_zeros_2d
