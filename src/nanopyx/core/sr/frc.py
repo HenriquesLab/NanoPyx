@@ -126,3 +126,57 @@ class FIRECalculator(object):
         
         return self.intersections[0]
 
+# ref: https://colab.research.google.com/drive/1svyAqyjpdo_hIG8FSCjAmhNznqDq2sFm?usp=sharing#scrollTo=uAek4PxwgVd4 from https://www.frontiersin.org/articles/10.3389/fbinf.2021.817254/full
+def calculate_FIRE(img_1, img_2, pixel_recon_dim=1):
+    
+    max_width = max(img_1.shape[1], img_2.shape[1])
+    max_height = max(img_1.shape[0], img_2.shape[0])
+    
+    img_1 = pad_w_zeros_2d(img_1, max_height, max_width).astype(np.float32)
+    img_2 = pad_w_zeros_2d(img_2, max_height, max_width).astype(np.float32)
+
+    fft_1 = np.fft.fft2(img_1)
+    fft_2 = np.fft.fft2(img_2)
+    
+    ccm = np.fft.fftshift(fft_1 * np.conj(fft_2))
+    
+    abs_sqrd_fft_1 = np.fft.fftshift(np.abs(fft_1)**2)
+    abs_sqrd_fft_2 = np.fft.fftshift(np.abs(fft_2)**2)
+    
+    distance_map = create_distance_map(img_1)
+    
+    max_d = np.int(np.floor(np.shape(distance_map)[0]/2))
+    
+    f1f2_r = np.zeros([max_d,1])
+    f12_r = np.zeros([max_d,1])
+    f22_r = np.zeros([max_d,1])
+    FRC_values = np.zeros([max_d,1])
+    
+    for d in range(1,max_d):
+        ringMap = (distance_map == d)
+        f1f2_r[d-1] = np.sum(ccm*ringMap)
+        f12_r[d-1] = np.sum(abs_sqrd_fft_1*ringMap)
+        f22_r[d-1] = np.sum(abs_sqrd_fft_2*ringMap)
+        #Now the FRC values are calculated as follows
+        FRC_values[d-1] = (f1f2_r[d-1]/np.sqrt(f12_r[d-1]*f22_r[d-1]))
+        
+    FRC_values = pd.DataFrame(FRC_values, columns=['FRC'])
+    FRC_values.interpolate(inplace=True, method='linear')
+
+    #The x-axis (spatial frequency) goes from 0 to 1/(2*pixel_recon_dim)
+    spat_freq = np.linspace(0, 1/(2*pixel_recon_dim), len(FRC_values))
+
+    #We find the FRC resolution
+    fire_ID = np.min(np.where(FRC_values<(1/7))[0])
+    fire = 1/spat_freq[fire_ID]
+    
+    return fire
+    
+def create_distance_map(img):
+    distance_map = np.zeros(np.shape(img))
+    center = np.floor(np.array(img.shape)/2)
+    for x_i in range(0,np.shape(img)[0]):
+        for y_i in range(0,np.shape(img)[1]):
+            distance_map[x_i,y_i] = np.round(np.sqrt((x_i-center[0])**2+(y_i-center[1])**2))
+        
+    return distance_map
