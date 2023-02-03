@@ -146,7 +146,7 @@ def calculate_FIRE(img_1, img_2, pixel_recon_dim=1):
     
     distance_map = create_distance_map(img_1)
     
-    max_d = np.int(np.floor(np.shape(distance_map)[0]/2))
+    max_d = int(np.floor(np.shape(distance_map)[0]/2))
     
     f1f2_r = np.zeros([max_d,1])
     f12_r = np.zeros([max_d,1])
