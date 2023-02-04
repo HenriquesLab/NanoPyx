@@ -19,7 +19,11 @@ environment:
 
 install:
   - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
-  - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get install python$env:PYTHON_VERSION }
+  - PS: |
+    if ($env:OS_LABEL -eq 'linux') { 
+      sudo apt-get update
+      sudo apt-get install -qqy python$env:PYTHON_VERSION 
+      }
   - PS: if ($env:OS_LABEL -eq 'macos') { brew install python$env:PYTHON_VERSION }
   - PS: python -m pip install --upgrade pip
   - PS: python -m pip install cibuildwheel
