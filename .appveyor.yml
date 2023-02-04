@@ -7,13 +7,22 @@ image:
 
 environment:
   matrix:
-    - PYTHON_VERSION: 3.8
-    - PYTHON_VERSION: 3.9
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PYTHON_VERSION: 3.8
+      OS_LABEL: win
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      PYTHON_VERSION: 3.8
+      OS_LABEL: linux
+    - APPVEYOR_BUILD_WORKER_IMAGE: macOS
+      PYTHON_VERSION: 3.8
+      OS_LABEL: macos
 
 install:
-  - cmd: python -m pip install --upgrade pip
-  - cmd: python -m pip install cibuildwheel
-  - cmd: python -m pip install -e '.[all]'
+  - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
+  - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get install python$env:PYTHON_VERSION }
+  - PS: if ($env:OS_LABEL -eq 'macos') { brew install python$env:PYTHON_VERSION }
+  - PS: python -m pip install --upgrade pip
+  - PS: python -m pip install cibuildwheel
 
 build_script:
   - cmd: cibuildwheel --output-dir wheelhouse
