@@ -17,7 +17,7 @@ install:
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
   # - PS: python3 -m pip install --upgrade pip
-  - PS: pip install pipx
+  - PS: pip3 install pipx
   - PS: pipx --python python$env:PYTHON_VERSION install cibuildwheel
 
 build_script:
