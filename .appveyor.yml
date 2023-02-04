@@ -1,76 +1,50 @@
-version: "Build {build}"
+version: 1.0.{build}
+image:
+  - Visual Studio 2019
+  - ubuntu-latest
+  - macOS-latest
+
+platform:
+  - x64
 
 environment:
   matrix:
-    # Windows
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
-      PYTHON: "C:/Python38-x64"
-    # MacOS
-    - APPVEYOR_BUILD_WORKER_IMAGE: "macos-catalina"
-      PYTHON: "~/venv3.8"
-    # Linux
-    - APPVEYOR_BUILD_WORKER_IMAGE: "Ubuntu1804"
-      PYTHON: "$HOME/venv3.8"
+    - PYTHON_VERSION: 3.8
+    - PYTHON_VERSION: 3.9
+    - PYTHON_VERSION: 3.10
 
-cache:
-  # Windows
-  - "%LOCALAPPDATA%/pip/Cache"
-  # macOS
-  - "/Users/appveyor/Library/Caches/pip"
-  # Linux
-  - "/home/appveyor/.cache/pip"
+install:
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'Visual Studio 2019' ]; then choco install python --version=$env:PYTHON_VERSION; fi
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'Visual Studio 2019' ]; then choco install python --version=$env:PYTHON_VERSION --x86; fi
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'Visual Studio 2019' ]; then choco install openmp; fi
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'ubuntu-latest' ]; then sudo apt-get update; fi
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'ubuntu-latest' ]; then sudo apt-get install python$env:PYTHON_VERSION python3-pip libomp-dev -y; fi
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'macOS-latest' ]; then brew install python$(echo $env:PYTHON_VERSION | cut -c1-3); fi
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'macOS-latest' ]; then brew install libomp; fi
+  - python -m venv $env:WORKING_DIR\\venv
+  - $env:WORKING_DIR\\venv\\Scripts\\pip install pytest
+  - $env:WORKING_DIR\\venv\\Scripts\\pip install cibuildwheel
+  - $env:WORKING_DIR\\venv\\Scripts\\pip install wheel
+  - $env:WORKING_DIR\\venv\\Scripts\\pip install pdoc
 
-stack: python 3.8
+before_build:
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'Visual Studio 2019' ]; then SET PATH=%PATH%;%USERPROFILE%\\AppData\\Local\\Programs\\Python\\Python$env:PYTHON_VERSION\\;%USERPROFILE%\\AppData\\Local\\Programs\\Python\\Python$env:PYTHON_VERSION\\Scripts\\; fi
+  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'ubuntu-latest' ]; then source $env:WORKING_DIR/venv/bin/activate; fi
 
-build: off
+test_script:
+  - pytest
 
-for:
-  # Windows
-  - matrix:
-      only:
-        - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+build_script:
+  - cibuildwheel --output-dir wheelhouse
+  - pdoc --html --output-dir docs <module_name>
 
-    install:
-      - cmd: set PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
-      # Check Python version
-      - python --version
-      - python -m pip install --upgrade pip setuptools
-      - pip install -e '.[all]'
+artifacts:
+  - path: wheelhouse
+    name: wheelhouse
 
-    # Run tests
-    test_script:
-      - pytest
-
-  # macOS
-  - matrix:
-      only:
-        - APPVEYOR_BUILD_WORKER_IMAGE: "macos-catalina"
-
-    install:
-      - cmd: set PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
-      # Check Python version
-      - python --version
-      # Install dependencies
-      - python -m pip install --upgrade pip setuptools
-      - pip install -e '.[all]'
-
-    # Run tests
-    test_script:
-      - pytest
-
-  # Ubuntu
-  - matrix:
-      only:
-        - APPVEYOR_BUILD_WORKER_IMAGE: "Ubuntu1804"
-
-    install:
-      - cmd: set PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
-      # Check Python version
-      - python --version
-      # Install dependencies
-      - python -m pip install --upgrade pip setuptools
-      - pip install -e '.[all]'
-
-    # Run tests
-    test_script:
-      - pytest
+deploy:
+  - provider: Pages
+    local_dir: docs
+    skip_cleanup: true
+    target_branch: gh-pages
+    github_token: $GITHUB_TOKEN
