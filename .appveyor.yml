@@ -16,9 +16,9 @@ install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-  # - PS: python3 -m pip install --upgrade pip
-  - PS: pip3 install pipx
-  - PS: pipx --python python$env:PYTHON_VERSION install cibuildwheel
+  - PS: python3 -m pip install --upgrade pip
+  - PS: python3 -m pip install pipx
+  - PS: python3 -m pipx --python python$env:PYTHON_VERSION install cibuildwheel
 
 build_script:
   - PS: pipx run cibuildwheel --output-dir wheelhouse
