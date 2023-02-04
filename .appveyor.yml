@@ -5,18 +5,15 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       OS_LABEL: win
       PYTHON_VERSION: 3.8
-      PYTHON: C:\\Python38
       PYTHON_CMD: C:\\Python38\\python.exe
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       OS_LABEL: linux
       PYTHON_VERSION: 3.8
-      PYTHON: ~/venv3.8/bin
       PYTHON_CMD: ~/venv3.8/bin/python
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       OS_LABEL: macos
       PYTHON_VERSION: 3.8
-      PYTHON: /usr/local/bin
-      PYTHON_CMD: /usr/local/bin/python3.8
+      PYTHON_CMD: python3.8
 
 install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
@@ -27,7 +24,7 @@ install:
   - PS: _python -m pip install cibuildwheel
 
 build_script:
-  - PS: _python -m cibuildwheel --output-dir wheelhouse"
+  - PS: _python -m cibuildwheel --output-dir wheelhouse
 
 test_script:
   - PS: _python -m pytest
