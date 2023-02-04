@@ -3,25 +3,34 @@ version: 1.0.{build}
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      PYTHON_VERSION: 3.8
       OS_LABEL: win
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       PYTHON_VERSION: 3.8
+      PYTHON_CMD: C:\Python38\python.exe
+      PIP_CMD: C:\Python38\Scripts\pip.exe
+      PIPX_CMD: C:\Python38\Scripts\pipx.exe
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       OS_LABEL: linux
+      PYTHON_VERSION: 3.8
+      PYTHON_CMD: $HOME/venv3.8/bin/python
+      PIP_CMD: $HOME/venv3.8/bin/pip
+      PIPX_CMD: $HOME/venv3.8/bin/pipx
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       PYTHON_VERSION: 3.8
       OS_LABEL: macos
+      PYTHON_CMD: /usr/local/bin/python3.8
+      PIP_CMD: /usr/local/bin/pip3.8
+      PIPX_CMD: /usr/local/bin/pipx
 
 install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-  - PS: python3 -m pip install --upgrade pip
-  - PS: python3 -m pip install pipx
-  - PS: python3 -m pipx --python python$env:PYTHON_VERSION install cibuildwheel
+  - PS: Invoke-Expression $env:PYTHON_CMD -m pip install --upgrade pip
+  # - PS: Invoke-Expression $env:PYTHON_CMD -m pip install pipx
+  - PS: Invoke-Expression $env:PYTHON_CMD -m pipx install cibuildwheel
 
 build_script:
-  - PS: pipx run cibuildwheel --output-dir wheelhouse
+  - PS: Invoke-Expression $env:PYTHON_CMD -m cibuildwheel --output-dir wheelhouse
 
 test_script:
   - PS: pipx run pytest
