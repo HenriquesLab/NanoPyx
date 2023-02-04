@@ -10,8 +10,8 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       OS_LABEL: linux
       PYTHON_VERSION: 3.8
-      PYTHON: $HOME/venv3.8/bin
-      PYTHON_CMD: $HOME/venv3.8/bin/python
+      PYTHON: ~/venv3.8/bin
+      PYTHON_CMD: ~/venv3.8/bin/python
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       OS_LABEL: macos
       PYTHON_VERSION: 3.8
