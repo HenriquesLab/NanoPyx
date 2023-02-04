@@ -20,16 +20,7 @@ environment:
 
 init:
   - PS: |
-    if ($env:OS_LABEL -eq 'win') {
-      $env:PATH = "$env:PYTHON;$env:PYTHON\Scripts;$env:PATH"
-    }
-    if ($env:OS_LABEL -eq 'linux') {
-      $env:PATH = "$env:PYTHON:$env:PATH"
-    }
-    if ($env:OS_LABEL -eq 'macos') {
-      $env:PATH = "$env:PYTHON:$env:PATH"
-    }
-  - cmd: |
+    Set-Alias python $env:PYTHON_CMD
     python -m pip install --upgrade pip
     python -m pip install virtualenv
     python -m virtualenv $HOME/venv$env:PYTHON_VERSION
@@ -40,8 +31,7 @@ install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-  - cmd: |
-    python -m pip install --upgrade pip
+  - PS: |
     python -m pip install cibuildwheel
 
 build_script:
