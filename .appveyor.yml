@@ -5,31 +5,42 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       OS_LABEL: win
       PYTHON_VERSION: 3.8
-      PYTHON_CMD: C:\Python38\python.exe
-      PIP_CMD: C:\Python38\Scripts\pip.exe
-      PIPX_CMD: C:\Python38\Scripts\pipx.exe
+      PYTHON: C:\\Python38
+      PYTHON_CMD: C:\\Python38\\python.exe
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       OS_LABEL: linux
       PYTHON_VERSION: 3.8
+      PYTHON: $HOME/venv3.8/bin
       PYTHON_CMD: $HOME/venv3.8/bin/python
-      PIP_CMD: $HOME/venv3.8/bin/pip
-      PIPX_CMD: $HOME/venv3.8/bin/pipx
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-      PYTHON_VERSION: 3.8
       OS_LABEL: macos
+      PYTHON_VERSION: 3.8
+      PYTHON: /usr/local/bin
       PYTHON_CMD: /usr/local/bin/python3.8
-      PIP_CMD: /usr/local/bin/pip3.8
-      PIPX_CMD: /usr/local/bin/pipx
 
 init:
-  - ps: $env:PATH = "$env:PYTHON;$env:PATH;"
-  - cmd: python -c "import sys;print('Python version is {}'.format(sys.version))"
+  - PS: |
+    if ($env:OS_LABEL -eq 'win') {
+      $env:PATH = "$env:PYTHON;$env:PYTHON\Scripts;$env:PATH"
+    }
+    if ($env:OS_LABEL -eq 'linux') {
+      $env:PATH = "$env:PYTHON:$env:PATH"
+    }
+    if ($env:OS_LABEL -eq 'macos') {
+      $env:PATH = "$env:PYTHON:$env:PATH"
+    }
+  - cmd: |
+    python -m pip install --upgrade pip
+    python -m pip install virtualenv
+    python -m virtualenv $HOME/venv$env:PYTHON_VERSION
+    python -m pip install --upgrade pip
+    python -m pip install cibuildwheel
 
 install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-  - cmd: >-
+  - cmd: |
     python -m pip install --upgrade pip
     python -m pip install cibuildwheel
 
