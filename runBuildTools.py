@@ -16,6 +16,16 @@ def run_cmd(command: str):
     subprocess.run(command, shell=True, check=True)
 
 
+def get_version():
+    # get the version from the pyproject.toml file
+    with open("pyproject.toml", "r") as f:
+        txt = f.read()
+        start = txt.find('version = "') + 11
+        end = txt.find('"', start)
+        version = txt[start:end]
+    return version
+
+
 def find_files(root_dir: str, extension: str) -> list:
     """
     Find all files with a given extension in a directory
@@ -115,7 +125,6 @@ def extract_requirements_from_pyproject():
 
 
 def main(mode=None):
-
     files2clean = " ".join(
         find_files("src", ".so")
         + find_files("src", ".pyc")
@@ -135,8 +144,7 @@ def main(mode=None):
     notebook_files = " ".join(find_files("notebooks", ".ipynb"))
     notebook_files += " ".join(find_files("tests", ".ipynb"))
     options = {
-        "Build nanopyx extensions": f"{python_call} setup.py build_ext --inplace",
-        "Auto-generate pxd files with pyx2pxd": "pyx2pxd src",
+        "Build nanopyx extensions": f"pyx2pxd src && {python_call} setup.py build_ext --inplace",
         "Clean files": f"{remove_call} {files2clean}"
         if len(files2clean) > 0
         else "echo 'No files to clean'",
@@ -160,6 +168,7 @@ def main(mode=None):
     # Show the logo
     with open("logo_ascii.txt", "r") as f:
         print(f.read())
+        print("Version: ", get_version())
 
     if mode is not None:
         selection = mode

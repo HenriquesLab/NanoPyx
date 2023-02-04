@@ -48,14 +48,14 @@ dependencies = [
     "tqdm>=4.64.1",
     "lmfit>=1.1.0",
     "opencv-python>=4.7.0.68",
+    "mastodon.py>=1.8.0",
 ]
 
 [project.optional-dependencies]
-all = ["nanopyx[test,jupyter,doc,developer]"]
+all = ["nanopyx[developer,test,jupyter,doc]"]
 developer = [
     "build>=0.10.0",
     "pyx2pxd>=0.1.1",
-    "mastodon.py>=1.8.0",
     "black>=23.1.0",
     "flake8>=6.0.0",
 ]
