@@ -1,0 +1,76 @@
+version: "Build {build}"
+
+environment:
+  matrix:
+    # Windows
+    - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+      PYTHON: "C:/Python38-x64"
+    # MacOS
+    - APPVEYOR_BUILD_WORKER_IMAGE: "macos-catalina"
+      PYTHON: "~/venv3.8"
+    # Linux
+    - APPVEYOR_BUILD_WORKER_IMAGE: "Ubuntu1804"
+      PYTHON: "$HOME/venv3.8"
+
+cache:
+  # Windows
+  - "%LOCALAPPDATA%/pip/Cache"
+  # macOS
+  - "/Users/appveyor/Library/Caches/pip"
+  # Linux
+  - "/home/appveyor/.cache/pip"
+
+stack: python 3.8
+
+build: off
+
+for:
+  # Windows
+  - matrix:
+      only:
+        - APPVEYOR_BUILD_WORKER_IMAGE: "Visual Studio 2019"
+
+    install:
+      - cmd: set PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
+      # Check Python version
+      - python --version
+      - python -m pip install --upgrade pip setuptools
+      - pip install -e '.[all]'
+
+    # Run tests
+    test_script:
+      - pytest
+
+  # macOS
+  - matrix:
+      only:
+        - APPVEYOR_BUILD_WORKER_IMAGE: "macos-catalina"
+
+    install:
+      - cmd: set PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
+      # Check Python version
+      - python --version
+      # Install dependencies
+      - python -m pip install --upgrade pip setuptools
+      - pip install -e '.[all]'
+
+    # Run tests
+    test_script:
+      - pytest
+
+  # Ubuntu
+  - matrix:
+      only:
+        - APPVEYOR_BUILD_WORKER_IMAGE: "Ubuntu1804"
+
+    install:
+      - cmd: set PATH=%PYTHON%;%PYTHON%/Scripts;%PATH%
+      # Check Python version
+      - python --version
+      # Install dependencies
+      - python -m pip install --upgrade pip setuptools
+      - pip install -e '.[all]'
+
+    # Run tests
+    test_script:
+      - pytest
