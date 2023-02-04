@@ -117,7 +117,9 @@ filterwarnings = [
     "ignore:.*distutils.*:DeprecationWarning:.*",
     "ignore:.*distutils.*:UserWarning:.*",
     "ignore:.*The 'u' format is deprecated.*:DeprecationWarning:pywintypes",
+    "ignore:.*Deprecated NumPy.*:DeprecationWarning:.*",
 ]
+testpaths = ["tests", "src"]
 
 [tool.flake8]
 # https://pypi.org/project/Flake8-pyproject/

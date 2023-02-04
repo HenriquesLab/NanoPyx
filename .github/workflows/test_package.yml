@@ -64,6 +64,6 @@ jobs:
           fail_ci_if_error: false # optional (default = false)
           verbose: true # optional (default = false)
 
-      - name: Test we can build
+      - name: Test if it can build
         run: |
           python -m build

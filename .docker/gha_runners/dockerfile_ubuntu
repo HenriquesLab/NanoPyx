@@ -23,7 +23,8 @@ RUN apt-get update -y && \
     ca-certificates \
     jq \
     systemctl \
-    htop
+    htop \
+    python3-pip
 
 # add a non-sudo user
 RUN useradd -m docker
