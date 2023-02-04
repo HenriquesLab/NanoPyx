@@ -19,20 +19,18 @@ environment:
       PYTHON_CMD: /usr/local/bin/python3.8
 
 init:
-  - PS: |
-    Set-Alias python $env:PYTHON_CMD
-    python -m pip install --upgrade pip
-    python -m pip install virtualenv
-    python -m virtualenv $HOME/venv$env:PYTHON_VERSION
-    python -m pip install --upgrade pip
-    python -m pip install cibuildwheel
+  - PS: Set-Alias _python $env:PYTHON_CMD
+  - PS: _python -m pip install --upgrade pip
+  - PS: _python -m pip install virtualenv
+  - PS: _python -m virtualenv $HOME/venv$env:PYTHON_VERSION
+  - PS: _python -m pip install --upgrade pip
+  - PS: _python -m pip install cibuildwheel
 
 install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-  - PS: |
-    python -m pip install cibuildwheel
+  - PS: _python -m pip install cibuildwheel
 
 build_script:
   - cmd: python -m cibuildwheel --output-dir wheelhouse"
