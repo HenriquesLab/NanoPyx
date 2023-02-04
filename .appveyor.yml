@@ -1,10 +1,5 @@
 version: 1.0.{build}
 
-image:
-  - macos-monterey
-  - Visual Studio 2019
-  - Ubuntu2004
-
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
