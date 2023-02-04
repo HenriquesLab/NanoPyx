@@ -31,9 +31,9 @@ jobs:
       # ADJUST THIS: build your documentation into docs/.
       # We use a custom build script for pdoc itself, ideally you just run `pdoc -o docs/ ...` here.
       - run: |
-        mkdir -p docs
-        VERSION=$(python setup.py --version)
-        pdoc src/nanopyx -o docs/$VERSION
+          mkdir -p docs
+          VERSION=$(python setup.py --version)
+          pdoc src/nanopyx -o docs/$VERSION
 
       - uses: actions/upload-pages-artifact@v1
         with:
