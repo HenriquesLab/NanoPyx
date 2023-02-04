@@ -161,7 +161,7 @@ def main(mode=None):
         "Activate venv:": "source .venv/bin/activate",
         "Deactivate venv:": "deactivate",
         "Remove venv:": "rm -rf .venv",
-        "Run tests": "pytest",
+        "Run tests": "pytest --nbmake --nbmake-timeout=600",
         "Run build": "python -m build",
     }
 
