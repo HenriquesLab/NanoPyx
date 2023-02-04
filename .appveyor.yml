@@ -1,50 +1,21 @@
 version: 1.0.{build}
-image:
-  - Visual Studio 2019
-  - ubuntu-latest
-  - macOS-latest
 
-platform:
-  - x64
+image:
+  - macOS
+  - Visual Studio 2019
+  - Ubuntu
 
 environment:
   matrix:
     - PYTHON_VERSION: 3.8
     - PYTHON_VERSION: 3.9
-    - PYTHON_VERSION: 3.10
-
-install:
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'Visual Studio 2019' ]; then choco install python --version=$env:PYTHON_VERSION; fi
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'Visual Studio 2019' ]; then choco install python --version=$env:PYTHON_VERSION --x86; fi
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'Visual Studio 2019' ]; then choco install openmp; fi
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'ubuntu-latest' ]; then sudo apt-get update; fi
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'ubuntu-latest' ]; then sudo apt-get install python$env:PYTHON_VERSION python3-pip libomp-dev -y; fi
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'macOS-latest' ]; then brew install python$(echo $env:PYTHON_VERSION | cut -c1-3); fi
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'macOS-latest' ]; then brew install libomp; fi
-  - python -m venv $env:WORKING_DIR\\venv
-  - $env:WORKING_DIR\\venv\\Scripts\\pip install pytest
-  - $env:WORKING_DIR\\venv\\Scripts\\pip install cibuildwheel
-  - $env:WORKING_DIR\\venv\\Scripts\\pip install wheel
-  - $env:WORKING_DIR\\venv\\Scripts\\pip install pdoc
-
-before_build:
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'Visual Studio 2019' ]; then SET PATH=%PATH%;%USERPROFILE%\\AppData\\Local\\Programs\\Python\\Python$env:PYTHON_VERSION\\;%USERPROFILE%\\AppData\\Local\\Programs\\Python\\Python$env:PYTHON_VERSION\\Scripts\\; fi
-  - if [ $env:APPVEYOR_BUILD_WORKER_IMAGE = 'ubuntu-latest' ]; then source $env:WORKING_DIR/venv/bin/activate; fi
-
-test_script:
-  - pytest
 
 build_script:
-  - cibuildwheel --output-dir wheelhouse
-  - pdoc --html --output-dir docs <module_name>
+  - cmd: cibuildwheel --output-dir wheelhouse
+
+test_script:
+  - cmd: pytest
 
 artifacts:
   - path: wheelhouse
     name: wheelhouse
-
-deploy:
-  - provider: Pages
-    local_dir: docs
-    skip_cleanup: true
-    target_branch: gh-pages
-    github_token: $GITHUB_TOKEN
