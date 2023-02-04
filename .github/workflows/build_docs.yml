@@ -4,7 +4,7 @@ name: Build and deploy docs into website
 on:
   release:
     types: [published]
-    
+
   # creates a button and only builds upon press
   workflow_dispatch:
     inputs:
@@ -25,7 +25,7 @@ permissions:
 jobs:
   # Build the documentation and upload the static HTML files as an artifact.
   build:
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [py310, linux]
     steps:
       - uses: actions/checkout@v3
       # ADJUST THIS: install all dependencies (including pdoc)
@@ -43,7 +43,7 @@ jobs:
   # This is a separate job so that only actions/deploy-pages has the necessary permissions.
   deploy:
     needs: build
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [py310, linux]
     permissions:
       pages: write
       id-token: write
