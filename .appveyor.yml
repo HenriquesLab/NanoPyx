@@ -21,19 +21,23 @@ environment:
       PIP_CMD: /usr/local/bin/pip3.8
       PIPX_CMD: /usr/local/bin/pipx
 
+init:
+  - ps: $env:PATH = "$env:PYTHON;$env:PATH;"
+  - cmd: python -c "import sys;print('Python version is {}'.format(sys.version))"
+
 install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-  - PS: Invoke-Expression "$env:PYTHON_CMD -m pip install --upgrade pip"
-  # - PS: Invoke-Expression $env:PYTHON_CMD -m pip install pipx
-  - PS: Invoke-Expression "$env:PYTHON_CMD -m pip install cibuildwheel"
+  - cmd: >-
+    python -m pip install --upgrade pip
+    python -m pip install cibuildwheel
 
 build_script:
-  - PS: Invoke-Expression "$env:PYTHON_CMD -m cibuildwheel --output-dir wheelhouse"
+  - cmd: python -m cibuildwheel --output-dir wheelhouse"
 
 test_script:
-  - PS: Invoke-Expression "$env:PYTHON_CMD -m pytest"
+  - cmd: python -m pytest
 
 artifacts:
   - path: wheelhouse
