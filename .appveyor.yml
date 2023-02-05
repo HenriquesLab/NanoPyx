@@ -2,7 +2,7 @@ version: 1.0.{build}
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey # macos-mojave
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey-openmp
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
