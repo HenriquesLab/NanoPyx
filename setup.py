@@ -203,8 +203,5 @@ Options.cimport_from_pyx = False
 setup(
     build_ext={"inplace": 1},
     ext_modules=collect_extensions(),
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
-    package_data={"": ["**/*.jpg", "**/*.yaml"]},
     zip_safe=False,
 )

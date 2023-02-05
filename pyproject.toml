@@ -106,6 +106,11 @@ exclude = '''
 )/
 '''
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["**/*.jpg", "**/*.yaml"]  # alternatively: `exclude = ["additional*"]`
+namespaces = false
+
 [tool.pyright]
 reportUndefinedVariable = false
 reportMissingImports = false
