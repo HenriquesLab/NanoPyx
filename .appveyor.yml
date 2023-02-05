@@ -6,15 +6,15 @@ environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       OS_LABEL: macos
-      PYTHON_VERSION: 3.8
+      PY: 3.8
       PYTHON_CMD: /usr/local/opt/python@3.8/bin/python3
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       OS_LABEL: linux
-      PYTHON_VERSION: 3.8
+      PY: 3.8
       PYTHON_CMD: ~/venv3.8/bin/python
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
       OS_LABEL: win
-      PYTHON_VERSION: 3.8
+      PY: 3.8
       PYTHON_CMD: C:\\Python38\\python.exe
 
 cache:
@@ -35,34 +35,31 @@ install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-  - ps: >-
-      if ($env:OS_LABEL -eq 'macos') {
-        Invoke-Expression (Invoke-WebRequest https://pyenv.run -UseBasicParsing).Content;
-        Add-Content $PROFILE 'export PATH="$HOME/.pyenv/bin:$PATH"'
-        Add-Content $PROFILE 'if command -v pyenv 1>/dev/null 2>&1; then'
-        Add-Content $PROFILE '  eval "$(pyenv init -)"'
-        Add-Content $PROFILE 'fi'
-        source $PROFILE;
-        pyenv install $env:PYTHON_VERSION;
-        pyenv global $env:PYTHON_VERSION;
-        pyenv exec python -m ensurepip;
-        pip install --upgrade pip;
-        pip install -e .[developer,test] --cache-dir %LOCALAPPDATA%\pip\cache;
-    }
+  - sh: '[[ "$(uname)" == "Linux" ]] && source ~/venv${PY}/bin/activate || true'
+  - sh: '[[ "$(uname)" == "Darwin" ]] && brew update || true'
+  - sh: '[[ "$(uname)" == "Darwin" ]] && brew install pyenv || true'
+  - sh: '[[ "$(uname)" == "Darwin" ]] && export PATH=~/.pyenv/shims:${PATH} || true'
+  - sh: '[[ "$(uname)" == "Darwin" ]] && env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install ${PY} || true'
+  - sh: '[[ "$(uname)" == "Darwin" ]] && pyenv global ${PY} || true'
+  - sh: '[[ "$(uname)" == "Darwin" ]] && pyenv rehash || true'
+  #- sh: '[[ "$(uname)" == "Darwin" ]] && python -m pip install --upgrade pip || true'
+  #- sh: '[[ "$(uname)" == "Darwin" ]] && python -m pip install -e .[developer,test] || true'
+  #- sh: '[[ "$(uname)" == "Linux" ]] && python -m pip install --upgrade pip || true'
+  #- sh: '[[ "$(uname)" == "Linux" ]] && python -m pip install -e .[developer,test] || true'
   - ps: if ($env:OS_LABEL -eq 'win') { $env:PATH = "C:\Python$env:PYTHON_VERSION;C:\Python$env:PYTHON_VERSION\Scripts;$env:PATH" }
-  - ps: Set-Alias _python $env:PYTHON_CMD
-  - ps: _python -m pip install --upgrade pip
-  - ps: _python -m pip install -e .[developer,test] --cache-dir %LOCALAPPDATA%\pip\cache
+  #- ps: Set-Alias _python $env:PYTHON_CMD
+  #- ps: _python -m pip install --upgrade pip
+  #- ps: _python -m pip install -e .[developer,test] --cache-dir %LOCALAPPDATA%\pip\cache
 
 build_script:
   # - ps: _python -m cibuildwheel --output-dir wheelhouse
-  - ps: _python setup.py build
-  - ps: _python setup.py bdist_wheel
+  - ps: python3 setup.py build
+  - ps: python3 setup.py bdist_wheel
   - ps: if ($env:OS_LABEL -eq 'macos') { delocate-wheel -w wheelhouse dist/*.whl }
   - ps: if ($env:OS_LABEL -eq 'linux') { auditwheel repair dist/*.whl -w wheelhouse }
 
 test_script:
-  - ps: _python -m pytest
+  - ps: python3 -m pytest
 
 artifacts:
   - path: wheelhouse
