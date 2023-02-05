@@ -50,6 +50,7 @@ dependencies = [
     "lmfit>=1.1.0",
     "opencv-python>=4.7.0.68",
     "mastodon.py>=1.8.0",
+    "pandas>=1.5.3",
 ]
 
 [project.optional-dependencies]
@@ -152,7 +153,7 @@ test-requires = ["nanopyx[test]"]
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64"]
-# before-all = "yum install opencv opencv-devel opencv-python"
+before-all = "yum install opencv opencv-devel opencv-python"
 # repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
@@ -169,7 +170,7 @@ before-all = ["brew install llvm libomp"]
 # #CC="/usr/local/opt/llvm/bin/clang"
 
 [tool.cibuildwheel.windows]
-archs = ["amd64"]
+archs = ["AMD64"]
 # test-command = "pytest -n=0 {project}\\tests"
 # before-build = "pip install delvewheel"
 # repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
