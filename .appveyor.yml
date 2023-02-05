@@ -36,7 +36,7 @@ install:
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
   - sh: '[[ "$(uname)" == "Linux" ]] && source ~/venv${PY}/bin/activate || true'
-  - sh: '[[ "$(uname)" == "Darwin" ]] && brew update || true'
+  # - sh: '[[ "$(uname)" == "Darwin" ]] && brew update || true'
   - sh: '[[ "$(uname)" == "Darwin" ]] && brew install python@${PY} || true'
   - sh: '[[ "$(uname)" == "Darwin" ]] && export PATH=/usr/local/opt/python@${PY}/bin:${PATH} || true'
   # - sh: '[[ "$(uname)" == "Darwin" ]] && brew install pyenv || true'
@@ -50,8 +50,8 @@ install:
   #- sh: '[[ "$(uname)" == "Linux" ]] && python -m pip install -e .[developer,test] || true'
   - ps: if ($env:OS_LABEL -eq 'win') { $env:PATH = "C:\Python$env:PYTHON_VERSION;C:\Python$env:PYTHON_VERSION\Scripts;$env:PATH" }
   #- ps: Set-Alias _python $env:PYTHON_CMD
-  #- ps: _python -m pip install --upgrade pip
-  #- ps: _python -m pip install -e .[developer,test] --cache-dir %LOCALAPPDATA%\pip\cache
+  - ps: python3 -m pip install --upgrade pip
+  - ps: python3 -m pip install -e .[developer,test] --cache-dir %LOCALAPPDATA%\pip\cache
 
 build_script:
   # - ps: _python -m cibuildwheel --output-dir wheelhouse
