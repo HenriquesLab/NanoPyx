@@ -151,8 +151,8 @@ build-verbosity = 1
 # repair-wheel-command = ""
 
 test-command = "pytest {project}/tests"
-# test-requires = "pytest"
-before-test = "pip install nanopyx[test] --cache-dir pip-cache"
+test-requires = "pytest"
+# before-test = "pip install nanopyx[test] --cache-dir pip-cache"
 # test-requires = ["nanopyx[test]"]
 # test-extras = []
 
@@ -175,7 +175,7 @@ before-all = ["brew install llvm libomp"]
 # #CC="/usr/local/opt/llvm/bin/clang"
 
 [tool.cibuildwheel.windows]
-archs = ["AMD64"]
+archs = ["amd64"]
 # test-command = "pytest -n=0 {project}\\tests"
 # before-build = "pip install delvewheel"
 # repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"

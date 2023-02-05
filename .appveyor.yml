@@ -4,7 +4,7 @@ environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey # macos-mojave
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 stack: python 3.8
 
