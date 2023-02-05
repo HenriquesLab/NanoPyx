@@ -38,6 +38,7 @@ install:
   - sh: '[[ "$(uname)" == "Linux" ]] && source ~/venv${PY}/bin/activate || true'
   # - sh: '[[ "$(uname)" == "Darwin" ]] && brew update || true'
   - sh: '[[ "$(uname)" == "Darwin" ]] && brew install python@${PY} || true'
+  - sh: '[[ "$(uname)" == "Darwin" ]] && brew install rust || true'
   - sh: '[[ "$(uname)" == "Darwin" ]] && export PATH=/usr/local/opt/python@${PY}/bin:${PATH} || true'
   # - sh: '[[ "$(uname)" == "Darwin" ]] && brew install pyenv || true'
   # - sh: '[[ "$(uname)" == "Darwin" ]] && export PATH=~/.pyenv/shims:${PATH} || true'
