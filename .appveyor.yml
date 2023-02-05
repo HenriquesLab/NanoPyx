@@ -15,6 +15,9 @@ environment:
       PYTHON_VERSION: 3.8
       PYTHON_CMD: python3.8
 
+cache:
+  - ~/.cache/cibuildwheel
+
 install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
