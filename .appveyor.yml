@@ -6,6 +6,10 @@ environment:
 
 stack: python 3.8
 
+cache:
+  - pip-cache
+  - build
+
 init:
   - cmd: set PATH=C:\Python37;C:\Python37\Scripts;%PATH%
 
