@@ -2,8 +2,11 @@
 requires = [
     "setuptools>=42",
     "wheel>=0.38.4",
+    "build>=0.10.0",
     "cython>=0.29.0",
     "numpy>=1.19.0",
+    "delocate>=0.10.4",
+    "auditwheel>=5.3.0",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -54,8 +57,6 @@ dependencies = [
 [project.optional-dependencies]
 all = ["nanopyx[developer,test,jupyter,doc]"]
 developer = [
-    "build>=0.10.0",
-    "wheel>=0.38.4",
     "delocate>=0.10.4",
     "auditwheel>=5.3.0",
     "pyx2pxd>=0.1.1",
