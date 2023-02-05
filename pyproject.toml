@@ -146,9 +146,8 @@ build-verbosity = 1
 # repair-wheel-command = ""
 
 test-command = "pytest {project}/tests"
-test-requires = "pytest"
 # before-test = "pip install nanopyx[test] --cache-dir pip-cache"
-# test-requires = ["nanopyx[test]"]
+test-requires = ["nanopyx[test]"]
 # test-extras = []
 
 [tool.cibuildwheel.linux]
