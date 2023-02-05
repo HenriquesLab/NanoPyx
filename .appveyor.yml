@@ -7,7 +7,7 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       OS_LABEL: macos
       PYTHON_VERSION: 3.8
-      PYTHON_CMD: python@3.8
+      PYTHON_CMD: /usr/local/opt/python@3.8/bin/python3
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       OS_LABEL: linux
       PYTHON_VERSION: 3.8
@@ -18,8 +18,8 @@ environment:
       PYTHON_CMD: C:\\Python38\\python.exe
 
 cache:
-  - ~/.cache/cibuildwheel
-  - build
+  - '%LOCALAPPDATA%\pip\cache'
+  - '%LOCALAPPDATA%\build'
 
 install:
   # If there is a newer build queued for the same PR, cancel this one.
@@ -38,15 +38,17 @@ install:
   - ps: if ($env:OS_LABEL -eq 'win') { $env:PATH = "C:\Python$env:PYTHON_VERSION;C:\Python$env:PYTHON_VERSION\Scripts;$env:PATH" }
   - ps: Set-Alias _python $env:PYTHON_CMD
   - ps: _python -m pip install --upgrade pip
-  - ps: _python -m pip install -e .[developer,test]
+  - ps: _python -m pip install -e .[developer,test] --cache-dir %LOCALAPPDATA%\pip\cache
 
 build_script:
   # - ps: _python -m cibuildwheel --output-dir wheelhouse
   - ps: _python setup.py build
   - ps: _python setup.py bdist_wheel
+  - ps: if ($env:OS_LABEL -eq 'macos') { delocate-wheel -w wheelhouse dist/*.whl }
+  - ps: if ($env:OS_LABEL -eq 'linux') { auditwheel repair dist/*.whl -w wheelhouse }
 
 test_script:
   - ps: _python -m pytest
 
 artifacts:
-  - path: dist\*.whl
+  - path: wheelhouse
