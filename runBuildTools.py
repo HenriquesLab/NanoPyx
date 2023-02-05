@@ -154,6 +154,7 @@ def main(mode=None):
         "Update .gitignore": update_gitignore,
         "Run pdoc": f"{python_call} -m pdoc src/nanopyx -o docs",
         "Install nanopyx in developer mode": "pip3 install -e '.[all]'",
+        "Build wheel": "pip wheel '.[all]' -w wheelhouse",
         "Build nanopyx binary distribution": f"{python_call} setup.py bdist_wheel",
         "Build nanopyx source distribution": f"{python_call} setup.py sdist",
         "Install coding tools": "pip3 install cython-lint",

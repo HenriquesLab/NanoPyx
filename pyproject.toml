@@ -152,7 +152,7 @@ build-verbosity = 1
 # before-build = ""
 # repair-wheel-command = ""
 
-test-command = "python -m pytest {project}/tests"
+test-command = "pytest {project}/tests"
 # before-test = ""
 test-requires = ["nanopyx[test]"]
 # test-extras = []

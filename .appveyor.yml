@@ -1,3 +1,5 @@
+version: 1.0.{build}
+
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey # macos-mojave
@@ -25,7 +27,7 @@ install:
       https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
       Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
       throw "There are newer queued builds for this pull request, failing early." }
-  - sh: '[[ "$(uname)" == "Darwin" ]] && brew --cache brew-cache install gcc llvm libomp || true'
+  - ps: python -m pip install --upgrade pip --cache-dir pip-cache
   - ps: python -m pip install cibuildwheel --cache-dir pip-cache
 
 build_script:
@@ -34,8 +36,6 @@ build_script:
 artifacts:
   - path: "wheelhouse\\*.whl"
     name: Wheels
-# version: 1.0.{build}
-
 # # REF: https://github.com/libyal/libexe/blob/a1d3190355aba02a89b503b2065b7218d8210764/appveyor.yml
 
 # environment:
