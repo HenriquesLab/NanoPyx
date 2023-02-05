@@ -1,6 +1,7 @@
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey # macos-mojave
+      cache: pip-cache
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
 
@@ -8,6 +9,7 @@ stack: python 3.8
 
 cache:
   - pip-cache
+  - brew-cache
   - build
 
 init:
@@ -25,6 +27,7 @@ install:
       https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
       Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
       throw "There are newer queued builds for this pull request, failing early." }
+  - sh: '[[ "$(uname)" == "Darwin" ]] && brew --cache brew-cache install gcc llvm libomp || true'
   - ps: python -m pip install cibuildwheel
 
 build_script:

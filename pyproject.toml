@@ -56,25 +56,18 @@ dependencies = [
 
 [project.optional-dependencies]
 all = ["nanopyx[developer,test,jupyter,doc]"]
-developer = [
-    "delocate>=0.10.4",
-    "auditwheel>=5.3.0",
-    "pyx2pxd>=0.1.1",
-    "black>=23.1.0",
-    "flake8>=6.0.0",
-]
+developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
 test = [
     "pytest>=7.1",
     "pytest-cov>= 4.0.0",
     "pytest-emoji>=0.2.0",
-    "pytest-icdiff>=0.6",         # https://github.com/hjwp/pytest-icdiff
-    "pytest-clarity>=1.0.1",      # https://pypi.org/project/pytest-clarity/
+    "pytest-icdiff>=0.6",    # https://github.com/hjwp/pytest-icdiff
+    "pytest-clarity>=1.0.1", # https://pypi.org/project/pytest-clarity/
     "pytest-timeout>=2.1.0",
     "pytest-plt>=1.1.0",
     "pytest-xdist>=3.1.0",
     "pytest-sugar>=0.9.6",
     "pytest-cython>=0.2.0",
-    "nanopyx[jupyter,developer]",
 ]
 jupyter = [
     "nbformat>=4.2.0",
@@ -163,9 +156,6 @@ test-command = "pytest"
 # before-test = ""
 test-requires = ["nanopyx[test]"]
 # test-extras = []
-
-# container-engine = "docker"
-# manylinux-x86_64-image = "manylinux2014"
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64"]

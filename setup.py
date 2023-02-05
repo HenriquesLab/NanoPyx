@@ -88,7 +88,6 @@ elif sys.platform == "darwin":
         found = False
         for version in versions:
             gcc_cmd = f"gcc-{version}"
-            print(gcc_cmd)
             if gcc_cmd in gcc_list:
                 print(f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'")
                 os.environ["CC"] = gcc_cmd
