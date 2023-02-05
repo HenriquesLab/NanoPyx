@@ -75,8 +75,8 @@ if sys.platform == "win32":
     EXTRA_LING_ARGS = ["/openmp"]
 
 elif sys.platform == "darwin":
-    INCLUDE_DIRS += ["/usr/local/include", "/usr/local/opt/libomp/include"]
-    LIBRARY_DIRS += ["/usr/local/lib", "/usr/local/opt/libomp/lib"]
+    INCLUDE_DIRS += ["/usr/local/include"]
+    LIBRARY_DIRS += ["/usr/local/lib"]
     EXTRA_COMPILE_ARGS += ["-O3", "-ffast-math"]
     EXTRA_LING_ARGS += []
 
@@ -90,7 +90,7 @@ elif sys.platform == "darwin":
         if is_homebrew_installed():
             print("\t - brew instalation detected...")
             brew_list = run_command("brew list").split()
-            packages = ["llvm", "libomp", "open-mpi"]  # "gcc"
+            packages = ["llvm", "libomp"]  # , "open-mpi"]  # "gcc"
             for package in packages:
                 if package in brew_list:
                     print(f"\t - {package} instalation detected...")
@@ -113,10 +113,18 @@ elif sys.platform == "darwin":
 
     if use_openmp_support:
         # some helpful info here REF: https://mac.r-project.org/openmp/
-        include, library = get_mpicc_path()
-        INCLUDE_DIRS += include
-        LIBRARY_DIRS += library
-        EXTRA_COMPILE_ARGS += ["-Xclang", "-fopenmp", "-lmpi"]
+        INCLUDE_DIRS += [
+            "/usr/local/opt/libomp/include",
+            "/usr/local/opt/llvm/include",
+        ]
+        LIBRARY_DIRS += [
+            "/usr/local/opt/libomp/lib",
+            "/usr/local/opt/llvm/lib",
+        ]
+        # include, library = get_mpicc_path()
+        # INCLUDE_DIRS += include
+        # LIBRARY_DIRS += library
+        EXTRA_COMPILE_ARGS += ["-Xclang", "-fopenmp"]  # , "-lmpi"]
         EXTRA_LING_ARGS += ["-lomp"]  # ["-fopenmp", "-lmpi"]
 
     pltform = platform.platform().split("-")
