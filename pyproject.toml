@@ -5,8 +5,6 @@ requires = [
     "build>=0.10.0",
     "cython>=0.29.0",
     "numpy>=1.19.0",
-    # "delocate>=0.10.4",
-    # "auditwheel>=5.3.0",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -153,8 +151,9 @@ build-verbosity = 1
 # repair-wheel-command = ""
 
 test-command = "pytest {project}/tests"
-# before-test = ""
-test-requires = ["nanopyx[test]"]
+# test-requires = "pytest"
+before-test = "pip install nanopyx[test] --cache-dir pip-cache"
+# test-requires = ["nanopyx[test]"]
 # test-extras = []
 
 [tool.cibuildwheel.linux]
@@ -176,7 +175,7 @@ before-all = ["brew install llvm libomp"]
 # #CC="/usr/local/opt/llvm/bin/clang"
 
 [tool.cibuildwheel.windows]
-archs = ["x86_64"]
+archs = ["AMD64"]
 # test-command = "pytest -n=0 {project}\\tests"
 # before-build = "pip install delvewheel"
 # repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"

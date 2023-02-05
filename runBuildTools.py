@@ -80,6 +80,7 @@ def update_gitignore():
         ".DS_Store",
         ".coverage",
         "*.pyd",
+        "wheelhouse",
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:

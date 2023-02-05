@@ -115,11 +115,11 @@ elif sys.platform == "darwin":
         # some helpful info here REF: https://mac.r-project.org/openmp/
         INCLUDE_DIRS += [
             "/usr/local/opt/libomp/include",
-            "/usr/local/opt/llvm/include",
+            # "/usr/local/opt/llvm/include", - if uncommented breaks cross-compilation
         ]
         LIBRARY_DIRS += [
             "/usr/local/opt/libomp/lib",
-            "/usr/local/opt/llvm/lib",
+            # "/usr/local/opt/llvm/lib", - if uncommented breaks cross-compilation
         ]
         # include, library = get_mpicc_path()
         # INCLUDE_DIRS += include
