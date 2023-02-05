@@ -55,6 +55,7 @@ dependencies = [
 all = ["nanopyx[developer,test,jupyter,doc]"]
 developer = [
     "build>=0.10.0",
+    "wheel>=0.38.4",
     "pyx2pxd>=0.1.1",
     "black>=23.1.0",
     "flake8>=6.0.0",
