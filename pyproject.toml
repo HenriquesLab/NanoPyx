@@ -138,30 +138,42 @@ max-line-length = 120
 # https://cibuildwheel.readthedocs.io/en/stable/options/
 skip = ["pp*", "*musllinux*"]
 build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
-test-skip = ""                                     # "*-macosx_arm64"
+# it is not possible to test arm64 and the arm64 part of a universal2 wheel on this CI platform
+test-skip = ["*arm64"]
 
-archs = ["auto"]
+# Comma-separated list of CPU architectures to build
+# for. When set to 'auto', builds the architectures
+# natively supported on this machine. Set this option to
+# build an architecture via emulation, for example,
+# using binfmt_misc and QEMU. Default: auto. Choices:
+# auto, auto64, auto32, native, all, x86_64, i686,
+# aarch64, ppc64le, s390x, universal2, arm64, x86,
+# AMD64, ARM64
+archs = ["x86_64", "universal2"]
 build-frontend = "pip"
-config-settings = {}
-dependency-versions = "pinned"
-environment = {}
-environment-pass = []
-build-verbosity = ""
+# config-settings = {}
+# dependency-versions = "pinned"
+# environment = {}
+# environment-pass = []
 
-before-all = ""
-before-build = ""
-repair-wheel-command = ""
+# An number from 1 to 3 to increase the level of verbosity (corresponding to invoking pip with -v, -vv, and -vvv), 
+# between -1 and -3 (-q, -qq, and -qqq), or just 0 (default verbosity)
+build-verbosity = 1
 
-test-command = "pytest -n=0 {project}/tests"
-before-test = ""
+# before-all = ""
+# before-build = ""
+# repair-wheel-command = ""
+
+test-command = "pytest -n=0"
+# before-test = ""
 test-requires = ["nanopyx[test]"]
-test-extras = []
+# test-extras = []
 
 container-engine = "docker"
 
-manylinux-x86_64-image = "manylinux2014"
-manylinux-i686-image = "manylinux2014"
-manylinux-aarch64-image = "manylinux2014"
+# manylinux-x86_64-image = "manylinux2014"
+# manylinux-i686-image = "manylinux2014"
+# manylinux-aarch64-image = "manylinux2014"
 # manylinux-ppc64le-image = "manylinux2014"
 # manylinux-s390x-image = "manylinux2014"
 # manylinux-pypy_x86_64-image = "manylinux2014"
