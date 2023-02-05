@@ -7,7 +7,6 @@ import sys
 from Cython.Build import cythonize
 from Cython.Compiler import Options
 from setuptools import Extension, setup
-import setuptools
 
 
 def run_command(command: str) -> str:
@@ -107,7 +106,10 @@ elif sys.platform == "darwin":
                             f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'"
                         )
                         os.environ["CC"] = gcc_cmd
-                        print("Using found brew version of gcc:" + os.environ["CC"])
+                        print(
+                            "Using found brew version of gcc:"
+                            + os.environ["CC"]
+                        )
 
     # brew install gcc llvm libomp
     # sudo xcode-select install
