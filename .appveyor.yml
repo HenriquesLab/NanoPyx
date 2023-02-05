@@ -2,18 +2,18 @@ version: 1.0.{build}
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      OS_LABEL: win
-      PYTHON_VERSION: 3.8
-      PYTHON_CMD: C:\\Python38\\python.exe
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
-      OS_LABEL: linux
-      PYTHON_VERSION: 3.8
-      PYTHON_CMD: ~/venv3.8/bin/python
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       OS_LABEL: macos
       PYTHON_VERSION: 3.8
       PYTHON_CMD: python3.8
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+      OS_LABEL: linux
+      PYTHON_VERSION: 3.8
+      PYTHON_CMD: ~/venv3.8/bin/python
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+      OS_LABEL: win
+      PYTHON_VERSION: 3.8
+      PYTHON_CMD: C:\\Python38\\python.exe
 
 cache:
   - ~/.cache/cibuildwheel
