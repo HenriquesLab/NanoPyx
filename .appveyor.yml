@@ -1,11 +1,13 @@
 version: 1.0.{build}
 
+# REF: https://github.com/libyal/libexe/blob/a1d3190355aba02a89b503b2065b7218d8210764/appveyor.yml
+
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       OS_LABEL: macos
       PYTHON_VERSION: 3.8
-      PYTHON_CMD: /usr/bin/python3.8
+      PYTHON_CMD: python@3.8
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       OS_LABEL: linux
       PYTHON_VERSION: 3.8
@@ -33,6 +35,7 @@ install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
+  - ps: if ($env:OS_LABEL -eq 'win') { $env:PATH = "C:\Python$env:PYTHON_VERSION;C:\Python$env:PYTHON_VERSION\Scripts;$env:PATH" }
   - ps: Set-Alias _python $env:PYTHON_CMD
   - ps: _python -m pip install --upgrade pip
   - ps: _python -m pip install -e .[developer,test]
@@ -40,11 +43,10 @@ install:
 build_script:
   # - ps: _python -m cibuildwheel --output-dir wheelhouse
   - ps: _python setup.py build
-  - ps: _python setup.py bdist_wheel --dist-dir wheelhouse
+  - ps: _python setup.py bdist_wheel
 
 test_script:
   - ps: _python -m pytest
 
 artifacts:
-  - path: wheelhouse
-    name: wheelhouse
+  - path: dist\*.whl
