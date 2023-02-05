@@ -16,8 +16,8 @@ install: python -m pip install cibuildwheel==1.12.0
 
 build_script:
   # increase cibuildwheel verbosity
-  - set CIBW_BUILD_VERBOSITY=2
-  - set CIBW_ARCHS_MACOS="x86_64 universal2 arm64"
+  - CIBW_BUILD_VERBOSITY=2
+  - CIBW_ARCHS_MACOS="x86_64 universal2 arm64"
   - python -m cibuildwheel --output-dir wheelhouse
 
 artifacts:
