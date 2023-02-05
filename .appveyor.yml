@@ -5,7 +5,7 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       OS_LABEL: macos
       PYTHON_VERSION: 3.8
-      PYTHON_CMD: /usr/local/bin/python3.8
+      PYTHON_CMD: /usr/bin/python3.8
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
       OS_LABEL: linux
       PYTHON_VERSION: 3.8
@@ -33,16 +33,17 @@ install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-  - PS: Set-Alias _python $env:PYTHON_CMD
-  - PS: _python -m pip install --upgrade pip
+  - ps: Set-Alias _python $env:PYTHON_CMD
+  - ps: _python -m pip install --upgrade pip
+  - ps: _python -m pip install -e .[developer,test]
 
 build_script:
-  # - PS: _python -m cibuildwheel --output-dir wheelhouse
-  - PS: _python setup.py build
-  - PS: _python setup.py bdist_wheel --dist-dir wheelhouse
+  # - ps: _python -m cibuildwheel --output-dir wheelhouse
+  - ps: _python setup.py build
+  - ps: _python setup.py bdist_wheel --dist-dir wheelhouse
 
 test_script:
-  - PS: _python -m pytest
+  - ps: _python -m pytest
 
 artifacts:
   - path: wheelhouse
