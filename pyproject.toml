@@ -97,11 +97,6 @@ exclude = '''
 )/
 '''
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["**/*.jpg", "**/*.yaml"] # alternatively: `exclude = ["additional*"]`
-namespaces = false
-
 [tool.pyright]
 reportUndefinedVariable = false
 reportMissingImports = false
@@ -163,7 +158,7 @@ archs = ["x86_64"]
 
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
-# before-all = ["brew install llvm libomp"]
+before-all = ["brew install llvm libomp"]
 # #repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 # repair-wheel-command = "delocate-wheel -w {dest_dir} -v {wheel}"
 
