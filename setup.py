@@ -38,6 +38,31 @@ def is_homebrew_installed() -> bool:
         return False
 
 
+def get_mpicc_path():
+    include = []
+    library = []
+    try:
+        result = subprocess.run(
+            ["mpicc", "-showme"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        txt = result.stdout.decode("utf-8").strip()
+        for arg in txt.split(" "):
+            if arg.startswith("-I"):
+                include.append(arg[2:])
+            if arg.startswith("-L"):
+                library.append(arg[2:])
+        return include, library
+    except Exception:
+        return None
+
+
+INCLUDE_DIRS = []
+LIBRARY_DIRS = []
+EXTRA_COMPILE_ARGS = []
+EXTRA_LING_ARGS = []
+
 if sys.platform == "win32":
     from distutils import msvccompiler
     from platform import architecture
@@ -50,6 +75,11 @@ if sys.platform == "win32":
     EXTRA_LING_ARGS = ["/openmp"]
 
 elif sys.platform == "darwin":
+    INCLUDE_DIRS += ["/usr/local/include", "/usr/local/opt/libomp/include"]
+    LIBRARY_DIRS += ["/usr/local/lib", "/usr/local/opt/libomp/lib"]
+    EXTRA_COMPILE_ARGS += ["-O3", "-ffast-math"]
+    EXTRA_LING_ARGS += []
+
     # Lets check if homebrew is installed
     use_openmp_support = True
     print(
@@ -60,7 +90,7 @@ elif sys.platform == "darwin":
         if is_homebrew_installed():
             print("\t - brew instalation detected...")
             brew_list = run_command("brew list").split()
-            packages = ["gcc", "llvm", "libomp"]
+            packages = ["llvm", "libomp", "open-mpi"]  # "gcc"
             for package in packages:
                 if package in brew_list:
                     print(f"\t - {package} instalation detected...")
@@ -82,51 +112,18 @@ elif sys.platform == "darwin":
         use_openmp_support = False
 
     if use_openmp_support:
-        gcc_list = run_command("ls /usr/local/bin/").split()
-        # Lets try to set the correct gcc version for compilation
-        versions = ["12", "11", "10", "9"]
-        found = False
-        for version in versions:
-            gcc_cmd = f"gcc-{version}"
-            if gcc_cmd in gcc_list:
-                print(f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'")
-                os.environ["CC"] = gcc_cmd
-                found = True
-        if not found:
-            print(
-                "GCC not detected on standard directory, looking in brew install folders"
-            )
-            gcc_list = run_command("ls /opt/homebrew/Cellar/gcc/").split()
-            for version in versions:
-                for gcc_dir in gcc_list:
-                    if version in gcc_dir:
-                        gcc_cmd = f"gcc-{version}"
-                        print(
-                            f"\t - {gcc_cmd} detected: export CC='{gcc_cmd}'"
-                        )
-                        os.environ["CC"] = gcc_cmd
-                        print(
-                            "Using found brew version of gcc:"
-                            + os.environ["CC"]
-                        )
+        # some helpful info here REF: https://mac.r-project.org/openmp/
+        include, library = get_mpicc_path()
+        INCLUDE_DIRS += include
+        LIBRARY_DIRS += library
+        EXTRA_COMPILE_ARGS += ["-Xclang", "-fopenmp", "-lmpi"]
+        EXTRA_LING_ARGS += ["-lomp"]  # ["-fopenmp", "-lmpi"]
 
-    # brew install gcc llvm libomp
-    # sudo xcode-select install
-    # export LDFLAGS="-L/usr/local/opt/libomp/lib"
-    # export CPPFLAGS="-I/usr/local/opt/libomp/include"
-    INCLUDE_DIRS = ["/usr/local/include"]
-    LIBRARY_DIRS = ["/usr/local/lib"]
-    EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math"]
-    EXTRA_LING_ARGS = []
     pltform = platform.platform().split("-")
     # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
     # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
     # EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
-    if use_openmp_support:
-        EXTRA_COMPILE_ARGS += [
-            "-fopenmp"
-        ]  # ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
-        EXTRA_LING_ARGS += ["-fopenmp"]  # ["-Xpreprocessor", "-fopenmp"]
+
 
 elif sys.platform.startswith("linux"):
     INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]

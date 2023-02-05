@@ -152,7 +152,7 @@ build-verbosity = 1
 # before-build = ""
 # repair-wheel-command = ""
 
-test-command = "pytest"
+test-command = "python -m pytest {project}/tests"
 # before-test = ""
 test-requires = ["nanopyx[test]"]
 # test-extras = []
@@ -164,7 +164,7 @@ archs = ["x86_64"]
 
 [tool.cibuildwheel.macos]
 archs = ["universal2"]
-before-all = ["brew install llvm libomp"]
+before-all = ["brew install llvm libomp open-mpi"]
 # #repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 # repair-wheel-command = "delocate-wheel -w {dest_dir} -v {wheel}"
 
