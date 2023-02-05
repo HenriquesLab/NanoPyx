@@ -35,6 +35,20 @@ install:
   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
+  - ps: |
+      if ($env:OS_LABEL -eq 'macos') {
+        Invoke-Expression (Invoke-WebRequest https://pyenv.run -UseBasicParsing).Content;
+        Add-Content $PROFILE 'export PATH="$HOME/.pyenv/bin:$PATH"'
+        Add-Content $PROFILE 'if command -v pyenv 1>/dev/null 2>&1; then'
+        Add-Content $PROFILE '  eval "$(pyenv init -)"'
+        Add-Content $PROFILE 'fi'
+        source $PROFILE;
+        pyenv install $env:PYTHON_VERSION;
+        pyenv global $env:PYTHON_VERSION;
+        pyenv exec python -m ensurepip;
+        pip install --upgrade pip;
+        pip install -e .[developer,test] --cache-dir %LOCALAPPDATA%\pip\cache;
+    }
   - ps: if ($env:OS_LABEL -eq 'win') { $env:PATH = "C:\Python$env:PYTHON_VERSION;C:\Python$env:PYTHON_VERSION\Scripts;$env:PATH" }
   - ps: Set-Alias _python $env:PYTHON_CMD
   - ps: _python -m pip install --upgrade pip
