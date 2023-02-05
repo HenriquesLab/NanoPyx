@@ -141,7 +141,7 @@ max-line-length = 120
 
 [tool.cibuildwheel]
 # https://cibuildwheel.readthedocs.io/en/stable/options/
-skip = ["pp*", "*musllinux*"]
+# skip = ["pp*", "*musllinux*"]
 build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
 # it is not possible to test arm64 and the arm64 part of a universal2 wheel on this CI platform
 test-skip = ["*arm64"]
@@ -153,50 +153,51 @@ test-skip = ["*arm64"]
 # auto, auto64, auto32, native, all, x86_64, i686,
 # aarch64, ppc64le, s390x, universal2, arm64, x86,
 # AMD64, ARM64
-archs = ["x86_64", "universal2"]
-build-frontend = "pip"
-config-settings = {}
-dependency-versions = "pinned"
-environment = {}
-environment-pass = []
+# archs = ["x86_64", "universal2"]
+# build-frontend = "pip"
+# config-settings = {}
+# dependency-versions = "pinned"
+# environment = {}
+# environment-pass = []
 
-# An number from 1 to 3 to increase the level of verbosity (corresponding to invoking pip with -v, -vv, and -vvv), 
-# between -1 and -3 (-q, -qq, and -qqq), or just 0 (default verbosity)
-build-verbosity = 1
+# # An number from 1 to 3 to increase the level of verbosity (corresponding to invoking pip with -v, -vv, and -vvv), 
+# # between -1 and -3 (-q, -qq, and -qqq), or just 0 (default verbosity)
+# build-verbosity = 1
 
-before-all = ""
-before-build = ""
-repair-wheel-command = ""
+# before-all = ""
+# before-build = ""
+# repair-wheel-command = ""
 
-test-command = "pytest -n=0"
-before-test = ""
-test-requires = ["nanopyx[test]"]
-test-extras = []
+# test-command = "pytest -n=0"
+# before-test = ""
+# test-requires = ["nanopyx[test]"]
+# test-extras = []
 
-container-engine = "docker"
-manylinux-x86_64-image = "manylinux2014"
+# container-engine = "docker"
+# manylinux-x86_64-image = "manylinux2014"
 
 [tool.cibuildwheel.linux]
-before-all = "yum install opencv opencv-devel opencv-python"
-repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
+archs = ["x86_64"]
+# before-all = "yum install opencv opencv-devel opencv-python"
+# repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
 archs = ["universal2"]
-before-all = ["brew install gcc llvm libomp"]
-#repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
-repair-wheel-command = "delocate-wheel -w {dest_dir} -v {wheel}"
+# before-all = ["brew install gcc llvm libomp"]
+# #repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
+# repair-wheel-command = "delocate-wheel -w {dest_dir} -v {wheel}"
 
-[tool.cibuildwheel.macos.environment]
-CMAKE_OSX_ARCHITECTURES = "arm64;x86_64"
-#MACOSX_DEPLOYMENT_TARGET = "11"
-#LDFLAGS="-L/usr/local/lib"
-#CXX="/usr/local/opt/llvm/bin/clang++"
-#CC="/usr/local/opt/llvm/bin/clang"
+# [tool.cibuildwheel.macos.environment]
+# CMAKE_OSX_ARCHITECTURES = "arm64;x86_64"
+# #MACOSX_DEPLOYMENT_TARGET = "11"
+# #LDFLAGS="-L/usr/local/lib"
+# #CXX="/usr/local/opt/llvm/bin/clang++"
+# #CC="/usr/local/opt/llvm/bin/clang"
 
-[tool.cibuildwheel.windows]
-test-command = "pytest -n=0 {project}\\tests"
-before-build = "pip install delvewheel"
-repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
+# [tool.cibuildwheel.windows]
+# test-command = "pytest -n=0 {project}\\tests"
+# before-build = "pip install delvewheel"
+# repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
-[tool.cibuildwheel.windows.environment]
-SETUPTOOLS_USE_DISTUTILS = "stdlib"
+# [tool.cibuildwheel.windows.environment]
+# SETUPTOOLS_USE_DISTUTILS = "stdlib"

@@ -1,13 +1,10 @@
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: macos-mojave
-      APPVEYOR_JOB_NAME: "python37-x64-macos-mojave"
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey # macos-mojave
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      APPVEYOR_JOB_NAME: "python37-x64-ubuntu"
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
-      APPVEYOR_JOB_NAME: "python37-x64-vs2015"
 
-stack: python 3.7
+stack: python 3.8
 
 init:
   - cmd: set PATH=C:\Python37;C:\Python37\Scripts;%PATH%
@@ -27,11 +24,6 @@ install:
   - ps: python -m pip install cibuildwheel
 
 build_script:
-  # increase cibuildwheel verbosity
-  - ps: $env:CIBW_BUILD_VERBOSITY = 1
-  - ps: $env:CIBW_ARCHS_MACOS = "universal2"
-  - ps: $env:CIBW_ARCHS_WINDOWS = "x86_64"
-  - ps: $env:CIBW_ARCHS_LINUX = "x86_64"
   - ps: python -m cibuildwheel --output-dir wheelhouse
 
 artifacts:
