@@ -37,11 +37,21 @@ artifacts:
     name: Wheels
 
 test_script:
-  - python -m pip install --upgrade pip --cache-dir pip-cache
   - python -m pip install twine --cache-dir pip-cache
   - python -m twine check wheelhouse/*.whl
 
-
+deploy:
+  release: $(APPVEYOR_REPO_TAG_NAME)-$(APPVEYOR_BUILD_NUMBER)
+  description: "Latest build of $(APPVEYOR_REPO_TAG_NAME)"
+  provider: GitHub
+  auth_token:
+    secure: QPTLU1jaSgIgs+6f/OKRKkSy3u0kI16A+ZtNaJaDGc6y0JK8K2pgeIZqIbvcrwURmhjo5b/57flQqfxReDfxPowCyk06M4rs5hU2p08Cin0HUXzxqULBzw22PfUOqkV5
+  artifact: Wheels
+  draft: false
+  prerelease: true
+  #on:
+  #  branch: master                 # release from master branch only
+  #  APPVEYOR_REPO_TAG: true        # deploy on tag push only
 # # REF: https://github.com/libyal/libexe/blob/a1d3190355aba02a89b503b2065b7218d8210764/appveyor.yml
 
 # environment:
