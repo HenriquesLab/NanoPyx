@@ -21,14 +21,14 @@ jobs:
       - name: Download wheels
         uses: robinraju/release-downloader@v1.7
         with:
-          tag: "nanopyx-b0.0.105"
+          latest: true
           fileName: "*.whl"
           out-file-path: "dist/"
 
       - name: Download sdist
         uses: robinraju/release-downloader@v1.7
         with:
-          tag: "nanopyx-b0.0.105"
+          latest: true
           tarBall: true
 
       - run: ls dist/
