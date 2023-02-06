@@ -10,6 +10,7 @@ cache:
   - cache-pip
   - cache-cibuildwheel
   - build
+  - $HOME/Library/Caches/Homebrew
 
 init:
   - cmd: set PATH=C:\Python37;C:\Python37\Scripts;%PATH%
