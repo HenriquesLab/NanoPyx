@@ -71,7 +71,7 @@ test_script:
 deploy:
   on:
     branch: main # release from main branch only
-    APPVEYOR_REPO_TAG: true # deploy on tag push only
+    # APPVEYOR_REPO_TAG: true # deploy on tag push only
   provider: GitHub
   tag: $(NPX_VERSION)
   repository: "HenriquesLab/NanoPyx"
