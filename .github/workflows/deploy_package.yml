@@ -36,7 +36,7 @@ jobs:
       - name: Publish package to TestPyPI
         run: |
           python -m pip install twine
-          python -m twine -p ${{ secrets.BMS_DEPLOY_TESTPYPI_TOKEN }} dist/
+          python -m twine upload -u "__token__" -p ${{ secrets.BMS_DEPLOY_TESTPYPI_TOKEN }} dist/
 
       # - name: Publish package to PyPI
       #   run: |
