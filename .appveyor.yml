@@ -23,8 +23,6 @@ cache:
 
 init:
   - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%
-  - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
-  - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
 
 install:
   # If there is a newer build queued for the same PR, cancel this one.
@@ -41,6 +39,8 @@ install:
   - python -m pip install cibuildwheel --cache-dir cache-pip
 
 build_script:
+  - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
+  - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
   - python -m cibuildwheel --output-dir wheelhouse
 
