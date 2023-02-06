@@ -7,7 +7,8 @@ environment:
 stack: python 3.8
 
 cache:
-  - pip-cache
+  - cache-pip
+  - cache-cibuildwheel
   - build
 
 init:
@@ -25,19 +26,19 @@ install:
       https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
       Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
       throw "There are newer queued builds for this pull request, failing early." }
-  - python -m pip install --upgrade pip --cache-dir pip-cache
-  - python -m pip install cibuildwheel --cache-dir pip-cache
+  - python -m pip install --upgrade pip --cache-dir cache-pip
+  - python -m pip install cibuildwheel --cache-dir cache-pip
 
 build_script:
   - PS: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
-  - python -m cibuildwheel --output-dir wheelhouse
+  - CIBW_CACHE_PATH="cache-cibuildwheel" python -m cibuildwheel --output-dir wheelhouse
 
 artifacts:
   - path: "wheelhouse\\*.whl"
     name: Wheels
 
 test_script:
-  - python -m pip install twine --cache-dir pip-cache
+  - python -m pip install twine --cache-dir cache-pip
   - python -m twine check wheelhouse/*.whl
 
 deploy:
@@ -70,7 +71,7 @@ deploy:
 #       PYTHON_CMD: C:\\Python38\\python.exe
 
 # cache:
-#   - pip-cache
+#   - cache-pip
 #   - build
 
 # install:
@@ -103,7 +104,7 @@ deploy:
 #   - ps: if ($env:OS_LABEL -eq 'win') { $env:PATH = "C:\Python$env:PYTHON_VERSION;C:\Python$env:PYTHON_VERSION\Scripts;$env:PATH" }
 #   #- ps: Set-Alias _python $env:PYTHON_CMD
 #   - ps: python3 -m pip install --upgrade pip
-#   # - ps: python3 -m pip install -e .[developer,test] --cache-dir pip-cache
+#   # - ps: python3 -m pip install -e .[developer,test] --cache-dir cache-pip
 
 # build_script:
 #   # - ps: _python -m cibuildwheel --output-dir wheelhouse
