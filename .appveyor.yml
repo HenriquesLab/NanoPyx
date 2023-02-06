@@ -1,6 +1,6 @@
 # REF: https://www.appveyor.com/docs/getting-started-with-appveyor-for-linux/
 
-version: $(APPVEYOR_BUILD_NUMBER)
+version: ${build}
 
 environment:
   matrix:
