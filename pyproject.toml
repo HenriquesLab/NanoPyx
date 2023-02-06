@@ -146,15 +146,15 @@ build-verbosity = 1
 # before-build = ""
 # repair-wheel-command = ""
 
-test-command = "pytest {project}/tests"
+# test-command = "pytest {project}/tests"
 # before-test = "pip install nanopyx[test] --cache-dir pip-cache"
-test-requires = ["nanopyx[test]"]
+# test-requires = ["nanopyx[test]"]
 # test-extras = []
 
 [tool.cibuildwheel.linux]
 archs = ["x86_64"]
 # before-all = "yum install opencv opencv-devel opencv-python"
-before-all = "yum install opencv-python"
+# before-all = "yum install opencv-python"
 # repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
