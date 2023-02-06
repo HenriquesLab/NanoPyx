@@ -25,7 +25,8 @@ class ExampleDataManager:
         """
         Helper class for downloading example test data
 
-        :param to_download_path: path to download the data to. If to_download_path is None, a temporary directory will be created. Note that it will not be automatically deleted.
+        :param to_download_path: path to download the data to. If to_download_path is None, a temporary directory
+        will be created. Note that it will not be automatically deleted.
         :type to_download_path: str, optional
         :raises ValueError: If to_download_path is not None and does not exist
 

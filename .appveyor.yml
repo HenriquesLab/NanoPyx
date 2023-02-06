@@ -1,5 +1,3 @@
-version: 1.0.{build}
-
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -27,11 +25,12 @@ install:
       https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
       Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
       throw "There are newer queued builds for this pull request, failing early." }
-  - ps: python -m pip install --upgrade pip --cache-dir pip-cache
-  - ps: python -m pip install cibuildwheel --cache-dir pip-cache
+  - python -m pip install --upgrade pip --cache-dir pip-cache
+  - python -m pip install cibuildwheel --cache-dir pip-cache
 
 build_script:
-  - ps: python -m cibuildwheel --output-dir wheelhouse
+  - python runUpdateBuildNumber.py {build}
+  - python -m cibuildwheel --output-dir wheelhouse
 
 artifacts:
   - path: "wheelhouse\\*.whl"

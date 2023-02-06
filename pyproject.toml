@@ -128,7 +128,7 @@ max-line-length = 120
 
 [tool.cibuildwheel]
 # https://cibuildwheel.readthedocs.io/en/stable/options/
-# skip = ["pp*", "*musllinux*"]
+skip = ["pp*", "*musllinux*"]
 build = ["cp39-*", "cp310-*", "cp311-*"]
 # it is not possible to test arm64 and the arm64 part of a universal2 wheel on this CI platform
 test-skip = ["*arm64"]
@@ -140,7 +140,7 @@ test-skip = ["*arm64"]
 
 # # An number from 1 to 3 to increase the level of verbosity (corresponding to invoking pip with -v, -vv, and -vvv), 
 # # between -1 and -3 (-q, -qq, and -qqq), or just 0 (default verbosity)
-build-verbosity = 1
+build-verbosity = 0
 
 # before-all = ""
 # before-build = ""
