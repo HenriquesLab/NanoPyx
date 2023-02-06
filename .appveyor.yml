@@ -42,10 +42,13 @@ build_script:
   - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
   - python -m cibuildwheel --output-dir wheelhouse
+  - python -m build --sdist --outdir wheelhouse
 
 artifacts:
   - path: "wheelhouse\\*.whl"
     name: Wheels
+  - path: "wheelhouse\\*.tar.gz"
+    name: SDist
 
 test_script:
   - python -m pip install twine --cache-dir cache-pip
@@ -59,7 +62,7 @@ deploy:
   description: "Latest build of nanopyx"
   auth_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
-  artifact: Wheels
+  artifact: Wheels, SDist
   draft: false
   prerelease: true
   on:
