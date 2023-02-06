@@ -1,11 +1,10 @@
+# REF: https://www.appveyor.com/docs/getting-started-with-appveyor-for-linux/
+
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      OS_TAG: win
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-      OS_TAG: macosx
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      OS_TAG: linux
 
 stack: python 3.8
 
@@ -16,9 +15,13 @@ cache:
   - $HOME/Library/Caches/Homebrew
 
 init:
-  - cmd: set PATH=C:\Python37;C:\Python37\Scripts;%PATH%
+  - ps: $env.APPVEYOR_SAVE_CACHE_ON_ERROR = $true
+  - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%
+  - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
+  - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
 
-#install: python -m pip install cibuildwheel==1.12.0
+version: $(NPX_VERSION)
+
 install:
   # If there is a newer build queued for the same PR, cancel this one.
   # The AppVeyor 'rollout builds' option is supposed to serve the same
@@ -34,7 +37,6 @@ install:
   - python -m pip install cibuildwheel --cache-dir cache-pip
 
 build_script:
-  - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
   - python -m cibuildwheel --output-dir wheelhouse
 
@@ -48,9 +50,9 @@ test_script:
 
 deploy:
   provider: GitHub
-  tag: nanopyx-b$(APPVEYOR_BUILD_NUMBER)
+  tag: nanopyx-b$(NPX_VERSION)
   repository: "HenriquesLab/NanoPyx"
-  release: $(APPVEYOR_REPO_TAG_NAME)-$(APPVEYOR_BUILD_NUMBER)
+  release: Build $(APPVEYOR_BUILD_NUMBER)
   description: "Latest build of nanopyx"
   auth_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
