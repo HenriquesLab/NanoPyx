@@ -19,7 +19,6 @@ only_commits:
 
 environment:
   matrix:
-    fast_finish: true     # set this flag to immediately finish build once one of the jobs fails
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -83,4 +82,3 @@ deploy:
   artifact: Wheels, SDist
   draft: true
   prerelease: false
-
