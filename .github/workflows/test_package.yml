@@ -69,5 +69,6 @@ jobs:
           python -m build
 
       - name: Test if it can install
-          pip uninstall . -y
+        run: |
+          pip uninstall nanopyx -y
           pip install 'dist/*.whl[test]'
