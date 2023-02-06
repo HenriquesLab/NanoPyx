@@ -1,12 +1,17 @@
 # REF: https://www.appveyor.com/docs/getting-started-with-appveyor-for-linux/
 
-version: ${build}
+version: "{build}"
+
+shallow_clone: true
 
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      APPVEYOR_SAVE_CACHE_ON_ERROR: true
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+      APPVEYOR_SAVE_CACHE_ON_ERROR: true
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      APPVEYOR_SAVE_CACHE_ON_ERROR: true
 
 stack: python 3.8
 
@@ -17,7 +22,6 @@ cache:
   - $HOME/Library/Caches/Homebrew
 
 init:
-  - ps: $env.APPVEYOR_SAVE_CACHE_ON_ERROR = $true
   - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%
   - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
   - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
