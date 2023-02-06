@@ -19,7 +19,6 @@ cache:
   - cache-pip
   - cache-cibuildwheel
   - build
-  - $HOME/Library/Caches/Homebrew
 
 init:
   - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%
@@ -61,73 +60,8 @@ deploy:
   auth_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
   artifact: Wheels
-  draft: true
-  prerelease: false
-  #on:
-  #  branch: master                 # release from master branch only
-  #  APPVEYOR_REPO_TAG: true        # deploy on tag push only
-# # REF: https://github.com/libyal/libexe/blob/a1d3190355aba02a89b503b2065b7218d8210764/appveyor.yml
-
-# environment:
-#   matrix:
-#     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-#       OS_LABEL: macos
-#       PY: 3.8
-#       PYTHON_CMD: /usr/local/opt/python@3.8/bin/python3
-#     # - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
-#     #   OS_LABEL: linux
-#     #   PY: 3.8
-#     #   PYTHON_CMD: ~/venv3.8/bin/python
-#     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-#       OS_LABEL: win
-#       PY: 3.8
-#       PYTHON_CMD: C:\\Python38\\python.exe
-
-# cache:
-#   - cache-pip
-#   - build
-
-# install:
-#   # If there is a newer build queued for the same PR, cancel this one.
-#   # The AppVeyor 'rollout builds' option is supposed to serve the same
-#   # purpose but it is problematic because it tends to cancel builds pushed
-#   # directly to master instead of just PR builds (or the converse).
-#   # credits: JuliaLang developers.
-#   - ps:
-#       if ($env:APPVEYOR_PULL_REQUEST_NUMBER -and $env:APPVEYOR_BUILD_NUMBER -ne ((Invoke-RestMethod `
-#       https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/history?recordsNumber=50).builds | `
-#       Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
-#       throw "There are newer queued builds for this pull request, failing early." }
-#   # - PS: if ($env:OS_LABEL -eq 'win') { choco install python --version $env:PYTHON_VERSION }
-#   # - PS: if ($env:OS_LABEL -eq 'linux') { sudo apt-get update && sudo apt-get install -qqy python$env:PYTHON_VERSION }
-#   # - PS: if ($env:OS_LABEL -eq 'macos') { brew install python@$env:PYTHON_VERSION }
-#   - sh: '[[ "$(uname)" == "Linux" ]] && source ~/venv${PY}/bin/activate || true'
-#   # - sh: '[[ "$(uname)" == "Darwin" ]] && brew update || true'
-#   - sh: '[[ "$(uname)" == "Darwin" ]] && brew install python@${PY} gcc llvm libomp || true'
-#   - sh: '[[ "$(uname)" == "Darwin" ]] && export PATH=/usr/local/opt/python@${PY}/bin:${PATH} || true'
-#   # - sh: '[[ "$(uname)" == "Darwin" ]] && brew install pyenv || true'
-#   # - sh: '[[ "$(uname)" == "Darwin" ]] && export PATH=~/.pyenv/shims:${PATH} || true'
-#   # - sh: '[[ "$(uname)" == "Darwin" ]] && env PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install ${PY} || true'
-#   # - sh: '[[ "$(uname)" == "Darwin" ]] && pyenv global ${PY} || true'
-#   # - sh: '[[ "$(uname)" == "Darwin" ]] && pyenv rehash || true'
-#   #- sh: '[[ "$(uname)" == "Darwin" ]] && python -m pip install --upgrade pip || true'
-#   #- sh: '[[ "$(uname)" == "Darwin" ]] && python -m pip install -e .[developer,test] || true'
-#   #- sh: '[[ "$(uname)" == "Linux" ]] && python -m pip install --upgrade pip || true'
-#   #- sh: '[[ "$(uname)" == "Linux" ]] && python -m pip install -e .[developer,test] || true'
-#   - ps: if ($env:OS_LABEL -eq 'win') { $env:PATH = "C:\Python$env:PYTHON_VERSION;C:\Python$env:PYTHON_VERSION\Scripts;$env:PATH" }
-#   #- ps: Set-Alias _python $env:PYTHON_CMD
-#   - ps: python3 -m pip install --upgrade pip
-#   # - ps: python3 -m pip install -e .[developer,test] --cache-dir cache-pip
-
-# build_script:
-#   # - ps: _python -m cibuildwheel --output-dir wheelhouse
-#   - ps: python3 setup.py build
-#   - ps: python3 setup.py bdist_wheel
-#   - ps: if ($env:OS_LABEL -eq 'macos') { delocate-wheel -w wheelhouse dist/*.whl }
-#   - ps: if ($env:OS_LABEL -eq 'linux') { auditwheel repair dist/*.whl -w wheelhouse }
-
-# test_script:
-#   - ps: python3 -m pytest
-
-# artifacts:
-#   - path: wheelhouse
+  draft: false
+  prerelease: true
+  on:
+    branch: master                 # release from master branch only
+    APPVEYOR_REPO_TAG: true        # deploy on tag push only
