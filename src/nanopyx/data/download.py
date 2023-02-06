@@ -17,8 +17,8 @@ from .examples import get_path as get_examples_path
 
 
 class ExampleDataManager:
-    _base_bath = get_examples_path()
-    _temp_dir = os.path.join(tempfile.gettempdir(), "nanopix_data")
+    _base_path = get_examples_path()
+    _temp_dir = os.path.join(tempfile.gettempdir(), "nanopyx_data")
     _to_download_path = None
 
     def __init__(self, to_download_path: str = None):
@@ -40,8 +40,8 @@ class ExampleDataManager:
 
         # Lets check on how many examples we have available
         self._datasets = []
-        for path in os.listdir(self._base_bath):
-            full_path = os.path.join(self._base_bath, path)
+        for path in os.listdir(self._base_path):
+            full_path = os.path.join(self._base_path, path)
             info_file_path = os.path.join(full_path, "info.yaml")
             if os.path.isdir(full_path) and os.path.exists(info_file_path):
                 info_data = None
@@ -52,7 +52,7 @@ class ExampleDataManager:
                 info = {
                     "info_path": info_file_path,
                     "thumbnail_path": os.path.join(
-                        self._base_bath, path, "thumbnail.jpg"
+                        self._base_path, path, "thumbnail.jpg"
                     ),
                     "tiff_sequence_path": None,
                     "zarr_path": None,
@@ -221,4 +221,3 @@ class ExampleDataManager:
                 f"If you find the '{dataset_name}' dataset useful, please cite: "
                 + f"{info['reference']} - {info['reference_doi']}"
             )
-            
