@@ -1,8 +1,6 @@
 name: Deploy Package
 
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
       logLevel:
