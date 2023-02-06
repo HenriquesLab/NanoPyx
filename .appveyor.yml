@@ -1,8 +1,11 @@
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-    - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      OS_TAG: win
+    - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+      OS_TAG: macosx
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      OS_TAG: linux
 
 stack: python 3.8
 
@@ -31,8 +34,9 @@ install:
   - python -m pip install cibuildwheel --cache-dir cache-pip
 
 build_script:
-  - PS: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
-  - CIBW_CACHE_PATH="cache-cibuildwheel" python -m cibuildwheel --output-dir wheelhouse
+  - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
+  - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
+  - python -m cibuildwheel --output-dir wheelhouse
 
 artifacts:
   - path: "wheelhouse\\*.whl"
