@@ -45,7 +45,7 @@ deploy:
   description: "Latest build of $(APPVEYOR_REPO_TAG_NAME)"
   provider: GitHub
   auth_token:
-    secure: QPTLU1jaSgIgs+6f/OKRKkSy3u0kI16A+ZtNaJaDGc6y0JK8K2pgeIZqIbvcrwURmhjo5b/57flQqfxReDfxPowCyk06M4rs5hU2p08Cin0HUXzxqULBzw22PfUOqkV5
+    secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
   artifact: Wheels
   draft: false
   prerelease: true
