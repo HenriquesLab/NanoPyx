@@ -4,6 +4,13 @@ version: "{build}"
 
 shallow_clone: true
 
+only_commits:
+  files:
+    # only trigger build if these files change
+    #https://www.appveyor.com/docs/how-to/filtering-commits/#skip-commits-2
+    - src/
+    - .appveyor.yml
+
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -56,15 +63,15 @@ test_script:
 
 deploy:
   provider: GitHub
-  tag: nanopyx-b$(NPX_VERSION)
+  tag: $(NPX_VERSION)
   repository: "HenriquesLab/NanoPyx"
   release: Build $(APPVEYOR_BUILD_NUMBER)
-  description: "Latest build of nanopyx"
+  description: "Latest build of NanoPyx"
   auth_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
   artifact: Wheels, SDist
   draft: false
   prerelease: true
   on:
-    branch: master                 # release from master branch only
-    APPVEYOR_REPO_TAG: true        # deploy on tag push only
+    branch: master # release from master branch only
+    APPVEYOR_REPO_TAG: true # deploy on tag push only
