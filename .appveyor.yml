@@ -42,9 +42,11 @@ test_script:
   - python -m twine check wheelhouse/*.whl
 
 deploy:
+  provider: GitHub
+  tag: nanopyx-b$(APPVEYOR_BUILD_NUMBER)
+  repository: "HenriquesLab/NanoPyx"
   release: $(APPVEYOR_REPO_TAG_NAME)-$(APPVEYOR_BUILD_NUMBER)
   description: "Latest build of $(APPVEYOR_REPO_TAG_NAME)"
-  provider: GitHub
   auth_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
   artifact: Wheels
