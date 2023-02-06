@@ -1,5 +1,7 @@
 # REF: https://www.appveyor.com/docs/getting-started-with-appveyor-for-linux/
 
+version: $(APPVEYOR_BUILD_NUMBER)
+
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -19,8 +21,6 @@ init:
   - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%
   - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
   - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
-
-version: $(NPX_VERSION)
 
 install:
   # If there is a newer build queued for the same PR, cancel this one.
