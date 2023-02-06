@@ -4,6 +4,12 @@ version: "{build}"
 
 shallow_clone: true
 
+# branches to build
+branches:
+  # whitelist
+  only:
+    - main
+
 only_commits:
   files:
     # only trigger build if these files change
@@ -13,6 +19,7 @@ only_commits:
 
 environment:
   matrix:
+    fast_finish: true     # set this flag to immediately finish build once one of the jobs fails
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -63,6 +70,9 @@ test_script:
   - python -m twine check wheelhouse/*.whl
 
 deploy:
+  on:
+    branch: main # release from main branch only
+    APPVEYOR_REPO_TAG: true # deploy on tag push only
   provider: GitHub
   tag: $(NPX_VERSION)
   repository: "HenriquesLab/NanoPyx"
@@ -71,8 +81,6 @@ deploy:
   auth_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
   artifact: Wheels, SDist
-  draft: false
-  prerelease: true
-  on:
-    branch: master # release from master branch only
-    APPVEYOR_REPO_TAG: true # deploy on tag push only
+  draft: true
+  prerelease: false
+
