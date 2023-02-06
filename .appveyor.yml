@@ -19,6 +19,7 @@ environment:
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
+      OS_NAME: linux
 
 stack: python 3.8
 
@@ -49,7 +50,7 @@ build_script:
   - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
   - python -m cibuildwheel --output-dir wheelhouse
-  - python -m build --sdist --outdir wheelhouse
+  - sh: "[[ $OS_NAME == 'linux' ]] && python setup.py sdist -d wheelhouse || true"
 
 artifacts:
   - path: "wheelhouse\\*.whl"
