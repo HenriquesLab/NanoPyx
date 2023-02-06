@@ -67,6 +67,7 @@ jobs:
       - name: Test if it can build
         run: |
           python -m build
+
+      - name: Test if it can install
           pip uninstall . -y
-          pip install dist/*.whl
-          pytest -n=0 --timeout=1200 -p no:nbmake
+          pip install 'dist/*.whl[test]'

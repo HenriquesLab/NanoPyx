@@ -1,8 +1,8 @@
 environment:
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
 
 stack: python 3.8
 
@@ -29,12 +29,19 @@ install:
   - python -m pip install cibuildwheel --cache-dir pip-cache
 
 build_script:
-  - PS: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_VERSION
+  - PS: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
   - python -m cibuildwheel --output-dir wheelhouse
 
 artifacts:
   - path: "wheelhouse\\*.whl"
     name: Wheels
+
+test_script:
+  - python -m pip install --upgrade pip --cache-dir pip-cache
+  - python -m pip install twine --cache-dir pip-cache
+  - python -m twine check wheelhouse/*.whl
+
+
 # # REF: https://github.com/libyal/libexe/blob/a1d3190355aba02a89b503b2065b7218d8210764/appveyor.yml
 
 # environment:
