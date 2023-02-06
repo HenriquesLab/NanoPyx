@@ -25,16 +25,14 @@ permissions:
 jobs:
   # Build the documentation and upload the static HTML files as an artifact.
   build:
-    runs-on: [py310, linux]
+    runs-on: [self-hosted, ubuntu]
     steps:
       - uses: actions/checkout@v3
       # ADJUST THIS: install all dependencies (including pdoc)
-      - run: pip install -e .[doc]
+      - run: pip3 install -e '.[doc]'
       # ADJUST THIS: build your documentation into docs/.
       # We use a custom build script for pdoc itself, ideally you just run `pdoc -o docs/ ...` here.
-      - run: |
-          pdoc src/nanopyx -o docs
-
+      - run: pdoc src/nanopyx -o docs
       - uses: actions/upload-pages-artifact@v1
         with:
           path: docs/
@@ -43,7 +41,7 @@ jobs:
   # This is a separate job so that only actions/deploy-pages has the necessary permissions.
   deploy:
     needs: build
-    runs-on: [py310, linux]
+    runs-on: [self-hosted, ubuntu]
     permissions:
       pages: write
       id-token: write
