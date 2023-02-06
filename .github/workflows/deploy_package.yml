@@ -24,8 +24,8 @@ jobs:
         uses: robinraju/release-downloader@v1.7
         with:
           latest: true
-          fileName: *.whl
-          out-file-path: dist/
+          fileName: "*.whl"
+          out-file-path: "dist/"
 
       - name: Download sdist
         uses: robinraju/release-downloader@v1.7
@@ -38,7 +38,7 @@ jobs:
         with:
           password: ${{ secrets.BMS_DEPLOY_TESTPYPI_TOKEN }}
           repository_url: https://test.pypi.org/legacy/
-          packages_dir: dist/
+          packages_dir: "dist/"
 
       # - name: Publish package to PyPI
       #   uses: pypa/gh-action-pypi-publish@release/v1
