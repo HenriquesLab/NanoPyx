@@ -29,7 +29,7 @@ install:
   - python -m pip install cibuildwheel --cache-dir pip-cache
 
 build_script:
-  - python runUpdateBuildNumber.py {build}
+  - PS: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_VERSION
   - python -m cibuildwheel --output-dir wheelhouse
 
 artifacts:
