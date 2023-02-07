@@ -18,48 +18,48 @@ from skimage.transform import AffineTransform, warp
 import cv2
 
 @timeit2
-def catmull_rom_shift(image: np.ndarray, angle:float, cx: float, cy: float):
+def catmull_rom_rotate(image: np.ndarray, angle:float):
     interpolator = catmull_rom.Interpolator(image)
-    return interpolator.rotate(angle, cx, cy)
+    return interpolator.rotate(angle)
 
 
 @timeit2
-def lanczos_shift(image: np.ndarray, angle:float, cx: float, cy: float, taps: int = 3):
+def lanczos_rotate(image: np.ndarray, angle:float, taps: int = 3):
     interpolator = lanczos.Interpolator(image, taps)
-    return interpolator.shift(angle, cx, cy)
+    return interpolator.rotate(angle)
 
 
 @timeit2
-def bicubic_shift(image: np.ndarray, angle:float, cx: float, cy: float):
+def bicubic_rotate(image: np.ndarray, angle:float):
     interpolator = bicubic.Interpolator(image)
-    return interpolator.shift(angle, cx, cy)
+    return interpolator.rotate(angle)
 
 
 @timeit2
-def bilinear_shift(image: np.ndarray, angle:float, cx: float, cy: float):
+def bilinear_rotate(image: np.ndarray, angle:float):
     interpolator = bilinear.Interpolator(image)
-    return interpolator.shift(angle, cx, cy)
+    return interpolator.rotate(angle)
 
 
 @timeit2
-def nearest_neighbor_shift(image: np.ndarray, angle:float, cx: float, cy: float):
+def nearest_neighbor_rotate(image: np.ndarray, angle:float):
     interpolator = nearest_neighbor.Interpolator(image)
-    return interpolator.shift(angle, cx, cy)
+    return interpolator.rotate(angle)
 
 
 @timeit2
-def scipy_shift(image: np.ndarray, angle:float, cx: float, cy: float):
-    return shift(image, angle)
+def scipy_rotate(image: np.ndarray, angle:float):
+    return rotate(image, angle)
 
 
 @timeit2
-def skimage_shift(image: np.ndarray, angle:float, cx: float, cy: float):
-    tform = AffineTransform(translation=(-dx, -dy))
+def skimage_rotate(image: np.ndarray, angle:float):
+    tform = AffineTransform(rotation=angle)
     return warp(image, tform)
 
 
 @timeit2
-def cv2_shift(image: np.ndarray, angle:float, cx: float, cy: float):
+def cv2_rotate(image: np.ndarray, angle:float, cx: float, cy: float):
     return cv2.warpAffine(
-        image, np.float32([[1, 0, dx], [0, 1, dy]]), image.shape[:2][::-1]
+        image, np.float32([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0]]), image.shape[:2][::-1]
     )
