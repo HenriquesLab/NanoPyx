@@ -50,13 +50,14 @@ install:
       throw "There are newer queued builds for this pull request, failing early." }
   - python -m pip install --upgrade pip --cache-dir cache-pip
   - python -m pip install cibuildwheel --cache-dir cache-pip
+  - python -m pip install pipx --cache-dir cache-pip
 
 build_script:
   - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
   - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
   - python -m cibuildwheel --output-dir wheelhouse
-  - sh: "[[ $OS_NAME == 'linux' ]] && python setup.py sdist -d wheelhouse || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
 
 artifacts:
   - path: "wheelhouse\\*.whl"
@@ -71,7 +72,7 @@ test_script:
 deploy:
   on:
     branch: main # release from main branch only
-    # APPVEYOR_REPO_TAG: true # deploy on tag push only
+    APPVEYOR_REPO_TAG: true # deploy on tag push only
   provider: GitHub
   tag: $(NPX_VERSION)
   repository: "HenriquesLab/NanoPyx"
