@@ -93,6 +93,7 @@ elif sys.platform == "darwin":
             packages = ["llvm", "libomp"]  # , "open-mpi"]  # "gcc"
             for package in packages:
                 if package in brew_list:
+
                     print(f"\t - {package} instalation detected...")
                 else:
                     print(
@@ -114,11 +115,11 @@ elif sys.platform == "darwin":
     if use_openmp_support:
         # some helpful info here REF: https://mac.r-project.org/openmp/
         INCLUDE_DIRS += [
-            "/usr/local/opt/libomp/include",
+            run_command("brew --prefix libomp").split()[0] + "/include",
             # "/usr/local/opt/llvm/include", - if uncommented breaks cross-compilation
         ]
         LIBRARY_DIRS += [
-            "/usr/local/opt/libomp/lib",
+            run_command("brew --prefix libomp").split()[0] + "/lib",
             # "/usr/local/opt/llvm/lib", - if uncommented breaks cross-compilation
         ]
         # include, library = get_mpicc_path()
