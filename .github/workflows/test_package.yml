@@ -65,9 +65,6 @@ jobs:
           verbose: true # optional (default = false)
 
   build_doc:
-    on:
-      paths:
-        - "src/**"
     needs: test_code
     runs-on: [py310]
     steps:
