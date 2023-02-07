@@ -146,22 +146,23 @@ cdef class Interpolator:
         return imShifted 
 
 
-    def rotate(self, float angle, float cx, float cy) -> np.ndarray:
+    def rotate(self, float angle) -> np.ndarray:
         """
-        Rotate an image by angle radians around (cx, cy) using interpolation
+        Rotate an image by angle radians around its center using interpolation
         :param angle: rotation angle in radians, positive angles are counter clockwise
-        :param cx: x coordinate of the center of rotation 
-        :param cy: y coordinate of the center of rotation
         """
-        imRotated = self._rotate(angle, cx, cy)
+        imRotated = self._rotate(angle)
         return np.asarray(imRotated).astype(self.original_dtype)
 
 
-    cdef float[:,:] _rotate(self, float angle, float cx, float cy):
+    cdef float[:,:] _rotate(self, float angle):
 
         cdef float[:,:] imRotated = np.zeros((self.h, self.w), dtype=np.float32)
         
         cdef int i, j
+
+        cdef cx = self.w // 2
+        cdef cy = self.h // 2
 
         cdef float cosine = np.cos(angle)
         cdef float sine = np.sin(angle)
@@ -171,8 +172,8 @@ cdef class Interpolator:
         with nogil:
             for i in prange(0, self.w):
                 for j in range(0, self.h):
-                    rotx = i * cosine + j * sine
-                    roty = -1 * i * sine + j * cosine
+                    rotx = (i+cx) * cosine + (j+cy) * sine
+                    roty = -1 * (i+cx) * sine + (j+cy) * cosine
                     imRotated[j,i] = self._interpolate(rotx,roty)
 
         return imRotated
