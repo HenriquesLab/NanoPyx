@@ -11,4 +11,4 @@ cdef class Interpolator:
     cdef float[:,:] _magnify(self, float magnification)
     cdef float[:,:] _magnify_xy(self, float magnification_y, float magnification_x)
     cdef float[:,:] _shift(self, float dx, float dy)
-    cdef float[:,:] _rotate(self, float angle)
+    cdef float[:,:] _rotate(self, float angle, float cx=self.w/2, float cy=self.h/2)

@@ -155,15 +155,12 @@ cdef class Interpolator:
         return np.asarray(imRotated).astype(self.original_dtype)
 
 
-    cdef float[:,:] _rotate(self, float angle):
+    cdef float[:,:] _rotate(self, float angle, float cx=self.w/2, float cy=self.h/2):
 
         cdef float[:,:] imRotated = np.zeros((self.h, self.w), dtype=np.float32)
         
         cdef int i, j
         cdef float rotx, roty
-
-        cdef float cx = self.w / 2
-        cdef float cy = self.h / 2
 
         cdef float cosine = np.cos(angle)
         cdef float sine = np.sin(angle)
@@ -176,4 +173,3 @@ cdef class Interpolator:
                     imRotated[j,i] = self._interpolate(rotx,roty)
 
         return imRotated
-
