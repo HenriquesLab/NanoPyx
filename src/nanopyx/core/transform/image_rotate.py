@@ -49,17 +49,18 @@ def nearest_neighbor_rotate(image: np.ndarray, angle:float):
 
 @timeit2
 def scipy_rotate(image: np.ndarray, angle:float):
-    return rotate(image, angle)
+    return rotate(image, np.rad2deg(angle), reshape=False)
 
 
 @timeit2
 def skimage_rotate(image: np.ndarray, angle:float):
-    tform = AffineTransform(rotation=angle)
-    return warp(image, tform)
+    rotation = AffineTransform(rotation=angle)
+    shift2center = AffineTransform(translation=-np.array(image.shape[:2][::-1]) / 2)
+    shift2og = AffineTransform(translation=np.array(image.shape[:2][::-1]) / 2)
+    return warp(image, shift2center + rotation + shift2og)
 
 
 @timeit2
-def cv2_rotate(image: np.ndarray, angle:float, cx: float, cy: float):
-    return cv2.warpAffine(
-        image, np.float32([[np.cos(angle), -np.sin(angle), 0], [np.sin(angle), np.cos(angle), 0]]), image.shape[:2][::-1]
-    )
+def cv2_rotate(image: np.ndarray, angle:float):
+    rotmat = cv2.getRotationMatrix2D(np.array(image.shape[:2][::-1]) / 2, np.rad2deg(angle), 1)
+    return cv2.warpAffine(image, rotmat, image.shape[:2][::-1])
