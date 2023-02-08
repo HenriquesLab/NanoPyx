@@ -18,8 +18,8 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
 
-    # return 0 if x and y positions do not exist in image
-    if not 0 <= x < w and not 0 <= y < h:
+    # return 0 if x OR y positions do not exist in image
+    if not 0 <= x < w or not 0 <= y < h:
         return 0
 
     cdef int x0 = int(x)
@@ -160,20 +160,19 @@ cdef class Interpolator:
         cdef float[:,:] imRotated = np.zeros((self.h, self.w), dtype=np.float32)
         
         cdef int i, j
+        cdef float rotx, roty
 
-        cdef cx = self.w // 2
-        cdef cy = self.h // 2
+        cdef float cx = self.w / 2
+        cdef float cy = self.h / 2
 
         cdef float cosine = np.cos(angle)
         cdef float sine = np.sin(angle)
 
-        cdef float rotx, roty
-
         with nogil:
             for i in prange(0, self.w):
                 for j in range(0, self.h):
-                    rotx = (i+cx) * cosine + (j+cy) * sine
-                    roty = -1 * (i+cx) * sine + (j+cy) * cosine
+                    rotx = cosine*(i-cx) - sine*(j-cy) + cx
+                    roty = sine*(i-cx) + cosine*(j-cy) + cy
                     imRotated[j,i] = self._interpolate(rotx,roty)
 
         return imRotated
