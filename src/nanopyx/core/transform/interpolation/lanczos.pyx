@@ -22,8 +22,8 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
 
-    # return 0 if x and y positions do not exist in image
-    if not 0 <= x < w and not 0 <= y < h:
+    # return 0 if x OR y positions do not exist in image
+    if not 0 <= x < w or not 0 <= y < h:
         return 0
 
     cdef int x0 = int(x)
