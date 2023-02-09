@@ -51,7 +51,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     cdef float[:] _xp = xp  # xp exists in python land, _xp in c land as memoryview
     cdef float[:] _yp = yp  # same as above
 
-    cdef long[:] particles_not_set, particles_set
+    cdef int[:] particles_not_set, particles_set
 
     cdef int n_particles = 0
     cdef int previous_n_particles = 0
