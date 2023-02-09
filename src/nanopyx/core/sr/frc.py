@@ -3,7 +3,9 @@ import numpy as np
 import pandas as pd
 from math import pi
 from skimage.draw import circle_perimeter
+from skimage.exposure import rescale_intensity
 from ..transform.padding import pad_w_zeros_2d
+from ..transform.interpolation.catmull_rom import interpolate
 from ..analysis.ccm.ccm import calculate_ccm_from_ref
 from ..analysis.ccm.helper_functions import check_even_square, make_even_square
 
@@ -128,51 +130,7 @@ class FIRECalculator(object):
         
         return self.intersections[0]
 
-# ref: https://colab.research.google.com/drive/1svyAqyjpdo_hIG8FSCjAmhNznqDq2sFm?usp=sharing#scrollTo=uAek4PxwgVd4 from https://www.frontiersin.org/articles/10.3389/fbinf.2021.817254/full
-def calculate_FIRE(img_1, img_2, pixel_recon_dim=1):
-    
-    max_width = max(img_1.shape[1], img_2.shape[1])
-    max_height = max(img_1.shape[0], img_2.shape[0])
-    
-    img_1 = pad_w_zeros_2d(img_1, max_height, max_width).astype(np.float32)
-    img_2 = pad_w_zeros_2d(img_2, max_height, max_width).astype(np.float32)
 
-    fft_1 = np.fft.fft2(img_1)
-    fft_2 = np.fft.fft2(img_2)
-    
-    ccm = np.fft.fftshift(fft_1 * np.conj(fft_2))
-    
-    abs_sqrd_fft_1 = np.fft.fftshift(np.abs(fft_1)**2)
-    abs_sqrd_fft_2 = np.fft.fftshift(np.abs(fft_2)**2)
-    
-    distance_map = create_distance_map(img_1)
-    
-    max_d = int(np.floor(np.shape(distance_map)[0]/2))
-    
-    f1f2_r = np.zeros([max_d,1])
-    f12_r = np.zeros([max_d,1])
-    f22_r = np.zeros([max_d,1])
-    FRC_values = np.zeros([max_d,1])
-    
-    for d in range(1,max_d):
-        ringMap = (distance_map == d)
-        f1f2_r[d-1] = np.sum(ccm*ringMap)
-        f12_r[d-1] = np.sum(abs_sqrd_fft_1*ringMap)
-        f22_r[d-1] = np.sum(abs_sqrd_fft_2*ringMap)
-        #Now the FRC values are calculated as follows
-        FRC_values[d-1] = (f1f2_r[d-1]/np.sqrt(f12_r[d-1]*f22_r[d-1]))
-        
-    FRC_values = pd.DataFrame(FRC_values, columns=['FRC'])
-    FRC_values.interpolate(inplace=True, method='linear')
-
-    #The x-axis (spatial frequency) goes from 0 to 1/(2*pixel_recon_dim)
-    spat_freq = np.linspace(0, 1/(2*pixel_recon_dim), len(FRC_values))
-
-    #We find the FRC resolution
-    fire_ID = np.min(np.where(FRC_values<(1/7))[0])
-    fire = 1/spat_freq[fire_ID]
-    
-    return fire
     
 def create_distance_map(img):
     distance_map = np.zeros(np.shape(img))
@@ -183,17 +141,55 @@ def create_distance_map(img):
         
     return distance_map
 
+def get_intersections(frc_curve, threshold_curve):
+    
+    if len(frc_curve) != len(threshold_curve):
+        print(
+            "Error: Unable to calculate FRC curve intersections due to input length mismatch."
+        )
+        return None
+    intersections = np.empty((len(frc_curve) - 1))
+    count = 0
+    for i in range(1, len(frc_curve)):
+        y1 = frc_curve[i - 1][1]
+        y2 = frc_curve[i][1]
+        y3 = threshold_curve[i - 1]
+        y4 = threshold_curve[i]
+        if not ((y3 >= y1 and y4 < y2) or (y1 >= y3 and y2 < y4)):
+            continue
+        x1 = frc_curve[i - 1][0]
+        x2 = frc_curve[i][0]
+        x3 = x1
+        x4 = x2
+        x1_x2 = x1 - x2
+        x3_x4 = x3 - x4
+        y1_y2 = y1 - y2
+        y3_y4 = y3 - y4
+        if x1_x2 * y3_y4 - y1_y2 * x3_x4 == 0:
+            if y1 == y3:
+                intersections[count] = x1
+                count += 1
+        else:
+            px = ((x1 * y2 - y1 * x2) * x3_x4 - x1_x2 * (x3 * y4 - y3 * x4)) / (
+                x1_x2 * y3_y4 - y1_y2 * x3_x4
+            )
+            if px >= x1 and px < x2:
+                intersections[count] = px
+                count += 1
+
+    return np.copy(intersections[:count])
+
 
 class FRCCalculator(object):
     
     def __init__(self):
-        self.threshold = 1/7
-        self.use_half_circle = True
+        self.use_half_circle = False
         self.perimeter_sampling_factor = 1
         self.img_1 = None
         self.img_2 = None
         self.fft_1 = None
         self.fft_2 = None
+        self.ccm = None
         self.numerator = None
         self.abs_fft_1 = None
         self.abs_fft_2 = None
@@ -208,18 +204,16 @@ class FRCCalculator(object):
         self.abs_fft_1 = np.empty(data_a1.shape)
         self.abs_fft_2 = np.empty(data_a1.shape)
         
-        print(data_a1.shape)
-        for i in range(data_a1.shape[0], 0, -1):
-            idx = i - 1
+        for idx in range(0, data_a1.shape[0]):
             
             a1i = data_a1[idx]
             a2i = data_a2[idx]
             b1i = data_b1[idx]
-            b2i = data_b[idx]
+            b2i = data_b2[idx]
             
-            self.numerator[idx] = a1i * a2i + b1i * b2i
-            self.abs_fft_1[idx] = a1i * a1i + b1i * b1i;
-            abs_fft_2[idx] = a2i * a2i + b2i * b2i;
+            self.numerator[idx] = (a1i * a2i + b1i * b2i)**2 + (b1i * b2i - a1i * a2i)**2
+            self.abs_fft_1[idx] = a1i * a1i + b1i * b1i
+            self.abs_fft_2[idx] = a2i * a2i + b2i * b2i
             
         
     def get_sine(self, angle, cos_a):
@@ -228,8 +222,65 @@ class FRCCalculator(object):
         else:
             return math.sqrt(1 - (cos_a * cos_a)) * 1
         
-    def get_interpolated_values(self, x, y, size):
-        pass
+    def get_interpolated_value_ccm(self, x, y, size):
+        images = [self.ccm]
+        x_base = int(x)
+        y_base = int(y)
+        x_fraction = x - x_base
+        y_fraction = y - y_base
+        if x_fraction < 0.0:
+            x_fraction = 0.0
+        if y_fraction < 0.0:
+            y_fraction = 0.0
+
+        lower_left_i = y_base * size + x_base
+        lower_right_i = lower_left_i + 1
+        upper_left_i = lower_left_i + size
+        upper_right_i = upper_left_i + 1
+
+        nImages = 3
+        values = np.empty((nImages))
+        for i in range(nImages):
+            image = images[i]
+            lower_left_v = image[lower_left_i]
+            lower_right_v = image[lower_right_i]
+            upper_right_v = image[upper_left_i]
+            upper_left_v = image[upper_right_i]
+
+            upper_average = upper_left_v + x_fraction * (upper_right_v - upper_left_v)
+            lower_average = lower_left_v + x_fraction * (lower_right_v - lower_left_v)
+            values[i] = lower_average + y_fraction * (upper_average - lower_average)
+        return values[0]
+    
+    def get_interpolated_value(self, x, y, size):
+        images = [self.numerator, self.abs_fft_1, self.abs_fft_2]
+        x_base = int(x)
+        y_base = int(y)
+        x_fraction = x - x_base
+        y_fraction = y - y_base
+        if x_fraction < 0.0:
+            x_fraction = 0.0
+        if y_fraction < 0.0:
+            y_fraction = 0.0
+
+        lower_left_i = y_base * size + x_base
+        lower_right_i = lower_left_i + 1
+        upper_left_i = lower_left_i + size
+        upper_right_i = upper_left_i + 1
+
+        nImages = 3
+        values = np.empty((nImages))
+        for i in range(nImages):
+            image = images[i]
+            lower_left_v = image[lower_left_i]
+            lower_right_v = image[lower_right_i]
+            upper_right_v = image[upper_left_i]
+            upper_left_v = image[upper_right_i]
+
+            upper_average = upper_left_v + x_fraction * (upper_right_v - upper_left_v)
+            lower_average = lower_left_v + x_fraction * (lower_right_v - lower_left_v)
+            values[i] = lower_average + y_fraction * (upper_average - lower_average)
+        return values
 
     def calculate_FRC_curve(self, img_1, img_2):
         
@@ -250,46 +301,44 @@ class FRCCalculator(object):
         fft_1 = np.fft.fft2(img_1)
         fft_2 = np.fft.fft2(img_2)
         
+        self.ccm = np.array(calculate_ccm_from_ref(img_2.reshape(1, img_2.shape[0], img_2.shape[1]), img_1)[0], dtype=np.float32)
+        
         size = fft_1.shape[0]
         centre = size / 2
         
-        data_a1 = fft_1.ravel().real
-        data_b1 = fft_1.ravel().imag
-        data_a2 = fft_2.ravel().real
-        data_b2 = fft_2.ravel().imag
+        data_a1 = fft_1.real.ravel()
+        data_b1 = fft_1.imag.ravel()
+        data_a2 = fft_2.real.ravel()
+        data_b2 = fft_2.imag.ravel()
         
         self.compute_FRC_values(data_a1, data_b1, data_a2, data_b2)
         
-        max = int(centre - 1)
-        results = np.empty((max, 5))
-        results[0] = [0, 1, 1, 1, 1]
+        max_r = int(centre - 1)
+        results = np.empty((max_r, 3))
+        results[0] = [0, 1, 1]
         
         if self.use_half_circle:
             limit = math.pi
         else:
             limit = math.pi * 2
         
-        #FRC Curve result = [radius, nSamples, sum0, sum1, sum2]
-        
-        for radius in range(1, max):
+        #FRC Curve result = [radius, correlation, n_samples]
+        for radius in range(1, max_r):
             sum0, sum1, sum2 = 0, 0, 0
             angle_step = 1 / (self.perimeter_sampling_factor * radius)
             num_sum = 0
-            for angle in range(0, limit, angle_step):
+            for angle in np.arange(0, limit, angle_step):
                 cos_a = math.cos(angle)
+                sin_a = self.get_sine(angle, cos_a)
                 x = centre + radius * cos_a
-                y = centre + radius * self.get_sine(angle, cos_a)
-                values = self.get_interpolated_values(x, y, size)
-                sum0 += values[0]
-                sum1 += values[1]
-                sum2 += values[2]
-                num_sum += 1
+                y = centre + radius * sin_a
+                value = interpolate(self.ccm, x, y)
                 
-            results[radius] = [radius, num_sum, sum0, sum1, sum2]
+            results[radius] = [radius, value, num_sum]
             
         self.frc_curve = results
 
-    def calculate_threshold_curve(self):
+    def calculate_threshold_curve(self, method="1/7"):
         
         threshold = np.empty((self.frc_curve.shape[0]))
         nr = 1
@@ -298,15 +347,64 @@ class FRCCalculator(object):
         if method == "1/7":
             threshold.fill(1/7)
         
-        self.threshold = threshold
+        self.threshold_curve = threshold
             
-    def get_intersections(self, max):
+    def get_intersections(self):
         
-        intersections = np.empty(())
+        frc_curve = self.frc_curve
+        threshold_curve = self.threshold_curve
+        
+        if len(frc_curve) != len(threshold_curve):
+            print(
+                "Error: Unable to calculate FRC curve intersections due to input length mismatch."
+            )
+            return None
+        intersections = np.empty((len(frc_curve) - 1))
+        count = 0
+        for i in range(1, len(frc_curve)):
+            y1 = frc_curve[i - 1][1]
+            y2 = frc_curve[i][1]
+            y3 = threshold_curve[i - 1]
+            y4 = threshold_curve[i]
+            if not ((y3 >= y1 and y4 < y2) or (y1 >= y3 and y2 < y4)):
+                continue
+            x1 = frc_curve[i - 1][0]
+            x2 = frc_curve[i][0]
+            x3 = x1
+            x4 = x2
+            x1_x2 = x1 - x2
+            x3_x4 = x3 - x4
+            y1_y2 = y1 - y2
+            y3_y4 = y3 - y4
+            if x1_x2 * y3_y4 - y1_y2 * x3_x4 == 0:
+                if y1 == y3:
+                    intersections[count] = x1
+                    count += 1
+            else:
+                px = ((x1 * y2 - y1 * x2) * x3_x4 - x1_x2 * (x3 * y4 - y3 * x4)) / (
+                    x1_x2 * y3_y4 - y1_y2 * x3_x4
+                )
+                if px >= x1 and px < x2:
+                    intersections[count] = px
+                    count += 1
+
+        self.intersections = np.copy(intersections[:count])
+
+    def get_correct_intersections(self, method="Fixed 1/7"):
+        if self.intersections is None or self.intersections.shape[0] == 0:
+            return 0
+        if method == "Fixed 1/7":
+            return self.intersections[0]
+        if self.intersections.shape[0] > 1:
+            return self.intersections[1]
+        
+        return self.intersections[0]
 
     def calculate_FIRE_number(self, img_1, img_2, method="1/7"):
         self.calculate_FRC_curve(img_1, img_2)
         self.calculate_threshold_curve(method=method)
-        self.get_intersections(2)
+        self.get_intersections()
+        intersection = self.get_correct_intersections(method=method)
+        self.fire_number = self.ccm.shape[0] / intersection
         
         return self.fire_number
