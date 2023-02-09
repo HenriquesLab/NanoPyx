@@ -58,7 +58,6 @@ developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
 test = [
     "pytest>=7.1",
     "pytest-cov>= 4.0.0",
-    "pytest-emoji>=0.2.0",
     "pytest-icdiff>=0.6",    # https://github.com/hjwp/pytest-icdiff
     "pytest-clarity>=1.0.1", # https://pypi.org/project/pytest-clarity/
     "pytest-timeout>=2.1.0",
@@ -105,7 +104,7 @@ reportUndefinedVariable = false
 reportMissingImports = false
 
 [tool.pytest.ini_options]
-addopts = "--emoji --cov=nanopyx -n=auto --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/"
+addopts = "--cov=nanopyx -n=auto --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/"
 timeout = 600
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
@@ -175,7 +174,7 @@ before-all = ["brew install llvm libomp"]
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
 test-requires = ["nanopyx[test]"]
-test-command = "pytest {project}\\tests -p no:emoji"
+test-command = "pytest {project}\\tests"
 # before-build = "pip install delvewheel"
 # repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
