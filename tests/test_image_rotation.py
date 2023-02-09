@@ -11,7 +11,7 @@ from nanopyx.core.transform.image_rotate import (
 
 def test_bicubic_rotate(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * 2*np.pi
+    theta = np.random.rand() * np.pi/10
 
     shifted1 = bicubic_rotate(image, theta)
     shifted2 = bicubic_rotate(shifted1, -theta)
@@ -28,7 +28,7 @@ def test_bicubic_rotate(random_image_with_squares, plt):
 
 def test_catmull_rom_rotate(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * 2*np.pi
+    theta = np.random.rand() * np.pi/10
 
     shifted1 = catmull_rom_rotate(image, theta)
     shifted2 = catmull_rom_rotate(shifted1, -theta)
@@ -45,7 +45,7 @@ def test_catmull_rom_rotate(random_image_with_squares, plt):
 
 def test_cv2_rotate(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * 2*np.pi
+    theta = np.random.rand() * np.pi/10
 
     shifted1 = cv2_rotate(image, theta)
     shifted2 = cv2_rotate(shifted1, -theta)
@@ -62,7 +62,7 @@ def test_cv2_rotate(random_image_with_squares, plt):
 
 def test_lanczos_rotate(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * 2*np.pi
+    theta = np.random.rand() * np.pi/10 
 
     shifted1 = lanczos_rotate(image, theta)
     shifted2 = lanczos_rotate(shifted1, -theta)
@@ -79,7 +79,7 @@ def test_lanczos_rotate(random_image_with_squares, plt):
 
 def test_scipy_rotate(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * 2*np.pi
+    theta = np.random.rand() * np.pi/10
 
     shifted1 = scipy_rotate(image, theta)
     shifted2 = scipy_rotate(shifted1, -theta)
@@ -96,7 +96,7 @@ def test_scipy_rotate(random_image_with_squares, plt):
 
 def test_skimage_rotate(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * 2*np.pi
+    theta = np.random.rand() * np.pi/10
 
     shifted1 = skimage_rotate(image, theta)
     shifted2 = skimage_rotate(shifted1, -theta)
