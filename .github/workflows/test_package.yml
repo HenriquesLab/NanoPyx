@@ -78,6 +78,8 @@ jobs:
 
   deploy_doc:
     needs: build_doc
+    # only run if main branch
+    if: github.ref == 'refs/heads/main'
     runs-on: [py310]
     permissions:
       pages: write
