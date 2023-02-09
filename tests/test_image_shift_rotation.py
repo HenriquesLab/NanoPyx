@@ -1,23 +1,22 @@
 import numpy as np
-
-from nanopyx.core.transform.image_shift_rotate import (
+from nanopyx.core.transform.image_shift_rotate import (  # scipy_rotate_shift,
     bicubic_rotate_shift,
     catmull_rom_rotate_shift,
     cv2_rotate_shift,
     lanczos_rotate_shift,
-    #scipy_rotate_shift,
     skimage_rotate_shift,
 )
 
+
 def test_bicubic_rotate_shift(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * np.pi/10
-    
+    theta = np.random.rand() * np.pi / 10
+
     w = image.shape[1]
     h = image.shape[0]
     cx = np.random.randint(0, w) / 10
     cy = np.random.randint(0, h) / 10
-    
+
     shifted1 = bicubic_rotate_shift(image, theta, cx, cy)
     shifted2 = bicubic_rotate_shift(shifted1, -theta, cx, cy)
     delta = image - shifted2
@@ -33,8 +32,8 @@ def test_bicubic_rotate_shift(random_image_with_squares, plt):
 
 def test_catmull_rom_rotate_shift(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * np.pi/10
-    
+    theta = np.random.rand() * np.pi / 10
+
     w = image.shape[1]
     h = image.shape[0]
     cx = np.random.randint(0, w) / 10
@@ -55,7 +54,7 @@ def test_catmull_rom_rotate_shift(random_image_with_squares, plt):
 
 def test_cv2_rotate_shift(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * np.pi/10
+    theta = np.random.rand() * np.pi / 10
 
     w = image.shape[1]
     h = image.shape[0]
@@ -77,7 +76,7 @@ def test_cv2_rotate_shift(random_image_with_squares, plt):
 
 def test_lanczos_rotate_shift(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * np.pi/10
+    theta = np.random.rand() * np.pi / 10
 
     w = image.shape[1]
     h = image.shape[0]
@@ -102,7 +101,7 @@ def test_lanczos_rotate_shift(random_image_with_squares, plt):
 
 def test_skimage_rotate_shift(random_image_with_squares, plt):
     image = random_image_with_squares
-    theta = np.random.rand() * np.pi/10
+    theta = np.random.rand() * np.pi / 10
 
     w = image.shape[1]
     h = image.shape[0]

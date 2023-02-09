@@ -138,7 +138,7 @@ test-skip = ["*arm64"]
 # environment = {}
 # environment-pass = []
 
-# # An number from 1 to 3 to increase the level of verbosity (corresponding to invoking pip with -v, -vv, and -vvv), 
+# # An number from 1 to 3 to increase the level of verbosity (corresponding to invoking pip with -v, -vv, and -vvv),
 # # between -1 and -3 (-q, -qq, and -qqq), or just 0 (default verbosity)
 build-verbosity = 0
 
@@ -172,7 +172,8 @@ before-all = ["brew install llvm libomp"]
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
-# test-command = "pytest -n=0 {project}\\tests"
+test-requires = ["nanopyx[test]"]
+test-command = "pytest {project}\\tests"
 # before-build = "pip install delvewheel"
 # repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
