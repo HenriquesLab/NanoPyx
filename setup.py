@@ -192,12 +192,12 @@ def collect_extensions():
 # Show the logo
 print(
     r"""
-  _  _               ___
+  _  _               ___      
  | \| |__ _ _ _  ___| _ \_  ___ __
  | .` / _` | ' \/ _ \  _/ || \ \ /
  |_|\_\__,_|_||_\___/_|  \_, /_\_\
-                      *|<|__/==/==
-  |-- Python Nanoscopy Library --|
+ □□■□■□■□■□□★✩✩★★✩✩✩★★★|<|__/==/==  
+  |-- Python Nanoscopy Library --| 
 
 """
 )
