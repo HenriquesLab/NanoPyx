@@ -93,7 +93,6 @@ elif sys.platform == "darwin":
             packages = ["llvm", "libomp"]  # , "open-mpi"]  # "gcc"
             for package in packages:
                 if package in brew_list:
-
                     print(f"\t - {package} instalation detected...")
                 else:
                     print(
@@ -197,7 +196,7 @@ print(
  | \| |__ _ _ _  ___| _ \_  ___ __
  | .` / _` | ' \/ _ \  _/ || \ \ /
  |_|\_\__,_|_||_\___/_|  \_, /_\_\
- □□■□■□■□■□□★✩✩★★✩✩✩★★★|<|__/==/==  
+   □□□■□□■■+■■□□■□□□  *|<|__/==/==  
   |-- Python Nanoscopy Library --| 
 
 """
