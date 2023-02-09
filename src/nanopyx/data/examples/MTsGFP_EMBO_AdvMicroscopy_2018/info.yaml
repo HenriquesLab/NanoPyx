@@ -1,6 +1,6 @@
-label: EMBL_TubulinGFP
+label: MTsGFP_EMBO_AdvMicroscopy_2018
 nickname: EMBL
-description: | 
+description: |
   HILO microscopy images of a HeLa cell expressing Tubulin-GFP.
   Acquired during an EMBL Advanced Microscopy course in 2018
 data_dims: "t,y,x"
@@ -11,4 +11,4 @@ reference_doi: ""
 tiff_sequence_url: https://drive.google.com/file/d/1TppSHdp-q_MCyzsj7-Vo_3YffqiFcgfQ/view?usp=share_link
 tiff_sequence_url_type: "gdrive"
 tiff_sequence_size: "380MB"
-tiff_sequence_checksum: 
+tiff_sequence_checksum:

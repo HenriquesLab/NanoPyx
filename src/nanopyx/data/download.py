@@ -9,10 +9,9 @@ import wget
 import yaml
 from gdown import download as gdrive_download
 from onedrivedownloader import download as onedrive_download
+from ..core.utils.downloader import download
 
-from ..core.io.checksum import get_checksum
 from ..core.io.zip_image_loader import ZipTiffIterator
-from ..core.utils.url_checker import url_checker
 from .examples import get_path as get_examples_path
 
 
@@ -56,13 +55,7 @@ class ExampleDataManager:
                         self._base_path, path, "thumbnail.jpg"
                     ),
                     "tiff_sequence_path": None,
-                    "zarr_path": None,
                 }
-                zarr_path = os.path.join(
-                    self._to_download_path, path, "dataset.zarr.zip"
-                )
-                if os.path.exists(zarr_path):
-                    info["zarr_path"] = zarr_path
                 tiff_sequence_path = os.path.join(
                     self._to_download_path, path, "tiff_sequence.zip"
                 )
@@ -71,6 +64,10 @@ class ExampleDataManager:
 
                 for key in info_data:
                     info[key] = info_data[key]
+
+                info["shape"] = tuple([int(v) for v in info["data_shape"].split(",")])
+
+                info["dtype"] = np.dtype(info["data_dtype"])
 
                 self._datasets.append(info)
 
@@ -95,10 +92,7 @@ class ExampleDataManager:
         """
         :return: list of dataset nicknames
         """
-        return [
-            (dataset["nickname"], dataset["label"])
-            for dataset in self._datasets
-        ]
+        return [(dataset["nickname"], dataset["label"]) for dataset in self._datasets]
 
     def get_dataset_info(self, dataset_name: str) -> dict:
         """
@@ -130,7 +124,7 @@ class ExampleDataManager:
         elif download_type == "gdrive":
             gdrive_download(url, file_path, fuzzy=True, quiet=False)
         else:
-            wget.download(url=url, out=file_path)
+            download(url, file_path)
 
     def _copy_auxiliary_files(self, info: dict):
         if not os.path.exists(self._to_download_path):
@@ -140,9 +134,9 @@ class ExampleDataManager:
         if not os.path.exists(path):
             os.mkdir(path)
 
-        thumbnail_path = os.path.join(path, "thumbnail.jpg")
-        if not os.path.exists(thumbnail_path):
-            shutil.copyfile(info["thumbnail_path"], thumbnail_path)
+        # thumbnail_path = os.path.join(path, "thumbnail.jpg")
+        # if not os.path.exists(thumbnail_path):
+        #    shutil.copyfile(info["thumbnail_path"], thumbnail_path)
 
         info_path = os.path.join(path, "info.yaml")
         if not os.path.exists(info_path):
@@ -168,6 +162,15 @@ class ExampleDataManager:
         info["tiff_sequence_path"] = file_path
 
         return file_path
+
+    def is_downloaded(self, dataset_name: str) -> bool:
+        """
+        :param dataset_name: can be a dataset label or nickname
+        :type dataset_name: str
+        :return: True if the dataset is downloaded
+        """
+        info = self.get_dataset_info(dataset_name)
+        return info["tiff_sequence_path"] is not None
 
     def get_ZipTiffIterator(
         self, dataset_name: str, as_ndarray: bool = False

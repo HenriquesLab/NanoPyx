@@ -1,0 +1,17 @@
+label: VirusMapper_ViralParticles_Sagittal_Seed-Average_Ch2
+nickname: Sagittal2
+description: |
+  Seed with sagittal view for VACV F17 virions as a list, as seen by Strucured Illumination Microscopy.
+
+  Figure 2 of the paper 'VirusMapper: open-source nanoscale mapping of viral architecture
+  through super-resolution microscopy' by Gray et al, Scientific Reports, 2016
+data_dims: "p, x, y"
+data_shape: "1, 21, 21"
+data_dtype: float32
+reference: "Gray et al, Scientific Reports, 2016"
+reference_doi: "https://doi.org/10.1038/srep29132"
+tiff_sequence_url: https://drive.google.com/file/d/1rimsbooaxpo7Wsnw_r7U0QkxoMejUDPo/view?usp=share_link
+tiff_sequence_url_type: "gdrive"
+tiff_sequence_size: "3KB"
+tiff_sequence_checksum:
+keyword: "VirusMapper, VACV, F17, virion, virions, virion list"
