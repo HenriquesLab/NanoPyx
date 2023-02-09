@@ -5,6 +5,7 @@ from math import pi
 from skimage.draw import circle_perimeter
 from ..transform.padding import pad_w_zeros_2d
 from ..analysis.ccm.ccm import calculate_ccm_from_ref
+from ..analysis.ccm.helper_functions import check_even_square, make_even_square
 
 from matplotlib import pyplot as plt
 
@@ -181,3 +182,131 @@ def create_distance_map(img):
             distance_map[x_i,y_i] = np.round(np.sqrt((x_i-center[0])**2+(y_i-center[1])**2))
         
     return distance_map
+
+
+class FRCCalculator(object):
+    
+    def __init__(self):
+        self.threshold = 1/7
+        self.use_half_circle = True
+        self.perimeter_sampling_factor = 1
+        self.img_1 = None
+        self.img_2 = None
+        self.fft_1 = None
+        self.fft_2 = None
+        self.numerator = None
+        self.abs_fft_1 = None
+        self.abs_fft_2 = None
+        self.frc_curve = None
+        self.threshold_curve = None
+        self.intersections = None
+        self.fire_number = None
+        
+    def compute_FRC_values(self, data_a1, data_b1, data_a2, data_b2):
+        
+        self.numerator = np.empty(data_a1.shape)
+        self.abs_fft_1 = np.empty(data_a1.shape)
+        self.abs_fft_2 = np.empty(data_a1.shape)
+        
+        print(data_a1.shape)
+        for i in range(data_a1.shape[0], 0, -1):
+            idx = i - 1
+            
+            a1i = data_a1[idx]
+            a2i = data_a2[idx]
+            b1i = data_b1[idx]
+            b2i = data_b[idx]
+            
+            self.numerator[idx] = a1i * a2i + b1i * b2i
+            self.abs_fft_1[idx] = a1i * a1i + b1i * b1i;
+            abs_fft_2[idx] = a2i * a2i + b2i * b2i;
+            
+        
+    def get_sine(self, angle, cos_a):
+        if angle > math.pi:
+            return math.sqrt(1 - (cos_a * cos_a)) * -1
+        else:
+            return math.sqrt(1 - (cos_a * cos_a)) * 1
+        
+    def get_interpolated_values(self, x, y, size):
+        pass
+
+    def calculate_FRC_curve(self, img_1, img_2):
+        
+        img_1 = img_1.astype(np.float32)
+        img_2 = img_2.astype(np.float32)
+        
+        if not check_even_square(img_1.reshape(1, img_1.shape[0], img_1.shape[1])):
+            img_1 = make_even_square(img_1.reshape(1, img_1.shape[0], img_1.shape[1]))[0]
+        if not check_even_square(img_2.reshape(1, img_2.shape[0], img_2.shape[1])):
+            img_2 = make_even_square(img_2.reshape(1, img_2.shape[0], img_2.shape[1]))[0]
+        
+        max_w = max(img_1.shape[1], img_2.shape[1])
+        max_h = max(img_1.shape[0], img_2.shape[0])
+        
+        img_1 = pad_w_zeros_2d(img_1, max_h, max_w)
+        img_2 = pad_w_zeros_2d(img_2, max_h, max_w)
+        
+        fft_1 = np.fft.fft2(img_1)
+        fft_2 = np.fft.fft2(img_2)
+        
+        size = fft_1.shape[0]
+        centre = size / 2
+        
+        data_a1 = fft_1.ravel().real
+        data_b1 = fft_1.ravel().imag
+        data_a2 = fft_2.ravel().real
+        data_b2 = fft_2.ravel().imag
+        
+        self.compute_FRC_values(data_a1, data_b1, data_a2, data_b2)
+        
+        max = int(centre - 1)
+        results = np.empty((max, 5))
+        results[0] = [0, 1, 1, 1, 1]
+        
+        if self.use_half_circle:
+            limit = math.pi
+        else:
+            limit = math.pi * 2
+        
+        #FRC Curve result = [radius, nSamples, sum0, sum1, sum2]
+        
+        for radius in range(1, max):
+            sum0, sum1, sum2 = 0, 0, 0
+            angle_step = 1 / (self.perimeter_sampling_factor * radius)
+            num_sum = 0
+            for angle in range(0, limit, angle_step):
+                cos_a = math.cos(angle)
+                x = centre + radius * cos_a
+                y = centre + radius * self.get_sine(angle, cos_a)
+                values = self.get_interpolated_values(x, y, size)
+                sum0 += values[0]
+                sum1 += values[1]
+                sum2 += values[2]
+                num_sum += 1
+                
+            results[radius] = [radius, num_sum, sum0, sum1, sum2]
+            
+        self.frc_curve = results
+
+    def calculate_threshold_curve(self):
+        
+        threshold = np.empty((self.frc_curve.shape[0]))
+        nr = 1
+        sigma = 0
+        
+        if method == "1/7":
+            threshold.fill(1/7)
+        
+        self.threshold = threshold
+            
+    def get_intersections(self, max):
+        
+        intersections = np.empty(())
+
+    def calculate_FIRE_number(self, img_1, img_2, method="1/7"):
+        self.calculate_FRC_curve(img_1, img_2)
+        self.calculate_threshold_curve(method=method)
+        self.get_intersections(2)
+        
+        return self.fire_number

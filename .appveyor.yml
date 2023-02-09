@@ -4,6 +4,12 @@ version: "{build}"
 
 shallow_clone: true
 
+# branches to build
+branches:
+  # whitelist
+  only:
+    - main
+
 only_commits:
   files:
     # only trigger build if these files change
@@ -19,6 +25,7 @@ environment:
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
+      OS_NAME: linux
 
 stack: python 3.8
 
@@ -43,13 +50,14 @@ install:
       throw "There are newer queued builds for this pull request, failing early." }
   - python -m pip install --upgrade pip --cache-dir cache-pip
   - python -m pip install cibuildwheel --cache-dir cache-pip
+  - python -m pip install pipx --cache-dir cache-pip
 
 build_script:
   - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
   - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
   - python -m cibuildwheel --output-dir wheelhouse
-  - python -m build --sdist --outdir wheelhouse
+  - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
 
 artifacts:
   - path: "wheelhouse\\*.whl"
@@ -62,6 +70,9 @@ test_script:
   - python -m twine check wheelhouse/*.whl
 
 deploy:
+  on:
+    branch: main # release from main branch only
+    APPVEYOR_REPO_TAG: true # deploy on tag push only
   provider: GitHub
   tag: $(NPX_VERSION)
   repository: "HenriquesLab/NanoPyx"
@@ -70,8 +81,5 @@ deploy:
   auth_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
   artifact: Wheels, SDist
-  draft: false
-  prerelease: true
-  on:
-    branch: master # release from master branch only
-    APPVEYOR_REPO_TAG: true # deploy on tag push only
+  draft: true
+  prerelease: false

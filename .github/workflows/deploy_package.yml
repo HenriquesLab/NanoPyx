@@ -1,4 +1,4 @@
-name: Deploy Package
+name: deploy package
 
 on:
   workflow_dispatch:
