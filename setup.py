@@ -93,7 +93,6 @@ elif sys.platform == "darwin":
             packages = ["llvm", "libomp"]  # , "open-mpi"]  # "gcc"
             for package in packages:
                 if package in brew_list:
-
                     print(f"\t - {package} instalation detected...")
                 else:
                     print(
