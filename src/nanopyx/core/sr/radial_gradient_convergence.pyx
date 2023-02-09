@@ -5,13 +5,15 @@ from libc.math cimport sqrt, fabs, exp, isnan, floor
 from ..transform.interpolation.catmull_rom cimport _interpolate, Interpolator
 from ..transform.image_magnify import cv2_zoom as zoom
 # from ..transform.image_magnify import fourier_zoom as zoom
+from ..utils.time.timeit import timeit2
+
 
 import numpy as np
 cimport numpy as np
 
 from cython.parallel import prange
 
-cdef int Gx_Gy_MAGNIFICATION = 2
+cdef float Gx_Gy_MAGNIFICATION = 2.0
 
 cdef class RadialGradientConvergence:
 
@@ -40,7 +42,7 @@ cdef class RadialGradientConvergence:
         self.tSS = 2 * sigma * sigma
         self.tSO = 2 * sigma + 1
 
-
+    @timeit2
     def calculate(self, im: np.ndarray):
         """
         Calculate the RGC of an image-stack.
@@ -76,12 +78,12 @@ cdef class RadialGradientConvergence:
         self._calculate_gradient(imInt, imGx, imGy) # calculate gradients of the interpolated image
 
         with nogil:
-            for yM in prange(magnification, h * magnification):
+            for yM in prange(magnification, h * magnification): 
                 for xM in range(magnification, w * magnification):
                     if self.doIntensityWeighting:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy)
-                    else:
                         imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy) * imInt[yM, xM]
+                    else:
+                        imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy) 
 
 
     cdef void _calculate_gradient(self, float[:,:] image, float[:,:] imGx, float[:,:] imGy): # Calculate gradients via Robert's cross
@@ -101,8 +103,12 @@ cdef class RadialGradientConvergence:
                     imGy[j,i] = image[y1, x1] - image[y0, x1]
                     # as in REF: https://github.com/HenriquesLab/NanoJ-eSRRF/blob/785c71b3bd508c938f63bb780cba47b0f1a5b2a7/resources/liveSRRF.cl under calculateGradient_2point
     
+    @timeit2
+    def calculateRGC(self, int xM, int yM, np.ndarray imGx, np.ndarray imGy):
+        "Calculate RGC value for a subpixel"
+        return self._calculateRGC(xM, yM, imGx, imGy)
 
-    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imGx, float[:,:] imGy) nogil:
+    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imGx, float[:,:] imGy) nogil: 
 
         cdef int w = imGx.shape[1]
         cdef int h = imGx.shape[0]
@@ -123,15 +129,15 @@ cdef class RadialGradientConvergence:
 
         cdef int i, j
 
-        for j in range(_start, _end):
+        for j in range(_start, _end): 
             vy = (<int>(Gx_Gy_MAGNIFICATION * yc) + j) / Gx_Gy_MAGNIFICATION # position in continuous space
             
-            if 0 <= vy <= h - 1:
+            if 0 < vy <= h - 1:
             
                 for i in range(_start, _end):
                     vx = (<int>(Gx_Gy_MAGNIFICATION * xc) + i) / Gx_Gy_MAGNIFICATION # position in continuous space
 
-                    if 0 <= vx <= w - 1:
+                    if 0 < vx <= w - 1:
 
                         dx = vx - xc
                         dy = vy - yc
@@ -140,15 +146,20 @@ cdef class RadialGradientConvergence:
                         if distance != 0 and distance <= self.tSO:
                             Gx = _interpolate(imGx, (vx * self.magnification) / 2, (vy * self.magnification) / 2) # get interpolated value (in continuous space) via Catmull-Rom interpolation
                             Gy = _interpolate(imGy, (vx * self.magnification) / 2, (vy * self.magnification) / 2)
+                            # with gil:
+                                # print("Gx, Gy =", (Gx, Gy))
                             distanceWeight = self._calculateDW(distance)
                             distanceWeightSum += distanceWeight
                             GdotR = Gx*dx + Gy*dy
 
                             if GdotR < 0: # if the vector is pointing inwards
                                 Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
-                                RGC += Dk * distanceWeight
+                                RGC += Dk * distanceWeight 
 
         RGC /= distanceWeightSum
+
+        # with gil:
+            # print("FINAL RGC:", RGC)
 
         if RGC >= 0:
             RGC = RGC ** self.sensitivity
