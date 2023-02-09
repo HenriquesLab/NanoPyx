@@ -93,7 +93,6 @@ elif sys.platform == "darwin":
             packages = ["llvm", "libomp"]  # , "open-mpi"]  # "gcc"
             for package in packages:
                 if package in brew_list:
-
                     print(f"\t - {package} instalation detected...")
                 else:
                     print(
@@ -191,17 +190,15 @@ def collect_extensions():
 
 
 # Show the logo
-print(
-    r"""
+print(r"""
   _  _               ___
  | \| |__ _ _ _  ___| _ \_  ___ __
  | .` / _` | ' \/ _ \  _/ || \ \ /
  |_|\_\__,_|_||_\___/_|  \_, /_\_\
-                      *|<|__/==/==
+      [ (( X )) ]     *|<|__/==/==
   |-- Python Nanoscopy Library --|
 
-"""
-)
+""")
 
 # cython options
 # REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options

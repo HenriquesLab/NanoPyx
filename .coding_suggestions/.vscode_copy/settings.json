@@ -1,0 +1,15 @@
+{
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.linting.enabled": true,
+  "python.linting.pycodestyleEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "flake8.args": [
+    "--max-line-length=120",
+    "--ignore=W503",
+    "--max-complexity=18"
+  ],
+  "python.formatting.provider": "black",
+  "editor.formatOnSave": true
+}
