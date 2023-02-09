@@ -1,6 +1,6 @@
 import numpy as np
 from nanopyx.data.download import ExampleDataManager
-from nanopyx.core.sr.frc import FIRECalculator, calculate_FIRE
+from nanopyx.core.sr.frc import FIRECalculator, FRCCalculator
 
 downloader = ExampleDataManager()
 
@@ -13,4 +13,5 @@ fire_fixed = fire_calculator.calculate_fire_number(img_1, img_2, "Fixed 1/7")
 fire_hb = fire_calculator.calculate_fire_number(img_1, img_2, "Half-bit")
 fire_3s = fire_calculator.calculate_fire_number(img_1, img_2, "Three sigma")
 
-fire = calculate_FIRE(img_1, img_2, pixel_recon_dim=100)
+calculator = FRCCalculator()
+fire_2 = calculator.calculate_FIRE_number(img_1, img_2, method="1/7")
