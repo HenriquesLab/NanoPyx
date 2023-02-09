@@ -169,8 +169,7 @@ def collect_extensions():
         if file.endswith(".pyx")
         or (
             file.endswith(".py")
-            and "# nanopyx-cythonize: True\n"
-            in open(os.path.join(dir, file)).read()
+            and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read()
         )
     ]
 
@@ -183,14 +182,15 @@ def collect_extensions():
     print(f"Found following files to build:\n {'; '.join(cython_files)}")
 
     collected_extensions = cythonize(
-        cython_extensions, annotate=True, language_level="3"
+        cython_extensions, annotate=True, language_level="3", nthreads=8
     )
 
     return collected_extensions
 
 
 # Show the logo
-print(r"""
+print(
+    r"""
   _  _               ___
  | \| |__ _ _ _  ___| _ \_  ___ __
  | .` / _` | ' \/ _ \  _/ || \ \ /
@@ -198,7 +198,8 @@ print(r"""
       [ (( X )) ]     *|<|__/==/==
   |-- Python Nanoscopy Library --|
 
-""")
+"""
+)
 
 # cython options
 # REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options

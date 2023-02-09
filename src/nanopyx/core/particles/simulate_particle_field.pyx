@@ -12,8 +12,8 @@ cimport numpy as np
 from cython.parallel import prange
 from tqdm import tqdm
 
-def simulate_particle_field_based_on_2D_PDF(image_pdf, 
-                                            min_particles: int = 10, max_particles: int = 1000, 
+def simulate_particle_field_based_on_2D_PDF(image_pdf,
+                                            min_particles: int = 10, max_particles: int = 1000,
                                             min_distance: float = 0.1, mean_distance_threshold: float = 0, int max_tries = 3):
     """
     Simulate a particle field based on a 2D probability density function (PDF)
@@ -35,32 +35,32 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     >>> image_pdf = np.random.random((100, 200)).astype(np.float32)
     >>> particles = simulate_particle_field_based_on_2D_PDF(image_pdf, min_particles=100, mean_distance_threshold=0.1)
     """
-    
+
     assert image_pdf.dtype == np.float32 and image_pdf.ndim == 2 and np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
 
     cdef float[:,:] _image_pdf = image_pdf
-    
+
     cdef int _max_particles = max_particles
     cdef int _min_particles = min_particles
     cdef float _min_distance = min_distance
     cdef int _max_tries = max_tries
     cdef float _mean_distance_threshold = mean_distance_threshold
-    
+
     xp = np.full(_max_particles, -999999, dtype=np.float32)
     yp = np.full(_max_particles, -999999, dtype=np.float32)
     cdef float[:] _xp = xp  # xp exists in python land, _xp in c land as memoryview
     cdef float[:] _yp = yp  # same as above
 
     cdef long[:] particles_not_set, particles_set
-    
+
     cdef int n_particles = 0
     cdef int previous_n_particles = 0
     cdef int p
     cdef int tries = 0
     cdef float closest_distance, closest_distance_sum, mean_closest_distance
 
-    # start by creating the minumal pool of particles    
-    with tqdm(total=_max_particles, desc="Generating particles", unit="particles") as progress_bar:
+    # start by creating the minumal pool of particles
+    with tqdm(total=max_particles, desc="Generating particles", unit="particles") as progress_bar:
         while 1:
             particles_not_set = np.nonzero(xp < 0)[0]  # get the index for the parciles not yet set
             with nogil:
@@ -68,7 +68,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
                     _get_particle_candidate(_image_pdf, p, _xp, _yp, _min_distance)  # find some particles
             particles_set = np.nonzero(xp >= 0)[0]  # get the index for the parciles already set
             with nogil:
-                n_particles = 0   
+                n_particles = 0
                 closest_distance_sum = 0
                 for p in prange(particles_set.shape[0]):
                     closest_distance = _get_closest_distance(_xp[p], _yp[p], _xp, _yp)
@@ -88,7 +88,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
                     tries += 1
                 else:
                     tries = 0
-                
+
                 # too many tries without change in the number of parciles
                 if n_particles == _max_particles or tries == _max_tries:
                     break
@@ -118,12 +118,12 @@ cdef bint _get_particle_candidate(float[:, :] _image_pdf, int particle_index, fl
     :param min_distance: float, ensure that paricle distances are above minimum distance given
     :return: 1 if a particle was placed, 0 if not
     """
-    
+
     cdef float x = _random() * (_image_pdf.shape[1] - 1)
     cdef float y = _random() * (_image_pdf.shape[0] - 1)
     cdef float pdf = _interpolate(_image_pdf, x, y)
     cdef float r = _random()
-    
+
     if r < pdf and _get_closest_distance(x, y, xp, yp) > min_distance:
         xp[particle_index] = x
         yp[particle_index] = y
@@ -134,7 +134,7 @@ cdef bint _get_particle_candidate(float[:, :] _image_pdf, int particle_index, fl
 
 cdef double _get_closest_distance(float x, float y, float[:] xp, float[:] yp) nogil:
     """
-    Get the closest distance between a point and a set of particles. 
+    Get the closest distance between a point and a set of particles.
     Ignores particles with exact same location as x, y.
     :param x: float, the x coordinate of the point
     :param y: float, the y coordinate of the point
@@ -142,7 +142,7 @@ cdef double _get_closest_distance(float x, float y, float[:] xp, float[:] yp) no
     :param yp: 1D array of floats, the y coordinates of the particles
     :return: double, the closest distance between the point and the particles
     """
-    
+
     cdef float _x, _y
     cdef float _min_distance = 999999999999
 
@@ -152,7 +152,7 @@ cdef double _get_closest_distance(float x, float y, float[:] xp, float[:] yp) no
 
         if _x < 0 or (x == _x and y == _y) or fabs(_x - x) > _min_distance or fabs(_y - y) > _min_distance:
             continue
-        
+
         _min_distance = min(_min_distance, sqrt((_x - x) ** 2 + (_y - y) ** 2))
 
     return _min_distance
@@ -164,7 +164,7 @@ def get_closest_distance(float[:,:] particle_field):
     :param particle_field: 2D array of floats, the particle field
     :return: double, the closest distance between all particles
     """
-    
+
     cdef float[:] xp = particle_field[:, 0]
     cdef float[:] yp = particle_field[:, 1]
 
@@ -178,7 +178,7 @@ def get_closest_distance(float[:,:] particle_field):
             closest_distance = min(closest_distance, _get_closest_distance(xp[p], yp[p], xp, yp))
 
     return closest_distance
-    
+
 
 def render_particle_histogram(float[:,:] particle_field, int w, int h):
     """
@@ -221,11 +221,11 @@ def render_particle_histogram_with_tracks(float[:,:] particle_field, int[:,:] st
     assert particle_field.shape[0] == states.shape[0]
 
     cdef int n_frames = states.shape[1]
-    
+
     image_particle_field = np.zeros((n_frames, h, w), dtype=np.float32)
     cdef float[:,:,:] _image_particle_field = image_particle_field
 
-    cdef int n_particles = particle_field.shape[0]    
+    cdef int n_particles = particle_field.shape[0]
     cdef float[:] xp = particle_field[:, 0]
     cdef float[:] yp = particle_field[:, 1]
 
@@ -248,11 +248,11 @@ def render_particle_gaussians_with_tracks(float[:,:] particle_field, int[:,:] st
     assert particle_field.shape[0] == states.shape[0]
 
     cdef int n_frames = states.shape[1]
-    
+
     image_particle_field = np.zeros((n_frames, h, w), dtype=np.float32)
     cdef float[:,:,:] _image_particle_field = image_particle_field
 
-    cdef int n_particles = particle_field.shape[0]    
+    cdef int n_particles = particle_field.shape[0]
     cdef float[:] xp = particle_field[:, 0]
     cdef float[:] yp = particle_field[:, 1]
 
@@ -260,7 +260,7 @@ def render_particle_gaussians_with_tracks(float[:,:] particle_field, int[:,:] st
 
     # break into 100 particles at a time
     with tqdm(total=n_particles, desc="Rendering particles", unit="particles") as progress_bar:
-        for b in range(0, n_particles, 100):    
+        for b in range(0, n_particles, 100):
             with nogil:
                 b_stop = min(b + 100, n_particles)
                 for i in prange(b, b_stop):
@@ -271,6 +271,5 @@ def render_particle_gaussians_with_tracks(float[:,:] particle_field, int[:,:] st
                             if states[i, f] == 1:
                                 _render_erf_gaussian(_image_particle_field[f], x, y, amplitude, sigma_x, sigma_y)
             progress_bar.update(100)
-                            
-    return image_particle_field
 
+    return image_particle_field

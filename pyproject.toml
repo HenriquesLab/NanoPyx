@@ -86,6 +86,9 @@ repository = "https://github.com/HenriquesLab/NanoPyx"
 #changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
+[tool.setuptools.package-data]
+"*" = ["*.yaml", "*.jpg"]
+
 [tool.black]
 exclude = '''
 /(
@@ -172,7 +175,7 @@ before-all = ["brew install llvm libomp"]
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
 test-requires = ["nanopyx[test]"]
-test-command = "pytest {project}\\tests"
+test-command = "pytest {project}\\tests -p no:emoji"
 # before-build = "pip install delvewheel"
 # repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
