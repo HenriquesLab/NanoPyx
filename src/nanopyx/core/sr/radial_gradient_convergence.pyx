@@ -125,11 +125,11 @@ cdef class RadialGradientConvergence:
         cdef float distanceWeightSum = 0
 
         cdef int _start = -(<int>(Gx_Gy_MAGNIFICATION * self.fwhm))
-        cdef int _end = <int>(Gx_Gy_MAGNIFICATION * self.fwhm + 1) + 1
+        cdef int _end = <int>(Gx_Gy_MAGNIFICATION * self.fwhm + 1) 
 
         cdef int i, j
 
-        for j in range(_start, _end): 
+        for j in prange(_start, _end): 
             vy = (<int>(Gx_Gy_MAGNIFICATION * yc) + j) / Gx_Gy_MAGNIFICATION # position in continuous space
             
             if 0 < vy <= h - 1:
@@ -155,6 +155,12 @@ cdef class RadialGradientConvergence:
                             if GdotR < 0: # if the vector is pointing inwards
                                 Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
                                 RGC += Dk * distanceWeight 
+                       # else:
+                            # with gil:
+                                # print(self.tSO)
+                                # print("(vx, vy)", vx, vy)
+                                # print("(dx, dy)", dx, dy)
+                                # print("distance=", distance)
 
         RGC /= distanceWeightSum
 
