@@ -5,7 +5,6 @@ import zipfile
 from urllib.request import ProxyHandler, build_opener, install_opener
 
 import numpy as np
-import wget
 import yaml
 from gdown import download as gdrive_download
 from onedrivedownloader import download as onedrive_download
@@ -77,7 +76,8 @@ class ExampleDataManager:
         opener.addheaders = [
             (
                 "User-Agent",
-                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.1 Safari/603.1.30",
+                "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/603.1.30"
+                + " (KHTML, like Gecko) Version/10.1 Safari/603.1.30",
             )
         ]
         install_opener(opener)
