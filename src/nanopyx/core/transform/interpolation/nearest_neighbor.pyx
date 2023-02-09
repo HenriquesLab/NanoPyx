@@ -18,8 +18,8 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
 
-    # return 0 if x and y positions do not exist in image
-    if not 0 <= x < w and not 0 <= y < h:
+    # return 0 if x OR y positions do not exist in image
+    if not 0 <= x < w or not 0 <= y < h:
         return 0
 
     cdef int x0 = int(x)
@@ -144,3 +144,38 @@ cdef class Interpolator:
                     imShifted[j,i] = self._interpolate(i - dx, j - dy)
 
         return imShifted 
+
+
+    def rotate(self, float angle, float cx=-1, float cy=-1) -> np.ndarray:
+        """
+        Rotate an image by angle radians around (cx,cy) using interpolation
+        :param angle: rotation angle in radians, positive angles are counter clockwise
+        :param cx: x coordinate of the center of rotation, defaults to image center if negative
+        :param cy: y coordinate of the center of rotation, defaults to image center if negative
+        """
+        if cx<0 or cy<0:
+            cx = self.w / 2
+            cy = self.h / 2
+
+        imRotated = self._rotate(angle, cx, cy)
+        return np.asarray(imRotated).astype(self.original_dtype)
+
+
+    cdef float[:,:] _rotate(self, float angle, float cx, float cy):
+
+        cdef float[:,:] imRotated = np.zeros((self.h, self.w), dtype=np.float32)
+        
+        cdef int i, j
+        cdef float rotx, roty
+
+        cdef float cosine = np.cos(angle)
+        cdef float sine = np.sin(angle)
+
+        with nogil:
+            for i in prange(0, self.w):
+                for j in range(0, self.h):
+                    rotx = cosine*(i-cx) - sine*(j-cy) + cx
+                    roty = sine*(i-cx) + cosine*(j-cy) + cy
+                    imRotated[j,i] = self._interpolate(rotx,roty)
+
+        return imRotated
