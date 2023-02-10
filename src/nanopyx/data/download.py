@@ -8,7 +8,7 @@ import numpy as np
 import yaml
 from gdown import download as gdrive_download
 from onedrivedownloader import download as onedrive_download
-from ..core.utils.downloader import download
+from ..core.io.downloader import download
 
 from ..core.io.zip_image_loader import ZipTiffIterator
 from .examples import get_path as get_examples_path
