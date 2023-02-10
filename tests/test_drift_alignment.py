@@ -84,19 +84,20 @@ def test_drift_alignment_w_temporal_averaging_initial_frame(random_timelapse_w_d
 
 
 def test_drift_alignment_init(random_timelapse_w_drift):
+    file_dir = os.path.dirname(os.path.realpath(__file__))
     aligned_image = estimate_drift_alignment(random_timelapse_w_drift, ref_option=0, apply=True,
-                                             save_drift_table_path="tests")
+                                             save_drift_table_path=file_dir + os.sep)
     estimate_drift_alignment(random_timelapse_w_drift, ref_option=0, apply=False,
-                             save_drift_table_path="tests", save_as_npy=False)
+                             save_drift_table_path=file_dir + os.sep, save_as_npy=False)
 
     assert random_timelapse_w_drift.shape == aligned_image.shape
 
 
 def test_apply_drift_alignment_init(random_timelapse_w_drift):
     estimator = DriftEstimator()
-    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, apply=True,
-                                     save_drift_table_path="tests")
-    aligned_img_corrector = apply_drift_alignment(random_timelapse_w_drift, drift_table=estimator.estimator_table)
+    file_dir = os.path.dirname(os.path.realpath(__file__))
+    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, apply=True)
+    aligned_img_corrector = apply_drift_alignment(random_timelapse_w_drift, drift_table=estimator.estimator_table, path=None)
 
     assert np.array_equal(aligned_img, aligned_img_corrector)
 
