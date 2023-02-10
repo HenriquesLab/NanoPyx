@@ -152,7 +152,7 @@ cdef class RadialGradientConvergence:
 
                             if GdotR < 0: # if the vector is pointing inwards
                                 Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
-                                RGC += Dk # * distanceWeight 
+                                RGC += Dk * distanceWeight 
 
         RGC /= distanceWeightSum
 
