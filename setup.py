@@ -3,6 +3,7 @@ import os.path
 import platform
 import subprocess
 import sys
+import multiprocessing
 
 from Cython.Build import cythonize
 from Cython.Compiler import Options
@@ -181,10 +182,13 @@ def collect_extensions():
 
     print(f"Found following files to build:\n {'; '.join(cython_files)}")
 
-    collected_extensions = cythonize(
-        cython_extensions, annotate=True, language_level="3", nthreads=8
-    )
-
+    if multiprocessing.get_start_method() == 'spawn':   
+        print("multiprocessing default behaviour does not allow concurrent compilation \n Proceeding compilation serially ...")
+        collected_extensions = cythonize(
+            cython_extensions, annotate=True, language_level="3")
+    else: 
+        collected_extensions = cythonize(
+            cython_extensions, annotate=True, language_level="3", nthreads=os.cpu_count()-1)
     return collected_extensions
 
 
