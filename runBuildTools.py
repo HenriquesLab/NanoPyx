@@ -119,9 +119,7 @@ def extract_requirements_from_pyproject():
         end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
     requirements = [line for line in requirements if "nanopyx" not in line]
-    with open(
-        os.path.join(".docker", "gha_runners", "requirements.txt"), "w"
-    ) as f:
+    with open(os.path.join(".docker", "gha_runners", "requirements.txt"), "w") as f:
         f.write("\n".join(requirements))
 
 
@@ -166,6 +164,8 @@ def main(mode=None):
         "Remove venv:": "rm -rf .venv",
         "Run tests": "pytest --nbmake --nbmake-timeout=600",
         "Run build": "python -m build",
+        "Test accelerations (requires build first)": "python -c 'import nanopyx.core.utils.mandelbrot_benchmark"
+        + " as bench; bench.check_acceleration()'",
     }
 
     # Show the logo
