@@ -51,7 +51,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     cdef float[:] _xp = xp  # xp exists in python land, _xp in c land as memoryview
     cdef float[:] _yp = yp  # same as above
 
-    cdef long[:] particles_not_set, particles_set
+    cdef np.ndarray[np.int32_t, ndim=1] particles_not_set, particles_set
 
     cdef int n_particles = 0
     cdef int previous_n_particles = 0
@@ -62,11 +62,11 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     # start by creating the minumal pool of particles
     with tqdm(total=max_particles, desc="Generating particles", unit="particles") as progress_bar:
         while 1:
-            particles_not_set = np.nonzero(xp < 0)[0].astype(np.int64)  # get the index for the parciles not yet set
+            particles_not_set = np.nonzero(xp < 0)[0].astype(np.int32)  # get the index for the parciles not yet set
             with nogil:
                 for p in prange(particles_not_set.shape[0]):
                     _get_particle_candidate(_image_pdf, p, _xp, _yp, _min_distance)  # find some particles
-            particles_set = np.nonzero(xp >= 0)[0].astype(np.int64)  # get the index for the parciles already set
+            particles_set = np.nonzero(xp >= 0)[0].astype(np.int32)  # get the index for the parciles already set
             with nogil:
                 n_particles = 0
                 closest_distance_sum = 0
@@ -101,7 +101,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
             previous_n_particles = n_particles
 
     # keep only set particles
-    particles_set = np.nonzero(xp >= 0)[0]
+    particles_set = np.nonzero(xp >= 0)[0].astype(np.int32)
     xp = xp[particles_set]
     yp = yp[particles_set]
 
