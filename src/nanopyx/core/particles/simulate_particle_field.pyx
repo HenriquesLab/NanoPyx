@@ -51,7 +51,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     cdef float[:] _xp = xp  # xp exists in python land, _xp in c land as memoryview
     cdef float[:] _yp = yp  # same as above
 
-    cdef np.ndarray[np.int32_t, ndim=2] particles_not_set, particles_set
+    cdef np.ndarray[np.int32_t, ndim=1] particles_not_set, particles_set
 
     cdef int n_particles = 0
     cdef int previous_n_particles = 0
