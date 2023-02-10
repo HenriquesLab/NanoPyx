@@ -1,6 +1,6 @@
 import numpy as np
 from nanopyx.data.download import ExampleDataManager
-from nanopyx.core.sr.frc import FIRECalculator, FRCCalculator
+from nanopyx.core.sr.frc import FIRECalculator
 
 downloader = ExampleDataManager()
 
@@ -8,10 +8,5 @@ img = downloader.get_ZipTiffIterator("SMLMS2013_HDTubulinAlexa647", as_ndarray =
 img_1 = np.sum(img[:250], axis=0)
 img_2 = np.sum(img[250:], axis=0)
 
-fire_calculator = FIRECalculator()
-fire_fixed = fire_calculator.calculate_fire_number(img_1, img_2, "Fixed 1/7")
-fire_hb = fire_calculator.calculate_fire_number(img_1, img_2, "Half-bit")
-fire_3s = fire_calculator.calculate_fire_number(img_1, img_2, "Three sigma")
-
-calculator = FRCCalculator()
-fire_2 = calculator.calculate_FIRE_number(img_1, img_2, method="1/7")
+calculator = FIRECalculator(pixel_size=100)
+fire_3 = calculator.calculate_fire_number(img_1, img_2)
