@@ -105,8 +105,9 @@ def test_apply_drift_alignment_init_previous_drift_table(random_timelapse_w_drif
     estimator = DriftEstimator()
     aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, max_expected_drift=100,
                                      apply=True)
-    estimator.save_drift_table(save_as_npy=False, path="tests")
-    aligned_img_corrector_2 = apply_drift_alignment(random_timelapse_w_drift, path=os.path.join("tests","_drift_table.csv"))
+    file_dir = os.path.dirname(os.path.realpath(__file__))
+    estimator.save_drift_table(save_as_npy=False, path=file_dir + os.sep)
+    aligned_img_corrector_2 = apply_drift_alignment(random_timelapse_w_drift, path=os.path.join(file_dir,"_drift_table.csv"))
 
     assert np.array_equal(aligned_img, aligned_img_corrector_2)
 
@@ -114,8 +115,9 @@ def test_apply_drift_alignment_init_previous_drift_table(random_timelapse_w_drif
 def test_apply_drift_alignment_init_previous_drift_table_npy(random_timelapse_w_drift):
     estimator = DriftEstimator()
     aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=5, apply=True)
-    estimator.save_drift_table(save_as_npy=True, path="tests/")
-    aligned_img_corrector_2 = apply_drift_alignment(random_timelapse_w_drift, path=os.path.join("tests", "_drift_table.npy"))
+    file_dir = os.path.dirname(os.path.realpath(__file__))
+    estimator.save_drift_table(save_as_npy=True, path=file_dir + os.sep)
+    aligned_img_corrector_2 = apply_drift_alignment(random_timelapse_w_drift, path=os.path.join(file_dir, "_drift_table.npy"))
 
     assert np.array_equal(aligned_img, aligned_img_corrector_2)
 
