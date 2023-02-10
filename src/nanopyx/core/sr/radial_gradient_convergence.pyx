@@ -144,28 +144,17 @@ cdef class RadialGradientConvergence:
                         distance = sqrt(dx * dx + dy * dy)
 
                         if distance != 0 and distance <= self.tSO:
-                            Gx = _interpolate(imGx, (vx * self.magnification) / 2, (vy * self.magnification) / 2) # get interpolated value (in continuous space) via Catmull-Rom interpolation
-                            Gy = _interpolate(imGy, (vx * self.magnification) / 2, (vy * self.magnification) / 2)
-                            # with gil:
-                                # print("Gx, Gy =", (Gx, Gy))
+                            Gx = _interpolate(imGx, vx * self.magnification, vy * self.magnification) # get interpolated value (in continuous space) via Catmull-Rom interpolation
+                            Gy = _interpolate(imGy, vx * self.magnification, vy * self.magnification)
                             distanceWeight = self._calculateDW(distance)
                             distanceWeightSum += distanceWeight
                             GdotR = Gx*dx + Gy*dy
 
                             if GdotR < 0: # if the vector is pointing inwards
                                 Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
-                                RGC += Dk * distanceWeight 
-                       # else:
-                            # with gil:
-                                # print(self.tSO)
-                                # print("(vx, vy)", vx, vy)
-                                # print("(dx, dy)", dx, dy)
-                                # print("distance=", distance)
+                                RGC += Dk # * distanceWeight 
 
         RGC /= distanceWeightSum
-
-        # with gil:
-            # print("FINAL RGC:", RGC)
 
         if RGC >= 0:
             RGC = RGC ** self.sensitivity
