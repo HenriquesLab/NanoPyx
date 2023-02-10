@@ -66,7 +66,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
             with nogil:
                 for p in prange(particles_not_set.shape[0]):
                     _get_particle_candidate(_image_pdf, p, _xp, _yp, _min_distance)  # find some particles
-            particles_set = np.nonzero(xp >= 0)[0].astype(np.long)  # get the index for the parciles already set
+            particles_set = np.nonzero(xp >= 0)[0].astype(np.int32)  # get the index for the parciles already set
             with nogil:
                 n_particles = 0
                 closest_distance_sum = 0
