@@ -62,11 +62,11 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     # start by creating the minumal pool of particles
     with tqdm(total=max_particles, desc="Generating particles", unit="particles") as progress_bar:
         while 1:
-            particles_not_set = np.nonzero(xp < 0)[0].astype(np.int64)  # get the index for the parciles not yet set
+            particles_not_set = np.nonzero(xp < 0)[0].astype(np.long)  # get the index for the parciles not yet set
             with nogil:
                 for p in prange(particles_not_set.shape[0]):
                     _get_particle_candidate(_image_pdf, p, _xp, _yp, _min_distance)  # find some particles
-            particles_set = np.nonzero(xp >= 0)[0].astype(np.int64)  # get the index for the parciles already set
+            particles_set = np.nonzero(xp >= 0)[0].astype(np.long)  # get the index for the parciles already set
             with nogil:
                 n_particles = 0
                 closest_distance_sum = 0
