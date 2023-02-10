@@ -129,7 +129,7 @@ max-line-length = 120
 
 [tool.cibuildwheel]
 # https://cibuildwheel.readthedocs.io/en/stable/options/
-skip = ["pp*", "*musllinux*"]
+skip = ["pp*"]                                     #, "*musllinux*"]
 build = ["cp38-*", "cp39-*", "cp310-*", "cp311-*"]
 # it is not possible to test arm64 and the arm64 part of a universal2 wheel on this CI platform
 test-skip = ["*arm64"]
