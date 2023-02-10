@@ -101,7 +101,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
             previous_n_particles = n_particles
 
     # keep only set particles
-    particles_set = np.nonzero(xp >= 0)[0]
+    particles_set = np.nonzero(xp >= 0)[0].astype(np.int32)
     xp = xp[particles_set]
     yp = yp[particles_set]
 
