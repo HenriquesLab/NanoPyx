@@ -27,3 +27,8 @@ repos:
       - id: blacken-docs
         additional_dependencies:
           - black==23.1.0
+  - repo: https://github.com/MarcoGorelli/cython-lint
+    rev: v0.12.4
+    hooks:
+      - id: cython-lint
+      - id: double-quote-cython-strings
