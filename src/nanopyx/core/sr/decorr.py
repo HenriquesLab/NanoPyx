@@ -1,48 +1,348 @@
 # https://github.com/Ades91/ImDecorr/blob/master/ijplugin/src/ImageDecorrelationAnalysis.java
+import math
 import numpy as np
+from scipy.ndimage import gaussian_filter
+import pandas as pd
 
-from .utils import apodize_edges
+from .utils import apodize_edges, normalizeFFT, linmap
+from ..analysis.ccm.helper_functions import make_even_square
 
 class DecorrAnalysis(object):
     
-    def __init__(self, img:np.ndarray, rmin:float, rmax:float, n_r:int, n_g:int, roi: tuple = None, do_plot: bool = False, save_path : str = None):
+    def __init__(self, img:np.ndarray, rmin:float = 0, rmax:float = 1, n_r:int = 50, n_g:int =10, pixel_size: int = 1, units: str = "pixel", roi: tuple = None, do_plot: bool = False, save_path : str = None):
         """_summary_
 
         Args:
-            img (np.ndarray): image array with shape (t, c, z, y, x)
-            roi (tuple): (x0, y0, x1, y1)
-            rmin (float): _description_
-            rmax (float): _description_
-            n_r (int): _description_
-            n_g (int): _description_
-            do_plot (bool, optional): _description_. Defaults to False.
-            save_path (str, optional): _description_. Defaults to None.
+            img (np.ndarray): image, numpy array with shape (t, c, z, y, x)
+            rmin (float, optional): Minimum radius [0,rMax] (normalized frequencies) used for decorrelation analysis. Defaults to 0.
+            rmax (float, optional): Maximum radius [rMin,1] (normalized frequencies) used for decorrelation analysis. Defaults to 1.
+            n_r (int, optional): [10,100], Sampling of decorrelation curve. Defaults to 50.
+            n_g (int, optional): [5,40], Number of high-pass image analyzed. Defaults to 10.
+            pixel_size (int, optional): > 1, pixel size value in units. Defaults to 1.
+            units (str, optional): string name of the units to use. Defaults to "pixel".
+            roi (tuple, optional): Coordinates used to crop the image (x0, y0, x1, y1). Defaults to None.
+            do_plot (bool, optional): Defaults to False.
+            save_path (str, optional): Defaults to None.
         """
         self.img = img
+        self.img_ref = None
         self.rmin, self.rmin2 = rmin, rmin
         self.rmax, self.rmax2 = rmax, rmax
         self.n_r = n_r
         self.n_g = n_g
+        self.pixel_size = pixel_size
+        self.units = units
         self.roi = roi
         self.do_plot = do_plot
         self.d0 = np.empty((self.n_r), dtype=np.float32)
         self.d = np.empty((self.n_r, 2*self.n_g), dtype=np.float32)
         self.kc = np.empty((2*self.n_g), dtype=np.float32)
         self.a_g = np.empty((2*self.n_g), dtype=np.float32)
+        self.kc0 = 0
+        self.a0 = 0
         self.kc_gm = 0
         self.agm = 0
         self.kc_max = 0
-        self.a_mac = 0
+        self.a_max = 0
         self.s = 1
         self.f = 1
         self.c = 1
         self.save_path = save_path
+        self.results_table = pd.DataFrame(columns=["Frame", "Channel", "Z", "Resolution", "Units", "A0", "Kc", "Kc GM", "rMin", "rMax", "Nr", "Ng"])
+        
+    def get_mask(self, w, r2):
+        
+        r2 = r2*w*w/4
+        mask = np.zeros((w, w), dtype=np.float32)
+        
+        for y_i in range(w):
+            for x_i in range(w):
+                dist = (y_i - w/2)**2 + (x_i - w/2)**2
+                if dist < r2:
+                    mask[y_i, x_i] = 1
+                    
+        return mask
+    
+    def get_corr_coef_norm(self, fft_real, fft_imag, mask):
+        
+        c = 0
+        
+        for y_i in range(fft_real.shape[0]):
+            for x_i in range(fft_real.shape[1]):
+                if mask[y_i, x_i] == 1:
+                    c += fft_real[y_i, x_i]**2 + fft_imag[y_i, x_i]**2
+                    
+        return math.sqrt(c)
+    
+    def get_corr_coef_ring(self, fft_real, fft_imag, normalized_fft_real, normalized_fft_imag):
+        out = np.empty((2*int(self.n_r)), dtype=np.float32)
+        d = 0
+        dist = 0
+        width = self.img_ref.shape[1]
+        height = self.img_ref.shape[0]
+        k = 0
+        
+        ox = int(width * (1-self.rmax)/2)
+        oy = int(height * (1-self.rmax)/2)
+        w = int(width * self.rmax)
+        h = int(height * self.rmax)
+        
+        for x_i in range(ox, ox+w):
+            for y_i in range(oy, oy+h):
+                dist = (x_i-width/2)**2 + (y_i-height/2)**2
+                dist = math.sqrt(4*dist/(width**2))
+                
+                if k > width+height/2 + height/2:
+                    break
+                else:
+                    if dist >= 0 and dist <= self.rmax:
+                        dist = linmap(dist, self.rmin, self.rmax, 0, self.n_r-1)
+                        if dist < 0:
+                            dist = 0
+                        d = math.floor(dist)
+                        out[d] += fft_real[y_i, x_i] * normalized_fft_real[y_i, x_i] + fft_imag[y_i, x_i] * normalized_fft_imag[y_i, x_i]
+                        out[d+self.n_r] = normalized_fft_real[y_i, x_i]**2 + normalized_fft_imag[y_i, x_i]**2
+                        
+        return out
+        
+    def compute_d0(self, fft_real, fft_imag):
+        
+        normalized_fft = normalizeFFT(fft_real, fft_imag)
+        normalized_fft_real = normalized_fft[0]
+        normalized_fft_imag = normalized_fft[1]
+
+        mask = self.get_mask(fft_real.shape[1], 1)
+        
+        cr = self.get_corr_coef_norm(fft_real, fft_imag, mask)
+        
+        coef = self.get_corr_coef_ring(fft_real, fft_imag, normalized_fft_real, normalized_fft_imag)
+        
+        for k in range(self.n_r):
+            d = 0
+            c = 0
+            
+            for n in range(k+1):
+                d += coef[n]
+                c += coef[n+self.n_r]
+                
+            self.d0[k] = math.sqrt(2)*d/(cr*math.sqrt(c))
+            
+        if math.isnan(self.d0[0]):
+            self.d0[0] = 0
+        
+    def get_max(self, arr, x1, x2):
+        out = np.empty((2), dtype=np.float32)
+        
+        out[0] = x1
+        out[1] = arr[x1]
+        
+        for k in range(x1, x2):
+            if arr[k] > out[1]:
+                out[0] = k
+                out[1] = arr[k]
+                
+        return out
+                
+    def get_min(self, arr, x1, x2):
+        out = np.empty((2), dtype=np.float32)
+        
+        out[0] = x1
+        out[1] = arr[x1]
+        
+        for k in range(x1, x2):
+            if arr[k] < out[1]:
+                out[0] = k
+                out[1] = arr[k]
+                
+        return out
+    
+    def get_d_corr_max(self, d, r1, r2):
+        
+        t = d.copy()
+        out = self.get_max(d, 0, self.n_r)
+        temp_min = self.get_min(d, 0, self.n_r)
+        d_length = t.shape[0]
+        dt = 0.001
+        
+        while out[0] == d_length-1:
+            t[d_length-1] = 0
+            d_length -= 1
+            if d_length == 0:
+                out[0] = 0
+                out[1] = 0
+                break
+            else:
+                out = self.get_max(t, 0, self.n_r)
+                temp_min = self.get_min(t, int(out[0]), d_length-1)
+                
+                if t[int(out[0])] - temp_min[1] > dt:
+                    break
+                else:
+                    t[int(out[0])] = temp_min[1]
+                    out[0] = d_length - 1
+                    
+        out[0] = r1 + (r2-r1)*out[0]/(self.n_r -1)
+        return out
+    
+    def get_best_score(self, kc, a):
+        gm = np.empty(self.kc.shape, dtype=np.float32)
+        out = np.empty((3), dtype=np.float32)
+        gm_max = 0
+        
+        for k in range(kc.shape[0]):
+            gm[k] = kc[k]*a[k]
+            
+            if gm[k] > gm_max:
+                gm_max = gm[k]
+                out[0] = kc[k]
+                out[1] = a[k]
+                out[2] = k
+                
+        return out
+    
+    def get_max_score(self, kc, a):
+        out = np.empty((3), dtype=np.float32)
+        kc_max = 0
+        
+        for k in range(kc.shape[0]):
+            if kc[k] > kc_max:
+                kcmax = kc[k]
+                out[0] = kc[k]
+                out[1] = a[k]
+                out[2] = k
+                
+        return out
+    
+    def compute_d(self):
+        
+        count = 0
+        
+        if self.kc0 == 0:
+            g_max = self.img_ref.shape[1]
+        else:
+            g_max = 2 / self.kc0
+            
+        g_min = 0.14
+        
+        ref = np.array([self.img_ref.copy()], dtype=np.float32)
+        
+        ref = make_even_square(ref)[0]
+        
+        crmin = self.rmin
+        crmax = self.rmax
+        
+        mask = self.get_mask(ref.shape[1], 1)
+        
+        for refine in range(2):
+            for k in range(self.n_g):                
+                sig = math.exp(math.log(g_min) + (math.log(g_max) - math.log(g_min))*((k/(self.n_g - 1))))
+                
+                blurred = gaussian_filter(ref, sig)
+                blurred = ref - blurred
+                
+                fft = np.fft.fft2(blurred)
+                fft_real = fft.real.astype(np.float32)
+                fft_imag = fft.imag.astype(np.float32)
+                normalized_fft = normalizeFFT(fft_real, fft_imag)
+                normalized_fft_real = normalized_fft[0]
+                normalized_fft_imag = normalized_fft[1]
+                
+                cr = self.get_corr_coef_norm(fft_real, fft_imag, mask)
+        
+                coef = self.get_corr_coef_ring(fft_real, fft_imag, normalized_fft_real, normalized_fft_imag)
+                
+                for i in range(self.n_r):
+                    d = 0
+                    c = 0
+                    for n in range(i + 1):
+                        d += coef[n]
+                        c += coef[n+self.n_r]
+                    if cr == 0 or c == 0:
+                        self.d[i][count] = math.nan # TODO: check this is ok, this is a workaround for differences in java and python
+                    else:
+                        self.d[i][count] = math.sqrt(2)*d/(cr*math.sqrt(c))
+                    
+                if math.isnan(self.d[0][count]):
+                    self.d[0][count] = 0
+                    
+                count += 1
+                
+            if refine == 0:
+                kc = np.empty((self.n_g+1), dtype=np.float32)
+                a = np.empty((self.n_g+1), dtype=np.float32)
+                dg = np.empty((self.n_r), dtype=np.float32)
+                result = np.empty((2), dtype=np.float32)
+                
+                for j in range(self.n_g):
+                    for h in range(self.n_r):
+                        dg[h] = self.d[h][j]
+                        
+                    result = self.get_d_corr_max(dg, crmin, crmax)
+                    kc[self.n_g] = result[0]
+                    a[self.n_g] = result[1]
+                    self.kc[self.n_g] = result[0]
+                    self.a_g[self.n_g] = result[1]
+                    
+                result = self.get_d_corr_max(self.d0, crmin, crmax)
+                kc[self.n_g] = result[0]
+                a[self.n_g] = result[1]
+                self.kc[self.n_g] = result[0]
+                self.a_g[self.n_g] = result[1]
+                
+                results_gm = self.get_best_score(kc, a)
+                results_max = self.get_max_score(kc, a)
+                
+                crmin = min(results_gm[0], results_max[0]) - 0.05
+                if crmin < self.rmin:
+                    crmin = self.rmin
+                    
+                crmax = max(results_gm[0], results_max[0]) + 0.3
+                if crmax > self.rmax:
+                    crmax = self.rmax
+                    
+                crmax = 0.5 # TODO: double check this, as this is the original implementation but makes no sense considering the previous calculations
+                self.rmin2 = crmin
+                self.rmax2 = crmax
+                
+                ind1 = min(results_gm[2], results_max[2])-1
+                ind2 = max(results_gm[2], results_max[2])
+                
+                if ind2 < self.n_g:
+                    g_temp = math.exp(math.log(g_min) + (math.log(g_max)-math.log(g_min))*(ind1/(self.n_g-1)))
+                    g_max = math.exp(math.log(g_min) + (math.log(g_max)-math.log(g_min))*(ind2/(self.n_g-1)))
+                    g_min = g_temp
+                else:
+                    g_max = g_min
+                    g_min = 2 / self.img_ref.shape[1]
+                    
+            else:
+                kc = np.empty((self.n_g), dtype=np.float32)
+                a = np.empty((self.n_g), dtype=np.float32)
+                dg = np.empty((self.n_r), dtype=np.float32)
+                result = np.empty((2), dtype=np.float32)
+                
+                for j in range(self.n_g):
+                    for h in range(self.n_r):
+                        dg[h] = self.d[h][j+self.n_g]
+                        
+                    result = self.get_d_corr_max(dg, crmin, crmax)
+                    kc[j] = result[0]
+                    a[j] = result[1]
+                    self.kc[j+self.n_g] = result[0]
+                    self.a_g[j+self.n_g] = result[1]
+                    
+                results_gm = self.get_best_score(self.kc, self.a_g)
+                self.kc_gm = results_gm[0]
+                self.agm = results_gm[1]
+                results_max = self.get_max_score(self.kc, self.a_g)
+                self.kc_max = results_max[0]
+                self.a_max = results_max[1]
     
     def run_analysis(self):
         
-        for f_i  in self.image.shape[0]:
-            for c_i in self.image.shape[1]:
-                for s_i in self.image.shape[2]:
+        for f_i  in range(self.img.shape[0]):
+            for c_i in range(self.img.shape[1]):
+                for s_i in range(self.img.shape[2]):
                     self.f = f_i
                     self.c = c_i
                     self.s = s_i
@@ -52,5 +352,33 @@ class DecorrAnalysis(object):
                     if self.roi is not None:
                         img_ref = img_slice[y0:y1, x0:x1]
                         
-                    img_slice = img_ref.copy()
-                    img_slice = apodize_edges(img_slice)
+                    img_f = img_ref.copy()
+                    img_f = np.array([apodize_edges(img_f)])
+                    
+                    temp = make_even_square(img_f)[0]
+                    self.img_ref = temp.copy()
+                    
+                    img_fft = np.fft.fftshift(np.fft.fft2(temp))
+                    fft_real = img_fft.real.astype(np.float32)
+                    fft_imag = img_fft.imag.astype(np.float32)
+                    
+                    fft_real[fft_real.shape[0]//2, fft_real.shape[1]//2] = 0
+                    fft_imag[fft_imag.shape[0]//2, fft_imag.shape[1]//2] = 0
+                    
+                    self.compute_d0(fft_real, fft_imag)
+                    out = self.get_d_corr_max(self.d0, 0, 1)
+                    self.kc0 = out[0]
+                    self.a0 = out[1]
+                    
+                    self.compute_d()
+                    
+                    self.resolution = int(2*self.pixel_size/self.kc_max)
+                    print(f"Resolution: {self.resolution}")
+                    
+                    self.results_table.loc[len(self.results_table)] = [f_i, c_i, s_i, self.resolution, self.units, self.a0, self.kc_max, self.kc_gm, self.rmin, self.rmax, self.n_r, self.n_g]
+                    
+                    if self.do_plot:
+                        self.do_plot()
+                    
+    def plot_results(self):
+        pass
