@@ -3,3 +3,4 @@
 
 cdef float[:, :, :] _normalizeFFT(float[:, :] fft_real, float[:, :] fft_imag)
 cdef float[:, :] _apodize_edges(float[:, :] img)
+cdef float _linmap(float val, float valmin, float valmax, float mapmin, float mapmax)

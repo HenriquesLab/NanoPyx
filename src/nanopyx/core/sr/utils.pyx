@@ -15,7 +15,7 @@ from cython.parallel import prange
 
 
 
-def normalizeFFT(fft_real: np.ndarray, fft_imag: np.ndarray) -> np.ndarray:
+def normalizeFFT(fft_real: np.ndarray, fft_imag: np.ndarray):
     return _normalizeFFT(fft_real, fft_imag)
 
 cdef float[:, :, :] _normalizeFFT(float[:, :] fft_real, float[:, :] fft_imag):
@@ -38,7 +38,7 @@ cdef float[:, :, :] _normalizeFFT(float[:, :] fft_real, float[:, :] fft_imag):
 
     return output
 
-def apodize_edges(img: np.ndarray) -> np.ndarray:
+def apodize_edges(img: np.ndarray):
     return _apodize_edges(img)
 
 cdef float[:, :] _apodize_edges(float[:, :] img):
@@ -75,3 +75,14 @@ cdef float[:, :] _apodize_edges(float[:, :] img):
                     output[y_i, x_i] = <float> edge_mean
 
     return output
+
+def linmap(val: float, valmin: float, valmax: float, mapmin:float, mapmax:float):
+    return _linmap(val, valmin, valmax, mapmin, mapmax)
+
+
+cdef float _linmap(float val, float valmin, float valmax, float mapmin, float mapmax):
+
+    cdef float out = 0
+    out = (val - valmin)/(valmax - valmin)
+    out = out * (mapmax-mapmin) + mapmin
+    return out
