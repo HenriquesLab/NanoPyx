@@ -3,6 +3,8 @@
 import numpy as np
 cimport numpy as np
 
+from libc.math cimport pi, sqrt, cos, sin
+
 from cython.parallel import prange
 
 # nearest-neighbor interpolation of a 2D array
@@ -179,3 +181,32 @@ cdef class Interpolator:
                     imRotated[j,i] = self._interpolate(rotx,roty)
 
         return imRotated
+
+    def polar(self) -> np.ndarray:
+        """
+        Transforms an image into its polar coordinate equivalent
+        """
+        polarized = self._polar()
+        return np.asarray(polarized).astype(self.original_dtype)
+
+    cdef float[:,:] _polar(self):
+
+        cdef int max_radius = int(sqrt(self.h**2 + self.w**2)/2)+1
+        cdef int max_theta = 360
+
+        cdef float[:,:] polarized = np.zeros((max_theta, max_radius), dtype=np.float32)
+
+        cdef float cx = self.w / 2
+        cdef float cy = self.h / 2
+
+        cdef int i,j
+        cdef float x,y
+
+        with nogil:
+            for i in prange(0,max_radius):
+                for j in range(0,max_theta):
+                    x = i * cos(j*pi/180)
+                    y = i * sin(j*pi/180)
+                    polarized[j,i] = self._interpolate(cx+x,cy+y)
+
+        return polarized
