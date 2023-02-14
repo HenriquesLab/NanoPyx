@@ -4,9 +4,12 @@ import numpy as np
 cimport numpy as np
 
 import cython
+from libc.math cimport pi
 
 from .helper_functions cimport _check_even_square, _make_even_square
 from ..pearson_correlation cimport _calculate_ppmcc
+
+from ...transform.interpolation.catmull_rom cimport Interpolator
 
 def calculate_ccm(np.ndarray img_stack, int ref):
     """
@@ -139,4 +142,40 @@ cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :]
             value = value * delta_ppmcc + min_ppmcc
             ccm_slice[j, i] = value
 
+
+def calculate_rccm(np.ndarray img_slice, np.ndarray img_ref):
+    """
+    TODO
+    """ 
+    return np.array(_calculate_rccm(img_slice, img_ref))
+
+cdef float[:,:,:] _calculate_rccm(float[:, :] img_slice, float[:, :] img_ref):
+    
+    cdef float[:,:,:] tmp
+
+    tmp = np.array([img_slice])
+    if not _check_even_square(tmp):
+        tmp = _make_even_square(tmp)
+        img_slice = tmp[0]
+
+    tmp = np.array([img_ref])
+    if not _check_even_square(tmp):
+        tmp = _make_even_square(tmp)
+        img_ref = tmp[0]
+
+    cdef int height = img_slice.shape[0]
+    cdef int width = img_slice.shape[1]
+
+    cdef float[:,:,:] rccm = np.empty((360,height,width), dtype=np.float32)
+
+    cdef float[:,:] rotated_img_slice
+
+    cdef int degree
+    cdef float radian
+    for degree in range(360):
+        radian = degree * pi/180
+        rotated_img_slice = Interpolator(img_slice).rotate(radian)
+        rccm[degree] = _calculate_slice_ccm(img_ref, rotated_img_slice)
+
+    return rccm
 
