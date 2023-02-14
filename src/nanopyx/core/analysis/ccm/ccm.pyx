@@ -145,8 +145,13 @@ cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :]
 
 def calculate_rccm(np.ndarray img_slice, np.ndarray img_ref):
     """
-    TODO
-    """ 
+    Function used to generate a rotational cross correlation matrix of an image against a reference image
+    Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two
+    images.
+    :param img_slice: numpy array with shape (y, x)
+    :param img_ref: numpy array with shape (y, x)
+    :return: numpy array with shape (360, y, x), corresponding to the rotational cross correlation matrix
+    """
     return np.array(_calculate_rccm(img_slice, img_ref))
 
 cdef float[:,:,:] _calculate_rccm(float[:, :] img_slice, float[:, :] img_ref):
