@@ -13,3 +13,4 @@ cdef class Interpolator:
     cdef float[:,:] _shift(self, float dx, float dy)
     cdef float[:,:] _rotate(self, float angle, float cx, float cy)
     cdef float[:,:] _polar(self)
+    cdef float[:,:] _cartesian(self, int x_shape, int y_shape)
