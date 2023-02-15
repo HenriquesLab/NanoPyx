@@ -184,3 +184,20 @@ cdef float[:,:,:] _calculate_rccm(float[:, :] img_slice, float[:, :] img_ref):
 
     return rccm
 
+def calculate_ccm_polar(np.ndarray img_slice, np.ndarray img_ref):
+    """
+    Function used to generate a cross correlation matrix of an image against a reference image where both are to be expressed in polar coordinates
+    Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two polar images.
+    :param img_slice: numpy array with shape (y, x)
+    :param img_ref: numpy array with shape (y, x)
+    :return: numpy array with shape (360,r), corresponding to the cross correlation matrix in polar coordinates
+    """
+    return np.array(_calculate_ccm_polar(img_slice, img_ref))
+
+cdef float[:,:] _calculate_ccm_polar(float[:, :] img_slice, float[:, :] img_ref):
+
+    cdef float[:,:] polar_slice = Interpolator(img_slice).polar()
+    cdef float[:,:] polar_ref = Interpolator(img_ref).polar()
+
+    return _calculate_slice_ccm(polar_ref, polar_slice)
+
