@@ -3,7 +3,7 @@
 import numpy as np
 cimport numpy as np
 
-from libc.math cimport pi, sqrt, cos, sin
+from libc.math cimport pi, hypot, cos, sin, atan2
 
 from cython.parallel import prange
 
@@ -185,19 +185,20 @@ cdef class Interpolator:
     def polar(self) -> np.ndarray:
         """
         Transforms an image into its polar coordinate equivalent
+        :return: (theta,r) image array
         """
         polarized = self._polar()
         return np.asarray(polarized).astype(self.original_dtype)
 
     cdef float[:,:] _polar(self):
 
-        cdef int max_radius = int(sqrt(self.h**2 + self.w**2)/2)+1
+        cdef float cx = self.w / 2
+        cdef float cy = self.h / 2
+
+        cdef int max_radius = int(hypot(cx,cy))
         cdef int max_theta = 360
 
         cdef float[:,:] polarized = np.zeros((max_theta, max_radius), dtype=np.float32)
-
-        cdef float cx = self.w / 2
-        cdef float cy = self.h / 2
 
         cdef int i,j
         cdef float x,y
@@ -210,3 +211,33 @@ cdef class Interpolator:
                     polarized[j,i] = self._interpolate(cx+x,cy+y)
 
         return polarized
+
+    def cartesian(self, int x_shape, int y_shape)-> np.ndarray:
+        """
+        Transforms an image into its cartesian coordinate equivalent. Assumes image shape is (theta,r)
+        :param x_shape: width of original image
+        :param y_shape: height of original image
+        :return: (y,x) image array
+        """
+        cart = self._cartesian(x_shape, y_shape)
+        return np.asarray(cart).astype(self.original_dtype)
+
+    cdef float[:,:] _cartesian(self, int x_shape, int y_shape):
+        
+        cdef float[:,:] cart = np.zeros((y_shape, x_shape), dtype=np.float32)
+
+        cdef float cx = x_shape / 2
+        cdef float cy = y_shape / 2
+
+        cdef int i, j
+        cdef float r, t
+        with nogil:
+            for i in prange(0,x_shape):
+                for j in range(0,y_shape):
+                    r = hypot(j-cy,i-cx)
+                    t = atan2(j-cy,i-cx) * 180/pi
+                    if t<0:
+                        t = 360+t
+                    cart[j,i] = self._interpolate(r,t)
+
+        return cart 
