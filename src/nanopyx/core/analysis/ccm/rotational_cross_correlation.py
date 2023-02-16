@@ -1,6 +1,6 @@
 import numpy as np
 
-from .ccm import calculate_rccm
+from .ccm import calculate_rccm, calculate_rccm_polar
 from .estimate_shift import GetMaxOptimizer
 
 def calculate_rotation_shift(img_slice, img_ref, method="subpixel"):
@@ -33,4 +33,32 @@ def calculate_rotation_shift(img_slice, img_ref, method="subpixel"):
             max_sim = ccm_max_value
     
     return y_shift, x_shift, ang_shift, max_sim
-    
+
+def calculate_rotation_polar(img_slice, img_ref, method="subpixel"):
+
+    rccm_polar = calculate_rccm_polar(img_slice, img_ref)
+
+    if method == "subpixel":
+        optimizer = GetMaxOptimizer(rccm_polar)
+        max_coords = optimizer.get_max()
+        ccm_max_value = -optimizer.get_interpolated_px_value(max_coords)
+    else:
+        max_coords = np.unravel_index(rccm_polar.argmax(), rccm_polar.shape)
+        ccm_max_value = slice_ccm[max_coords[0], max_coords[1]]
+
+    theta = max_coords[0] * np.pi/180
+    r = max_coords[1]
+
+    return theta, r, ccm_max_value
+
+def calculate_peak(ccm, method="subpixel"):
+
+    if method == "subpixel":
+        optimizer = GetMaxOptimizer(ccm)
+        max_coords = optimizer.get_max()
+        ccm_max_value = -optimizer.get_interpolated_px_value(max_coords)
+    else:
+        max_coords = np.unravel_index(ccm.argmax(), ccm.shape)
+        ccm_max_value = slice_ccm[max_coords[0], max_coords[1]]
+
+    return max_coords, ccm_max_value
