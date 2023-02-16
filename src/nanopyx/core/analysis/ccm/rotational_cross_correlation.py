@@ -1,6 +1,6 @@
 import numpy as np
 
-from .ccm import calculate_rccm, calculate_rccm_polar
+from .ccm import calculate_rccm, calculate_ccm_polar 
 from .estimate_shift import GetMaxOptimizer
 
 def calculate_rotation_shift(img_slice, img_ref, method="subpixel"):
@@ -36,7 +36,7 @@ def calculate_rotation_shift(img_slice, img_ref, method="subpixel"):
 
 def calculate_rotation_polar(img_slice, img_ref, method="subpixel"):
 
-    rccm_polar = calculate_rccm_polar(img_slice, img_ref)
+    rccm_polar = calculate_ccm_polar(img_slice, img_ref)
 
     if method == "subpixel":
         optimizer = GetMaxOptimizer(rccm_polar)
