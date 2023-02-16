@@ -1,6 +1,7 @@
 import math
 import numpy as np
 import pandas as pd
+from scipy.signal.windows import tukey
 from matplotlib import pyplot as plt
 from ..transform.padding import pad_w_zeros_2d
 from ..analysis.ccm.helper_functions import check_even_square, make_even_square
@@ -66,6 +67,30 @@ class FIRECalculator(object):
             
         return values
         
+    def get_squared_tapered_image(self, img):
+        taper_x = tukey(img.shape[1], alpha=0.25)
+        taper_y = tukey(img.shape[0], alpha=0.25)  
+        
+        img_data = img.ravel()
+        new_data = np.empty(img_data.shape, dtype=np.float32)
+        
+        max_y_1 = img.shape[0]
+        max_x_1 = img.shape[1]
+        old_width = img.shape[1]
+        new_size = img.shape[0]
+
+        for y_i in range(0, max_y_1):
+            y_tmp = taper_y[y_i]
+            
+            i = y_i * old_width
+            ii = y_i * new_size
+            for x_i in range(0, max_x_1):
+                new_data[ii] = img_data[i] * taper_x[x_i] * y_tmp
+                i += 1
+                ii += 1
+                
+        return new_data.reshape((img.shape[0], img.shape[1]))
+        
     def calculate_frc_curve(self, img_1, img_2):
         
         max_width = img_1.shape[1]
@@ -77,6 +102,9 @@ class FIRECalculator(object):
         if not check_even_square(np.array([img_1], dtype=np.float32)):
             img_1 = np.array(make_even_square(np.array([img_1], dtype=np.float32)), dtype=np.float32)
             img_2 = np.array(make_even_square(np.array([img_2], dtype=np.float32)), dtype=np.float32)
+        
+        img_1 = self.get_squared_tapered_image(img_1)
+        img_2 = self.get_squared_tapered_image(img_2)
         
         fft_1 = np.fft.fftshift(np.fft.fft2(img_1))
         fft_2 = np.fft.fftshift(np.fft.fft2(img_2))
