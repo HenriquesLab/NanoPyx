@@ -3,7 +3,7 @@
 import numpy as np
 cimport numpy as np
 
-from libc.math cimport pi, hypot, cos, sin, atan2
+from libc.math cimport pi, hypot, cos, sin, atan2, log, exp
 
 from cython.parallel import prange
 
@@ -182,22 +182,23 @@ cdef class Interpolator:
 
         return imRotated
 
-    def polar(self) -> np.ndarray:
+    def polar(self, str scale='linear') -> np.ndarray:
         """
-        Transforms an image into its polar coordinate equivalent
+        Transforms an image into its polar coordinate equivalent with origin at the center of the image
+        :param scale: scaling done during conversion, if 'log' performs log-polar transformation
         :return: (theta,r) image array
         """
-        polarized = self._polar()
+        polarized = self._polar(scale)
         return np.asarray(polarized).astype(self.original_dtype)
 
-    cdef float[:,:] _polar(self):
+    cdef float[:,:] _polar(self, str scale):
 
         cdef float cx = self.w / 2
         cdef float cy = self.h / 2
 
-        cdef int max_radius = int(hypot(cx,cy))
         cdef int max_theta = 360
-
+        cdef int max_radius = int(hypot(cx,cy))+1
+        
         cdef float[:,:] polarized = np.zeros((max_theta, max_radius), dtype=np.float32)
 
         cdef int i,j
@@ -206,23 +207,28 @@ cdef class Interpolator:
         with nogil:
             for i in prange(0,max_radius):
                 for j in range(0,max_theta):
-                    x = i * cos(j*pi/180)
-                    y = i * sin(j*pi/180)
-                    polarized[j,i] = self._interpolate(cx+x,cy+y)
+                    if scale=='log':
+                        x = exp(i*log(max_radius)/max_radius) * cos(j*pi/180) + cx
+                        y = exp(i*log(max_radius)/max_radius) * sin(j*pi/180) + cy
+                    else:
+                        x = i * cos(j*pi/180) + cx
+                        y = i * sin(j*pi/180) + cy
+                    polarized[j,i] = self._interpolate(x,y)
 
         return polarized
 
-    def cartesian(self, int x_shape, int y_shape)-> np.ndarray:
+    def cartesian(self, int x_shape, int y_shape, str scale='linear')-> np.ndarray:
         """
-        Transforms an image into its cartesian coordinate equivalent. Assumes image shape is (theta,r)
+        Transforms an image into its cartesian coordinate equivalent. Assumes image shape is (theta,r) and the origin is at the center of the cartesian image
         :param x_shape: width of original image
         :param y_shape: height of original image
+        :param scale: scaling performed during transition to polar coordinates, if 'log' assumes the image was a log-polar image
         :return: (y,x) image array
         """
-        cart = self._cartesian(x_shape, y_shape)
+        cart = self._cartesian(x_shape, y_shape, scale)
         return np.asarray(cart).astype(self.original_dtype)
 
-    cdef float[:,:] _cartesian(self, int x_shape, int y_shape):
+    cdef float[:,:] _cartesian(self, int x_shape, int y_shape, str scale):
         
         cdef float[:,:] cart = np.zeros((y_shape, x_shape), dtype=np.float32)
 
@@ -234,7 +240,10 @@ cdef class Interpolator:
         with nogil:
             for i in prange(0,x_shape):
                 for j in range(0,y_shape):
-                    r = hypot(j-cy,i-cx)
+                    if scale=='log' and (j!=cy and i!=cx):
+                        r = log(hypot(j-cy,i-cx)) * self.w / log(self.w)
+                    else:
+                        r = hypot(j-cy, i-cx)
                     t = atan2(j-cy,i-cx) * 180/pi
                     if t<0:
                         t = 360+t
