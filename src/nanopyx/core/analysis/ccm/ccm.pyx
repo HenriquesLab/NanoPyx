@@ -219,3 +219,4 @@ cdef float[:,:] _calculate_ccm_logpolar(float[:, :] img_slice, float[:, :] img_r
     cdef float[:,:] polar_slice = Interpolator(img_slice).polar(scale='log')
     cdef float[:,:] polar_ref = Interpolator(img_ref).polar(scale='log')
 
+    return _calculate_slice_ccm(polar_ref, polar_slice)
