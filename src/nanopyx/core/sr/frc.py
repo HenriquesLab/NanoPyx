@@ -2,9 +2,12 @@ import math
 import numpy as np
 import pandas as pd
 from scipy.signal.windows import tukey
+from scipy.signal import savgol_filter
 from matplotlib import pyplot as plt
 from ..transform.padding import pad_w_zeros_2d
+from ..utils.time.timeit import timeit2
 from ..analysis.ccm.helper_functions import check_even_square, make_even_square
+from .frc_utils import *
 
 
 class FIRECalculator(object):
@@ -14,29 +17,12 @@ class FIRECalculator(object):
         self.units = units
         self.threshold = 1/7
         self.frc_curve = None
-        self.perimeter_sampling_factor = 1
-        self.use_half_circle = False
         self.threshold_curve = None
         self.intersections = None
         
-    def get_sine(self, angle, cos_a):
-        if angle > math.pi:
-            return math.sqrt(1 - (cos_a * cos_a)) * -1
-        else:
-            return math.sqrt(1 - (cos_a * cos_a)) * 1
-        
     def compute(self, images, data_a1, data_b1, data_a2, data_b2):
         
-        for x_i in range(data_a1.shape[1]):
-            for y_i in range(data_a1.shape[0]):
-                a1 = data_a1[y_i, x_i]
-                a2 = data_a2[y_i, x_i]
-                b1 = data_b1[y_i, x_i]
-                b2 = data_b2[y_i, x_i]
-                
-                images[0, y_i, x_i] = a1 * a2 + b1 * b2
-                images[1, y_i, x_i] = a1 * a1 + b1 * b1
-                images[2, y_i, x_i] = a2 * a2 + b2 * b2
+        compute(images, data_a1, data_b1, data_a2, data_b2)
         
     def get_interpolated_values(self, y, x, images, maxx):
         x_base = int(x)
@@ -91,6 +77,36 @@ class FIRECalculator(object):
                 
         return new_data.reshape((img.shape[0], img.shape[1]))
         
+    def calculate_frc_value(self, centre, size, images, pixel_size):
+        radius = 1
+        max = centre - 1
+        
+        spatial_frequency = np.linspace(0, 1/(2*pixel_size), max)
+        
+        limit = math.pi * 2
+
+        results = np.empty((max, 3), dtype=np.float32)
+        results[0] = [0, 1, 1]
+        for r in range(radius, max):
+            sum_0 = 0
+            sum_1 = 0
+            sum_2 = 0
+            
+            angle_step = 1 / r
+            n_sum = 0
+            
+            for angle in np.arange(0, limit, angle_step):
+                cos_a = math.cos(angle)
+                x = max + 1 + r * cos_a
+                y = max + 1 + r * get_sine(angle, cos_a)
+                values = get_interpolated_values(y, x, images, size)
+                sum_0 += values[0]
+                sum_1 += values[1]
+                sum_2 += values[2]
+                n_sum += 1
+            results[r] = [spatial_frequency[r], sum_0 / math.sqrt(sum_1*sum_2), n_sum]
+        return results
+        
     def calculate_frc_curve(self, img_1, img_2):
         
         max_width = img_1.shape[1]
@@ -113,46 +129,20 @@ class FIRECalculator(object):
         self.field_of_view = size
         centre = int(size / 2)
         
-        data_a1 = fft_1.real
-        data_b1 = fft_1.imag
-        data_a2 = fft_2.real
-        data_b2 = fft_2.imag
+        data_a1 = fft_1.real.ravel().astype(np.float32)
+        data_b1 = fft_1.imag.ravel().astype(np.float32)
+        data_a2 = fft_2.real.ravel().astype(np.float32)
+        data_b2 = fft_2.imag.ravel().astype(np.float32)
         
-        images = np.empty((3, data_a1.shape[0], data_a1.shape[1]))
+        images = np.empty((3, data_a1.shape[0]), dtype=np.float32)
         
         self.compute(images, data_a1, data_b1, data_a2, data_b2)
-        
-        radius = 1
-        max = centre - 1
-        
-        results = np.empty((max, 3), dtype=np.float32)
-        results[0] = [0, 1, 1]
-        self.spatial_frequency = np.linspace(0, 1/(2*self.pixel_size), max)
-        
-        if self.use_half_circle:
-            limit = math.pi
-        else:
-            limit = math.pi * 2
             
-        for r in range(radius, max):
-            sum_0 = 0
-            sum_1 = 0
-            sum_2 = 0
-            
-            angle_step = 1 / (self.perimeter_sampling_factor * r)
-            n_sum = 0
-            
-            for angle in np.arange(0, limit, angle_step):
-                cos_a = math.cos(angle)
-                x = centre + r * cos_a
-                y = centre + r * self.get_sine(angle, cos_a)
-                values = self.get_interpolated_values(y, x, images, size)
-                sum_0 += values[0]
-                sum_1 += values[1]
-                sum_2 += values[2]
-                n_sum += 1
-            results[r] = [self.spatial_frequency[r], sum_0 / math.sqrt(sum_1*sum_2), n_sum]
-        self.frc_curve = results
+        self.frc_curve = self.calculate_frc_value(centre, size, images, self.pixel_size)
+        
+    def get_smoothed_curve(self):
+        
+        self.frc_curve[:, 1] = savgol_filter(self.frc_curve[:, 1], window_length=int(0.0707*self.frc_curve.shape[0]), polyorder=3)
         
     def calculate_threshold_curve(self):
         self.threshold_curve = np.empty((self.frc_curve.shape[0]))
@@ -160,9 +150,9 @@ class FIRECalculator(object):
         
     def interpolate_y(self, x1, y1, x2, y2, x):
         
-        m = (y2 - y1) / (x2 - x1)
+        m = (y2 -y1) / (x2 - x1)
         c = y1 - m * x1
-        
+
         return m * x + c
         
     def get_intersections(self):
@@ -208,8 +198,10 @@ class FIRECalculator(object):
                     count += 1
         self.intersections = np.copy(intersections[:count])
         
+    @timeit2
     def calculate_fire_number(self, img_1, img_2):
         self.calculate_frc_curve(img_1, img_2)
+        self.get_smoothed_curve()
         self.calculate_threshold_curve()
         self.get_intersections()
         
@@ -221,7 +213,7 @@ class FIRECalculator(object):
         return self.fire_number
 
     def plot_frc_curve(self):
-        plt.plot(self.spatial_frequency, self.frc_curve[:, 1])
+        plt.plot(self.frc_curve[:, 0], self.frc_curve[:, 1])
         plt.axhline(1/7, color='r', linestyle='-')
         plt.xlabel('Spatial frequency [1/nm]')
         plt.ylabel('FRC')
