@@ -184,6 +184,32 @@ cdef float[:,:,:] _calculate_rccm(float[:, :] img_slice, float[:, :] img_ref):
 
     return rccm
 
+def calculate_ccm_cartesian(np.ndarray img_slice, np.ndarray img_ref):
+    """
+    Function used to generate a cross correlation matrix of an image against a reference image
+    Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two polar images.
+    :param img_slice: numpy array with shape (y, x)
+    :param img_ref: numpy array with shape (y, x)
+    :return: numpy array with shape (y,x), corresponding to the cross correlation matrix
+    """
+    return np.array(_calculate_ccm_cartesian(img_slice, img_ref))
+
+cdef float[:,:] _calculate_ccm_cartesian(float[:, :] img_slice, float[:, :] img_ref):
+
+    cdef float[:,:,:] tmp
+
+    tmp = np.array([img_slice])
+    if not _check_even_square(tmp):
+        tmp = _make_even_square(tmp)
+        img_slice = tmp[0]
+
+    tmp = np.array([img_ref])
+    if not _check_even_square(tmp):
+        tmp = _make_even_square(tmp)
+        img_ref = tmp[0]
+
+    return _calculate_slice_ccm(img_ref, img_slice)
+
 def calculate_ccm_polar(np.ndarray img_slice, np.ndarray img_ref):
     """
     Function used to generate a cross correlation matrix of an image against a reference image where both are to be expressed in polar coordinates (theta,r)
