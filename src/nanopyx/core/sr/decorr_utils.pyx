@@ -40,21 +40,25 @@ def apodize_edges(img: np.ndarray):
 
 cdef float[:, :] _apodize_edges(float[:, :] img):
 
-    cdef float[:, :] output = np.copy(img)
-    cdef float dist, edge_mean, x0, y0, d, c
+    cdef float[:, :] pin = np.copy(img)
+    cdef float d, c
     cdef int y_i, x_i
     cdef int height = img.shape[0]
     cdef int width = img.shape[1]
     cdef int offset = 20 # number of pixels used for smooth apodization
     cdef float radius = width / 2 - offset
     cdef int count = 0
+    cdef float edge_mean = 0
+    cdef float dist = 0
+    cdef float x0 = 0
+    cdef float y0 = 0
 
     with nogil:
         for x_i in prange(width):
             for y_i in range(height):
-                dist = (y_i - height//2)**2 + (x_i - width//2)**2
+                dist = (y_i - height/2)**2 + (x_i - width/2)**2
                 if dist > radius**2:
-                    edge_mean += output[y_i, x_i]
+                    edge_mean += pin[y_i, x_i]
                     count += 1
 
     edge_mean /= count
@@ -67,11 +71,11 @@ cdef float[:, :] _apodize_edges(float[:, :] img):
                 if fabs(x0 - width/2) <= offset or fabs(y0 - height/2) <= offset:
                     d = fmin(fabs(x_i - width/2), fabs(y_i - height/2))
                     c = (cos(d * pi / offset - pi) + 1) / 2
-                    output[y_i, x_i] = <float> (c*(output[y_i, x_i]-edge_mean)) + edge_mean
+                    pin[y_i, x_i] = <float> (c*(pin[y_i, x_i]-edge_mean)) + edge_mean
                 elif fabs(x_i - width/2) > width/2 and fabs(y_i - height/2) > height/2:
-                    output[y_i, x_i] = <float> edge_mean
+                    pin[y_i, x_i] = <float> edge_mean
 
-    return output
+    return pin
 
 def linmap(val: float, valmin: float, valmax: float, mapmin:float, mapmax:float):
     return float(_linmap(val, valmin, valmax, mapmin, mapmax))
@@ -90,7 +94,7 @@ def get_mask(w: int, r2: float):
 
 cdef float[:, :] _get_mask(int w, float r2):
 
-    cdef int y_i, x_i
+    cdef int y_i, x_i 
     cdef float radius = r2 * w * w / 4
     cdef float dist
 
@@ -160,8 +164,8 @@ def get_best_score(kc: np.ndarray, a: np.ndarray):
 cdef _get_best_score(float[:] kc, float[:] a):
     cdef int k
     cdef float gm_max
-    cdef float[:] gm = np.empty(kc.shape[0], dtype=np.float32)
-    cdef float[:] out = np.empty((3), dtype=np.float32)
+    cdef float[:] gm = np.zeros(kc.shape[0], dtype=np.float32)
+    cdef float[:] out = np.zeros((3), dtype=np.float32)
     gm_max = 0.0
     
     for k in range(kc.shape[0]):
@@ -181,7 +185,7 @@ def get_max_score(kc: np.ndarray, a: np.ndarray):
 cdef _get_max_score(float[:] kc, float[:] a):
     cdef int k
     cdef float kc_max
-    cdef float[:] out = np.empty((3), dtype=np.float32)
+    cdef float[:] out = np.zeros((3), dtype=np.float32)
     kc_max = 0.0
 
     for k in range(kc.shape[0]):
