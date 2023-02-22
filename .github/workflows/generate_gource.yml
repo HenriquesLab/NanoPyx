@@ -23,9 +23,6 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - run: |
-          mkdir ./faces
-          pipx run gitfaces ./ ./faces
 
       # - name: Install packages
       #   run: |
@@ -38,6 +35,8 @@ jobs:
 
       - name: Generate movie
         run: |
+          mkdir ./faces
+          pipx run gitfaces ./ ./faces
           xvfb-run gource --output-custom-log repo-activity.log
           python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
           xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir ./faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
