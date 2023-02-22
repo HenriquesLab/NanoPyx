@@ -47,11 +47,9 @@ class DecorrAnalysis(object):
 		self.agm = 0
 		self.kc_max = 0
 		self.a_max = 0
-		self.s = 1
 		self.f = 1
-		self.c = 1
 		self.save_path = save_path
-		self.results_table = pd.DataFrame(columns=["Frame", "Channel", "Z", "Resolution", "Units", "A0", "Kc", "Kc GM", "rMin", "rMax", "Nr", "Ng"])
+		self.results_table = pd.DataFrame(columns=["Frame", "Resolution", "Units", "A0", "Kc", "Kc GM", "rMin", "rMax", "Nr", "Ng"])
 	
 	def normalizeFFT(self, fft_real, fft_imag):
 		return normalizeFFT(fft_real, fft_imag)
@@ -347,56 +345,52 @@ class DecorrAnalysis(object):
 	def run_analysis(self):
 		
 		for f_i  in range(self.img.shape[0]):
-			for c_i in range(self.img.shape[1]):
-				for s_i in range(self.img.shape[2]):
-					self.f = f_i
-					self.c = c_i
-					self.s = s_i
-					self.d0 = np.empty((self.n_r), dtype=np.float32)
-					self.d = np.empty((self.n_r, 2*self.n_g), dtype=np.float32)
-					self.kc = np.empty((2*self.n_g), dtype=np.float32)
-					self.a_g = np.empty((2*self.n_g), dtype=np.float32)
-					self.kc0 = 0
-					self.a0 = 0
-					self.kc_gm = 0
-					self.agm = 0
-					self.kc_max = 0
-					self.a_max = 0
-					self.img_ref = None
-					
-					img_ref = np.zeros((self.img.shape[-2], self.img.shape[-1]), dtype=np.float32)
-					img_ref += self.img[f_i, c_i, s_i]
-					
-					if self.roi is not None:
-						self.img_ref = img_ref[y0:y1, x0:x1].copy()
-					else:
-						self.img_ref = img_ref.copy()
-						
-					img_f = img_ref.copy()
-					img_f = self.apodize_edges(img_f)
-					
-					temp = self.get_preprocessed_image(img_f)
-					self.img_ref = temp.copy()
-					
-					img_fft = np.fft.fftshift(np.fft.fft2(temp))
-					fft_real = img_fft.real.astype(np.float32)
-					fft_imag = img_fft.imag.astype(np.float32)
-					fft_real[fft_real.shape[0]//2, fft_real.shape[1]//2] = 0
-					fft_imag[fft_imag.shape[0]//2, fft_imag.shape[1]//2] = 0
-					
-					self.compute_d0(fft_real, fft_imag)
-					out = self.get_d_corr_max(self.d0, 0, 1)
-					self.kc0 = out[0]
-					self.a0 = out[1]
-					self.compute_d()
-					
-					self.resolution = 2*self.pixel_size/self.kc_max
-					print(f"Resolution: {self.resolution}")
-					
-					self.results_table.loc[len(self.results_table)] = [f_i, c_i, s_i, self.resolution, self.units, self.a0, self.kc_max, self.kc_gm, self.rmin, self.rmax, self.n_r, self.n_g]
-					
-					if self.do_plot:
-						self.do_plot()
+			self.f = f_i
+			self.d0 = np.empty((self.n_r), dtype=np.float32)
+			self.d = np.empty((self.n_r, 2*self.n_g), dtype=np.float32)
+			self.kc = np.empty((2*self.n_g), dtype=np.float32)
+			self.a_g = np.empty((2*self.n_g), dtype=np.float32)
+			self.kc0 = 0
+			self.a0 = 0
+			self.kc_gm = 0
+			self.agm = 0
+			self.kc_max = 0
+			self.a_max = 0
+			self.img_ref = None
+			
+			img_ref = np.zeros((self.img.shape[-2], self.img.shape[-1]), dtype=np.float32)
+			img_ref += self.img[f_i]
+			
+			if self.roi is not None:
+				self.img_ref = img_ref[y0:y1, x0:x1].copy()
+			else:
+				self.img_ref = img_ref.copy()
+				
+			img_f = img_ref.copy()
+			img_f = self.apodize_edges(img_f)
+			
+			temp = self.get_preprocessed_image(img_f)
+			self.img_ref = temp.copy()
+			
+			img_fft = np.fft.fftshift(np.fft.fft2(temp))
+			fft_real = img_fft.real.astype(np.float32)
+			fft_imag = img_fft.imag.astype(np.float32)
+			fft_real[fft_real.shape[0]//2, fft_real.shape[1]//2] = 0
+			fft_imag[fft_imag.shape[0]//2, fft_imag.shape[1]//2] = 0
+			
+			self.compute_d0(fft_real, fft_imag)
+			out = self.get_d_corr_max(self.d0, 0, 1)
+			self.kc0 = out[0]
+			self.a0 = out[1]
+			self.compute_d()
+			
+			self.resolution = 2*self.pixel_size/self.kc_max
+			print(f"Resolution: {self.resolution}")
+			
+			self.results_table.loc[len(self.results_table)] = [f_i, self.resolution, self.units, self.a0, self.kc_max, self.kc_gm, self.rmin, self.rmax, self.n_r, self.n_g]
+			
+			if self.do_plot:
+				self.plot_results()
 					
 	def plot_results(self):
 		x = np.empty((self.n_r))
