@@ -22,15 +22,12 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-        run: |
-          mkdir ./faces
-          pipx run gitfaces ./ ./faces
 
       - name: Generate movie
         run: |
           xvfb-run gource --output-custom-log repo-activity.log
           python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
-          xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir ./faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
+          xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir /home/docker/Nanopyx/faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
 
       - name: Archive generated movie
         uses: actions/upload-artifact@v3
