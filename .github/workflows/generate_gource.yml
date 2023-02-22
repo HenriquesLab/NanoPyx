@@ -34,9 +34,11 @@ jobs:
 
       - name: Generate movie
         run: |
-          mkdir faces
+          mkdir ./faces
           pipx run gitfaces ./ ./faces
-          xvfb-run gource -a 1 -s 1 -c 3 --user-image-dir ./faces -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
+          xvfb-run gource --output-custom-log repo-activity.log
+          python -c "txt=open('repo-activity.txt').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva');open('repo-activity.txt', 'w').write(txt)"
+          xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir ./faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
 
       - name: Archive generated movie
         uses: actions/upload-artifact@v3
