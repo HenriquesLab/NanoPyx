@@ -10,6 +10,7 @@ cdef class Interpolator:
     cdef float _interpolate(self, float x, float y) nogil
     cdef float[:,:] _magnify(self, float magnification)
     cdef float[:,:] _magnify_xy(self, float magnification_y, float magnification_x)
+    cdef float[:,:] _scale_xy(self, float scaling_y, float scaling_x)
     cdef float[:,:] _shift(self, float dx, float dy)
     cdef float[:,:] _rotate(self, float angle, float cx, float cy)
     cdef float[:,:] _polar(self, str scale)

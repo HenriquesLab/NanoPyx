@@ -117,6 +117,33 @@ cdef class Interpolator:
         
         return imMagnified
 
+    def scale_xy(self, float scaling_y, float scaling_x) -> np.ndarray:
+        """
+        Scale an image by a factor. 
+        Equivalent to magnify_xy but takes floats as inputs and mantains image shape.
+        :param scaling_y: scale factor in y
+        :param scaling_x: scale factor in x
+        :return: scaled image
+        """
+        imScaled = self._scale_xy(scaling_y, scaling_x)
+        return np.asarray(imScaled).astype(self.original_dtype)
+
+    cdef float[:,:] _scale_xy(self, float scaling_y, float scaling_x):
+        cdef int i, j
+        cdef float x, y
+        cdef float wM = self.w * scaling_x
+        cdef float hM = self.h * scaling_y
+        cdef float[:,:] imScaled = np.empty((self.h, self.w), dtype=np.float32)
+
+        with nogil:
+            for i in prange(self.w):
+                x = (i+(wM/2-self.w/2)) / scaling_x
+                for j in range(self.h):
+                    y = (j+(hM/2-self.h/2)) / scaling_y
+                    imScaled[j, i] = self._interpolate(x, y)
+        
+        return imScaled
+
     def shift(self, double dx, double dy) -> np.ndarray:
         """
         Shift an image by (dx, dy) using interpolation
@@ -186,7 +213,7 @@ cdef class Interpolator:
         """
         Transforms an image into its polar coordinate equivalent with origin at the center of the image
         :param scale: scaling done during conversion, if 'log' performs log-polar transformation
-        :return: (theta,r) image array
+        :return: (theta,r) image array 
         """
         polarized = self._polar(scale)
         return np.asarray(polarized).astype(self.original_dtype)
