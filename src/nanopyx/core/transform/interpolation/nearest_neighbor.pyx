@@ -3,6 +3,8 @@
 import numpy as np
 cimport numpy as np
 
+from libc.math cimport pi, hypot, cos, sin, atan2, log, exp
+
 from cython.parallel import prange
 
 # nearest-neighbor interpolation of a 2D array
@@ -115,6 +117,33 @@ cdef class Interpolator:
         
         return imMagnified
 
+    def scale_xy(self, float scaling_y, float scaling_x) -> np.ndarray:
+        """
+        Scale an image by a factor. 
+        Equivalent to magnify_xy but takes floats as inputs and mantains image shape.
+        :param scaling_y: scale factor in y
+        :param scaling_x: scale factor in x
+        :return: scaled image
+        """
+        imScaled = self._scale_xy(scaling_y, scaling_x)
+        return np.asarray(imScaled).astype(self.original_dtype)
+
+    cdef float[:,:] _scale_xy(self, float scaling_y, float scaling_x):
+        cdef int i, j
+        cdef float x, y
+        cdef float wM = self.w * scaling_x
+        cdef float hM = self.h * scaling_y
+        cdef float[:,:] imScaled = np.empty((self.h, self.w), dtype=np.float32)
+
+        with nogil:
+            for i in prange(self.w):
+                x = (i+(wM/2-self.w/2)) / scaling_x
+                for j in range(self.h):
+                    y = (j+(hM/2-self.h/2)) / scaling_y
+                    imScaled[j, i] = self._interpolate(x, y)
+        
+        return imScaled
+
     def shift(self, double dx, double dy) -> np.ndarray:
         """
         Shift an image by (dx, dy) using interpolation
@@ -179,3 +208,72 @@ cdef class Interpolator:
                     imRotated[j,i] = self._interpolate(rotx,roty)
 
         return imRotated
+
+    def polar(self, str scale='linear') -> np.ndarray:
+        """
+        Transforms an image into its polar coordinate equivalent with origin at the center of the image
+        :param scale: scaling done during conversion, if 'log' performs log-polar transformation
+        :return: (theta,r) image array 
+        """
+        polarized = self._polar(scale)
+        return np.asarray(polarized).astype(self.original_dtype)
+
+    cdef float[:,:] _polar(self, str scale):
+
+        cdef float cx = self.w / 2
+        cdef float cy = self.h / 2
+
+        cdef int max_theta = 360
+        cdef int max_radius = int(hypot(cx,cy))+1
+        
+        cdef float[:,:] polarized = np.zeros((max_theta, max_radius), dtype=np.float32)
+
+        cdef int i,j
+        cdef float x,y
+
+        with nogil:
+            for i in prange(0,max_radius):
+                for j in range(0,max_theta):
+                    if scale=='log':
+                        x = exp(i*log(max_radius)/max_radius) * cos(j*pi/180) + cx
+                        y = exp(i*log(max_radius)/max_radius) * sin(j*pi/180) + cy
+                    else:
+                        x = i * cos(j*pi/180) + cx
+                        y = i * sin(j*pi/180) + cy
+                    polarized[j,i] = self._interpolate(x,y)
+
+        return polarized
+
+    def cartesian(self, int x_shape, int y_shape, str scale='linear')-> np.ndarray:
+        """
+        Transforms an image into its cartesian coordinate equivalent. Assumes image shape is (theta,r) and the origin is at the center of the cartesian image
+        :param x_shape: width of original image
+        :param y_shape: height of original image
+        :param scale: scaling performed during transition to polar coordinates, if 'log' assumes the image was a log-polar image
+        :return: (y,x) image array
+        """
+        cart = self._cartesian(x_shape, y_shape, scale)
+        return np.asarray(cart).astype(self.original_dtype)
+
+    cdef float[:,:] _cartesian(self, int x_shape, int y_shape, str scale):
+        
+        cdef float[:,:] cart = np.zeros((y_shape, x_shape), dtype=np.float32)
+
+        cdef float cx = x_shape / 2
+        cdef float cy = y_shape / 2
+
+        cdef int i, j
+        cdef float r, t
+        with nogil:
+            for i in prange(0,x_shape):
+                for j in range(0,y_shape):
+                    if scale=='log' and (j!=cy and i!=cx):
+                        r = log(hypot(j-cy,i-cx)) * self.w / log(self.w)
+                    else:
+                        r = hypot(j-cy, i-cx)
+                    t = atan2(j-cy,i-cx) * 180/pi
+                    if t<0:
+                        t = 360+t
+                    cart[j,i] = self._interpolate(r,t)
+
+        return cart 

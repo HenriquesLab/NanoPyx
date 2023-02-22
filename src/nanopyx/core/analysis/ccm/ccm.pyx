@@ -184,3 +184,65 @@ cdef float[:,:,:] _calculate_rccm(float[:, :] img_slice, float[:, :] img_ref):
 
     return rccm
 
+def calculate_ccm_cartesian(np.ndarray img_slice, np.ndarray img_ref):
+    """
+    Function used to generate a cross correlation matrix of an image against a reference image
+    Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two polar images.
+    :param img_slice: numpy array with shape (y, x)
+    :param img_ref: numpy array with shape (y, x)
+    :return: numpy array with shape (y,x), corresponding to the cross correlation matrix
+    """
+    return np.array(_calculate_ccm_cartesian(img_slice, img_ref))
+
+cdef float[:,:] _calculate_ccm_cartesian(float[:, :] img_slice, float[:, :] img_ref):
+
+    cdef float[:,:,:] tmp
+
+    tmp = np.array([img_slice])
+    if not _check_even_square(tmp):
+        tmp = _make_even_square(tmp)
+        img_slice = tmp[0]
+
+    tmp = np.array([img_ref])
+    if not _check_even_square(tmp):
+        tmp = _make_even_square(tmp)
+        img_ref = tmp[0]
+
+    return _calculate_slice_ccm(img_ref, img_slice)
+
+def calculate_ccm_polar(np.ndarray img_slice, np.ndarray img_ref):
+    """
+    Function used to generate a cross correlation matrix of an image against a reference image where both are to be expressed in polar coordinates (theta,r)
+    Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two polar images.
+    Rotation in cartesian space will show as translation in the theta dimension. 
+    :param img_slice: numpy array with shape (y, x)
+    :param img_ref: numpy array with shape (y, x)
+    :return: numpy array with shape (360,r), corresponding to the cross correlation matrix in polar coordinates
+    """
+    return np.array(_calculate_ccm_polar(img_slice, img_ref))
+
+cdef float[:,:] _calculate_ccm_polar(float[:, :] img_slice, float[:, :] img_ref):
+
+    cdef float[:,:] polar_slice = Interpolator(img_slice).polar()
+    cdef float[:,:] polar_ref = Interpolator(img_ref).polar()
+
+    return _calculate_slice_ccm(polar_ref, polar_slice)
+
+
+def calculate_ccm_logpolar(np.ndarray img_slice, np.ndarray img_ref):
+    """
+    Function used to generate a cross correlation matrix of an image against a reference image where both are to be expressed in logpolar coordinates (theta, log(r))
+    Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two logpolar images.
+    Rotation and scaling in cartesian space will show as translation in the theta and log(r) dimensions respectively.
+    :param img_slice: numpy array with shape (y, x)
+    :param img_ref: numpy array with shape (y, x)
+    :return: numpy array with shape (360,log(r)), corresponding to the cross correlation matrix in polar coordinates
+    """
+    return np.array(_calculate_ccm_logpolar(img_slice, img_ref))
+
+cdef float[:,:] _calculate_ccm_logpolar(float[:, :] img_slice, float[:, :] img_ref):
+
+    cdef float[:,:] polar_slice = Interpolator(img_slice).polar(scale='log')
+    cdef float[:,:] polar_ref = Interpolator(img_ref).polar(scale='log')
+
+    return _calculate_slice_ccm(polar_ref, polar_slice)
