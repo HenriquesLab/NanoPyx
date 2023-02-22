@@ -34,11 +34,14 @@ jobs:
 
       - name: Generate movie
         run: |
-          rm -rf ./faces
           mkdir ./faces
+          wget -o ./faces/HannahSHeil.jpg https://henriqueslab.github.io/images/HH.jpg
+          wget -o ./faces/Bruno\ Saraiva.jpg https://henriqueslab.github.io/images/researchers_BS.jpg
+          wget -o ./faces/Inês\ Cunha.jpg https://henriqueslab.github.io/images/IC.jpg
+          wget -o ./faces/António\ Brito.jpg https://henriqueslab.github.io/images/researchers_AB.jpg
           pipx run gitfaces ./ ./faces
           xvfb-run gource --output-custom-log repo-activity.log
-          python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva');open('repo-activity.log', 'w').write(txt)"
+          python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
           xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir ./faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
 
       - name: Archive generated movie
