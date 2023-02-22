@@ -34,7 +34,6 @@ jobs:
         run: |
           mkdir faces
           pipx run gitfaces ./ ./faces
-          cp ./faces/Bruno\ Manuel\ Santos\ Saraiva.png ./faces/Bruno\ Saraiva.png
           xvfb-run gource -a 1 -s 1 -c 3 --user-image-dir ./faces -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
 
       - name: Archive generated movie
