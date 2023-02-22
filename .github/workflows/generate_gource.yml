@@ -1,0 +1,43 @@
+name: generate gource movie
+
+on:
+  # creates a button
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Log level"
+        required: true
+        default: "warning"
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+
+jobs:
+  generate_movie:
+    runs-on: [self-hosted, ubuntu]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ffmpeg \
+            gource \
+            xvfb
+          pip install -U pipx
+
+      - name: Generate movie
+        run: |
+          pipx run gitfaces ./ ./faces
+          cp Bruno\ Manuel\ Santos\ Saraiva.png Bruno\ Saraiva.png
+          xvfb-run gource -a 1 -s 1 -c 3 --user-image-dir ./faces -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
+
+      - name: Archive generated movie
+        uses: actions/upload-artifact@v3
+        with:
+          name: gource-movie
+          path: gource.mp4
