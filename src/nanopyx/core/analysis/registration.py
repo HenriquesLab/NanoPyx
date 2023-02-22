@@ -100,7 +100,7 @@ class Registration:
             return rotated
 
         else:
-            print("Looking for rotation, scaling and translation", flush=True)
+            print("Not implemented yet", flush=True)
 
             return None
 
