@@ -24,35 +24,6 @@ class FIRECalculator(object):
         
         compute(images, data_a1, data_b1, data_a2, data_b2)
         
-    def get_interpolated_values(self, y, x, images, maxx):
-        x_base = int(x)
-        y_base = int(y)
-        x_fraction = x - x_base
-        y_fraction = y - y_base
-        if x_fraction < 0:
-            x_fraction = 0
-        if y_fraction < 0:
-            y_fraction = 0
-            
-        lower_left_index = y_base * maxx + x_base
-        lower_right_index = lower_left_index + 1
-        upper_left_index = lower_left_index + maxx
-        upper_right_index = upper_left_index + 1
-        
-        values = np.empty((images.shape[0]))
-        for i in range(images.shape[0]):
-            image = images[i].ravel()
-            lower_left = image[lower_left_index]
-            lower_right = image[lower_right_index]
-            upper_left = image[upper_left_index] #TODO upper indexes were swapped in og code make sure it's ok
-            upper_right = image[upper_right_index]
-            
-            upper_average = upper_left + x_fraction * (upper_right - upper_left)
-            lower_average = lower_left + x_fraction * (lower_right - lower_left)
-            values[i] = lower_average + y_fraction * (upper_average - lower_average)
-            
-        return values
-        
     def get_squared_tapered_image(self, img):
         taper_x = tukey(img.shape[1], alpha=0.25)
         taper_y = tukey(img.shape[0], alpha=0.25)  
