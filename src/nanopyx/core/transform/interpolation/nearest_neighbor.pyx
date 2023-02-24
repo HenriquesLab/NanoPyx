@@ -197,8 +197,8 @@ cdef class Interpolator:
         cdef int i, j
         cdef float rotx, roty
 
-        cdef float cosine = np.cos(angle)
-        cdef float sine = np.sin(angle)
+        cdef float cosine = cos(angle)
+        cdef float sine = sin(angle)
 
         with nogil:
             for i in prange(0, self.w):
