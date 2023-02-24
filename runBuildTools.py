@@ -193,7 +193,28 @@ def main(mode=None):
 
     # print the selected option
     cmd = list(options.values())[selection]
-    print(f"- Running command: {repr(cmd)}")
+    print(
+        r'''
+          ,~-.
+         (  ' )-.          ,~'`-.
+      ,~' `  ' ) )       _(   _) )
+     ( ( .--.===.--.    (  `    ' )
+      `.%%.;::|888.#`.   `-'`~~=~'
+      /%%/::::|8888\##\
+     |%%/:::::|88888\##|
+     |%%|:::::|88888|##|.,-.
+     \%%|:::::|88888|##/    )_
+      \%\:::::|88888/#/ ( `'  )
+       \%\::::|8888/#/(  ,  -'`-.
+   ,~-. `%\:::|888/#'(  (     ') )
+  (  ) )_ `\__|__/'   `~-~=--~~='
+ ( ` ')  ) [VVVVV]
+(_(_.~~~'   \|_|/   off we go...
+            [XXX]
+            `"""'
+    '''
+    )
+
     if type(cmd) == str:
         run_cmd(cmd)
     elif isfunction(cmd):
