@@ -42,7 +42,6 @@ cdef class RadialGradientConvergence:
         self.tSS = 2 * sigma * sigma
         self.tSO = 2 * sigma + 1
 
-    @timeit2
     def calculate(self, im: np.ndarray):
         """
         Calculate the RGC of an image-stack.
@@ -56,34 +55,41 @@ cdef class RadialGradientConvergence:
         cdef float [:,:,:] imRaw = im.astype(np.float32)
         cdef float [:,:,:] imRad = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32)
         cdef float [:,:,:] imInt = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32) # interpolated image
-        cdef float [:,:,:] imGx = np.zeros_like(imInt) # Gradient of the interpolated image
-        cdef float [:,:,:] imGy = np.zeros_like(imInt)
+        cdef float [:,:,:] imGx = np.zeros_like(imRaw) # Gradient of the original image
+        cdef float [:,:,:] imGy = np.zeros_like(imRaw)
+        cdef float [:,:,:] imIntGx = np.zeros((im.shape[0], im.shape[1]*self.magnification*2, im.shape[2]*self.magnification*2), dtype=np.float32)
+        cdef float [:,:,:] imIntGy = np.zeros((im.shape[0], im.shape[1]*self.magnification*2, im.shape[2]*self.magnification*2), dtype=np.float32)
 
         cdef int n
         for n in range(nFrames):
-            self._single_frame_RGC_map(imRaw[n,:,:], imRad[n,:,:], imInt[n,:,:], imGx[n,:,:], imGy[n,:,:])
+            self._single_frame_RGC_map(imRaw[n,:,:], imRad[n,:,:], imInt[n,:,:], imGx[n,:,:], imGy[n,:,:], imIntGx[n,:,:], imIntGy[n,:,:])
 
-        return imRad, imInt, imGx, imGy
+        return imRad, imInt, imGx, imGy, imIntGx, imIntGy
 
 
-    cdef void _single_frame_RGC_map(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy):
+    cdef void _single_frame_RGC_map(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy, float[:,:] imIntGx, float[:,:] imIntGy):
         cdef int w = imRaw.shape[1]
         cdef int h = imRaw.shape[0]
-        cdef int magnification = self.magnification
         cdef int yM, xM
 
-        cdef Interpolator interpolator = Interpolator(imRaw)
-        imInt[:,:] = interpolator._magnify(self.magnification) # needs to be fixed to use FFT
+        self._calculate_gradient(imRaw, imGx, imGy) # calculate gradients of the raw image
 
-        self._calculate_gradient(imInt, imGx, imGy) # calculate gradients of the interpolated image
+        cdef Interpolator interpolator = Interpolator(imRaw)
+        imInt[:,:] = interpolator._magnify(self.magnification) #for Intensity Weighting
+
+        cdef Interpolator interpolator_gx = Interpolator(imGx) #interpolate gradients for RGC calculation
+        imIntGx[:,:] = interpolator_gx._magnify(2*self.magnification) 
+
+        cdef Interpolator interpolator_gy = Interpolator(imGy)
+        imIntGy[:,:] = interpolator_gy._magnify(2*self.magnification) #fix this
 
         with nogil:
-            for yM in prange(magnification, h * magnification): 
-                for xM in range(magnification, w * magnification):
+            for yM in prange(self.magnification, h * self.magnification): 
+                for xM in range(self.magnification, w * self.magnification):
                     if self.doIntensityWeighting:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy) * imInt[yM, xM]
+                        imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy) * imInt[yM, xM]
                     else:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy) 
+                        imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy) 
 
 
     cdef void _calculate_gradient(self, float[:,:] image, float[:,:] imGx, float[:,:] imGy): # Calculate gradients via Robert's cross
@@ -93,7 +99,7 @@ cdef class RadialGradientConvergence:
 
         cdef int i, j
         with nogil:
-            for j in prange(1, h):
+            for j in range(1, h): #prange
                 y1 = j
                 y0 = j - 1
                 for i in range(1, w):
@@ -103,15 +109,15 @@ cdef class RadialGradientConvergence:
                     imGy[j,i] = image[y1, x1] - image[y0, x1]
                     # as in REF: https://github.com/HenriquesLab/NanoJ-eSRRF/blob/785c71b3bd508c938f63bb780cba47b0f1a5b2a7/resources/liveSRRF.cl under calculateGradient_2point
     
-    @timeit2
-    def calculateRGC(self, int xM, int yM, np.ndarray imGx, np.ndarray imGy):
-        "Calculate RGC value for a subpixel"
-        return self._calculateRGC(xM, yM, imGx, imGy)
+    # @timeit2
+    # def calculateRGC(self, int xM, int yM, np.ndarray imGx, np.ndarray imGy):
+    #     "Calculate RGC value for a subpixel"
+    #     return self._calculateRGC(xM, yM, imGx, imGy)
 
-    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imGx, float[:,:] imGy) nogil: 
+    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imIntGx, float[:,:] imIntGy) nogil: 
 
-        cdef int w = imGx.shape[1]
-        cdef int h = imGx.shape[0]
+        cdef int w = imIntGx.shape[1]
+        cdef int h = imIntGy.shape[0]
         
         cdef float vx, vy, Gx, Gy
 
@@ -129,23 +135,23 @@ cdef class RadialGradientConvergence:
 
         cdef int i, j
 
-        for j in prange(_start, _end): 
+        for j in range(_start, _end): #prange
             vy = (<int>(Gx_Gy_MAGNIFICATION * yc) + j) / Gx_Gy_MAGNIFICATION # position in continuous space
             
-            if 0 < vy <= h - 1:
+            if 0 < vy <= h/2 - 1:
             
                 for i in range(_start, _end):
                     vx = (<int>(Gx_Gy_MAGNIFICATION * xc) + i) / Gx_Gy_MAGNIFICATION # position in continuous space
 
-                    if 0 < vx <= w - 1:
+                    if 0 < vx <= w/2 - 1:
 
                         dx = vx - xc
                         dy = vy - yc
                         distance = sqrt(dx * dx + dy * dy)
 
                         if distance != 0 and distance <= self.tSO:
-                            Gx = _interpolate(imGx, vx * self.magnification, vy * self.magnification) # get interpolated value (in continuous space) via Catmull-Rom interpolation
-                            Gy = _interpolate(imGy, vx * self.magnification, vy * self.magnification)
+                            Gx = imIntGx[<int>(vy*self.magnification*2) - self.magnification*2 - 1, <int>(vx*self.magnification*2) - self.magnification*2 - 1]
+                            Gy = imIntGy[<int>(vy*self.magnification*2) - self.magnification*2 - 1, <int>(vx*self.magnification*2) - self.magnification*2 - 1]
                             distanceWeight = self._calculateDW(distance)
                             distanceWeightSum += distanceWeight
                             GdotR = Gx*dx + Gy*dy
