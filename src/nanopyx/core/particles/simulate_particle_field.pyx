@@ -59,7 +59,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     cdef int tries = 0
     cdef float closest_distance, closest_distance_sum, mean_closest_distance
 
-    # start by creating the minumal pool of particles
+    # start by creating the minimal pool of particles
     with tqdm(total=max_particles, desc="Generating particles", unit="particles") as progress_bar:
         while 1:
             particles_not_set = np.nonzero(xp < 0)[0].astype(np.int32)  # get the index for the parciles not yet set
@@ -115,7 +115,7 @@ cdef bint _get_particle_candidate(float[:, :] _image_pdf, int particle_index, fl
     :param particle_index: int, the index of the particle to place
     :param xp: 1D array of floats, the x coordinates of the particles
     :param yp: 1D array of floats, the y coordinates of the particles
-    :param min_distance: float, ensure that paricle distances are above minimum distance given
+    :param min_distance: float, ensure that particle distances are above minimum distance given
     :return: 1 if a particle was placed, 0 if not
     """
 
