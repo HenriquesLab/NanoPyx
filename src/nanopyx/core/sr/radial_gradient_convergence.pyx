@@ -152,6 +152,7 @@ cdef class RadialGradientConvergence:
                         distance = sqrt(dx * dx + dy * dy)
 
                         if distance != 0 and distance <= self.tSO:
+                            #TODO: change these indexes - turns out this speeded version is generating artifacts
                             Gx = imIntGx[<int>(vy*self.magnification*2) - self.magnification*2 - 1, <int>(vx*self.magnification*2) - self.magnification*2 - 1]
                             Gy = imIntGy[<int>(vy*self.magnification*2) - self.magnification*2 - 1, <int>(vx*self.magnification*2) - self.magnification*2 - 1]
                             distanceWeight = self._calculateDW(distance)
