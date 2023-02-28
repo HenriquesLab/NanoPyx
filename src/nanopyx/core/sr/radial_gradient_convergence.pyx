@@ -72,6 +72,8 @@ cdef class RadialGradientConvergence:
         cdef int h = imRaw.shape[0]
         cdef int yM, xM
 
+        #TODO: change interpolation techniques
+
         self._calculate_gradient(imRaw, imGx, imGy) # calculate gradients of the raw image
 
         cdef Interpolator interpolator = Interpolator(imRaw)
