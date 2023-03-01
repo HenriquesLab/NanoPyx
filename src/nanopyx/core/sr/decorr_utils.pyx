@@ -18,10 +18,10 @@ from cython.parallel import prange
 def normalizeFFT(fft_real: np.ndarray, fft_imag: np.ndarray):
     return np.array(_normalizeFFT(fft_real, fft_imag), dtype=np.float32)
 
-cdef float[:, :, :] _normalizeFFT(float[:, :] fft_real, float[:, :] fft_imag):
+cdef double[:, :, :] _normalizeFFT(double[:, :] fft_real, double[:, :] fft_imag):
 
-    cdef float[:, :, :] output = np.zeros((2, fft_real.shape[0], fft_real.shape[1]), dtype=np.float32)
-    cdef float mag
+    cdef double[:, :, :] output = np.zeros((2, fft_real.shape[0], fft_real.shape[1]), dtype=np.float64)
+    cdef double mag
     cdef int x_i, y_i
     
     with nogil:
@@ -38,20 +38,20 @@ cdef float[:, :, :] _normalizeFFT(float[:, :] fft_real, float[:, :] fft_imag):
 def apodize_edges(img: np.ndarray):
     return np.array(_apodize_edges(img), dtype=np.float32)
 
-cdef float[:, :] _apodize_edges(float[:, :] img):
+cdef double[:, :] _apodize_edges(float[:, :] img):
 
-    cdef float[:, :] pin = np.copy(img)
-    cdef float d, c
+    cdef double[:, :] pin = np.copy(img)
+    cdef double d, c
     cdef int y_i, x_i
     cdef int height = img.shape[0]
     cdef int width = img.shape[1]
     cdef int offset = 20 # number of pixels used for smooth apodization
-    cdef float radius = width / 2 - offset
+    cdef double radius = width / 2 - offset
     cdef int count = 0
-    cdef float edge_mean = 0
-    cdef float dist = 0
-    cdef float x0 = 0
-    cdef float y0 = 0
+    cdef double edge_mean = 0
+    cdef double dist = 0
+    cdef double x0 = 0
+    cdef double y0 = 0
 
     with nogil:
         for x_i in prange(width):
@@ -71,9 +71,9 @@ cdef float[:, :] _apodize_edges(float[:, :] img):
                 if fabs(x0 - width/2) <= offset or fabs(y0 - height/2) <= offset:
                     d = fmin(fabs(x_i - width/2), fabs(y_i - height/2))
                     c = (cos(d * pi / offset - pi) + 1) / 2
-                    pin[y_i, x_i] = <float> (c*(pin[y_i, x_i]-edge_mean)) + edge_mean
+                    pin[y_i, x_i] = <double> (c*(pin[y_i, x_i]-edge_mean)) + edge_mean
                 elif fabs(x_i - width/2) > width/2 and fabs(y_i - height/2) > height/2:
-                    pin[y_i, x_i] = <float> edge_mean
+                    pin[y_i, x_i] = <double> edge_mean
 
     return pin
 
@@ -81,24 +81,24 @@ def linmap(val: float, valmin: float, valmax: float, mapmin:float, mapmax:float)
     return float(_linmap(val, valmin, valmax, mapmin, mapmax))
 
 
-cdef float _linmap(float val, float valmin, float valmax, float mapmin, float mapmax):
+cdef double _linmap(float val, float valmin, float valmax, float mapmin, float mapmax):
 
-    cdef float out = 0
+    cdef double out = 0
     out = (val - valmin)/(valmax - valmin)
     out = out * (mapmax-mapmin) + mapmin
     return out
 
 def get_mask(w: int, r2: float):
 
-    return np.array(_get_mask(w, r2), dtype=np.float32)
+    return np.array(_get_mask(w, r2), dtype=np.float64)
 
-cdef float[:, :] _get_mask(int w, float r2):
+cdef double[:, :] _get_mask(int w, float r2):
 
     cdef int y_i, x_i 
-    cdef float radius = r2 * w * w / 4
-    cdef float dist
+    cdef double radius = r2 * w * w / 4
+    cdef double dist
 
-    cdef float[:, :] mask = np.empty((w, w), dtype=np.float32)
+    cdef double[:, :] mask = np.zeros((w, w), dtype=np.float64)
 
     with nogil:
         for y_i in prange(w):
@@ -113,10 +113,10 @@ def get_corr_coef_norm(fft_real: np.ndarray, fft_imag: np.ndarray, mask: np.ndar
 
     return float(_get_corr_coef_norm(fft_real, fft_imag, mask))
 
-cdef float _get_corr_coef_norm(float[:, :] fft_real, float[:, :] fft_imag, float[:, :] mask):
+cdef double _get_corr_coef_norm(double[:, :] fft_real, double[:, :] fft_imag, double[:, :] mask):
 
     cdef int y_i, x_i
-    cdef float c = 0
+    cdef double c = 0
     
     with nogil:
         for y_i in prange(fft_real.shape[0]):
@@ -129,9 +129,9 @@ cdef float _get_corr_coef_norm(float[:, :] fft_real, float[:, :] fft_imag, float
 def get_max(arr: np.ndarray, x1: int, x2: int):
     return np.array(_get_max(arr, x1, x2), dtype=np.float32)
 
-cdef float[:] _get_max(float[:] arr, int x1, int x2):
+cdef double[:] _get_max(float[:] arr, int x1, int x2):
     cdef int k
-    cdef float[:] out = np.empty((2), dtype=np.float32)
+    cdef double[:] out = np.zeros((2), dtype=np.float64)
     out[0] = x1
     out[1] = arr[x1]
 
@@ -145,9 +145,9 @@ cdef float[:] _get_max(float[:] arr, int x1, int x2):
 def get_min(arr: np.ndarray, x1: int, x2: int):
     return np.array(_get_min(arr, x1, x2), dtype=np.float32)
 
-cdef float[:] _get_min(float[:] arr, int x1, int x2):
+cdef double[:] _get_min(float[:] arr, int x1, int x2):
     cdef int k
-    cdef float[:] out = np.empty((2), dtype=np.float32)
+    cdef double[:] out = np.zeros((2), dtype=np.float64)
     out[0] = x1
     out[1] = arr[x1]
 
@@ -163,9 +163,9 @@ def get_best_score(kc: np.ndarray, a: np.ndarray):
 
 cdef _get_best_score(float[:] kc, float[:] a):
     cdef int k
-    cdef float gm_max
-    cdef float[:] gm = np.zeros(kc.shape[0], dtype=np.float32)
-    cdef float[:] out = np.zeros((3), dtype=np.float32)
+    cdef double gm_max
+    cdef double[:] gm = np.zeros(kc.shape[0], dtype=np.float64)
+    cdef double[:] out = np.zeros((3), dtype=np.float64)
     gm_max = 0.0
     
     for k in range(kc.shape[0]):
@@ -184,8 +184,8 @@ def get_max_score(kc: np.ndarray, a: np.ndarray):
 
 cdef _get_max_score(float[:] kc, float[:] a):
     cdef int k
-    cdef float kc_max
-    cdef float[:] out = np.zeros((3), dtype=np.float32)
+    cdef double kc_max
+    cdef double[:] out = np.zeros((3), dtype=np.float64)
     kc_max = 0.0
 
     for k in range(kc.shape[0]):

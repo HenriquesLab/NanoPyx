@@ -3,11 +3,10 @@ import math
 import numpy as np
 from scipy.ndimage import gaussian_filter
 import pandas as pd
-from math import sqrt, fabs, cos, pi
+from math import sqrt, fabs, cos
 from matplotlib import pyplot as plt
 
 from .decorr_utils import *
-from ..analysis.ccm.helper_functions import make_even_square
 from ..utils.time.timeit import timeit2
 
 class DecorrAnalysis(object):
@@ -37,10 +36,10 @@ class DecorrAnalysis(object):
 		self.units = units
 		self.roi = roi
 		self.do_plot = do_plot
-		self.d0 = np.empty((self.n_r), dtype=np.float32)
-		self.d = np.empty((self.n_r, 2*self.n_g), dtype=np.float32)
-		self.kc = np.empty((2*self.n_g), dtype=np.float32)
-		self.a_g = np.empty((2*self.n_g), dtype=np.float32)
+		self.d0 = np.zeros((self.n_r), dtype=np.float32)
+		self.d = np.zeros((self.n_r, 2*self.n_g), dtype=np.float32)
+		self.kc = np.zeros((2*self.n_g), dtype=np.float32)
+		self.a_g = np.zeros((2*self.n_g), dtype=np.float32)
 		self.kc0 = 0
 		self.a0 = 0
 		self.kc_gm = 0
@@ -96,7 +95,7 @@ class DecorrAnalysis(object):
 		
 		meanIm = pixelsIn[0]; 
 		
-		pixelsOut = np.empty((newSize*newSize), dtype=np.float32);
+		pixelsOut = np.zeros((newSize*newSize), dtype=np.float32);
 		for k in range(newSize*newSize):
 			pixelsOut[k] = meanIm
 		
@@ -120,11 +119,13 @@ class DecorrAnalysis(object):
 		return get_mask(w, r2)
 	
 	def get_corr_coef_norm(self, fft_real, fft_imag, mask):
-		
 		return get_corr_coef_norm(fft_real, fft_imag, mask)
+
+	def linmap(self, val, valmin, valmax, mapmin, mapmax):
+		return linmap(val, valmin, valmax, mapmin, mapmax)
 	
 	def get_corr_coef_ring(self, fft_real, fft_imag, normalized_fft_real, normalized_fft_imag, crmin, crmax):
-		out = np.empty((2*int(self.n_r)), dtype=np.float32).ravel()
+		out = np.zeros((2*int(self.n_r)), dtype=np.float32)
 		d = 0
 		dist = 0
 		width = self.img_ref.shape[1]
@@ -144,25 +145,28 @@ class DecorrAnalysis(object):
 					return out
 				else:
 					if dist >= 0 and dist <= crmax:
-						dist = linmap(dist, crmin, crmax, 0, self.n_r-1)
+						dist = self.linmap(dist, crmin, crmax, 0, self.n_r-1)
 						if dist < 0:
 							dist = 0
-						d = int(round(dist))
+						d = round(dist)
 						if d+self.n_r < out.shape[0]:
 							out[d] += fft_real[y_i, x_i] * normalized_fft_real[y_i, x_i] + fft_imag[y_i, x_i] * normalized_fft_imag[y_i, x_i]
 							out[d+self.n_r] += normalized_fft_real[y_i, x_i]**2 + normalized_fft_imag[y_i, x_i]**2
-						
+
 		return out
 	
 	def compute_d0(self, fft_real, fft_imag):
+
+		d0 = np.zeros((self.n_r), dtype=np.float32)
 		
 		normalized_fft = self.normalizeFFT(fft_real, fft_imag)
 
 		mask = self.get_mask(fft_real.shape[1], 1)
 		
 		cr = self.get_corr_coef_norm(fft_real, fft_imag, mask)
-		
+
 		coef = self.get_corr_coef_ring(fft_real, fft_imag, normalized_fft[0], normalized_fft[1], self.rmin, self.rmax)
+
 		for k in range(self.n_r):
 			d = 0
 			c = 0
@@ -172,12 +176,14 @@ class DecorrAnalysis(object):
 				c += coef[n+self.n_r]
 			
 			if cr == 0 or c == 0:
-				self.d0[k] = float("nan")
+				d0[k] = float("nan")
 			else:
-				self.d0[k] = math.sqrt(2)*d/(cr*math.sqrt(c))
+				d0[k] = math.sqrt(2)*d/(cr*math.sqrt(c))
 			
-		if math.isnan(self.d0[0]):
-			self.d0[0] = 0
+		if math.isnan(d0[0]):
+			d0[0] = 0
+
+		return d0
 	
 	def get_max(self, arr, x1, x2):
 		return get_max(arr, x1, x2)
@@ -220,6 +226,8 @@ class DecorrAnalysis(object):
 		return get_max_score(kc, a)
 	
 	def compute_d(self):
+
+		d_curve = np.zeros((self.n_r, 2*self.n_g), dtype=np.float32)
 		
 		count = 0
 		
@@ -234,30 +242,27 @@ class DecorrAnalysis(object):
 		img_ref = self.get_preprocessed_image(img_ref)
 		blurred = self.img_ref.copy()
 		
-		fft = np.fft.fftshift(np.fft.fft2(img_ref))
-		fft_real = fft.real.astype(np.float32)
-		fft_imag = fft.imag.astype(np.float32)
-		normalized_fft = self.normalizeFFT(fft_real, fft_imag)
+		crmin = 0
+		crmax = 0
+		crmin += self.rmin
+		crmax += self.rmax
 		
-		crmin = self.rmin
-		crmax = self.rmax
-		
-		mask = self.get_mask(fft_real.shape[1], 1)
+		mask = self.get_mask(img_ref.shape[1], 1)
 		
 		for refine in range(2):
 			for k in range(self.n_g):                
 				sig = math.exp(math.log(g_min) + (math.log(g_max)-math.log(g_min))*(k/(self.n_g-1)))
-				blurred = img_ref.copy()
+				blurred = self.img_ref.copy()
 				blurred = gaussian_filter(blurred, sig)
-				blurred = img_ref - blurred
+				blurred = self.img_ref.copy() - blurred
 								
 				fft = np.fft.fftshift(np.fft.fft2(blurred))
-				fft_real = fft.real.astype(np.float32)
-				fft_imag = fft.imag.astype(np.float32)
+				fft_real = fft.real.astype(np.float64)
+				fft_imag = fft.imag.astype(np.float64)
 				normalized_fft = self.normalizeFFT(fft_real, fft_imag)
 				cr = self.get_corr_coef_norm(fft_real, fft_imag, mask)
-		
 				coef = self.get_corr_coef_ring(fft_real, fft_imag, normalized_fft[0], normalized_fft[1], crmin, crmax)
+				
 				for i in range(self.n_r):
 					d = 0
 					c = 0
@@ -265,23 +270,23 @@ class DecorrAnalysis(object):
 						d += coef[n]
 						c += coef[n+self.n_r]
 					if cr == 0 or c == 0:
-						self.d[i][count] = float("nan") # TODO: check this is ok, this is a workaround for differences in java and python
+						d_curve[i][count] = float("nan") # TODO: check this is ok, this is a workaround for differences in java and python
 					else:
-						self.d[i][count] = math.sqrt(2)*d/(cr*math.sqrt(c))
+						d_curve[i][count] = math.sqrt(2)*d/(cr*math.sqrt(c))
 					
-				if math.isnan(self.d[0][count]):
-					self.d[0][count] = 0
+				if math.isnan(d_curve[0][count]):
+					d_curve[0][count] = 0
 				count += 1
 				
 			if refine == 0:
-				kc = np.empty((self.n_g+1), dtype=np.float32)
-				a = np.empty((self.n_g+1), dtype=np.float32)
-				dg = np.empty((self.n_r), dtype=np.float32)
-				result = np.empty((2), dtype=np.float32)
+				kc = np.zeros((self.n_g+1), dtype=np.float32)
+				a = np.zeros((self.n_g+1), dtype=np.float32)
+				dg = np.zeros((self.n_r), dtype=np.float32)
+				result = np.zeros((2), dtype=np.float32)
 				
 				for j in range(self.n_g):
 					for h in range(self.n_r):
-						dg[h] = self.d[h][j]
+						dg[h] = d_curve[h][j]
 					result = self.get_d_corr_max(dg, crmin, crmax)
 					kc[j] = result[0]
 					a[j] = result[1]
@@ -321,13 +326,13 @@ class DecorrAnalysis(object):
 					g_min = 2 / self.img_ref.shape[1]
 					
 			else:
-				kc = np.empty((self.n_g), dtype=np.float32)
-				a = np.empty((self.n_g), dtype=np.float32)
-				dg = np.empty((self.n_r), dtype=np.float32)
-				result = np.empty((2), dtype=np.float32)
+				kc = np.zeros((self.n_g), dtype=np.float32)
+				a = np.zeros((self.n_g), dtype=np.float32)
+				dg = np.zeros((self.n_r), dtype=np.float32)
+				result = np.zeros((2), dtype=np.float32)
 				for j in range(self.n_g):
 					for h in range(self.n_r):
-						dg[h] = self.d[h][j+self.n_g]
+						dg[h] = d_curve[h][j+self.n_g]
 						
 					result = self.get_d_corr_max(dg, crmin, crmax)
 					kc[j] = result[0]
@@ -340,16 +345,18 @@ class DecorrAnalysis(object):
 				results_max = self.get_max_score(self.kc, self.a_g)
 				self.kc_max = results_max[0]
 				self.a_max = results_max[1]
+    
+		return d_curve
 	
 	@timeit2
 	def run_analysis(self):
-		
+
 		for f_i  in range(self.img.shape[0]):
 			self.f = f_i
-			self.d0 = np.empty((self.n_r), dtype=np.float32)
-			self.d = np.empty((self.n_r, 2*self.n_g), dtype=np.float32)
-			self.kc = np.empty((2*self.n_g), dtype=np.float32)
-			self.a_g = np.empty((2*self.n_g), dtype=np.float32)
+			self.d0 = np.zeros((self.n_r), dtype=np.float32)
+			self.d = np.zeros((self.n_r, 2*self.n_g), dtype=np.float32)
+			self.kc = np.zeros((2*self.n_g), dtype=np.float32)
+			self.a_g = np.zeros((2*self.n_g), dtype=np.float32)
 			self.kc0 = 0
 			self.a0 = 0
 			self.kc_gm = 0
@@ -371,18 +378,17 @@ class DecorrAnalysis(object):
 			
 			temp = self.get_preprocessed_image(img_f)
 			self.img_ref = temp.copy()
-			
 			img_fft = np.fft.fftshift(np.fft.fft2(temp))
-			fft_real = img_fft.real.astype(np.float32)
-			fft_imag = img_fft.imag.astype(np.float32)
+			fft_real = img_fft.real.astype(np.float64)
+			fft_imag = img_fft.imag.astype(np.float64)
 			fft_real[fft_real.shape[0]//2, fft_real.shape[1]//2] = 0
 			fft_imag[fft_imag.shape[0]//2, fft_imag.shape[1]//2] = 0
 			
-			self.compute_d0(fft_real, fft_imag)
+			self.d0 = self.compute_d0(fft_real, fft_imag)
 			out = self.get_d_corr_max(self.d0, 0, 1)
 			self.kc0 = out[0]
 			self.a0 = out[1]
-			self.compute_d()
+			self.d = self.compute_d()
 			
 			self.resolution = 2*self.pixel_size/self.kc_max
 			print(f"Resolution: {self.resolution}")
@@ -393,7 +399,7 @@ class DecorrAnalysis(object):
 				self.plot_results()
 					
 	def plot_results(self):
-		x = np.empty((self.n_r))
+		x = np.zeros((self.n_r))
 		for k in range(self.d0.shape[0]):
 			x[k] = 0 + (1-0)*k/(self.n_r-1)
 
@@ -402,7 +408,7 @@ class DecorrAnalysis(object):
 		for k in range(self.d0.shape[0]):
 			x[k] = self.rmin + (self.rmax-self.rmin)*k/(self.n_r-1)
 
-		dg = np.empty((self.n_r))
+		dg = np.zeros((self.n_r))
 		for k in range(self.n_g):
 			for j in range(self.n_r):
 				dg[j] = self.d[j][k]
