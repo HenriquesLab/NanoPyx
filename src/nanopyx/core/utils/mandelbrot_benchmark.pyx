@@ -1,11 +1,12 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
+
+from .omp cimport omp_get_num_procs
 
 from cython.parallel import prange
 import numpy as np
 import time
 
-
-cdef int mandelbrot(double x, double y, int max_iter, double divergence) nogil:
+cdef int _mandelbrot(double x, double y, int max_iter, double divergence) nogil:
     cdef double real, imag
     cdef double real2, imag2
     cdef int i
@@ -31,10 +32,12 @@ def create_fractal_cython_threaded(int size, int max_iter, divergence: float=4):
     cdef int i, j
     cdef float _divergence = divergence
 
+    print("Number of OMP processors: ", omp_get_num_procs())
+
     with nogil:
         for i in prange(size):
             for j in range(size):
-                image[i, j] = mandelbrot(j, i, max_iter, _divergence)
+                image[i, j] = _mandelbrot(j, i, max_iter, _divergence)
     return image
 
 
@@ -52,7 +55,7 @@ def create_fractal_cython_nonthreaded(int size, int max_iter, divergence: float=
     with nogil:
         for i in range(size):
             for j in range(size):
-                image[i, j] = mandelbrot(j, i, max_iter, _divergence)
+                image[i, j] = _mandelbrot(j, i, max_iter, _divergence)
     return image
 
 
