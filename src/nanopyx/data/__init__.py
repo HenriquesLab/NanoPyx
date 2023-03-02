@@ -9,6 +9,7 @@ Contains helper methods for downloading and loading example test data
  - LongContinuous_UtrGFP
  - MTsGFP_EMBO_AdvMicroscopy_2018
  - PumpyCos7_UtrGFP
+ - Reconstructed_COS7_STORM_IC
  - SMLMS2013_HDTubulinAlexa647
  - SM_U2OS_Pereira_MTAlexaA647_V1
  - SM_U2OS_Pereira_MTAlexaA647_V2
