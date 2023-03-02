@@ -2,10 +2,11 @@
 #define _C_CATMULL_ROM_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-double _c_cubic(double v);
+    double _c_cubic(double v);
 
 #ifdef __cplusplus
 }

@@ -59,7 +59,8 @@ def get_mpicc_path():
         return None
 
 
-INCLUDE_DIRS = [os.path.join(os.path.split(__file__)[0], "include")]
+EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
+INCLUDE_DIRS = [EXTRA_C_FILES_PATH]
 LIBRARY_DIRS = []
 EXTRA_COMPILE_ARGS = []
 EXTRA_LING_ARGS = []
@@ -175,6 +176,8 @@ def collect_extensions():
     ]
 
     cython_extensions = []
+    extra_c_files = []
+
     for file in cython_files:
         module = ".".join(os.path.splitext(file)[0].split(os.sep)[1:])
         sources = [file]
@@ -185,20 +188,23 @@ def collect_extensions():
             for line in lines:
                 if "# nanopyx-c-file: " in line:
                     extra_c_file = os.path.join(
-                        "include", line.split("# nanopyx-c-file: ")[1].strip()
+                        EXTRA_C_FILES_PATH,
+                        line.split("# nanopyx-c-file: ")[1].strip(),
                     )
                     if os.path.exists(extra_c_file):
                         sources.append(extra_c_file)
-                        print("Extra c file found: " + extra_c_file)
+                        extra_c_files.append(extra_c_file)
 
         ext = Extension(module, sources, **kwargs)
         cython_extensions.append(ext)
 
     print(f"Found following .pyx files to build:\n {'; '.join(cython_files)}")
+    print(f"Found the extra c files to build:\n {'; '.join(extra_c_files)}")
 
     if multiprocessing.get_start_method() == "spawn":
         print(
-            "multiprocessing default behaviour does not allow concurrent compilation \n Proceeding compilation serially ..."
+            "multiprocessing default behaviour does not allow concurrent compilation\n",
+            "Proceeding compilation serially ...",
         )
         collected_extensions = cythonize(
             cython_extensions, annotate=True, language_level="3"
