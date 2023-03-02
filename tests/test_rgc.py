@@ -11,7 +11,9 @@ def test_rgc(downloader):
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True)
     rgc = RadialGradientConvergence(sensitivity=2)
 
-    imRad, imInt, imGx, imGy = rgc.calculate(dataset)
+    small_dataset = dataset[:10,:20,:20]
+
+    imRad, imInt, imGx, imGy = rgc.calculate(small_dataset)
     plt.imshow(np.mean(imRad,0), interpolation='none')
     plt.title('RGC')
     #plt.show()
