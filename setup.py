@@ -177,7 +177,12 @@ def collect_extensions():
     cython_extensions = []
     for file in cython_files:
         module = ".".join(os.path.splitext(file)[0].split(os.sep)[1:])
-        ext = Extension(module, [file], **kwargs)
+        sources = [file]
+        extra_c_file = "_c_" + module + ".c"
+        if os.path.exists(os.path.join("include", extra_c_file)):
+            sources.append(extra_c_file)
+
+        ext = Extension(module, sources, **kwargs)
         cython_extensions.append(ext)
 
     print(f"Found following files to build:\n {'; '.join(cython_files)}")

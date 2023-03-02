@@ -5,7 +5,7 @@ cimport numpy as np
 
 from .nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
 
-cdef extern from "catmull_rom.h":
+cdef extern from "_c_catmull_rom.h":
     double _c_cubic(double v) nogil
 
 
