@@ -1,12 +1,13 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# nanopyx-c-file: _c_catmull_rom.c
+
+cdef extern from "_c_catmull_rom.h":
+    double _c_cubic(double v) nogil
 
 import numpy as np
 cimport numpy as np
 
 from .nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
-
-cdef extern from "_c_catmull_rom.h":
-    double _c_cubic(double v) nogil
 
 
 def interpolate(np.ndarray im, double x, double y) -> float:
