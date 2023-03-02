@@ -71,10 +71,10 @@ if sys.platform == "win32":
 
     VC_VERSION = msvccompiler.get_build_version()
     ARCH = "x64" if architecture()[0] == "64bit" else "x86"
-    INCLUDE_DIRS = []
-    LIBRARY_DIRS = []
-    EXTRA_COMPILE_ARGS = ["/openmp"]
-    EXTRA_LING_ARGS = ["/openmp"]
+    INCLUDE_DIRS += []
+    LIBRARY_DIRS += []
+    EXTRA_COMPILE_ARGS += ["/openmp"]
+    EXTRA_LING_ARGS += ["/openmp"]
 
 elif sys.platform == "darwin":
     INCLUDE_DIRS += ["/usr/local/include"]
@@ -136,10 +136,10 @@ elif sys.platform == "darwin":
 
 
 elif sys.platform.startswith("linux"):
-    INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
-    LIBRARY_DIRS = ["/usr/local/lib", "/usr/lib"]
-    EXTRA_COMPILE_ARGS = ["-O3", "-march=native", "-fopenmp"]
-    EXTRA_LING_ARGS = ["-fopenmp"]
+    INCLUDE_DIRS += ["/usr/local/include", "/usr/include"]
+    LIBRARY_DIRS += ["/usr/local/lib", "/usr/lib"]
+    EXTRA_COMPILE_ARGS += ["-O3", "-march=native", "-fopenmp"]
+    EXTRA_LING_ARGS += ["-fopenmp"]
 
 try:
     import numpy
