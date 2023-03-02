@@ -59,7 +59,7 @@ def get_mpicc_path():
         return None
 
 
-INCLUDE_DIRS = []
+INCLUDE_DIRS = [os.path.join(os.path.split(__file__)[0], "include")]
 LIBRARY_DIRS = []
 EXTRA_COMPILE_ARGS = []
 EXTRA_LING_ARGS = []
@@ -182,13 +182,20 @@ def collect_extensions():
 
     print(f"Found following files to build:\n {'; '.join(cython_files)}")
 
-    if multiprocessing.get_start_method() == 'spawn':   
-        print("multiprocessing default behaviour does not allow concurrent compilation \n Proceeding compilation serially ...")
+    if multiprocessing.get_start_method() == "spawn":
+        print(
+            "multiprocessing default behaviour does not allow concurrent compilation \n Proceeding compilation serially ..."
+        )
         collected_extensions = cythonize(
-            cython_extensions, annotate=True, language_level="3")
-    else: 
+            cython_extensions, annotate=True, language_level="3"
+        )
+    else:
         collected_extensions = cythonize(
-            cython_extensions, annotate=True, language_level="3", nthreads=os.cpu_count()-1)
+            cython_extensions,
+            annotate=True,
+            language_level="3",
+            nthreads=os.cpu_count() - 1,
+        )
     return collected_extensions
 
 
