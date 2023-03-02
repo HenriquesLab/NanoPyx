@@ -55,6 +55,7 @@ def test_simulate_particle_field_ensure_thresholds(plt):
         max_particles=1000,
         min_distance=0.01,
         mean_distance_threshold=0.1,
+        normalize = 1
     )
 
     assert mean_closest_distance > 0.1

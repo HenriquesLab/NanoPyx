@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 def simulate_particle_field_based_on_2D_PDF(image_pdf,
                                             min_particles: int = 10, max_particles: int = 1000,
-                                            min_distance: float = 0.1, mean_distance_threshold: float = 0, int max_tries = 3):
+                                            min_distance: float = 0.1, mean_distance_threshold: float = 0, normalize: bint = 1, int max_tries = 3):
     """
     Simulate a particle field based on a 2D probability density function (PDF)
     :param image_pdf: 2D array of floats, the PDF
@@ -22,6 +22,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     :param max_particles: int, the maximum number of particles to simulate
     :param min_distance: float, ensure that paricle distances are above minimum distance given
     :param mean_distance_threshold: float, the mean distance between closest particles, if the mean distance is below this threshold, the simulation will stop
+    :param normalize: bint, whether or not the image requires normalization
     :param max_tries: int, the maximum number of tries to place particles before giving up
     :return: (2D array of floats, mean closest distance), for the first tupple element the shape is (n_particles, 2) where the last dimension is the x and y coordinates of the simulated particle
 
@@ -35,8 +36,14 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     >>> image_pdf = np.random.random((100, 200)).astype(np.float32)
     >>> particles = simulate_particle_field_based_on_2D_PDF(image_pdf, min_particles=100, mean_distance_threshold=0.1)
     """
+    assert image_pdf.dtype == np.float32 and image_pdf.ndim == 2
 
-    assert image_pdf.dtype == np.float32 and image_pdf.ndim == 2 and np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
+    if normalize:
+        #image_pdf = (image_pdf - image_pdf.min())/(image_pdf.max() - image_pdf.min())
+        image_pdf = image_pdf / np.linalg.norm(image_pdf, axis=1, keepdims=True)
+
+    assert np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
+
 
     cdef float[:,:] _image_pdf = image_pdf
 
