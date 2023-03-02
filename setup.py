@@ -59,7 +59,8 @@ def get_mpicc_path():
         return None
 
 
-EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
+# EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
+EXTRA_C_FILES_PATH = os.path.join("src", "include")
 INCLUDE_DIRS = [EXTRA_C_FILES_PATH]
 LIBRARY_DIRS = []
 EXTRA_COMPILE_ARGS = []
