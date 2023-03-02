@@ -1,18 +1,14 @@
-#include <math.h>
+#ifndef _C_CATMULL_ROM_H
+#define _C_CATMULL_ROM_H
 
-// Cubic function used in Catmull-Rom interpolation
-// https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull.E2.80.93Rom_spline
-double _c_cubic(double v) {
-    double a = 0.5;
-    double z = 0;
-    if (v < 0) {
-        v = -v;
-    }
-    if (v < 1) {
-        z = v * v * (v * (-a + 2) + (a - 3)) + 1;
-    }
-    else if (v < 2) {
-        z = -a * v * v * v + 5 * a * v * v - 8 * a * v + 4 * a;
-    }
-    return z;
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+double _c_cubic(double v);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif /* _C_CATMULL_ROM_H */

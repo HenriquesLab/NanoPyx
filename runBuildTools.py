@@ -69,7 +69,7 @@ def update_gitignore():
         "__pycache__",
         "*.egg-info",
         "*.so",
-        "*.c",
+        "src/**/*.c",
         "src/**/*.html",
         ".coverage*",
         "tests_plots",

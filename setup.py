@@ -178,14 +178,23 @@ def collect_extensions():
     for file in cython_files:
         module = ".".join(os.path.splitext(file)[0].split(os.sep)[1:])
         sources = [file]
-        extra_c_file = "_c_" + module + ".c"
-        if os.path.exists(os.path.join("include", extra_c_file)):
-            sources.append(extra_c_file)
+
+        # analyse code for extra c files
+        with open(file, "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                if "# nanopyx-c-file: " in line:
+                    extra_c_file = os.path.join(
+                        "include", line.split("# nanopyx-c-file: ")[1].strip()
+                    )
+                    if os.path.exists(extra_c_file):
+                        sources.append(extra_c_file)
+                        print("Extra c file found: " + extra_c_file)
 
         ext = Extension(module, sources, **kwargs)
         cython_extensions.append(ext)
 
-    print(f"Found following files to build:\n {'; '.join(cython_files)}")
+    print(f"Found following .pyx files to build:\n {'; '.join(cython_files)}")
 
     if multiprocessing.get_start_method() == "spawn":
         print(
