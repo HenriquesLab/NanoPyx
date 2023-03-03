@@ -1,5 +1,4 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
-# nanopyx-c-file: _c_lanczos.c
 
 cdef extern from "_c_lanczos.h":
     double _c_lanczos_kernel(double v, int taps) nogil
