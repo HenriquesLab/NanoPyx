@@ -1,16 +1,11 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
-cdef extern from "_c_lanczos.h":
-    double _c_lanczos_kernel(double v, int taps) nogil
-
 from libc.math cimport pi, fabs, sin, floor, ceil, M_PI
 
 import numpy as np
 cimport numpy as np
 
 from cython.parallel import prange
-
-from .interpolation_nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
 
 cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     """

@@ -1,12 +1,7 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
-cdef extern from "_c_catmull_rom.h":
-    double _c_cubic(double v) nogil
-
 import numpy as np
 cimport numpy as np
-
-from .interpolation_nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
 
 
 def interpolate(np.ndarray im, double x, double y) -> float:
