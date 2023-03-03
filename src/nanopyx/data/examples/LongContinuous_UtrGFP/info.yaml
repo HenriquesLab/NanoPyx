@@ -9,7 +9,7 @@ description: |
   Set exposure time = 30ms
   Timestamp frame 59068 = 1800.333 --> mean exposure time = 30.5ms per frame
   Pixel size = 0.107 um (1.5x mag)
-data_dims: "t,y,x"
+data_dims: "time, height, width"
 data_shape: 5900, 512, 512
 data_dtype: uint16
 reference: "Culley et al, The International Journal of Biochemistry & Cell Biology, 2018"

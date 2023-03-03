@@ -1,0 +1,14 @@
+label: Cell2_TIRF_COS7_IC
+nickname: cell6_tirf
+description: | 
+    Acquired TIRF image of microtubules labelled with AlexaFluor647, COS-7 cells. 
+    Acquired by Inês Cunha at Instituto Gulbenkian de Ciência, 2023
+data_dims: "time, height, width"
+data_shape: 1, 418, 477
+data_dtype: uint16
+reference: ""
+reference_doi: ""
+tiff_sequence_url: https://drive.google.com/file/d/1Nn40teI6uEqwrBaG0vPNteGvmivngzre/view?usp=share_link
+tiff_sequence_url_type: "gdrive"
+tiff_sequence_size: "299KB"
+tiff_sequence_checksum: 

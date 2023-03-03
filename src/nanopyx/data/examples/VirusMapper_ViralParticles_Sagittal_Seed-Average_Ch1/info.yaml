@@ -5,7 +5,7 @@ description: |
 
   Figure 2 of the paper 'VirusMapper: open-source nanoscale mapping of viral architecture
   through super-resolution microscopy' by Gray et al, Scientific Reports, 2016
-data_dims: "p, y, x"
+data_dims: "p, height, width"
 data_shape: "1, 21, 21"
 data_dtype: float32
 reference: "Gray et al, Scientific Reports, 2016"

@@ -3,7 +3,7 @@ nickname: Crowded
 description: | 
     Single molecule localization microscopy dataset of U2OS cells with microtubules labelled with Alexa647
     Acquired by Pedro Pereira at University College London, UK - circa 2015
-data_dims: "t,y,x"
+data_dims: "time, height, width"
 data_shape: 1000, 464, 329
 data_dtype: uint16
 reference: ""

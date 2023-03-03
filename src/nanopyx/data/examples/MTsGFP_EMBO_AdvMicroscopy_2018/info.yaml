@@ -3,7 +3,7 @@ nickname: EMBL
 description: |
   HILO microscopy images of a HeLa cell expressing Tubulin-GFP.
   Acquired during an EMBL Advanced Microscopy course in 2018
-data_dims: "t,y,x"
+data_dims: "time, height, width"
 data_shape: 10000, 168, 128
 data_dtype: uint16
 reference: ""
