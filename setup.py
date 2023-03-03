@@ -1,6 +1,5 @@
 import os
 import os.path
-import glob
 import platform
 import subprocess
 import sys

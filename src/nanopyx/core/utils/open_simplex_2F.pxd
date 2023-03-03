@@ -62,24 +62,24 @@ cdef extern from "OpenSimplex2F.h":
         LatticePoint3D** LOOKUP_3D
         LatticePoint4D** VERTICES_4D
 
-    OpenSimplexEnv* initOpenSimplex()
+    OpenSimplexEnv* initOpenSimplex() nogil
 
-    OpenSimplexGradients* newOpenSimplexGradients(OpenSimplexEnv* ose, long seed)
+    OpenSimplexGradients* newOpenSimplexGradients(OpenSimplexEnv* ose, long seed) nogil
 
-    double noise2(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y)
+    double noise2(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y) nogil
 
-    double noise2_XBeforeY(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y)
+    double noise2_XBeforeY(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y) nogil
 
-    double noise3_Classic(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z)
+    double noise3_Classic(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z) nogil
 
-    double noise3_XYBeforeZ(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z)
+    double noise3_XYBeforeZ(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z) nogil
 
-    double noise3_XZBeforeY(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z)
+    double noise3_XZBeforeY(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z) nogil
 
-    double noise4_Classic(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z, double w)
+    double noise4_Classic(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z, double w) nogil
 
-    double noise4_XYBeforeZW(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z, double w)
+    double noise4_XYBeforeZW(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z, double w) nogil
 
-    double noise4_XZBeforeYW(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z, double w)
+    double noise4_XZBeforeYW(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z, double w) nogil
 
-    double noise4_XYZBeforeW(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z, double w)
+    double noise4_XYZBeforeW(OpenSimplexEnv* ose, OpenSimplexGradients* osg, double x, double y, double z, double w) nogil
