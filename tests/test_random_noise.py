@@ -1,6 +1,10 @@
 import numpy as np
 
-from nanopyx.core.generate.noise_add_random_noise import add_mixed_gaussian_poisson_noise, get_perlin_noise, get_simplex_noise
+from nanopyx.core.generate.noise_add_random_noise import (
+    add_mixed_gaussian_poisson_noise,
+    get_perlin_noise,
+    get_simplex_noise,
+)
 from nanopyx.core.generate.noise_add_squares import get_squares
 from nanopyx.core.generate.noise_add_ramp import get_ramp
 
@@ -24,7 +28,7 @@ def test_get_perlin_noise(plt):
 
 
 def test_get_simplex_noise(plt):
-    noise = get_simplex_noise(100, 400, f=10)
+    noise = get_simplex_noise(100, 400)
     # assert np.all(noise >= 0)
     plt.imshow(noise)
 

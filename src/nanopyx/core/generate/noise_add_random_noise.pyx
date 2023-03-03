@@ -1,8 +1,6 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 # code based on NanoJ-Core/Core/src/nanoj/core2/NanoJRandomNoise.java
 
-
-
 from libc.math cimport pow, log, sqrt, exp, pi, floor, fabs, fmax, fmin
 
 from ..utils.random cimport _random
@@ -15,7 +13,7 @@ import numpy as np
 cimport numpy as np
 
 from noise import pnoise2
-import opensimplex
+from ..utils.open_simplex_2F cimport _add_simplex_noise
 
 r = np.random.RandomState()
 
@@ -190,7 +188,7 @@ def add_perlin_noise(float[:,:] image, int amp=100, int offset = 100, float f = 
             image[j, i] += amp * p + offset
 
 
-def get_perlin_noise(w, h, amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
+def get_perlin_noise(w, h, float amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
     """
     Return a perlin noise image
     :param w: The width of the image
@@ -210,25 +208,18 @@ def get_perlin_noise(w, h, amp=100, int offset = 100, f = 10, octaves = 1, persi
     add_perlin_noise(image, amp, offset, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
     return image
 
-
-def get_simplex_noise(int w, int h, int f = 1):
+def get_simplex_noise(int rows, int columns, double frequency = 0.1, int octaves = 4, double persistence = 0.1, double amplitude = 1, int seed = 1234):
     """
     Return a simplex noise image
-    REF: https://github.com/lmas/opensimplex
-    :param w: The width of the image
-    :param h: The height of the image
-    :param f: The frequency of the noise
+    :param rows: The number of rows
+    :param columns: The number of columns
+    :param frequency: The frequency of the noise
+    :param octaves: The number of octaves
+    :param persistence: The persistence of the noise
+    :param amplitude: The amplitude of the noise
+    :param seed: The seed of the noise
     :return: The simplex noise image
     """
-
-    cdef float f_x = f
-    cdef float f_y = f
-    if w > h:
-        f_y *= w / h
-    else:
-        f_x *= h / w
-
-    x0 = np.linspace(0, f_x, num = h, dtype=np.float32)
-    y0 = np.linspace(0, f_y, num = w, dtype=np.float32)
-
-    return opensimplex.noise2array(x0, y0)
+    image = np.zeros((rows, columns), dtype=np.float32)
+    _add_simplex_noise(image, frequency, octaves, persistence, amplitude, seed)
+    return image
