@@ -1,6 +1,8 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 # code based on NanoJ-Core/Core/src/nanoj/core2/NanoJRandomNoise.java
 
+
+
 from libc.math cimport pow, log, sqrt, exp, pi, floor, fabs, fmax, fmin
 
 from ..utils.random cimport _random
@@ -40,13 +42,13 @@ cdef int _poisson_small(double mean) nogil:
     cdef double L = exp(-mean)
     cdef double p = 1.
     cdef int k = 1
-    
+
     p *= _random()
-    
+
     while (p > L):
         p *= _random()
         k += 1
-    
+
     return k - 1
 
 
@@ -66,14 +68,14 @@ cdef int _poisson_large(double mean) nogil:
     cdef double beta = pi/sqrt(3.0 * mean)
     cdef double alpha = beta*mean
     cdef double k = log(c) - mean - log(beta)
-    
+
     cdef double u, x, v, y, temp
     cdef int n
     while (True):
         u = _random()
         x = (alpha - log((1.0 - u) / u))/beta
         n = int(floor(x + 0.5))
-        if n < 0: 
+        if n < 0:
             continue
         v = _random()
         y = alpha - beta*x
@@ -131,7 +133,7 @@ def add_mixed_gaussian_poisson_noise(image, double gauss_sigma, double gauss_mea
                     v = fmax(v, 0)
                     v = fmin(v, 65535)
                     image_2d[j,i] = v
-    
+
     else:
         image_3d = image
         with nogil:
@@ -143,7 +145,7 @@ def add_mixed_gaussian_poisson_noise(image, double gauss_sigma, double gauss_mea
                         v = fmax(v, 0)
                         v = fmin(v, 65535)
                         image_3d[f,j,i] = v
-    
+
 
 def add_mixed_gaussian_poisson_noise2(np.ndarray image, double gauss_sigma, double gauss_mean):
     """
@@ -230,8 +232,3 @@ def get_simplex_noise(int w, int h, int f = 1):
     y0 = np.linspace(0, f_y, num = w, dtype=np.float32)
 
     return opensimplex.noise2array(x0, y0)
-
-
-
-
-

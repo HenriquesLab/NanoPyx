@@ -59,7 +59,9 @@ def get_mpicc_path():
         return None
 
 
-INCLUDE_DIRS = []
+# EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
+EXTRA_C_FILES_PATH = os.path.join("src", "include")
+INCLUDE_DIRS = [EXTRA_C_FILES_PATH]
 LIBRARY_DIRS = []
 EXTRA_COMPILE_ARGS = []
 EXTRA_LING_ARGS = []
@@ -70,10 +72,10 @@ if sys.platform == "win32":
 
     VC_VERSION = msvccompiler.get_build_version()
     ARCH = "x64" if architecture()[0] == "64bit" else "x86"
-    INCLUDE_DIRS = []
-    LIBRARY_DIRS = []
-    EXTRA_COMPILE_ARGS = ["/openmp"]
-    EXTRA_LING_ARGS = ["/openmp"]
+    INCLUDE_DIRS += []
+    LIBRARY_DIRS += []
+    EXTRA_COMPILE_ARGS += ["/openmp"]
+    EXTRA_LING_ARGS += ["/openmp"]
 
 elif sys.platform == "darwin":
     INCLUDE_DIRS += ["/usr/local/include"]
@@ -135,10 +137,10 @@ elif sys.platform == "darwin":
 
 
 elif sys.platform.startswith("linux"):
-    INCLUDE_DIRS = ["/usr/local/include", "/usr/include"]
-    LIBRARY_DIRS = ["/usr/local/lib", "/usr/lib"]
-    EXTRA_COMPILE_ARGS = ["-O3", "-march=native", "-fopenmp"]
-    EXTRA_LING_ARGS = ["-fopenmp"]
+    INCLUDE_DIRS += ["/usr/local/include", "/usr/include"]
+    LIBRARY_DIRS += ["/usr/local/lib", "/usr/lib"]
+    EXTRA_COMPILE_ARGS += ["-O3", "-march=native", "-fopenmp"]
+    EXTRA_LING_ARGS += ["-fopenmp"]
 
 try:
     import numpy
@@ -175,20 +177,58 @@ def collect_extensions():
     ]
 
     cython_extensions = []
+    extra_c_files = []
+
     for file in cython_files:
         module = ".".join(os.path.splitext(file)[0].split(os.sep)[1:])
-        ext = Extension(module, [file], **kwargs)
+        sources = [file]
+
+        # analyse code for extra c files
+        with open(file, "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                # check if we explicitly name a c file to include
+                if "# nanopyx-c-file: " in line:
+                    extra_c_file = os.path.join(
+                        EXTRA_C_FILES_PATH,
+                        line.split("# nanopyx-c-file: ")[1].strip(),
+                    )
+                    if os.path.exists(extra_c_file):
+                        sources.append(extra_c_file)
+                        extra_c_files.append(extra_c_file)
+
+                # search for header imports and check if the equivalent c files exist
+                elif "cdef extern from" in line:
+                    extra_c_file = os.path.join(
+                        EXTRA_C_FILES_PATH,
+                        line.split('"')[1].strip(),
+                    )
+                    extra_c_file = os.path.splitext(extra_c_file)[0] + ".c"
+                    if os.path.exists(extra_c_file) and extra_c_file not in sources:
+                        sources.append(extra_c_file)
+                        extra_c_files.append(extra_c_file)
+
+        ext = Extension(module, sources, **kwargs)
         cython_extensions.append(ext)
 
-    print(f"Found following files to build:\n {'; '.join(cython_files)}")
+    print(f"Found following .pyx files to build:\n {'; '.join(cython_files)}")
+    print(f"Found the extra c files to build:\n {'; '.join(extra_c_files)}")
 
-    if multiprocessing.get_start_method() == 'spawn':   
-        print("multiprocessing default behaviour does not allow concurrent compilation \n Proceeding compilation serially ...")
+    if multiprocessing.get_start_method() == "spawn":
+        print(
+            "multiprocessing default behaviour does not allow concurrent compilation\n",
+            "Proceeding compilation serially ...",
+        )
         collected_extensions = cythonize(
-            cython_extensions, annotate=True, language_level="3")
-    else: 
+            cython_extensions, annotate=True, language_level="3"
+        )
+    else:
         collected_extensions = cythonize(
-            cython_extensions, annotate=True, language_level="3", nthreads=os.cpu_count()-1)
+            cython_extensions,
+            annotate=True,
+            language_level="3",
+            nthreads=os.cpu_count() - 1,
+        )
     return collected_extensions
 
 

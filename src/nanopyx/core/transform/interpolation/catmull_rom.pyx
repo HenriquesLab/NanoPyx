@@ -1,5 +1,8 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
+cdef extern from "_c_catmull_rom.h":
+    double _c_cubic(double v) nogil
+
 import numpy as np
 cimport numpy as np
 
@@ -33,7 +36,7 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
         return 0
 
     cdef int x0 = int(x)
-    cdef int y0 = int(y)    
+    cdef int y0 = int(y)
 
     # do not interpolate if x and y positions exist in image
     #if x == x0 and y == y0:
@@ -52,30 +55,13 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
             u = u0 - 1 + i
             _u = max(0, min(u, w-1))
             _v = max(0, min(v, h-1))
-            p = p + image[_v, _u] * _cubic(x - (u + 0.5))
-        q = q + p * _cubic(y - (v + 0.5))
+            p = p + image[_v, _u] * _c_cubic(x - (u + 0.5))
+        q = q + p * _c_cubic(y - (v + 0.5))
 
     #if isnan(q) or isinf(q):
     #    return 0.
 
     return float(q)
-
-
-cdef double _cubic(double x) nogil:
-    """
-    Cubic function used in Catmull-Rom interpolation.
-    :param x: the input value
-    :return: the output value of cubic function (double)
-    """
-    cdef double a = 0.5  # Catmull-Rom interpolation
-    cdef double z = 0
-    if x < 0:
-        x = -x
-    if x < 1:
-        z = x * x * (x * (-a + 2.) + (a - 3.)) + 1.
-    elif x < 2:
-        z = -a * x * x * x + 5. * a * x * x - 8. * a * x + 4.0 * a
-    return z
 
 
 cdef class Interpolator(InterpolatorNearestNeighbor):

@@ -69,7 +69,7 @@ def update_gitignore():
         "__pycache__",
         "*.egg-info",
         "*.so",
-        "*.c",
+        "src/nanopyx/**/*.c",
         "src/**/*.html",
         ".coverage*",
         "tests_plots",
@@ -124,14 +124,15 @@ def extract_requirements_from_pyproject():
 
 
 def main(mode=None):
+    base_path = os.path.join("src", "nanopyx")
     files2clean = " ".join(
-        find_files("src", ".so")
-        + find_files("src", ".pyc")
-        + find_files("src", ".c")
-        + find_files("src", ".html")
-        + find_files("src", ".profile")
-        + find_files("notebooks", ".profile")
-        + find_files("src", ".pyd")  # Windows .dll-like file
+        find_files(base_path, ".so")
+        + find_files(base_path, ".pyc")
+        + find_files(base_path, ".c")
+        + find_files(base_path, ".html")
+        + find_files(base_path, ".profile")
+        + find_files(base_path, ".profile")
+        + find_files(base_path, ".pyd")  # Windows .dll-like file
     )
 
     python_call = shutil.which("python")

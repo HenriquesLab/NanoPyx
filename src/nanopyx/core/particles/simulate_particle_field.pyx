@@ -14,7 +14,7 @@ from tqdm import tqdm
 
 def simulate_particle_field_based_on_2D_PDF(image_pdf,
                                             min_particles: int = 10, max_particles: int = 1000,
-                                            min_distance: float = 0.1, mean_distance_threshold: float = 0, int max_tries = 3):
+                                            min_distance: float = 0.1, mean_distance_threshold: float = 0, normalize: bint = 1, int max_tries = 3):
     """
     Simulate a particle field based on a 2D probability density function (PDF)
     :param image_pdf: 2D array of floats, the PDF
@@ -22,6 +22,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     :param max_particles: int, the maximum number of particles to simulate
     :param min_distance: float, ensure that paricle distances are above minimum distance given
     :param mean_distance_threshold: float, the mean distance between closest particles, if the mean distance is below this threshold, the simulation will stop
+    :param normalize: bint, whether or not the image requires normalization
     :param max_tries: int, the maximum number of tries to place particles before giving up
     :return: (2D array of floats, mean closest distance), for the first tupple element the shape is (n_particles, 2) where the last dimension is the x and y coordinates of the simulated particle
 
@@ -35,8 +36,14 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     >>> image_pdf = np.random.random((100, 200)).astype(np.float32)
     >>> particles = simulate_particle_field_based_on_2D_PDF(image_pdf, min_particles=100, mean_distance_threshold=0.1)
     """
+    assert image_pdf.dtype == np.float32 and image_pdf.ndim == 2
 
-    assert image_pdf.dtype == np.float32 and image_pdf.ndim == 2 and np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
+    if normalize:
+        #image_pdf = (image_pdf - image_pdf.min())/(image_pdf.max() - image_pdf.min())
+        image_pdf = image_pdf / np.linalg.norm(image_pdf, axis=1, keepdims=True)
+
+    assert np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
+
 
     cdef float[:,:] _image_pdf = image_pdf
 
@@ -59,7 +66,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     cdef int tries = 0
     cdef float closest_distance, closest_distance_sum, mean_closest_distance
 
-    # start by creating the minumal pool of particles
+    # start by creating the minimal pool of particles
     with tqdm(total=max_particles, desc="Generating particles", unit="particles") as progress_bar:
         while 1:
             particles_not_set = np.nonzero(xp < 0)[0].astype(np.int32)  # get the index for the parciles not yet set
@@ -115,7 +122,7 @@ cdef bint _get_particle_candidate(float[:, :] _image_pdf, int particle_index, fl
     :param particle_index: int, the index of the particle to place
     :param xp: 1D array of floats, the x coordinates of the particles
     :param yp: 1D array of floats, the y coordinates of the particles
-    :param min_distance: float, ensure that paricle distances are above minimum distance given
+    :param min_distance: float, ensure that particle distances are above minimum distance given
     :return: 1 if a particle was placed, 0 if not
     """
 

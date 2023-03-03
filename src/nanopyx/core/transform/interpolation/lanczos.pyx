@@ -1,5 +1,8 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
+cdef extern from "_c_lanczos.h":
+    double _c_lanczos_kernel(double v, int taps) nogil
+
 from libc.math cimport pi, fabs, sin, floor, ceil, M_PI
 
 import numpy as np
@@ -27,7 +30,7 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
         return 0
 
     cdef int x0 = int(x)
-    cdef int y0 = int(y)    
+    cdef int y0 = int(y)
 
     # do not interpolate if x and y positions exist in image
     if x == x0 and y == y0:
@@ -35,23 +38,23 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
 
     cdef double x_factor, y_factor
     cdef int i, j
-    
+
     # Determine the low and high indices for the x and y dimensions
     cdef int x_low = int(floor(x) - taps)
     cdef int x_high = int(ceil(x) + taps)
     cdef int y_low = int(floor(y) - taps)
     cdef int y_high = int(ceil(y) + taps)
-    
+
     # Initialize the interpolation value to 0
     cdef double interpolation = 0
     cdef double weight
     cdef double weight_sum = 0
-    
+
     # Loop over the taps in the x and y dimensions
     for i in range(x_low, x_high+1):
-        x_factor = _lanczos_kernel(x - i, taps)
+        x_factor = _c_lanczos_kernel(x - i, taps)
         for j in range(y_low, y_high+1):
-            y_factor = _lanczos_kernel(y - j, taps)                        
+            y_factor = _c_lanczos_kernel(y - j, taps)
             # Check if the indices are in bounds
             i = max(0, min(i, w-1))
             j = max(0, min(j, h-1))
@@ -60,25 +63,8 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
             weight = x_factor * y_factor
             interpolation += image[j, i] * weight
             weight_sum += weight
-    
+
     return float(interpolation / weight_sum)
-
-
-# Lanczos kernel function
-cdef double _lanczos_kernel(double x, int taps) nogil:
-    """
-    Calculate the Lanczos kernel (windowed sinc function) value for a given value.
-    REF: https://en.wikipedia.org/wiki/Lanczos_resampling
-    :param x: The value for which to calculate the kernel.
-    :param taps: The number of taps (interpolation points) in the kernel.
-    :return: The kernel value for the given value.
-    """
-    if x == 0:
-        return 1.0
-    elif fabs(x) < taps:
-        return taps * sin(pi * x) * sin(M_PI * x / taps) / (M_PI * M_PI * x * x)
-    else:
-        return 0.0
 
 
 cdef class Interpolator(InterpolatorNearestNeighbor):
