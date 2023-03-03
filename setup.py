@@ -1,5 +1,6 @@
 import os
 import os.path
+import glob
 import platform
 import subprocess
 import sys
@@ -8,6 +9,13 @@ import multiprocessing
 from Cython.Build import cythonize
 from Cython.Compiler import Options
 from setuptools import Extension, setup
+
+# EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
+EXTRA_C_FILES_PATH = os.path.join("src", "include")
+INCLUDE_DIRS = [EXTRA_C_FILES_PATH]
+LIBRARY_DIRS = []
+EXTRA_COMPILE_ARGS = []
+EXTRA_LING_ARGS = []
 
 
 def run_command(command: str) -> str:
@@ -59,12 +67,39 @@ def get_mpicc_path():
         return None
 
 
-# EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
-EXTRA_C_FILES_PATH = os.path.join("src", "include")
-INCLUDE_DIRS = [EXTRA_C_FILES_PATH]
-LIBRARY_DIRS = []
-EXTRA_COMPILE_ARGS = []
-EXTRA_LING_ARGS = []
+def search_for_c_files_referrenced_in_pyx_text(text: str):
+    c_files = []
+    for line in text.splitlines():
+        # check if we explicitly name a c file to include
+        if "# nanopyx-c-file: " in line:
+            c_file = line.split("# nanopyx-c-file: ")[1].strip()
+            if c_file not in c_files:
+                c_files.append(c_file)
+
+        # search for header imports and check if the equivalent c files exist
+        elif "cdef extern from" in line:
+            c_file = line.split('"')[1].strip()
+            c_file = os.path.splitext(c_file)[0] + ".c"
+            if c_file not in c_files:
+                c_files.append(c_file)
+
+    # search for the file path under EXTRA_C_FILES_PATH path tree
+    for i, c_file in enumerate(c_files):
+        c_file_path = os.path.join(EXTRA_C_FILES_PATH, c_file)
+        if os.path.exists(c_file_path):
+            c_files[i] = c_file_path
+        else:
+            # try to find the file
+            for root, dirs, files in os.walk(EXTRA_C_FILES_PATH):
+                # Check if the current directory contains the target file
+                if c_file in files:
+                    # If found, print the full path to the file
+                    c_file = os.path.join(root, c_file)
+                    c_files[i] = c_file
+                    break
+
+    return c_files
+
 
 if sys.platform == "win32":
     from distutils import msvccompiler
@@ -183,30 +218,35 @@ def collect_extensions():
         module = ".".join(os.path.splitext(file)[0].split(os.sep)[1:])
         sources = [file]
 
-        # analyse code for extra c files
-        with open(file, "r") as f:
-            lines = f.readlines()
-            for line in lines:
-                # check if we explicitly name a c file to include
-                if "# nanopyx-c-file: " in line:
-                    extra_c_file = os.path.join(
-                        EXTRA_C_FILES_PATH,
-                        line.split("# nanopyx-c-file: ")[1].strip(),
-                    )
-                    if os.path.exists(extra_c_file):
-                        sources.append(extra_c_file)
-                        extra_c_files.append(extra_c_file)
+        # - Analyse code for extra c files -
+        # First search in the pxd file, if it exists
+        pxd_file = os.path.join(
+            os.path.dirname(file),
+            os.path.basename(file).split(".")[0] + ".pxd",
+        )
+        if os.path.exists(pxd_file):
+            with open(pxd_file, "r") as f:
+                extra_c_files_candadates = search_for_c_files_referrenced_in_pyx_text(
+                    f.read()
+                )
+            sources += extra_c_files_candadates
+            extra_c_files += extra_c_files_candadates
 
-                # search for header imports and check if the equivalent c files exist
-                elif "cdef extern from" in line:
-                    extra_c_file = os.path.join(
-                        EXTRA_C_FILES_PATH,
-                        line.split('"')[1].strip(),
-                    )
-                    extra_c_file = os.path.splitext(extra_c_file)[0] + ".c"
-                    if os.path.exists(extra_c_file) and extra_c_file not in sources:
-                        sources.append(extra_c_file)
-                        extra_c_files.append(extra_c_file)
+        # Now search in the pyx file
+        with open(file, "r") as f:
+            extra_c_files_candadates = search_for_c_files_referrenced_in_pyx_text(
+                f.read()
+            )
+            sources += extra_c_files_candadates
+            extra_c_files += extra_c_files_candadates
+
+        # Remove redundancy
+        sources = list(set(sources))
+        extra_c_files = list(set(extra_c_files))
+        # Make sure we have all the include paths
+        for path in extra_c_files:
+            if os.path.split(path)[0] not in INCLUDE_DIRS:
+                INCLUDE_DIRS.append(os.path.split(path)[0])
 
         ext = Extension(module, sources, **kwargs)
         cython_extensions.append(ext)

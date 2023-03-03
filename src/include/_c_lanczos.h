@@ -5,15 +5,14 @@
 #include <math.h>
 
 #ifndef M_PI
-    #define M_PI 3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-    double _c_lanczos_kernel(double v, int taps);
+double _c_lanczos_kernel(double v, int taps);
 
 #ifdef __cplusplus
 }
