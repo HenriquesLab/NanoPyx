@@ -187,12 +187,24 @@ def collect_extensions():
         with open(file, "r") as f:
             lines = f.readlines()
             for line in lines:
+                # check if we explicitly name a c file to include
                 if "# nanopyx-c-file: " in line:
                     extra_c_file = os.path.join(
                         EXTRA_C_FILES_PATH,
                         line.split("# nanopyx-c-file: ")[1].strip(),
                     )
                     if os.path.exists(extra_c_file):
+                        sources.append(extra_c_file)
+                        extra_c_files.append(extra_c_file)
+
+                # search for header imports and check if the equivalent c files exist
+                elif "cdef extern from" in line:
+                    extra_c_file = os.path.join(
+                        EXTRA_C_FILES_PATH,
+                        line.split('"')[1].strip(),
+                    )
+                    extra_c_file = os.path.splitext(extra_c_file)[0] + ".c"
+                    if os.path.exists(extra_c_file) and extra_c_file not in sources:
                         sources.append(extra_c_file)
                         extra_c_files.append(extra_c_file)
 
