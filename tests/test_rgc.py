@@ -1,4 +1,4 @@
-from nanopyx.core.sr.radial_gradient_convergence import RadialGradientConvergence
+from nanopyx.core.transform.sr_radial_gradient_convergence import RadialGradientConvergence
 from nanopyx.data.download import ExampleDataManager
 from matplotlib import pyplot as plt
 import numpy as np

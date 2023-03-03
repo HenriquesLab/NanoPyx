@@ -1,6 +1,6 @@
 import numpy as np
 from nanopyx.data.download import ExampleDataManager
-from nanopyx.core.sr.frc import FIRECalculator
+from nanopyx.core.analysis.frc import FIRECalculator
 
 downloader = ExampleDataManager()
 

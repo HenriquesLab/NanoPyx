@@ -1,9 +1,9 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
-from nanopyx.core.sr.error_map import ErrorMap
+from nanopyx.core.transform.error_map import ErrorMap
 from nanopyx.core.transform.binning import rebin_2d
-from nanopyx.core.image.add_random_noise import (
+from nanopyx.core.generate.noise_add_random_noise import (
     add_mixed_gaussian_poisson_noise,
     add_perlin_noise,
 )

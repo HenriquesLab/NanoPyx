@@ -5,14 +5,12 @@ Combination of functions for shifting an image, using several interpolation meth
 from scipy.ndimage import shift
 import numpy as np
 
-from ..utils.time.timeit import timeit2
-from .interpolation import (
-    bicubic,
-    bilinear,
-    nearest_neighbor,
-    catmull_rom,
-    lanczos,
-)
+from ..utils.timeit import timeit2
+from . import interpolation_bicubic
+from . import interpolation_bilinear
+from . import interpolation_nearest_neighbor
+from . import interpolation_catmull_rom
+from . import interpolation_lanczos
 
 from skimage.transform import AffineTransform, warp
 import cv2
@@ -20,31 +18,31 @@ import cv2
 
 @timeit2
 def catmull_rom_shift(image: np.ndarray, dx: float, dy: float):
-    interpolator = catmull_rom.Interpolator(image)
+    interpolator = interpolation_catmull_rom.Interpolator(image)
     return interpolator.shift(dx, dy)
 
 
 @timeit2
 def lanczos_shift(image: np.ndarray, dx: float, dy: float, taps: int = 3):
-    interpolator = lanczos.Interpolator(image, taps)
+    interpolator = interpolation_lanczos.Interpolator(image, taps)
     return interpolator.shift(dx, dy)
 
 
 @timeit2
 def bicubic_shift(image: np.ndarray, dx: float, dy: float):
-    interpolator = bicubic.Interpolator(image)
+    interpolator = interpolation_bicubic.Interpolator(image)
     return interpolator.shift(dx, dy)
 
 
 @timeit2
 def bilinear_shift(image: np.ndarray, dx: float, dy: float):
-    interpolator = bilinear.Interpolator(image)
+    interpolator = interpolation_bilinear.Interpolator(image)
     return interpolator.shift(dx, dy)
 
 
 @timeit2
 def nearest_neighbor_shift(image: np.ndarray, dx: float, dy: float):
-    interpolator = nearest_neighbor.Interpolator(image)
+    interpolator = interpolation_nearest_neighbor.Interpolator(image)
     return interpolator.shift(dx, dy)
 
 

@@ -1,4 +1,4 @@
-from nanopyx.core.particles.simulate_photoswitching_time_tracks import simple_state_transition_model
+from nanopyx.core.generate.simulate_photoswitching_time_tracks import simple_state_transition_model
 
 
 def test_simple_state_transition_model(plt):

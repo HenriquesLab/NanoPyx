@@ -1,5 +1,5 @@
 import math
-from nanopyx.core.sr.decorr import DecorrAnalysis
+from nanopyx.core.analysis.decorr import DecorrAnalysis
 
 
 def test_decorr_analysis(random_timelapse_w_drift):

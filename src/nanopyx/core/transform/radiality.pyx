@@ -12,7 +12,7 @@ from libc.stdlib cimport free
 import numpy as np
 cimport numpy as np
 
-from .interpolation.catmull_rom cimport _interpolate
+from .interpolation_catmull_rom cimport _interpolate
 
 from cython.parallel import prange
 

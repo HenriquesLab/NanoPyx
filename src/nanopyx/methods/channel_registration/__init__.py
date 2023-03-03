@@ -1,6 +1,6 @@
 from .estimator import ChannelRegistrationEstimator
 from .corrector import ChannelRegistrationCorrector
-from ...core.utils.time.timeit import timeit
+from ...core.utils.timeit import timeit
 
 @timeit
 def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method="subpixel",

@@ -1,10 +1,10 @@
 
 import numpy as np
 
-from .ccm.estimate_shift import GetMaxOptimizer
-from .ccm.ccm import calculate_ccm_cartesian, calculate_ccm_polar, calculate_ccm_logpolar
+from .estimate_shift import GetMaxOptimizer
+from .ccm import calculate_ccm_cartesian, calculate_ccm_polar, calculate_ccm_logpolar
 
-from ..transform.interpolation.catmull_rom import Interpolator
+from ..transform.interpolation_catmull_rom import Interpolator
 
 class Registration:
 

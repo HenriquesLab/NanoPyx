@@ -1,7 +1,7 @@
 import numpy as np
 from skimage.io import imread
 
-from ...core.transform.interpolation.catmull_rom import interpolate
+from ...core.transform.interpolation_catmull_rom import interpolate
 
 
 class ChannelRegistrationCorrector(object):

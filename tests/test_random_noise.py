@@ -1,8 +1,8 @@
 import numpy as np
 
-from nanopyx.core.image.add_random_noise import add_mixed_gaussian_poisson_noise, get_perlin_noise, get_simplex_noise
-from nanopyx.core.image.add_squares import get_squares
-from nanopyx.core.image.add_ramp import get_ramp
+from nanopyx.core.generate.noise_add_random_noise import add_mixed_gaussian_poisson_noise, get_perlin_noise, get_simplex_noise
+from nanopyx.core.generate.noise_add_squares import get_squares
+from nanopyx.core.generate.noise_add_ramp import get_ramp
 
 
 def test_random_noise(random_image_with_ramp_squares):
