@@ -158,55 +158,72 @@ def add_mixed_gaussian_poisson_noise2(np.ndarray image, double gauss_sigma, doub
     image[:] = np.clip(r.poisson(image)+r.normal(scale=gauss_sigma, size=tuple(shape), loc=gauss_mean), 0, 65535)
 
 
-def add_perlin_noise(float[:,:] image, int amp=100, int offset = 100, float f = 100, int octaves = 1, float persistence = 0.5, float lacunarity = 2., float repeatx = 1024, float repeaty = 1024, int base = 0):
+# def add_perlin_noise(float[:,:] image, int amp=100, int offset = 100, float f = 100, int octaves = 1, float persistence = 0.5, float lacunarity = 2., float repeatx = 1024, float repeaty = 1024, int base = 0):
+#     """
+#     Add perlin noise to an image
+#     :param image: The image to add noise to
+#     :param amp: The amplitude of the noise
+#     :param offset: The offset of the noise
+#     :param f: The frequency of the noise
+#     :param octaves: The number of octaves
+#     :param persistence: The persistence of the noise
+#     :param lacunarity: The lacunarity of the noise
+#     :param repeatx: The repeat of the noise in the x direction
+#     :param repeaty: The repeat of the noise in the y direction
+#     :param base: The base of the noise
+#     """
+#     cdef double p
+#     cdef int w = image.shape[1]
+#     cdef int h = image.shape[0]
+#     cdef float f_x = f / w
+#     cdef float f_y = f / h
+#     if w > h:
+#         f_x *= w / h
+#     else:
+#         f_y *= h / w
+
+#     for j in range(h):
+#         for i in range(w):
+#             p = pnoise2(i * f_x, j * f_y, octaves, persistence, lacunarity, repeatx, repeaty, base)
+#             image[j, i] += amp * p + offset
+
+
+# def get_perlin_noise(w, h, float amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
+#     """
+#     Return a perlin noise image
+#     :param w: The width of the image
+#     :param h: The height of the image
+#     :param amp: The amplitude of the noise
+#     :param offset: The offset of the noise
+#     :param f: The frequency of the noise
+#     :param octaves: The number of octaves
+#     :param persistence: The persistence of the noise
+#     :param lacunarity: The lacunarity of the noise
+#     :param repeatx: The repeat of the noise in the x direction
+#     :param repeaty: The repeat of the noise in the y direction
+#     :param base: The base of the noise
+#     :return: The perlin noise image
+#     """
+#     image = np.zeros((w, h), dtype=np.float32)
+#     add_perlin_noise(image, amp, offset, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
+#     return image
+
+def add_simplex_noise(image: np.ndarray, double frequency = 0.1, int octaves = 4, double persistence = 0.1, double amplitude = 1, int seed = 1234):
     """
-    Add perlin noise to an image
+    Add simplex noise to an image
     :param image: The image to add noise to
-    :param amp: The amplitude of the noise
-    :param offset: The offset of the noise
-    :param f: The frequency of the noise
+    :param frequency: The frequency of the noise
     :param octaves: The number of octaves
     :param persistence: The persistence of the noise
-    :param lacunarity: The lacunarity of the noise
-    :param repeatx: The repeat of the noise in the x direction
-    :param repeaty: The repeat of the noise in the y direction
-    :param base: The base of the noise
+    :param amplitude: The amplitude of the noise
+    :param seed: The seed of the noise
     """
-    cdef double p
-    cdef int w = image.shape[1]
-    cdef int h = image.shape[0]
-    cdef float f_x = f / w
-    cdef float f_y = f / h
-    if w > h:
-        f_x *= w / h
-    else:
-        f_y *= h / w
 
-    for j in range(h):
-        for i in range(w):
-            p = pnoise2(i * f_x, j * f_y, octaves, persistence, lacunarity, repeatx, repeaty, base)
-            image[j, i] += amp * p + offset
+    assert image.ndim == 2, "Only 2D images are supported"
 
+    image = image.view(np.float32)
+    _add_simplex_noise(image, frequency, octaves, persistence, amplitude, seed)
 
-def get_perlin_noise(w, h, float amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
-    """
-    Return a perlin noise image
-    :param w: The width of the image
-    :param h: The height of the image
-    :param amp: The amplitude of the noise
-    :param offset: The offset of the noise
-    :param f: The frequency of the noise
-    :param octaves: The number of octaves
-    :param persistence: The persistence of the noise
-    :param lacunarity: The lacunarity of the noise
-    :param repeatx: The repeat of the noise in the x direction
-    :param repeaty: The repeat of the noise in the y direction
-    :param base: The base of the noise
-    :return: The perlin noise image
-    """
-    image = np.zeros((w, h), dtype=np.float32)
-    add_perlin_noise(image, amp, offset, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
-    return image
 
 def get_simplex_noise(int rows, int columns, double frequency = 0.1, int octaves = 4, double persistence = 0.1, double amplitude = 1, int seed = 1234):
     """
