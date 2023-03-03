@@ -5,11 +5,13 @@ Contains helper methods for downloading and loading example test data
 >>> downloader = ExampleDataManager()
 >>> datasets = downloader.list_datasets()
 >>> print("\\n".join([" - "+dataset for dataset in datasets]))
+ - Cell1_STORM_COS7_IC
+ - Cell2_STORM_COS7_IC
+ - Cell2_TIRF_COS7_IC
  - ImmunoSynapseFormation_LifeActGFP
  - LongContinuous_UtrGFP
  - MTsGFP_EMBO_AdvMicroscopy_2018
  - PumpyCos7_UtrGFP
- - Reconstructed_COS7_STORM_IC
  - SMLMS2013_HDTubulinAlexa647
  - SM_U2OS_Pereira_MTAlexaA647_V1
  - SM_U2OS_Pereira_MTAlexaA647_V2

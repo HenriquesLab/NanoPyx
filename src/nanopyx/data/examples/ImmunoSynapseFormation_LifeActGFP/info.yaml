@@ -6,7 +6,7 @@ description: |
   to stimulate an immunological synapse formation.
   Fig 4 of the paper 'Fast live-cell conventional fluorophore nanoscopy
   with ImageJ through super-resolution radial fluctuations'
-data_dims: "t,y,x"
+data_dims: "time, height, width"
 data_shape: 20000, 256, 256
 data_dtype: uint16
 reference: "Gustafsson, Culley et al, Nature Communications, 2016"

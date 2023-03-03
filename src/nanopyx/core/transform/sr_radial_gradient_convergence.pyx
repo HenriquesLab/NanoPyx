@@ -12,6 +12,9 @@ cimport numpy as np
 
 from cython.parallel import prange
 
+cdef extern from "_c_calculate_distance_weight.h":
+    double _c_calculate_dw(double distance, double tSS) nogil
+
 cdef float Gx_Gy_MAGNIFICATION = 2.0
 
 cdef class RadialGradientConvergence:
@@ -156,7 +159,8 @@ cdef class RadialGradientConvergence:
                         if distance != 0 and distance <= self.tSO:
                             Gx = _interpolate(imGx, vx * self.magnification, vy * self.magnification) # get interpolated value (in continuous space) via Catmull-Rom interpolation
                             Gy = _interpolate(imGy, vx * self.magnification, vy * self.magnification)
-                            distanceWeight = self._calculateDW(distance)
+                            distanceWeight = _c_calculate_dw(distance, self.tSS)
+                            # distanceWeight = self._calculateDW(distance)
                             distanceWeightSum += distanceWeight
                             GdotR = Gx*dx + Gy*dy
 

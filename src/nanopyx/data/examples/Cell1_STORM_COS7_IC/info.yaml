@@ -1,7 +1,7 @@
-label: Reconstructed_COS7_STORM_IC
-nickname: cos7
+label: Cell1_STORM_COS7_IC
+nickname: cell3
 description: | 
-    Single molecule localization microscopy reconstruction of COS-7 cells with microtubules labelled with Alexa647
+    Single molecule localization microscopy reconstruction of COS-7 cells labelled against beta-tubulin with AlexaFluor647
     Acquired and post-processed by Inês Cunha at Instituto Gulbenkian de Ciência, 2023
 data_dims: "t,y,x"
 data_shape: 1, 1190, 1180

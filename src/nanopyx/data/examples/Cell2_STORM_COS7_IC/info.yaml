@@ -1,0 +1,14 @@
+label: Cell2_STORM_COS7_IC
+nickname: cell6
+description: | 
+    Single molecule localization microscopy reconstruction of COS-7 cells labelled against beta-tubulin with AlexaFluor647
+    Acquired and post-processed by Inês Cunha at Instituto Gulbenkian de Ciência, 2023
+data_dims: "time, height, width"
+data_shape: 1, 2090, 2385
+data_dtype: uint32
+reference: ""
+reference_doi: ""
+tiff_sequence_url: https://drive.google.com/file/d/1guyp48ZWJpf65TfXE4HFWKsSYzVs5Smr/view?usp=share_link
+tiff_sequence_url_type: "gdrive"
+tiff_sequence_size: "2.8MB"
+tiff_sequence_checksum: 

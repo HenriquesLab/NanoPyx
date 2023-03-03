@@ -4,7 +4,7 @@ description: |
   HILO microscopy images of a Cos7 cell expressing UtrCH-GFP imaged every 10 min for 150 min.
   Each 99 frames are a burst, followed by a 10 min pause.
   Figure 4 of the paper 'Automating multimodal microscopy with NanoJ-Fluidics'.
-data_dims: "t,y,x"
+data_dims: "time, height, width"
 data_shape: 1485, 512, 512
 data_dtype: uint16
 reference: "Almada, Pereira et al, Nature Communications, 2019"

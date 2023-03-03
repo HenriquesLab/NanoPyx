@@ -6,7 +6,7 @@ description: |
   The microtubules are stained with α-tubulin primary antibodies and Alexa-647–conjugated
   secondary antibody fragments. Reference: "Nicolas Olivier, & Debora Keller. (2023).
   STORM Vectashield datasets (Tubulin) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.7620025"
-data_dims: "t,y,x"
+data_dims: "time, height, width"
 data_shape: 500, 128, 128
 data_dtype: uint16
 reference: "Nicolas Olivier, & Debora Keller, Zenodo, 2023"
