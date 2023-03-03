@@ -1,5 +1,5 @@
-from nanopyx.core.image.blocks import assemble_frame_from_blocks
-from nanopyx.core.image.generate.beads import generate_timelapse_drift
+from nanopyx.core.transform.blocks import assemble_frame_from_blocks
+from nanopyx.core.generate.beads import generate_timelapse_drift
 
 
 def test_assemble_blocks(random_timelapse_w_drift):

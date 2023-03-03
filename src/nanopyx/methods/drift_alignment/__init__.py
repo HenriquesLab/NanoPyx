@@ -1,6 +1,6 @@
 from .corrector import DriftCorrector
 from .estimator import DriftEstimator
-from ...core.utils.time.timeit import timeit
+from ...core.utils.timeit import timeit
 
 
 @timeit

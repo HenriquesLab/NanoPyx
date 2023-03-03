@@ -4,44 +4,42 @@ Combination of functions for shifting an image, using several interpolation meth
 
 import numpy as np
 
-from ..utils.time.timeit import timeit2
-from .interpolation import (
-    bicubic,
-    bilinear,
-    nearest_neighbor,
-    catmull_rom,
-    lanczos,
-)
+from ..utils.timeit import timeit2
+from . import interpolation_bicubic
+from . import interpolation_bilinear
+from . import interpolation_nearest_neighbor
+from . import interpolation_catmull_rom
+from . import interpolation_lanczos
 
 from skimage.transform import warp_polar
 
 @timeit2
 def catmull_rom_polar(image: np.ndarray, scale:str='linear'):
-    interpolator = catmull_rom.Interpolator(image)
+    interpolator = interpolation_catmull_rom.Interpolator(image)
     return interpolator.polar(scale)
 
 
 @timeit2
 def lanczos_polar(image: np.ndarray, scale:str='linear', taps: int = 3):
-    interpolator = lanczos.Interpolator(image, taps)
+    interpolator = interpolation_lanczos.Interpolator(image, taps)
     return interpolator.polar(scale)
 
 
 @timeit2
 def bicubic_polar(image: np.ndarray, scale:str='linear'):
-    interpolator = bicubic.Interpolator(image)
+    interpolator = interpolation_bicubic.Interpolator(image)
     return interpolator.polar(scale)
 
 
 @timeit2
 def bilinear_polar(image: np.ndarray, scale:str='linear'):
-    interpolator = bilinear.Interpolator(image)
+    interpolator = interpolation_bilinear.Interpolator(image)
     return interpolator.polar(scale)
 
 
 @timeit2
 def nearest_neighbor_polar(image: np.ndarray, scale:str='linear'):
-    interpolator = nearest_neighbor.Interpolator(image)
+    interpolator = interpolation_nearest_neighbor.Interpolator(image)
     return interpolator.polar(scale)
 
 

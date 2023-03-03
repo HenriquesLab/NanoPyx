@@ -8,9 +8,14 @@ from cv2 import resize as cv2_resize
 from scipy.ndimage import zoom
 from skimage.transform import rescale
 
-from ..utils.time.timeit import timeit2
-from .interpolation import (bicubic, bilinear, catmull_rom, fft_zoom, lanczos,
-                            nearest_neighbor)
+from . import interpolation_fft_zoom
+
+from ..utils.timeit import timeit2
+from . import interpolation_bicubic
+from . import interpolation_bilinear
+from . import interpolation_nearest_neighbor
+from . import interpolation_catmull_rom
+from . import interpolation_lanczos
 
 
 @timeit2
@@ -22,7 +27,7 @@ def fourier_zoom(image: np.ndarray, magnification: float = 2) -> np.ndarray:
     :return: zoomed image.
     """
 
-    return fft_zoom.magnify(image, magnification)
+    return interpolation_fft_zoom.magnify(image, magnification)
 
 
 @timeit2
@@ -35,11 +40,11 @@ def catmull_rom_zoom(image: np.ndarray, magnification: int = 2) -> np.ndarray:
     REF: based on https://github.com/HenriquesLab/NanoJ-SRRF/blob/master/SRRF/src/nanoj/srrf/java/SRRF.java
     """
 
-    interpolator = catmull_rom.Interpolator(image)
+    interpolator = interpolation_catmull_rom.Interpolator(image)
     return interpolator.magnify(magnification)
 
 def catmull_rom_zoom_xy(image: np.ndarray, magnification_y: int = 2, magnification_x: int = 2) -> np.ndarray:
-    interpolator = catmull_rom.Interpolator(image)
+    interpolator = interpolation_catmull_rom.Interpolator(image)
     return interpolator.magnify_xy(magnification_y, magnification_x)
 
 @timeit2
@@ -54,7 +59,7 @@ def lanczos_zoom(
     :return: zoomed image.
     """
 
-    interpolator = lanczos.Interpolator(image, taps)
+    interpolator = interpolation_lanczos.Interpolator(image, taps)
     return interpolator.magnify(magnification)
 
 
@@ -67,7 +72,7 @@ def bicubic_zoom(image: np.ndarray, magnification: int = 2) -> np.ndarray:
     :return: zoomed image.
     """
 
-    interpolator = bicubic.Interpolator(image)
+    interpolator = interpolation_bicubic.Interpolator(image)
     return interpolator.magnify(magnification)
 
 
@@ -80,7 +85,7 @@ def bilinear_zoom(image: np.ndarray, magnification: int = 2) -> np.ndarray:
     :return: zoomed image.
     """
 
-    interpolator = bilinear.Interpolator(image)
+    interpolator = interpolation_bilinear.Interpolator(image)
     return interpolator.magnify(magnification)
 
 
@@ -95,7 +100,7 @@ def nearest_neighbor_zoom(
     :return: zoomed image.
     """
 
-    interpolator = nearest_neighbor.Interpolator(image)
+    interpolator = interpolation_nearest_neighbor.Interpolator(image)
     return interpolator.magnify(magnification)
 
 

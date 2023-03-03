@@ -1,6 +1,6 @@
 import numpy as np
 
-from nanopyx.core.particles.simulate_particle_field import (
+from nanopyx.core.generate.simulate_particle_field import (
     get_closest_distance,
     render_particle_histogram,
     simulate_particle_field_based_on_2D_PDF,

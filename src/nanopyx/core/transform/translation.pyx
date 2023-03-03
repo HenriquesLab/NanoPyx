@@ -1,11 +1,11 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=False
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
 
 import numpy as np
 cimport numpy as np
 
 from cython.parallel import prange
 
-from .interpolation.catmull_rom cimport Interpolator
+from .interpolation_catmull_rom cimport Interpolator
 
 
 def translate_array(float[:, :, :] img_arr, float[:, :] drift_t):

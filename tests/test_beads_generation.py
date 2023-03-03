@@ -1,4 +1,4 @@
-from nanopyx.core.image.generate.beads import generate_timelapse_drift
+from nanopyx.core.generate.beads import generate_timelapse_drift
 
 
 def test_generate_random_drift():

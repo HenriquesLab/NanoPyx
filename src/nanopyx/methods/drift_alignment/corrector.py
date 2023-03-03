@@ -1,5 +1,5 @@
 from .estimator_table import DriftEstimatorTable
-from ...core.utils.time.timeit import timeit
+from ...core.utils.timeit import timeit
 from ...core.transform import translation
 from ...core.transform.image_shift import cv2_shift
 

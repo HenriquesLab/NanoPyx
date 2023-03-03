@@ -4,10 +4,10 @@ from scipy.interpolate import interp1d
 
 from .estimator_table import DriftEstimatorTable
 from .corrector import DriftCorrector
-from ...core.analysis.ccm.estimate_shift import GetMaxOptimizer
-from ...core.utils.time.timeit import timeit
-from ...core.analysis.ccm.ccm import calculate_ccm
-from ...core.analysis.ccm.rcc import rcc
+from ...core.analysis.estimate_shift import GetMaxOptimizer
+from ...core.utils.timeit import timeit
+from ...core.analysis.ccm import calculate_ccm
+from ...core.analysis.rcc import rcc
 
 
 class DriftEstimator(object):

@@ -1,6 +1,6 @@
 
-from nanopyx.core.image.add_gaussians import render_random_gaussians
-from nanopyx.core.image.add_random_noise import add_mixed_gaussian_poisson_noise
+from nanopyx.core.generate.noise_add_gaussians import render_random_gaussians
+from nanopyx.core.generate.noise_add_random_noise import add_mixed_gaussian_poisson_noise
 
 
 def test_random_gaussians(plt):
