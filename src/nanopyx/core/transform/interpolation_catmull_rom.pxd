@@ -1,4 +1,4 @@
-cdef extern from "_c_catmull_rom.h":
+cdef extern from "_c_interpolation_catmull_rom.h":
     double _c_cubic(double v) nogil
 
 from .interpolation_nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor

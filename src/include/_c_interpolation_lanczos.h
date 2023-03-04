@@ -5,10 +5,6 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Calculate the Lanczos kernel (windowed sinc function) value for a given
 // value. REF: https://en.wikipedia.org/wiki/Lanczos_resampling
 double _c_lanczos_kernel(double v, int taps) {
@@ -20,7 +16,3 @@ double _c_lanczos_kernel(double v, int taps) {
     return 0.0;
   }
 }
-
-#ifdef __cplusplus
-}
-#endif

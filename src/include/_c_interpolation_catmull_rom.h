@@ -1,6 +1,3 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 // Cubic function used in Catmull-Rom interpolation
 // https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull.E2.80.93Rom_spline
@@ -17,7 +14,3 @@ double _c_cubic(double v) {
   }
   return z;
 }
-
-#ifdef __cplusplus
-}
-#endif

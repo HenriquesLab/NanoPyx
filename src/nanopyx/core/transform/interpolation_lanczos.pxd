@@ -1,4 +1,4 @@
-cdef extern from "_c_lanczos.h":
+cdef extern from "_c_interpolation_lanczos.h":
     double _c_lanczos_kernel(double v, int taps) nogil
 
 from .interpolation_nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
