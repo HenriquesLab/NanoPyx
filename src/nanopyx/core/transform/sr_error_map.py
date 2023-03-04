@@ -10,7 +10,7 @@ from scipy.stats import (
 )
 from skimage.transform import resize
 
-from ..analysis import pearson_correlation
+from ..analysis.pearson_correlation import pearson_correlation
 
 
 class ErrorMap:
