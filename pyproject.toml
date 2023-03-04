@@ -5,6 +5,7 @@ requires = [
     "build>=0.10.0",
     "cython>=0.29.0",
     "numpy>=1.19.0",
+    "versioneer[toml]>=0.26",
 ]
 build-backend = "setuptools.build_meta"
 
@@ -85,6 +86,14 @@ bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
 [tool.setuptools.package-data]
 "*" = ["*.yaml", "*.jpg"]
+
+[tool.versioneer]
+VCS = "git"
+style = "pep440"
+versionfile_source = "src/nanopyx/_version.py"
+versionfile_build = "nanopyx/_version.py"
+tag_prefix = ""
+parentdir_prefix = "nanopyx-"
 
 [tool.black]
 exclude = '''

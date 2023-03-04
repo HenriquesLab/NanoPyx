@@ -8,6 +8,7 @@ import multiprocessing
 from Cython.Build import cythonize
 from Cython.Compiler import Options
 from setuptools import Extension, setup
+import versioneer
 
 # EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
 EXTRA_C_FILES_PATH = os.path.join("src", "include")
@@ -297,4 +298,6 @@ setup(
     build_ext={"inplace": 1},
     ext_modules=collect_extensions(),
     zip_safe=False,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
 )
