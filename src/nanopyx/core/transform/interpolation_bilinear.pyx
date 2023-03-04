@@ -5,9 +5,6 @@ cimport numpy as np
 
 from cython.parallel import prange
 
-from .interpolation_nearest_neighbor cimport _interpolate as _interpolate_nn
-from .interpolation_nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
-
 # bilinear spline interpolation of a 2D array
 cdef double _interpolate(float[:,:] image, double x, double y) nogil:
     """
