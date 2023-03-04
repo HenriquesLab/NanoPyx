@@ -1,4 +1,4 @@
-# adaptation of https://github.com/HenriquesLab/NanoJ-eSRRF/blob/master/src/nanoj/liveSRRF/ErrorMapLiveSRRF.java into NanoPyx
+# adaptation of https://github.com/HenriquesLab/NanoJ-eSRRF/blob/master/src/nanoj/liveSRRF/ErrorMapLiveSRRF.java
 
 import numpy as np
 from scipy.ndimage import gaussian_filter
@@ -76,9 +76,7 @@ class ErrorMap:
         return self._sigma
 
 
-def calculate_alpha_beta(
-    sigma: float, imRef: np.ndarray, imSR: np.ndarray
-) -> tuple:
+def calculate_alpha_beta(sigma: float, imRef: np.ndarray, imSR: np.ndarray) -> tuple:
     """Gaussian blurs imSR image and calculates linear regressino again imRef
 
     Args:
@@ -94,7 +92,9 @@ def calculate_alpha_beta(
     return slope, intercept
 
 
-def sigma_function_to_optimize(sigma: float, imRef: np.ndarray, imSR: np.ndarray) -> float:
+def sigma_function_to_optimize(
+    sigma: float, imRef: np.ndarray, imSR: np.ndarray
+) -> float:
     alpha, beta = calculate_alpha_beta(sigma, imRef, imSR)
     im_sr_intensity_scaled_blurred = gaussian_filter(imSR * alpha + beta, sigma)
     rmse = np.mean((im_sr_intensity_scaled_blurred - imRef) ** 2) ** 0.5

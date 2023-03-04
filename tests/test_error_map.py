@@ -1,21 +1,21 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter
 
-from nanopyx.core.transform.error_map import ErrorMap
+from nanopyx.core.transform.sr_error_map import ErrorMap
 from nanopyx.core.transform.binning import rebin_2d
-from nanopyx.core.generate.noise_add_random_noise import (
+from nanopyx.core.generate.noise_add_mixed_noise import (
     add_mixed_gaussian_poisson_noise,
-    add_perlin_noise,
 )
+from nanopyx.core.generate.noise_add_simplex import add_simplex_noise
 
 
 def test_error_map():
     # generate some random ground truth
-    w = 1000
-    h = 1000
+    rows = 1000
+    cols = 1000
     alpha = 5
-    image_gt = np.ones((w, h), dtype="float32") * 1000
-    add_perlin_noise(image_gt, amp=1000, f=10, octaves=3)
+    image_gt = np.ones((rows, cols), dtype="float32") * 1000
+    add_simplex_noise(image_gt, amplitude=1000, frequency=0.01)
 
     image_ref = gaussian_filter(image_gt * alpha, 15)
     image_ref = rebin_2d(image_ref, 10, mode="mean")

@@ -1,12 +1,9 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 import numpy as np
 cimport numpy as np
 
 from cython.parallel import prange
-
-from .interpolation_nearest_neighbor cimport _interpolate as _interpolate_nn
-from .interpolation_nearest_neighbor cimport Interpolator as InterpolatorNearestNeighbor
 
 # bilinear spline interpolation of a 2D array
 cdef double _interpolate(float[:,:] image, double x, double y) nogil:
@@ -25,7 +22,7 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
         return 0
 
     cdef int x0 = int(x)
-    cdef int y0 = int(y)    
+    cdef int y0 = int(y)
 
     # do not interpolate if x and y positions exist in image
     if x == x0 and y == y0:
@@ -44,7 +41,7 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
         double dy1 = 1.0 - dy
         double v01 = v0 * dx1 + v1 * dx
         double v23 = v2 * dx1 + v3 * dx
-    
+
     return v01 * dy1 + v23 * dy
 
 

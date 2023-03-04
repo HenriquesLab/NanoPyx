@@ -18,6 +18,7 @@ def calculate_ppmcc(np.ndarray im1, np.ndarray im2, int shift_x, int shift_y):
     """
     return _calculate_ppmcc(im1.astype(np.float32), im2.astype(np.float32), shift_x, shift_y)
 
+
 cdef float _calculate_ppmcc(float[:, :] im1, float[:, :] im2, int shift_x, int shift_y) nogil:
     cdef int w = im1.shape[1]
     cdef int h = im1.shape[0]
@@ -53,7 +54,7 @@ cdef float _pearson_correlation(float[:,:] im1, float[:,:] im2) nogil:
     cdef float sum_im12 = 0.0
     cdef float sum_im11 = 0.0
     cdef float sum_im22 = 0.0
-    
+
     cdef int i, j
     cdef float d_im1, d_im2
 

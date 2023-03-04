@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 from ..utils.random cimport _random
 
@@ -19,7 +19,7 @@ def simple_state_transition_model(int n_particles, int n_ticks, double p_on, dou
     :param initial_state: initial state of the photoswitch
     :return: array of states with shape (n_particles, n_ticks)
 
-    States: 
+    States:
         -1: bleached
         0: off
         1: on
@@ -29,7 +29,7 @@ def simple_state_transition_model(int n_particles, int n_ticks, double p_on, dou
         1 -> 1
         0 -> 1 with probability p_on
         1 -> 0 with probability p_transient_off
-        1 -> -1 with probability p_permanent_off  
+        1 -> -1 with probability p_permanent_off
 
     Example:
         >>> n_ticks = 1000
@@ -53,7 +53,7 @@ def simple_state_transition_model(int n_particles, int n_ticks, double p_on, dou
                     _simple_state_transition_model(states[i,:], p_on, p_transient_off, p_permanent_off, _initial_state)
             progress_bar.update(100)
     return np.asarray(states)
-    
+
 
 cdef void _simple_state_transition_model(int[:] states, double p_on, double p_transient_off, double p_permanent_off, int initial_state) nogil:
     """
@@ -64,7 +64,7 @@ cdef void _simple_state_transition_model(int[:] states, double p_on, double p_tr
     :param p_permanent_off: probability of switching off permanently
     :param initial_state: initial state of the photoswitch
 
-    States: 
+    States:
         -1: bleached
         0: off
         1: on
@@ -74,7 +74,7 @@ cdef void _simple_state_transition_model(int[:] states, double p_on, double p_tr
         1 -> 1
         0 -> 1 with probability p_on
         1 -> 0 with probability p_transient_off
-        1 -> -1 with probability p_permanent_off    
+        1 -> -1 with probability p_permanent_off
     """
 
     cdef int n_ticks = states.shape[0]

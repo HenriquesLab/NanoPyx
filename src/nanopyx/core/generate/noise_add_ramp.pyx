@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 from cython.parallel import prange
 
@@ -36,6 +36,6 @@ def get_ramp(int w, int h, float vmax=100, float vmin=0):
     :param vmin: The minimum intensity value of the ramp
     :return: The image with the ramp
     """
-    image = np.zeros((h, w), dtype='float32')
+    image = np.zeros((h, w), dtype="float32")
     add_ramp(image, vmax, vmin)
     return image

@@ -1,7 +1,5 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 # code based on NanoJ-Core/Core/src/nanoj/core2/NanoJRandomNoise.java
-
-
 
 from libc.math cimport pow, log, sqrt, exp, pi, floor, fabs, fmax, fmin
 
@@ -13,9 +11,6 @@ from cython.parallel import prange
 
 import numpy as np
 cimport numpy as np
-
-from noise import pnoise2
-import opensimplex
 
 r = np.random.RandomState()
 
@@ -112,8 +107,11 @@ def add_mixed_gaussian_poisson_noise(image, double gauss_sigma, double gauss_mea
     """
     Add mixed Gaussian-Poisson noise to an image, pure cython version
     :param image: The image to add noise to, need to be 2D or 3D
+    :type image: numpy.ndarray or numpy.view
     :param gauss_sigma: The standard deviation of the Gaussian noise
+    :type gauss_sigma: float
     :param gauss_mean: The mean of the Gaussian noise
+    :type gauss_mean: float
     """
 
     assert image.ndim == 2 or image.ndim == 3, "Only 2D and 3D images are supported"
@@ -151,84 +149,13 @@ def add_mixed_gaussian_poisson_noise2(np.ndarray image, double gauss_sigma, doub
     """
     Add mixed Gaussian-Poisson noise to an image, pure numpy version
     :param image: The image to add noise to
+    :type image: np.ndarray
     :param gauss_sigma: The standard deviation of the Gaussian noise
+    :type gauss_sigma: float
     :param gauss_mean: The mean of the Gaussian noise
+    :type gauss_mean: float
     """
     shape = []
     for i in range(image.ndim):
         shape.append(image.shape[i])
     image[:] = np.clip(r.poisson(image)+r.normal(scale=gauss_sigma, size=tuple(shape), loc=gauss_mean), 0, 65535)
-
-
-def add_perlin_noise(float[:,:] image, int amp=100, int offset = 100, float f = 100, int octaves = 1, float persistence = 0.5, float lacunarity = 2., float repeatx = 1024, float repeaty = 1024, int base = 0):
-    """
-    Add perlin noise to an image
-    :param image: The image to add noise to
-    :param amp: The amplitude of the noise
-    :param offset: The offset of the noise
-    :param f: The frequency of the noise
-    :param octaves: The number of octaves
-    :param persistence: The persistence of the noise
-    :param lacunarity: The lacunarity of the noise
-    :param repeatx: The repeat of the noise in the x direction
-    :param repeaty: The repeat of the noise in the y direction
-    :param base: The base of the noise
-    """
-    cdef double p
-    cdef int w = image.shape[1]
-    cdef int h = image.shape[0]
-    cdef float f_x = f / w
-    cdef float f_y = f / h
-    if w > h:
-        f_x *= w / h
-    else:
-        f_y *= h / w
-
-    for j in range(h):
-        for i in range(w):
-            p = pnoise2(i * f_x, j * f_y, octaves, persistence, lacunarity, repeatx, repeaty, base)
-            image[j, i] += amp * p + offset
-
-
-def get_perlin_noise(w, h, amp=100, int offset = 100, f = 10, octaves = 1, persistence = 0.5, lacunarity = 2., repeatx = 1024, repeaty = 1024, base = 0):
-    """
-    Return a perlin noise image
-    :param w: The width of the image
-    :param h: The height of the image
-    :param amp: The amplitude of the noise
-    :param offset: The offset of the noise
-    :param f: The frequency of the noise
-    :param octaves: The number of octaves
-    :param persistence: The persistence of the noise
-    :param lacunarity: The lacunarity of the noise
-    :param repeatx: The repeat of the noise in the x direction
-    :param repeaty: The repeat of the noise in the y direction
-    :param base: The base of the noise
-    :return: The perlin noise image
-    """
-    image = np.zeros((w, h), dtype=np.float32)
-    add_perlin_noise(image, amp, offset, f, octaves, persistence, lacunarity, repeatx, repeaty, base)
-    return image
-
-
-def get_simplex_noise(int w, int h, int f = 1):
-    """
-    Return a simplex noise image
-    REF: https://github.com/lmas/opensimplex
-    :param w: The width of the image
-    :param h: The height of the image
-    :param f: The frequency of the noise
-    :return: The simplex noise image
-    """
-
-    cdef float f_x = f
-    cdef float f_y = f
-    if w > h:
-        f_y *= w / h
-    else:
-        f_x *= h / w
-
-    x0 = np.linspace(0, f_x, num = h, dtype=np.float32)
-    y0 = np.linspace(0, f_y, num = w, dtype=np.float32)
-
-    return opensimplex.noise2array(x0, y0)

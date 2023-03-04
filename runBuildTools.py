@@ -147,11 +147,11 @@ def main(mode=None):
     files2clean = " ".join(
         find_files(base_path, ".so")
         + find_files(base_path, ".pyc")
+        + find_files(base_path, ".pyd")  # Windows .dll-like file
         + find_files(base_path, ".c")
         + find_files(base_path, ".html")
         + find_files(base_path, ".profile")
-        + find_files(base_path, ".profile")
-        + find_files(base_path, ".pyd")  # Windows .dll-like file
+        + find_files(os.path.join("tests"), ".profile")
     )
 
     python_call = shutil.which("python")
@@ -169,19 +169,15 @@ def main(mode=None):
         if len(files2clean) > 0
         else "echo 'No files to clean'",
         "Run tests": "pytest --nbmake --nbmake-timeout=600",
-        "Run pdoc": f"{python_call} -m pdoc src/nanopyx",
-        "Enable cython profiler": lambda: change_cython_profiler_flag(base_path, True),
-        "Disable cython profiler": lambda: change_cython_profiler_flag(
-            base_path, False
-        ),
-        "Install nanopyx in developer mode": "pip3 install -e '.[all]'",
-        "Build wheel": "pip wheel '.[all]' -w wheelhouse",
-        "Build nanopyx binary distribution": f"{python_call} setup.py bdist_wheel",
-        "Build nanopyx source distribution": f"{python_call} setup.py sdist",
-        "Run build": f"{python_call} -m build",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Generate .docker/gha_runners/requirements.txt": extract_requirements_from_pyproject,
         "Update .gitignore": update_gitignore,
+        "Run pdoc": f"{python_call} -m pdoc src/nanopyx -o docs",
+        "Install nanopyx in developer mode": "pip3 install -e '.[all]'",
+        "Run build": "python -m build",
+        "Build wheel": "pip wheel '.[all]' -w wheelhouse",
+        "Build nanopyx binary distribution": f"{python_call} setup.py bdist_wheel",
+        "Build nanopyx source distribution": f"{python_call} setup.py sdist",
         "Install coding tools": "pip3 install cython-lint",
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
         "Create venv:": "python3 -m venv .venv",

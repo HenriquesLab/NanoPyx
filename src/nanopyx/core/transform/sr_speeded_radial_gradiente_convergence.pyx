@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=False
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 from libc.math cimport sqrt, fabs, exp, isnan, floor
 
@@ -37,7 +37,7 @@ cdef class RadialGradientConvergence:
         self.fwhm = radius
         self.sensitivity = sensitivity
         self.doIntensityWeighting = doIntensityWeighting
-        
+
         cdef float sigma = radius / 2.355
         self.tSS = 2 * sigma * sigma
         self.tSO = 2 * sigma + 1
@@ -80,18 +80,18 @@ cdef class RadialGradientConvergence:
         imInt[:,:] = interpolator._magnify(self.magnification) #for Intensity Weighting
 
         cdef Interpolator interpolator_gx = Interpolator(imGx) #interpolate gradients for RGC calculation
-        imIntGx[:,:] = interpolator_gx._magnify(2*self.magnification) 
+        imIntGx[:,:] = interpolator_gx._magnify(2*self.magnification)
 
         cdef Interpolator interpolator_gy = Interpolator(imGy)
         imIntGy[:,:] = interpolator_gy._magnify(2*self.magnification) #fix this
 
         with nogil:
-            for yM in prange(self.magnification, h * self.magnification): 
+            for yM in prange(self.magnification, h * self.magnification):
                 for xM in range(self.magnification, w * self.magnification):
                     if self.doIntensityWeighting:
                         imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy) * imInt[yM, xM]
                     else:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy) 
+                        imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy)
 
 
     cdef void _calculate_gradient(self, float[:,:] image, float[:,:] imGx, float[:,:] imGy): # Calculate gradients via Robert's cross
@@ -106,21 +106,21 @@ cdef class RadialGradientConvergence:
                 y0 = j - 1
                 for i in range(1, w):
                     x1 = i
-                    x0 = i - 1    
+                    x0 = i - 1
                     imGx[j,i] = image[y1, x1] - image[y1, x0]
                     imGy[j,i] = image[y1, x1] - image[y0, x1]
                     # as in REF: https://github.com/HenriquesLab/NanoJ-eSRRF/blob/785c71b3bd508c938f63bb780cba47b0f1a5b2a7/resources/liveSRRF.cl under calculateGradient_2point
-    
+
     # @timeit2
     # def calculateRGC(self, int xM, int yM, np.ndarray imGx, np.ndarray imGy):
     #     "Calculate RGC value for a subpixel"
     #     return self._calculateRGC(xM, yM, imGx, imGy)
 
-    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imIntGx, float[:,:] imIntGy) nogil: 
+    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imIntGx, float[:,:] imIntGy) nogil:
 
         cdef int w = imIntGx.shape[1]
         cdef int h = imIntGy.shape[0]
-        
+
         cdef float vx, vy, Gx, Gy
 
         cdef float dx, dy
@@ -133,15 +133,15 @@ cdef class RadialGradientConvergence:
         cdef float distanceWeightSum = 0
 
         cdef int _start = -(<int>(Gx_Gy_MAGNIFICATION * self.fwhm))
-        cdef int _end = <int>(Gx_Gy_MAGNIFICATION * self.fwhm + 1) 
+        cdef int _end = <int>(Gx_Gy_MAGNIFICATION * self.fwhm + 1)
 
         cdef int i, j
 
         for j in range(_start, _end): #prange
             vy = (<int>(Gx_Gy_MAGNIFICATION * yc) + j) / Gx_Gy_MAGNIFICATION # position in continuous space
-            
+
             if 0 < vy <= h/2 - 1:
-            
+
                 for i in range(_start, _end):
                     vx = (<int>(Gx_Gy_MAGNIFICATION * xc) + i) / Gx_Gy_MAGNIFICATION # position in continuous space
 
@@ -161,7 +161,7 @@ cdef class RadialGradientConvergence:
 
                             if GdotR < 0: # if the vector is pointing inwards
                                 Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
-                                RGC += Dk * distanceWeight 
+                                RGC += Dk * distanceWeight
 
         RGC /= distanceWeightSum
 
