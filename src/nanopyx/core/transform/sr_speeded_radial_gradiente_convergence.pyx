@@ -52,7 +52,7 @@ cdef class RadialGradientConvergence:
 
         nFrames = im.shape[0]
 
-        cdef float [:,:,:] imRaw = im.astype(np.float32)
+        cdef float [:,:,:] imRaw = im.astype(np.float32, copy=False)
         cdef float [:,:,:] imRad = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32)
         cdef float [:,:,:] imInt = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32) # interpolated image
         cdef float [:,:,:] imGx = np.zeros_like(imRaw) # Gradient of the original image

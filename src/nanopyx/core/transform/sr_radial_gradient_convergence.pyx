@@ -12,9 +12,6 @@ cimport numpy as np
 
 from cython.parallel import prange
 
-cdef extern from "_c_calculate_distance_weight.h":
-    double _c_calculate_dw(double distance, double tSS) nogil
-
 cdef float Gx_Gy_MAGNIFICATION = 2.0
 
 cdef class RadialGradientConvergence:
@@ -55,7 +52,7 @@ cdef class RadialGradientConvergence:
 
         nFrames = im.shape[0]
 
-        cdef float [:,:,:] imRaw = im.astype(np.float32)
+        cdef float [:,:,:] imRaw = im.astype(np.float32, copy=False)
         cdef float [:,:,:] imRad = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32)
         cdef float [:,:,:] imInt = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32) # interpolated image
         cdef float [:,:,:] imGx = np.zeros_like(imInt) # Gradient of the interpolated image
@@ -165,7 +162,8 @@ cdef class RadialGradientConvergence:
                             GdotR = Gx*dx + Gy*dy
 
                             if GdotR < 0: # if the vector is pointing inwards
-                                Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
+                                # Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
+                                Dk = _c_calculate_dk(Gx, Gy, dx, dy, distance)
                                 RGC += Dk * distanceWeight
 
         RGC /= distanceWeightSum
