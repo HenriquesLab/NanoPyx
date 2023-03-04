@@ -1,3 +1,6 @@
+#ifndef _C_INTERPOLATION_LANCZOS_H
+#define _C_INTERPOLATION_LANCZOS_H
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -16,3 +19,5 @@ double _c_lanczos_kernel(double v, int taps) {
     return 0.0;
   }
 }
+
+#endif  // _C_INTERPOLATION_LANCZOS_H

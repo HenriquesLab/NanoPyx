@@ -24,21 +24,14 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     if not 0 <= x < w or not 0 <= y < h:
         return 0
 
-    cdef int x0 = int(x)
-    cdef int y0 = int(y)
-
-    # do not interpolate if x and y positions exist in image
-    if x == x0 and y == y0:
-        return image[y0, x0]
-
     cdef double x_factor, y_factor
     cdef int i, j
 
     # Determine the low and high indices for the x and y dimensions
-    cdef int x_low = int(floor(x) - taps)
-    cdef int x_high = int(ceil(x) + taps)
-    cdef int y_low = int(floor(y) - taps)
-    cdef int y_high = int(ceil(y) + taps)
+    cdef int x_low = max(<int>(floor(x) - taps), 0)
+    cdef int x_high = min(<int>(ceil(x) + taps)+1, w)
+    cdef int y_low = max(<int>(floor(y) - taps), 0)
+    cdef int y_high = min(<int>(ceil(y) + taps)+1, h)
 
     # Initialize the interpolation value to 0
     cdef double interpolation = 0
@@ -46,13 +39,10 @@ cdef double _interpolate(float[:,:] image, double x, double y, int taps) nogil:
     cdef double weight_sum = 0
 
     # Loop over the taps in the x and y dimensions
-    for i in range(x_low, x_high+1):
+    for i in range(x_low, x_high):
         x_factor = _c_lanczos_kernel(x - i, taps)
-        for j in range(y_low, y_high+1):
+        for j in range(y_low, y_high):
             y_factor = _c_lanczos_kernel(y - j, taps)
-            # Check if the indices are in bounds
-            i = max(0, min(i, w-1))
-            j = max(0, min(j, h-1))
 
             # Add the contribution from this tap to the interpolation
             weight = x_factor * y_factor
