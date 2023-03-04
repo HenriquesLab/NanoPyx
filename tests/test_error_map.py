@@ -5,7 +5,7 @@ from nanopyx.core.transform.error_map import ErrorMap
 from nanopyx.core.transform.binning import rebin_2d
 from nanopyx.core.generate.noise_add_random_noise import (
     add_mixed_gaussian_poisson_noise,
-    get_simplex_noise,
+    add_simplex_noise,
 )
 
 
@@ -14,9 +14,8 @@ def test_error_map():
     rows = 1000
     cols = 1000
     alpha = 5
-    image_gt = np.ones((rows, cols), dtype="float32") * 1000 + get_simplex_noise(
-        rows, cols, amplitude=1000
-    )
+    image_gt = np.ones((rows, cols), dtype="float32") * 1000
+    add_simplex_noise(image_gt, amplitude=1000, frequency=0.01)
 
     image_ref = gaussian_filter(image_gt * alpha, 15)
     image_ref = rebin_2d(image_ref, 10, mode="mean")
