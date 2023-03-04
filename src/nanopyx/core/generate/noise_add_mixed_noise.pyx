@@ -1,10 +1,9 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 # code based on NanoJ-Core/Core/src/nanoj/core2/NanoJRandomNoise.java
 
 from libc.math cimport pow, log, sqrt, exp, pi, floor, fabs, fmax, fmin
 
 from ..utils.random cimport _random
-from ..utils.open_simplex_2F import add_simplex_noise
 
 import cython
 cimport cython
@@ -108,8 +107,11 @@ def add_mixed_gaussian_poisson_noise(image, double gauss_sigma, double gauss_mea
     """
     Add mixed Gaussian-Poisson noise to an image, pure cython version
     :param image: The image to add noise to, need to be 2D or 3D
+    :type image: numpy.ndarray or numpy.view
     :param gauss_sigma: The standard deviation of the Gaussian noise
+    :type gauss_sigma: float
     :param gauss_mean: The mean of the Gaussian noise
+    :type gauss_mean: float
     """
 
     assert image.ndim == 2 or image.ndim == 3, "Only 2D and 3D images are supported"
@@ -147,27 +149,13 @@ def add_mixed_gaussian_poisson_noise2(np.ndarray image, double gauss_sigma, doub
     """
     Add mixed Gaussian-Poisson noise to an image, pure numpy version
     :param image: The image to add noise to
+    :type image: np.ndarray
     :param gauss_sigma: The standard deviation of the Gaussian noise
+    :type gauss_sigma: float
     :param gauss_mean: The mean of the Gaussian noise
+    :type gauss_mean: float
     """
     shape = []
     for i in range(image.ndim):
         shape.append(image.shape[i])
     image[:] = np.clip(r.poisson(image)+r.normal(scale=gauss_sigma, size=tuple(shape), loc=gauss_mean), 0, 65535)
-
-
-def get_simplex_noise(int rows, int columns, double frequency = 0.01, int octaves = 4, double persistence = 2, double amplitude = 1000, double offset = 1000, int seed = -1):
-    """
-    Return a simplex noise image
-    :param rows: The number of rows
-    :param columns: The number of columns
-    :param frequency: The frequency of the noise
-    :param octaves: The number of octaves
-    :param persistence: The persistence of the noise
-    :param amplitude: The amplitude of the noise
-    :param seed: The seed of the noise, -1 for random
-    :return: The simplex noise image
-    """
-    image = np.zeros((rows, columns), dtype=np.float32)
-    add_simplex_noise(image, frequency, octaves, persistence, amplitude, offset, seed)
-    return image

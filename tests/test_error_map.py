@@ -3,10 +3,10 @@ from scipy.ndimage import gaussian_filter
 
 from nanopyx.core.transform.error_map import ErrorMap
 from nanopyx.core.transform.binning import rebin_2d
-from nanopyx.core.generate.noise_add_random_noise import (
+from nanopyx.core.generate.noise_add_mixed_noise import (
     add_mixed_gaussian_poisson_noise,
-    add_simplex_noise,
 )
+from nanopyx.core.generate.noise_add_simplex import add_simplex_noise
 
 
 def test_error_map():

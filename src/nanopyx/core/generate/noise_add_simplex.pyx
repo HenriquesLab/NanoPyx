@@ -7,6 +7,24 @@ from libc.stdlib cimport malloc, free
 
 from cython.parallel import prange
 
+
+def get_simplex_noise(int rows, int columns, *args, **kwargs):
+    """
+    Get a simplex noise image
+    :param rows: The number of rows
+    :type rows: int
+    :param columns: The number of columns
+    :type columns: int
+    :param args: The arguments to pass to the simplex noise function (see :func:`add_simplex_noise`)
+    :param kwargs: The keyword arguments to pass to the simplex noise function
+    :return: The simplex noise image
+    :rtype: np.ndarray
+    """
+    image = np.zeros((rows, columns), dtype=np.float32)
+    add_simplex_noise(image, *args, **kwargs)
+    return image
+
+
 def add_simplex_noise(dataset: np.ndarray, double frequency = 0.01, int octaves = 4, double persistence = 2, double amplitude = 1000, double offset = 1000, int seed = -1):
     """
     Add simplex noise to a 2D numpy array.
@@ -21,7 +39,6 @@ def add_simplex_noise(dataset: np.ndarray, double frequency = 0.01, int octaves 
     if seed == -1:
         seed = np.random.randint(0, 1000000)
 
-    assert dataset.ndim == 2, "The image must be 2D."
     assert frequency > 0, "The frequency must be greater than 0."
     assert octaves > 0, "The number of octaves must be greater than 0."
     assert persistence > 0, "The persistence must be greater than 0."
@@ -49,7 +66,7 @@ cdef void _add_simplex_noise_2D(float[:,:] im, double frequency, int octaves, do
     cdef OpenSimplexGradients *osg = newOpenSimplexGradients(ose, seed)
 
     # Loop through each element in the imay
-    for r in range(rows):
+    for r in prange(rows):
         for c in range(cols):
             # Calculate the simplex noise for the current x,y position
             noise = 0
@@ -75,7 +92,7 @@ cdef void _add_simplex_noise_3D(float[:,:,:] im, double frequency, int octaves, 
     cdef OpenSimplexGradients *osg = newOpenSimplexGradients(ose, seed)
 
     # Loop through each element in the imay
-    for r in range(rows):
+    for r in prange(rows):
         for c in range(cols):
             for d in range(depth):
                 # Calculate the simplex noise for the current x,y,z position
@@ -103,7 +120,7 @@ cdef void _add_simplex_noise_4D(float[:,:,:,:] im, double frequency, int octaves
     cdef OpenSimplexGradients *osg = newOpenSimplexGradients(ose, seed)
 
     # Loop through each element in the imay
-    for r in range(rows):
+    for r in prange(rows):
         for c in range(cols):
             for d in range(depth):
                 for t in range(time):
