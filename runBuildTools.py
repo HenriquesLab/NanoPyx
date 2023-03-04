@@ -48,6 +48,25 @@ def find_files(root_dir: str, extension: str) -> list:
     return target_files
 
 
+def change_cython_profiler_flag(base_path: str, flag: bool):
+    """
+    Change the cython profiler flag in all .pyx files
+    :param base_path: base path to search for .pyx files
+    :param flag: flag to set
+    """
+    pyx_files = find_files(base_path, ".pyx")
+    for pyx_file in pyx_files:
+        with open(pyx_file, "r") as f:
+            lines = f.read().splitlines()
+            for i, line in enumerate(lines):
+                if line.startswith("# cython:") and f"profile={not flag}" in line:
+                    print(f"Changing profile flag to {flag}: {pyx_file}")
+                    lines[i] = line.replace(f"profile={not flag}", f"profile={flag}")
+                    break
+        with open(pyx_file, "w") as f:
+            f.write("\n".join(lines))
+
+
 def update_gitignore():
     """
     Update the .gitignore file with common ignores
@@ -149,22 +168,26 @@ def main(mode=None):
         "Clean files": f"{remove_call} {files2clean}"
         if len(files2clean) > 0
         else "echo 'No files to clean'",
-        "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
-        "Generate .docker/gha_runners/requirements.txt": extract_requirements_from_pyproject,
-        "Update .gitignore": update_gitignore,
-        "Run pdoc": f"{python_call} -m pdoc src/nanopyx -o docs",
+        "Run tests": "pytest --nbmake --nbmake-timeout=600",
+        "Run pdoc": f"{python_call} -m pdoc src/nanopyx",
+        "Enable cython profiler": lambda: change_cython_profiler_flag(base_path, True),
+        "Disable cython profiler": lambda: change_cython_profiler_flag(
+            base_path, False
+        ),
         "Install nanopyx in developer mode": "pip3 install -e '.[all]'",
         "Build wheel": "pip wheel '.[all]' -w wheelhouse",
         "Build nanopyx binary distribution": f"{python_call} setup.py bdist_wheel",
         "Build nanopyx source distribution": f"{python_call} setup.py sdist",
+        "Run build": f"{python_call} -m build",
+        "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
+        "Generate .docker/gha_runners/requirements.txt": extract_requirements_from_pyproject,
+        "Update .gitignore": update_gitignore,
         "Install coding tools": "pip3 install cython-lint",
         "Run cython-lint on pyx files": f"cython-lint {', '.join(find_files('src', '.pyx'))}",
         "Create venv:": "python3 -m venv .venv",
         "Activate venv:": "source .venv/bin/activate",
         "Deactivate venv:": "deactivate",
         "Remove venv:": "rm -rf .venv",
-        "Run tests": "pytest --nbmake --nbmake-timeout=600",
-        "Run build": "python -m build",
         "Test accelerations (requires build first)": "python -c 'import nanopyx.core.utils.mandelbrot_benchmark"
         + " as bench; bench.check_acceleration()'",
     }
