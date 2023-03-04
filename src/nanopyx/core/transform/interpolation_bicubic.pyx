@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 import numpy as np
 cimport numpy as np
@@ -27,7 +27,7 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
         return 0
 
     cdef int x0 = int(x)
-    cdef int y0 = int(y)    
+    cdef int y0 = int(y)
 
     # do not interpolate if x and y positions exist in image
     if x == x0 and y == y0:

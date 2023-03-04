@@ -1,6 +1,6 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=False
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
-from ...core.transform.radiality cimport Radiality
+from ...core.transform.sr_radiality cimport Radiality
 
 import numpy as np
 cimport numpy as np
@@ -14,10 +14,10 @@ cdef class SRRF:
     cdef float ringRadius
     cdef bint radialityPositivityConstraint, doIntensityWeighting
 
-    def __init__(self, magnification: int = 5, 
-                 ringRadius: float = 0.5, 
-                 border: int = 0, 
-                 radialityPositivityConstraint: bool = True, 
+    def __init__(self, magnification: int = 5,
+                 ringRadius: float = 0.5,
+                 border: int = 0,
+                 radialityPositivityConstraint: bool = True,
                  doIntensityWeighting: bool = True):
 
         self.magnification = magnification
@@ -46,7 +46,7 @@ cdef class SRRF:
 
                 data_block_srrf = np.asarray(data_block_radiality).mean(axis=0)
                 data_block_intensity = np.asarray(data_block_intensity).mean(axis=0)
-                
+
                 data_srrf.append(data_block_srrf)
                 data_intensity.append(data_block_intensity)
 

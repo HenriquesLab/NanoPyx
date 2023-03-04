@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 """
 Python reimplementation of the Radiality Transform from the original SRRF paper
@@ -92,7 +92,7 @@ cdef class Radiality:
 
         # calculate Gx and Gy
         cdef float vGx, vGy
-        cdef float CGH # for Culley Gustafsson Henriques transform 
+        cdef float CGH # for Culley Gustafsson Henriques transform
 
         # Radiality Variable
         cdef float Dk, DivDFactor = 0
@@ -124,26 +124,26 @@ cdef class Radiality:
 
                     Dk = 1 - self._calculateDk(x0, y0, xc, yc, vGx, vGy, GMag) / self.ringRadius
                     Dk = Dk * Dk
-                    
+
                     if (vGx * xRing + vGy * yRing) > 0: # inwards or outwards vector
                         DivDFactor -= Dk
                     else:
                         DivDFactor += Dk
-                
+
                 DivDFactor /= self.nRingCoordinates
 
                 if self.radialityPositivityConstraint:
                     CGH = max(DivDFactor, 0)
                 else:
                     CGH = DivDFactor
-                
+
                 if self.doIntensityWeighting:
                     imRad[j,i] = CGH
 
                 else:
                     imRad[j,i] = CGH * imIW[j,i]
 
-                
+
     cdef float _calculateDk(self, float x, float y, float xc, float yc, float vGx, float vGy, float vGx2Gy2) nogil:
         if vGx2Gy2 == 0:
             return self.ringRadius

@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 from libc.math cimport erf, sqrt
 
@@ -12,10 +12,10 @@ cdef double SIGMA_CUTTOFF = 4
 
 
 def render_random_gaussians(width: int, height: int, nFrames: int, particles_per_slice: int,
-                            amplitude: float = 1000, sigma_x: float = 1.5, sigma_y: float = 1.5, 
+                            amplitude: float = 1000, sigma_x: float = 1.5, sigma_y: float = 1.5,
                             particles_per_slice_randomness: float = 0.25,
-                            amplitude_randomness: float = 0.25, 
-                            sigma_x_randomness: float = 0.1, 
+                            amplitude_randomness: float = 0.25,
+                            sigma_x_randomness: float = 0.1,
                             sigma_y_randomness: float = 0.1):
     """
     Generate a stack of images with random particles
@@ -47,7 +47,7 @@ def render_random_gaussians(width: int, height: int, nFrames: int, particles_per
         sigmas_y = sigma_y * (1 + sigma_y_randomness * np.random.uniform(-1, 1, n_particles))
         amplitudes = amplitude * (1 + amplitude_randomness * np.random.uniform(-1, 1, n_particles))
         render_gaussians(ims[nf], x_positions, y_positions, amplitudes, sigmas_x, sigmas_y)
-        
+
     return ims
 
 
@@ -61,10 +61,10 @@ def render_gaussians(float[:,:] image, double[:] x, double[:] y, double[:] ampli
     :param sigma_x: the sigma of the gaussian in the x direction
     :param sigma_y: the sigma of the gaussian in the y direction
     :return: the image with the particles rendered on it
-    
+
     Original implementation: https://github.com/HenriquesLab/NanoJ-Core/blob/80020c9cf5ecac70019daa5731d0c296cb306ac4/Core/src/nanoj/core/java/image/rendering/SubPixelGaussianRendering.java#L12
     """
-    
+
     cdef int p
     cdef int nParticles = amplitude.shape[0]
 
@@ -102,9 +102,9 @@ cdef void _render_erf_gaussian(float[:,:] image, double xp, double yp, double am
     # minimum uncertainty (see Sup Mat page 10)
     # note, the paper has an error on their formula 4a and 4b, 2sigma^2 should be sqrt(2)*sigma
     # see REF: https://en.wikipedia.org/wiki/Normal_distribution formula 'Cumulative distribution function'
-    
+
     for j in range(y_start, y_end):
-        Ey = 0.5 * (erf((j + 0.5 - yp) / sy2) - erf((j - 0.5 - yp) / sy2))    
+        Ey = 0.5 * (erf((j + 0.5 - yp) / sy2) - erf((j - 0.5 - yp) / sy2))
         for i in range(x_start, x_end):
             Ex = 0.5 * (erf((i + 0.5 - xp) / sx2) - erf((i - 0.5 - xp) / sx2))
             image[j,i] += amplitude * Ex * Ey

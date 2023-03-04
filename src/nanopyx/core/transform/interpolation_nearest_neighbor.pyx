@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 import numpy as np
 cimport numpy as np
@@ -25,7 +25,7 @@ cdef double _interpolate(float[:,:] image, double x, double y) nogil:
         return 0
 
     cdef int x0 = int(x)
-    cdef int y0 = int(y)    
+    cdef int y0 = int(y)
 
     return image[y0, x0]
 
@@ -43,7 +43,7 @@ cdef class Interpolator:
         """
 
         assert image.ndim == 2, "image must be 2D"
-        
+
         if type(image) is np.ndarray:
             self.image = image.view(np.float32)
             self.original_dtype = image.dtype
@@ -88,7 +88,7 @@ cdef class Interpolator:
                 for j in range(hM):
                     y = j / magnification
                     imMagnified[j, i] = self._interpolate(x, y)
-        
+
         return imMagnified
 
     def magnify_xy(self, int magnification_y, int magnification_x) -> np.ndarray:
@@ -114,12 +114,12 @@ cdef class Interpolator:
                 for j in range(hM):
                     y = j / magnification_y
                     imMagnified[j, i] = self._interpolate(x, y)
-        
+
         return imMagnified
 
     def scale_xy(self, float scaling_y, float scaling_x) -> np.ndarray:
         """
-        Scale an image by a factor. 
+        Scale an image by a factor.
         Equivalent to magnify_xy but takes floats as inputs and mantains image shape.
         :param scaling_y: scale factor in y
         :param scaling_x: scale factor in x
@@ -141,7 +141,7 @@ cdef class Interpolator:
                 for j in range(self.h):
                     y = (j+(hM/2-self.h/2)) / scaling_y
                     imScaled[j, i] = self._interpolate(x, y)
-        
+
         return imScaled
 
     def shift(self, double dx, double dy) -> np.ndarray:
@@ -156,9 +156,9 @@ cdef class Interpolator:
 
 
     cdef float[:,:] _shift(self, float dx, float dy):
-        
+
         cdef float[:,:] imShifted = np.zeros((self.h, self.w), dtype=np.float32)
-        
+
         cdef int i, j
         cdef int _dx = int(dx)
         cdef int _dy = int(dy)
@@ -166,13 +166,13 @@ cdef class Interpolator:
         cdef int y_start = max(0, _dy)
         cdef int x_end = min(self.w, self.w + _dx)
         cdef int y_end = min(self.h, self.h + _dy)
-        
+
         with nogil:
             for i in prange(x_start, x_end):
                 for j in range(y_start, y_end):
                     imShifted[j,i] = self._interpolate(i - dx, j - dy)
 
-        return imShifted 
+        return imShifted
 
 
     def rotate(self, float angle, float cx=-1, float cy=-1) -> np.ndarray:
@@ -193,7 +193,7 @@ cdef class Interpolator:
     cdef float[:,:] _rotate(self, float angle, float cx, float cy):
 
         cdef float[:,:] imRotated = np.zeros((self.h, self.w), dtype=np.float32)
-        
+
         cdef int i, j
         cdef float rotx, roty
 
@@ -209,11 +209,11 @@ cdef class Interpolator:
 
         return imRotated
 
-    def polar(self, str scale='linear') -> np.ndarray:
+    def polar(self, str scale="linear") -> np.ndarray:
         """
         Transforms an image into its polar coordinate equivalent with origin at the center of the image
         :param scale: scaling done during conversion, if 'log' performs log-polar transformation
-        :return: (theta,r) image array 
+        :return: (theta,r) image array
         """
         polarized = self._polar(scale)
         return np.asarray(polarized).astype(self.original_dtype)
@@ -225,7 +225,7 @@ cdef class Interpolator:
 
         cdef int max_theta = 360
         cdef int max_radius = int(hypot(cx,cy))+1
-        
+
         cdef float[:,:] polarized = np.zeros((max_theta, max_radius), dtype=np.float32)
 
         cdef int i,j
@@ -234,7 +234,7 @@ cdef class Interpolator:
         with nogil:
             for i in prange(0,max_radius):
                 for j in range(0,max_theta):
-                    if scale=='log':
+                    if scale=="log":
                         x = exp(i*log(max_radius)/max_radius) * cos(j*pi/180) + cx
                         y = exp(i*log(max_radius)/max_radius) * sin(j*pi/180) + cy
                     else:
@@ -244,7 +244,7 @@ cdef class Interpolator:
 
         return polarized
 
-    def cartesian(self, int x_shape, int y_shape, str scale='linear')-> np.ndarray:
+    def cartesian(self, int x_shape, int y_shape, str scale="linear")-> np.ndarray:
         """
         Transforms an image into its cartesian coordinate equivalent. Assumes image shape is (theta,r) and the origin is at the center of the cartesian image
         :param x_shape: width of original image
@@ -256,7 +256,7 @@ cdef class Interpolator:
         return np.asarray(cart).astype(self.original_dtype)
 
     cdef float[:,:] _cartesian(self, int x_shape, int y_shape, str scale):
-        
+
         cdef float[:,:] cart = np.zeros((y_shape, x_shape), dtype=np.float32)
 
         cdef float cx = x_shape / 2
@@ -267,7 +267,7 @@ cdef class Interpolator:
         with nogil:
             for i in prange(0,x_shape):
                 for j in range(0,y_shape):
-                    if scale=='log' and (j!=cy and i!=cx):
+                    if scale=="log" and (j!=cy and i!=cx):
                         r = log(hypot(j-cy,i-cx)) * self.w / log(self.w)
                     else:
                         r = hypot(j-cy, i-cx)
