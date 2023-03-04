@@ -17,13 +17,16 @@ def run_cmd(command: str):
 
 
 def get_version():
-    # get the version from the pyproject.toml file
-    with open("pyproject.toml", "r") as f:
-        txt = f.read()
-        start = txt.find('version = "') + 11
-        end = txt.find('"', start)
-        version = txt[start:end]
-    return version
+    # # get the version from the pyproject.toml file
+    # with open("pyproject.toml", "r") as f:
+    #     txt = f.read()
+    #     start = txt.find('version = "') + 11
+    #     end = txt.find('"', start)
+    #     version = txt[start:end]
+    # return version
+    import versioneer
+
+    return versioneer.get_version()
 
 
 def find_files(root_dir: str, extension: str) -> list:

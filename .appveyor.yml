@@ -55,8 +55,6 @@ install:
   - python -m pip install pipx --cache-dir cache-pip
 
 build_script:
-  - ps: python runUpdateBuildNumber.py $env:APPVEYOR_BUILD_NUMBER
-  - ps: $env:NPX_VERSION = python runUpdateBuildNumber.py
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
   - python -m cibuildwheel --output-dir wheelhouse
   - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
@@ -85,12 +83,3 @@ deploy:
   artifact: Wheels, SDist
   draft: true
   prerelease: false
-
-on_success:
-  - git config --global credential.helper store
-  - ps: Set-Content -Path "$HOME\.git-credentials" -Value "https://$($env:access_token):x-oauth-basic@github.com`n" -NoNewline
-  - git config --global user.email "noreply@gmail.com"
-  - git config --global user.name "AppVeyor"
-  - git add pyproject.toml
-  - git commit -m "Update build number to $(NPX_VERSION)"
-  - git push
