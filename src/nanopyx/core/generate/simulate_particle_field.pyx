@@ -39,8 +39,11 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     assert image_pdf.dtype == np.float32 and image_pdf.ndim == 2
 
     if normalize:
-        #image_pdf = (image_pdf - image_pdf.min())/(image_pdf.max() - image_pdf.min())
-        image_pdf = image_pdf / np.linalg.norm(image_pdf, axis=1, keepdims=True)
+        if image_pdf.max() == image_pdf.min(): # if the image_pdf has the same intensity all across the image..
+            image_pdf = np.full_like(image_pdf, 0.5)
+        else: 
+            image_pdf = (image_pdf - image_pdf.min()) / (image_pdf.max() - image_pdf.min())
+        # image_pdf = image_pdf / np.linalg.norm(image_pdf, axis=1, keepdims=True) 
 
     assert np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
 
@@ -187,7 +190,7 @@ def get_closest_distance(float[:,:] particle_field):
     return closest_distance
 
 
-def render_particle_histogram(float[:,:] particle_field, int w, int h):
+def render_particle_histogram(float[:,:] particle_field, int h, int w):
     """
     Render a particle field as an image
     :param particle_field: 2D array of floats, the particle field with shape (n_particles, 2) where the last dimension is the x and y coordinates of the particle
@@ -215,7 +218,7 @@ def render_particle_histogram(float[:,:] particle_field, int w, int h):
     return image_particle_field
 
 
-def render_particle_histogram_with_tracks(float[:,:] particle_field, int[:,:] states, int w, int h):
+def render_particle_histogram_with_tracks(float[:,:] particle_field, int[:,:] states, int h, int w):
     """
     Render a particle field as an image stack
     :param particle_field: 2D array of floats, the particle field
@@ -250,7 +253,7 @@ def render_particle_histogram_with_tracks(float[:,:] particle_field, int[:,:] st
     return image_particle_field
 
 
-def render_particle_gaussians_with_tracks(float[:,:] particle_field, int[:,:] states, int w, int h, double amplitude, double sigma_x, double sigma_y):
+def render_particle_gaussians_with_tracks(float[:,:] particle_field, int[:,:] states, int h, int w, double amplitude, double sigma_x, double sigma_y):
 
     assert particle_field.shape[0] == states.shape[0]
 

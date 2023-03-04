@@ -48,6 +48,25 @@ def find_files(root_dir: str, extension: str) -> list:
     return target_files
 
 
+def change_cython_profiler_flag(base_path: str, flag: bool):
+    """
+    Change the cython profiler flag in all .pyx files
+    :param base_path: base path to search for .pyx files
+    :param flag: flag to set
+    """
+    pyx_files = find_files(base_path, ".pyx")
+    for pyx_file in pyx_files:
+        with open(pyx_file, "r") as f:
+            lines = f.read().splitlines()
+            for i, line in enumerate(lines):
+                if line.startswith("# cython:") and f"profile={not flag}" in line:
+                    print(f"Changing profile flag to {flag}: {pyx_file}")
+                    lines[i] = line.replace(f"profile={not flag}", f"profile={flag}")
+                    break
+        with open(pyx_file, "w") as f:
+            f.write("\n".join(lines))
+
+
 def update_gitignore():
     """
     Update the .gitignore file with common ignores
