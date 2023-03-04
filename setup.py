@@ -242,6 +242,11 @@ def collect_extensions():
         # Remove redundancy
         sources = list(set(sources))
         extra_c_files = list(set(extra_c_files))
+
+        # Remove files that don't exist
+        sources = [file for file in sources if os.path.exists(file)]
+        extra_c_files = [file for file in extra_c_files if os.path.exists(file)]
+
         # Make sure we have all the include paths
         for path in extra_c_files:
             if os.path.split(path)[0] not in INCLUDE_DIRS:
