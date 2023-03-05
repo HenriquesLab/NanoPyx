@@ -194,13 +194,13 @@ def main(mode=None):
     # Show the logo
     with open("logo_ascii.txt", "r") as f:
         print(f.read())
-        print("Version: ", get_version())
 
     if mode is not None:
         selection = mode
 
     else:
         # print the options
+        print("Version: ", get_version())
         print("(⌐⊙_⊙) what do you want to do?")
         for i, option in enumerate(options.keys()):
             cmd = options[option]

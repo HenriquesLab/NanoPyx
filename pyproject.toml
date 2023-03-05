@@ -149,10 +149,10 @@ test-skip = ["*arm64"]
 
 # # An number from 1 to 3 to increase the level of verbosity (corresponding to invoking pip with -v, -vv, and -vvv),
 # # between -1 and -3 (-q, -qq, and -qqq), or just 0 (default verbosity)
-build-verbosity = 1
+build-verbosity = 0
 
 # before-all = ""
-# before-build = ""
+before-build = ["git status"]
 # repair-wheel-command = ""
 
 # test-command = "pytest {project}/tests"
