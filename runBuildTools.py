@@ -103,6 +103,7 @@ def update_gitignore():
         ".coverage",
         "*.pyd",
         "wheelhouse",
+        ".tox",
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
@@ -171,7 +172,8 @@ def main(mode=None):
         "Clean files": f"{remove_call} {files2clean}"
         if len(files2clean) > 0
         else "echo 'No files to clean'",
-        "Run tests": "pytest --nbmake --nbmake-timeout=600",
+        "Run pytest": "pytest --nbmake --nbmake-timeout=600",
+        "Run tox": f"{python_call} -m pip install pipx && pipx run tox",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Generate .docker/gha_runners/requirements.txt": extract_requirements_from_pyproject,
         "Update .gitignore": update_gitignore,

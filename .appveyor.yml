@@ -27,6 +27,7 @@ environment:
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
       OS_NAME: linux
+
   access_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
 
@@ -52,12 +53,11 @@ install:
       Where-Object pullRequestId -eq $env:APPVEYOR_PULL_REQUEST_NUMBER)[0].buildNumber) { `
       throw "There are newer queued builds for this pull request, failing early." }
   - python -m pip install --upgrade pip --cache-dir cache-pip
-  - python -m pip install cibuildwheel --cache-dir cache-pip
   - python -m pip install pipx --cache-dir cache-pip
 
 build_script:
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
-  - python -m cibuildwheel --output-dir wheelhouse
+  - pipx run cibuildwheel --output-dir wheelhouse
   - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
 
 artifacts:
@@ -67,10 +67,8 @@ artifacts:
     name: SDist
 
 test_script:
-  - python -m pip install twine --cache-dir cache-pip
-  - python -m twine check wheelhouse/*.whl
-  - python -m pip install "nanopyx[test]" --cache-dir wheelhouse
-  - cd .. && python -m pytest NanoPyx/tests
+  - pipx run twine check wheelhouse/*.whl
+  - pipx run tox
 
 notifications:
   - provider: Email
