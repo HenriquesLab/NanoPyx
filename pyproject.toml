@@ -156,8 +156,8 @@ before-build = ["git status"]
 # repair-wheel-command = ""
 
 # test-command = "pytest {project}/tests"
-# before-test = "pip install nanopyx[test] --cache-dir pip-cache"
-# test-requires = ["nanopyx[test]"]
+before-test = "pip uninstall -y nanopyx"
+test-requires = ["nanopyx[test]"]
 # test-extras = []
 
 [tool.cibuildwheel.linux]
