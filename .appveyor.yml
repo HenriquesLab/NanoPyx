@@ -15,6 +15,7 @@ only_commits:
     # only trigger build if these files change
     #https://www.appveyor.com/docs/how-to/filtering-commits/#skip-commits-2
     - src/
+    - pyproject.toml
     - .appveyor.yml
 
 environment:
