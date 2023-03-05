@@ -2,7 +2,7 @@
 
 version: "{build}"
 
-shallow_clone: true
+shallow_clone: false
 
 # branches to build
 branches:
@@ -56,6 +56,7 @@ install:
 
 build_script:
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
+  - python setup.py version
   - python -m cibuildwheel --output-dir wheelhouse
   - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
 
