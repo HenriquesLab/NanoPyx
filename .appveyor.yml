@@ -68,17 +68,19 @@ artifacts:
 test_script:
   - python -m pip install twine --cache-dir cache-pip
   - python -m twine check wheelhouse/*.whl
-# deploy:
-#   on:
-#     branch: main # release from main branch only
-#     APPVEYOR_REPO_TAG: true # deploy on tag push only
-#   provider: GitHub
-#   tag: $(NPX_VERSION)
-#   repository: "HenriquesLab/NanoPyx"
-#   release: Build $(APPVEYOR_BUILD_NUMBER)
-#   description: "Latest build of NanoPyx"
-#   auth_token:
-#     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
-#   artifact: Wheels, SDist
-#   draft: true
-#   prerelease: false
+
+deploy:
+  # skip_tags: true
+  on:
+    branch: main # release from main branch only
+    APPVEYOR_REPO_TAG: true # deploy on tag push only
+  provider: GitHub
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  repository: "HenriquesLab/NanoPyx"
+  release: Build $(APPVEYOR_REPO_TAG_NAME)
+  description: "Latest build of NanoPyx"
+  auth_token:
+    secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
+  artifact: Wheels, SDist
+  draft: false
+  prerelease: true
