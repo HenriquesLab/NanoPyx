@@ -69,6 +69,8 @@ artifacts:
 test_script:
   - python -m pip install twine --cache-dir cache-pip
   - python -m twine check wheelhouse/*.whl
+  - python -m pip install "nanopyx[test]" --cache-dir wheelhouse
+  - cd .. && python -m pytest NanoPyx/tests
 
 notifications:
   - provider: Email
