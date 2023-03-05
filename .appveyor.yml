@@ -69,6 +69,18 @@ test_script:
   - python -m pip install twine --cache-dir cache-pip
   - python -m twine check wheelhouse/*.whl
 
+notifications:
+  - provider: Email
+    to:
+      - "{{commitAuthorEmail}}"
+    on_build_success: true
+    on_build_failure: true
+    on_build_status_changed: true
+  - provider: GitHubPullRequest
+    auth_token:
+      secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
+    template: "{{#passed}}:white_check_mark:{{/passed}}{{#failed}}:x:{{/failed}} [Build {{&projectName}} {{buildVersion}} {{status}}]({{buildUrl}}) (commit {{commitUrl}} by @{{&commitAuthorUsername}})"
+
 deploy:
   # skip_tags: true
   on:
