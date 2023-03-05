@@ -56,7 +56,6 @@ install:
 
 build_script:
   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
-  - python setup.py version
   - python -m cibuildwheel --output-dir wheelhouse
   - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
 
@@ -69,6 +68,7 @@ artifacts:
 test_script:
   - python -m pip install twine --cache-dir cache-pip
   - python -m twine check wheelhouse/*.whl
+  - python setup.py version
 
 notifications:
   - provider: Email
