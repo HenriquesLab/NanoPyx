@@ -63,7 +63,10 @@ def build_wheel(session: nox.Session) -> None:
         )
 
     else:
-        shutil.copy(temp_path, DIR / "wheelhouse")
+        os.makedirs(DIR / "wheelhouse", exist_ok=True)
+        for file in os.listdir(temp_path):
+            if file.endswith(".whl"):
+                shutil.copy(os.path.join(temp_path, file), DIR / "wheelhouse")
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
