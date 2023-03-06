@@ -35,9 +35,9 @@ jobs:
           fetch-depth: 0
       - name: Setup Nox
         uses: wntrblm/nox@2022.8.7
-        with:
-          python-versions: "3.8, 3.9, 3.10, 3.11"
       - name: Run Nox
-        run: nox
+        run: |
+          python -m pip install pipx
+          pipx run nox
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
