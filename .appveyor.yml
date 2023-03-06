@@ -54,8 +54,8 @@ install:
   - python -m pip install pipx --cache-dir cache-pip
 
 build_script:
-  # set NOX_MACOS_INSTALL_DEPENDENCIES to 1 to install dependencies
-  - ps: $env:NOX_MACOS_INSTALL_DEPENDENCIES = 1
+  # set if macos NOX_MACOS_INSTALL_DEPENDENCIES to 1 to install dependencies
+  - sh: "[[ $OS_NAME == 'darwin' ]] && export NOX_MACOS_INSTALL_DEPENDENCIES=1 || true"
   - pipx run nox --sessions build_wheel build_sdist
 
 test_script:

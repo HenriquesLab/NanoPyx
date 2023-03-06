@@ -34,10 +34,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      # - name: Setup Nox
-      #   uses: wntrblm/nox@2022.8.7
-      #   with:
-      #     python-versions: "3.10"
       - name: Run Nox Quick-Tests
         run: |
           python3 -m pip install pipx
