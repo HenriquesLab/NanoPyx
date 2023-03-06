@@ -40,7 +40,7 @@ jobs:
           retention-days: 15
 
   deploy_doc:
-    needs: night_doctor
+    needs: night_mechanic
     runs-on: [self-hosted, deepthought]
     # only run if main branch
     if: github.ref == 'refs/heads/main'
@@ -55,7 +55,7 @@ jobs:
         uses: actions/deploy-pages@v1
 
   generate_movie:
-    needs: night_doctor
+    needs: night_mechanic
     runs-on: [self-hosted, ubuntu]
     steps:
       - name: Generate movie
