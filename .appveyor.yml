@@ -35,8 +35,6 @@ stack: python 3.8
 
 cache:
   - cache-pip
-  - cache-cibuildwheel
-  - build
 
 init:
   - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%
@@ -56,9 +54,10 @@ install:
   - python -m pip install pipx --cache-dir cache-pip
 
 build_script:
-  - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
-  - pipx run cibuildwheel --output-dir wheelhouse
-  - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
+  - pipx run nox --sessions build_wheel build_sdist
+
+test_script:
+  - pipx run nox --sessions tests_on_wheels
 
 artifacts:
   - path: "wheelhouse\\*.whl"
@@ -66,9 +65,13 @@ artifacts:
   - path: "wheelhouse\\*.tar.gz"
     name: SDist
 
-test_script:
-  - pipx run twine check wheelhouse/*.whl
-  - pipx run tox
+# build_script:
+#   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
+#   - pipx run cibuildwheel --output-dir wheelhouse
+#   - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
+# test_script:
+#   - pipx run twine check wheelhouse/*.whl
+#   - pipx run tox
 
 notifications:
   - provider: Email
@@ -81,19 +84,18 @@ notifications:
     auth_token:
       secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
     template: "{{#passed}}:white_check_mark:{{/passed}}{{#failed}}:x:{{/failed}} [Build {{&projectName}} {{buildVersion}} {{status}}]({{buildUrl}}) (commit {{commitUrl}} by @{{&commitAuthorUsername}})"
-
-deploy:
-  # skip_tags: true
-  on:
-    branch: main # release from main branch only
-    APPVEYOR_REPO_TAG: true # deploy on tag push only
-  provider: GitHub
-  tag: $(APPVEYOR_REPO_TAG_NAME)
-  repository: "HenriquesLab/NanoPyx"
-  release: Build $(APPVEYOR_REPO_TAG_NAME)
-  description: "Latest build of NanoPyx"
-  auth_token:
-    secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
-  artifact: Wheels, SDist
-  draft: false
-  prerelease: true
+# deploy:
+#   # skip_tags: true
+#   on:
+#     branch: main # release from main branch only
+#     APPVEYOR_REPO_TAG: true # deploy on tag push only
+#   provider: GitHub
+#   tag: $(APPVEYOR_REPO_TAG_NAME)
+#   repository: "HenriquesLab/NanoPyx"
+#   release: Build $(APPVEYOR_REPO_TAG_NAME)
+#   description: "Latest build of NanoPyx"
+#   auth_token:
+#     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
+#   artifact: Wheels, SDist
+#   draft: false
+#   prerelease: true

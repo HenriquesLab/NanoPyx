@@ -1,4 +1,4 @@
-name: nanopyx on-call mechanic
+name: on-call tests
 # does a quick test
 
 on:
@@ -38,9 +38,16 @@ jobs:
         uses: wntrblm/nox@2022.8.7
         with:
           python-versions: "3.10"
-      - name: Run Nox
+      - name: Run Nox Quick-Tests
         run: |
           python -m pip install pipx
           pipx run nox --sessions tests_on_source-3.10
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage.xml # optional
+          flags: pytests # optional
+          fail_ci_if_error: false # optional (default = false)
+          verbose: true # optional (default = false)

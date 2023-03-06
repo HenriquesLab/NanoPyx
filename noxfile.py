@@ -81,7 +81,8 @@ def tests_on_source(session):
     Run the test suite
     """
     session.run("pip", "install", "-e", ".[test]")
-    session.run("pytest", DIR.joinpath("tests"))
+    session.run("pytest", DIR.joinpath("tests"), "-p", "no:nbmake")
+    session.run("coverage", "xml")
 
 
 @nox.session(python=PYTHON_ALL_VERSIONS)

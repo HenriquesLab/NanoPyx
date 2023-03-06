@@ -1,4 +1,4 @@
-name: nanopyx night mechanic
+name: nightly tests
 # does a massive check, every night
 
 on:
@@ -20,8 +20,12 @@ on:
 
 jobs:
   night_mechanic:
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [self-hosted, deepthought]
     steps:
+      - name: Update runner
+        run: |
+          sudo apt-get update && sudo apt-get upgrade -y
+          sudo apt-get install -y ffmpeg libavcodec-extra xvfb-run gource
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -45,7 +49,7 @@ jobs:
 
   deploy_doc:
     needs: night_doctor
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [self-hosted, deepthought]
     # only run if main branch
     if: github.ref == 'refs/heads/main'
     permissions:
@@ -64,6 +68,8 @@ jobs:
     steps:
       - name: Generate movie
         run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg libavcodec-extra xvfb-run gource
           xvfb-run gource --output-custom-log repo-activity.log
           python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
           xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir /home/docker/NanoPyx/faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
