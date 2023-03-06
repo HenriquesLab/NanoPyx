@@ -32,7 +32,7 @@ jobs:
       #     python-versions: "3.8, 3.9, 3.10, 3.11"
       - name: Run Nox
         run: |
-          python -m pip install pipx
+          python3 -m pip install pipx
           pipx run nox --sessions build_wheel build_sdist tests_on_wheels generate_docs
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
