@@ -186,8 +186,8 @@ class FIRECalculator(object):
     def plot_frc_curve(self):
         plt.plot(self.frc_curve[:, 0], self.frc_curve[:, 1])
         plt.axhline(1/7, color='r', linestyle='-')
-        plt.xlabel('Spatial frequency [1/nm]')
+        plt.xlabel(f'Spatial frequency [1/{self.units}]')
         plt.ylabel('FRC')
-        plt.title(f"FRC resolution: {np.round(self.fire_number, 1)} {self.units}");
+        plt.title(f"FRC resolution: {np.round(self.fire_number, 1)} {self.units}")
         plt.show()
 

@@ -419,5 +419,11 @@ class DecorrAnalysis(object):
 			for j in range(self.n_r):
 				dg[j] = self.d[j][k]
 			plt.plot(x, dg, c="b")
+		plt.plot(self.kc, self.a_g, c="g", marker="*")
+		plt.plot(self.kc0, self.a0, c="r", marker="x")
+		plt.axvline(x=self.kc_max, color='b', linestyle='-', label="Cut-off frequency")
+		plt.xlabel(f'Spatial frequency [1/{self.units}]')
+		plt.ylabel('Cross-correlation coefficients')
+		plt.title(f"Decorrelation analysis resolution: {np.round(self.resolution, 4)} {self.units}")
 		plt.show()
 
