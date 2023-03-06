@@ -33,7 +33,7 @@ jobs:
       - name: Run Nox
         run: |
           python -m pip install pipx
-          pipx run nox --list --sessions build_wheel build_sdist tests_on_wheels generate_docs
+          pipx run nox --sessions build_wheel build_sdist tests_on_wheels generate_docs
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
       - name: Archive Wheels
