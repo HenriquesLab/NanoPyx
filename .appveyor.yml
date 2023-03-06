@@ -86,18 +86,19 @@ notifications:
     auth_token:
       secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
     template: "{{#passed}}:white_check_mark:{{/passed}}{{#failed}}:x:{{/failed}} [Build {{&projectName}} {{buildVersion}} {{status}}]({{buildUrl}}) (commit {{commitUrl}} by @{{&commitAuthorUsername}})"
-# deploy:
-#   # skip_tags: true
-#   on:
-#     branch: main # release from main branch only
-#     APPVEYOR_REPO_TAG: true # deploy on tag push only
-#   provider: GitHub
-#   tag: $(APPVEYOR_REPO_TAG_NAME)
-#   repository: "HenriquesLab/NanoPyx"
-#   release: Build $(APPVEYOR_REPO_TAG_NAME)
-#   description: "Latest build of NanoPyx"
-#   auth_token:
-#     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
-#   artifact: Wheels, SDist
-#   draft: false
-#   prerelease: true
+
+deploy:
+  # skip_tags: true
+  on:
+    branch: main # release from main branch only
+    APPVEYOR_REPO_TAG: true # deploy on tag push only
+  provider: GitHub
+  # tag: $(APPVEYOR_REPO_TAG_NAME)
+  repository: "HenriquesLab/NanoPyx"
+  release: Latest
+  description: "Latest build of NanoPyx"
+  auth_token:
+    secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
+  artifact: Wheels, SDist
+  draft: true
+  prerelease: false

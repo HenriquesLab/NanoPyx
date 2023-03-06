@@ -81,17 +81,17 @@ def build_sdist(session: nox.Session) -> None:
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def tests_on_source(session):
     """
-    Run the test suite
+    Run the test suite by directly calling pip install -e .[test] and then pytest
     """
     session.run("pip", "install", "-e", ".[test]")
-    session.run("pytest", DIR.joinpath("tests"), "-p", "no:nbmake")
+    session.run("pytest", DIR.joinpath("tests"), "-p", "no:nbmake", "-n=auto")
     session.run("coverage", "xml")
 
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def tests_on_wheels(session):
     """
-    Run the test suite
+    Run the test suite by installing the wheel, changing directory and then calling pytest
     """
     python_version_str = f"cp{session.python.replace('.', '')}"
     # find the latest wheel
@@ -103,10 +103,9 @@ def tests_on_wheels(session):
     wheel_names.sort()
     wheel_name = wheel_names[-1]
 
-    print(python_version_str)
     session.run("pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]")
     with session.chdir(".nox"):
-        session.run("pytest", DIR.joinpath("tests"))
+        session.run("pytest", DIR.joinpath("tests"), "-p", "no:nbmake", "-n=auto")
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
