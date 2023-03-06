@@ -2,9 +2,9 @@
 
 import os
 import shutil
+import subprocess
 import sys
 from inspect import isfunction
-import subprocess
 
 
 def run_cmd(command: str):
@@ -87,6 +87,7 @@ def update_gitignore():
         "venv",
         "build",
         "dist",
+        "docs",
         ".ipynb_checkpoints",
         "__pycache__",
         "*.egg-info",
@@ -103,7 +104,7 @@ def update_gitignore():
         ".coverage",
         "*.pyd",
         "wheelhouse",
-        ".tox",
+        ".nox",
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
@@ -173,7 +174,12 @@ def main(mode=None):
         if len(files2clean) > 0
         else "echo 'No files to clean'",
         "Run pytest": "pytest --nbmake --nbmake-timeout=600",
-        "Run tox": f"{python_call} -m pip install pipx && pipx run tox",
+        "Run nox with all sessions": "pipx run nox",
+        "Run nox with build and test wheels": "pipx run nox --session build_wheel build_sdist tests_on_wheels",
+        "Run nox with test wheels": "pipx run nox --session tests_on_wheels",
+        "Run nox with test source": "pipx run nox --session tests_on_source",
+        "Run nox with lint": "pipx run nox --session lint",
+        "Run nox with generate docs": "pipx run nox --session generate_docs",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Generate .docker/gha_runners/requirements.txt": extract_requirements_from_pyproject,
         "Update .gitignore": update_gitignore,

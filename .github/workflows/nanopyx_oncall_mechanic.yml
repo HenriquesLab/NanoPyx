@@ -1,0 +1,49 @@
+name: test-oncall
+# does a quick test
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      # only run if src or tests changes
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore
+      - "src/**"
+      - "tests/**"
+      - "setup.py"
+  pull_request:
+    branches: ["main"]
+
+  # creates a button
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Log level"
+        required: true
+        default: "warning"
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+
+jobs:
+  oncall_mechanic:
+    runs-on: [self-hosted, deepthought]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Run Nox Quick-Tests
+        run: |
+          python3 -m pip install pipx
+          pipx run nox --sessions tests_on_source-3.10
+        env:
+          LOG_LEVEL: ${{ github.event.inputs.logLevel }}
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: coverage.xml # optional
+          flags: pytests # optional
+          fail_ci_if_error: false # optional (default = false)
+          verbose: true # optional (default = false)

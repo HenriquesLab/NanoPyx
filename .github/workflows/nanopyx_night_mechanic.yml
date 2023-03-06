@@ -1,6 +1,10 @@
-name: generate gource movie
+name: test-nightly
+# does a massive check, every night
 
 on:
+  schedule:
+    - cron: "0 23 * * *"
+
   # creates a button
   workflow_dispatch:
     inputs:
@@ -15,22 +19,53 @@ on:
           - debug
 
 jobs:
-  generate_movie:
-    runs-on: [self-hosted, ubuntu]
+  night_mechanic:
+    runs-on: [self-hosted, deepthought]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Run Nox
+        run: |
+          python3 -m pip install pipx
+          pipx run nox --sessions build_wheel build_sdist tests_on_wheels generate_docs
+        env:
+          LOG_LEVEL: ${{ github.event.inputs.logLevel }}
+      - name: Archive Wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: wheelhouse/*.whl
+          retention-days: 15
 
+  deploy_doc:
+    needs: night_doctor
+    runs-on: [self-hosted, deepthought]
+    # only run if main branch
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v1
+
+  generate_movie:
+    needs: night_doctor
+    runs-on: [self-hosted, ubuntu]
+    steps:
       - name: Generate movie
         run: |
           xvfb-run gource --output-custom-log repo-activity.log
           python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
           xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir /home/docker/NanoPyx/faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
-
       - name: Archive generated movie
         uses: actions/upload-artifact@v3
         with:
           name: gource-movie
           path: gource.mp4
+          retention-days: 3
