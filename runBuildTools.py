@@ -87,6 +87,7 @@ def update_gitignore():
         "venv",
         "build",
         "dist",
+        "docs",
         ".ipynb_checkpoints",
         "__pycache__",
         "*.egg-info",
@@ -103,7 +104,7 @@ def update_gitignore():
         ".coverage",
         "*.pyd",
         "wheelhouse",
-        ".tox",
+        ".nox",
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
