@@ -277,6 +277,7 @@ def collect_extensions():
     return collected_extensions
 
 
+VERSION = versioneer.get_version()
 # Show the logo
 print(
     r"""
@@ -286,8 +287,9 @@ print(
  |_|\_\__,_|_||_\___/_|  \_, /_\_\
       [ (( X )) ]     *|<|__/==/==
   |-- Python Nanoscopy Library --|
-
 """
+    + "  "
+    + f"v{VERSION}".center(len("|-- Python Nanoscopy Library --|"))
 )
 
 # cython options

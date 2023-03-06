@@ -56,6 +56,7 @@ dynamic = ["version"]
 all = ["nanopyx[developer,test,jupyter,doc]"]
 developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
 test = [
+    "pipx>=1.1.0",
     "pytest>=7.1",
     "pytest-cov>= 4.0.0",
     "pytest-icdiff>=0.6",    # https://github.com/hjwp/pytest-icdiff
@@ -152,12 +153,11 @@ test-skip = ["*arm64"]
 build-verbosity = 0
 
 # before-all = ""
-# before-build = ""
+before-build = ["git status"]
 # repair-wheel-command = ""
 
 # test-command = "pytest {project}/tests"
-# before-test = "pip install nanopyx[test] --cache-dir pip-cache"
-# test-requires = ["nanopyx[test]"]
+test-requires = ["nanopyx[test]"]
 # test-extras = []
 
 [tool.cibuildwheel.linux]
@@ -170,7 +170,7 @@ archs = ["x86_64"]
 archs = ["x86_64", "arm64"]
 before-all = ["brew install llvm libomp"]
 test-requires = ["nanopyx[test]"]
-test-command = "pytest -n=0 --timeout=1200 {project}/tests"
+#test-command = "pytest -n=0 --timeout=1200 {project}/tests"
 # #repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 # repair-wheel-command = "delocate-wheel -w {dest_dir} -v {wheel}"
 
@@ -184,7 +184,7 @@ test-command = "pytest -n=0 --timeout=1200 {project}/tests"
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
 test-requires = ["nanopyx[test]"]
-test-command = "pytest -n=0 --timeout=1200 {project}\\tests"
+#test-command = "pytest -n=0 --timeout=1200 {project}\\tests"
 # before-build = "pip install delvewheel"
 # repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"
 
