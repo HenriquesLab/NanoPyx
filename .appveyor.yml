@@ -35,6 +35,7 @@ stack: python 3.8
 
 cache:
   - cache-pip
+  - cache-cibuildwheel
 
 init:
   - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%
@@ -54,8 +55,15 @@ install:
   - python -m pip install pipx --cache-dir cache-pip
 
 build_script:
-  # set if macos NOX_MACOS_INSTALL_DEPENDENCIES to 1 to install dependencies
+  # build wheels for windows, also sdist
+  - cmd: pipx run nox --sessions build_wheel build_sdist
+  # build wheels for darwin
   - sh: "[[ $OS_NAME == 'darwin' ]] && export NOX_MACOS_INSTALL_DEPENDENCIES=1 || true"
+  - sh: "[[ $OS_NAME == 'darwin' ]] && pipx run nox --sessions build_wheel || true"
+  # build wheels for linux
+  - sh: "[[ $OS_NAME == 'linux' ]] && export CIBW_CACHE_PATH = 'cache-cibuildwheel' || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && pipx run cibuildwheel --output-dir wheelhouse || true"
+
   - pipx run nox --sessions build_wheel build_sdist
 
 test_script:
