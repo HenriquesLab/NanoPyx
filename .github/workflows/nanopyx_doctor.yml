@@ -1,0 +1,42 @@
+# This workflow will install Python dependencies, run tests and lint with a variety of Python versions
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: nanopyx doctor
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      # only run if src or tests changes
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#onpushpull_requestpull_request_targetpathspaths-ignore
+      - "src/**"
+      - "tests/**"
+      - "setup.py"
+  pull_request:
+    branches: ["main"]
+
+  # creates a button
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Log level"
+        required: true
+        default: "warning"
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+
+jobs:
+  generate_movie:
+    runs-on: [self-hosted, ubuntu]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Nox
+        uses: wntrblm/nox@2022.8.7
+        #with:
+        #  args: -k "not tests_on_source"

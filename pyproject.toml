@@ -63,7 +63,7 @@ test = [
     "pytest-clarity>=1.0.1", # https://pypi.org/project/pytest-clarity/
     "pytest-timeout>=2.1.0",
     "pytest-plt>=1.1.0",
-    # "pytest-xdist>=3.1.0",
+    "pytest-xdist>=3.1.0",
     "pytest-sugar>=0.9.6",
     "pytest-cython>=0.2.0",
 ]

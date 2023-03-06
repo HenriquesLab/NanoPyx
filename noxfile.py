@@ -7,6 +7,9 @@ import os
 DIR = Path(__file__).parent.resolve()
 PYTHON_ALL_VERSIONS = ["3.8", "3.9", "3.10", "3.11"]
 PYTHON_DEFAULT_VERSION = "3.8"
+MACOS_INSTALL_DEPENDENCIES = False
+if os.environ.get("MACOS_INSTALL_DEPENDENCIES"):
+    MACOS_INSTALL_DEPENDENCIES = True
 LINT_DEPENDENCIES = [
     "black==22.8.0",
     "flake8==4.0.1",
@@ -27,15 +30,12 @@ else:
 
 
 # Set nox options
-nox.options.sessions = ["tests_on_source", "generate_docs"]
-if PLATFORM == "macos":
-    # build_docs fail on Windows, even if `chcp.com 65001` is used
-    # nox.options.sessions = ["tests", "lint", "build_man"]
-    pass
-else:
-    # nox.options.sessions = ["tests", "lint", "build_docs", "build_man"]
-    pass
 nox.options.reuse_existing_virtualenvs = True
+
+# Some platform specific actions
+if PLATFORM == "macos":
+    if os.environ.get("NOX_MACOS_INSTALL_DEPENDENCIES"):
+        os.system("brew install llvm libomp")
 
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
@@ -47,6 +47,7 @@ def build_wheel(session: nox.Session) -> None:
     temp_path = session.create_tmp()
     # session.run("python", "-m", "build", "--wheel", "-o", temp_path)
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
+
     if PLATFORM == "unix":
         session.install("auditwheel")
         session.run(
@@ -56,14 +57,17 @@ def build_wheel(session: nox.Session) -> None:
             "-w",
             DIR / "wheelhouse",
         )
+
     elif PLATFORM == "macos":
         session.install("delocate")
         session.run(
             "delocate-wheel",
+            "-v",
             os.path.join(temp_path, "*.whl"),
             "-w",
             DIR / "wheelhouse",
         )
+
     else:
         shutil.copy(temp_path, DIR / "wheelhouse")
 
@@ -104,8 +108,7 @@ def tests_on_source(session):
     Run the test suite
     """
     session.run("pip", "install", "-e", ".[test]")
-    with session.chdir(".nox"):
-        session.run("pytest", DIR.joinpath("tests"))
+    session.run("pytest", DIR.joinpath("tests"))
 
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
