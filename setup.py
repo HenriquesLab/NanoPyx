@@ -1,13 +1,14 @@
+import multiprocessing
 import os
 import os.path
 import platform
 import subprocess
 import sys
-import multiprocessing
 
 from Cython.Build import cythonize
 from Cython.Compiler import Options
 from setuptools import Extension, setup
+
 import versioneer
 
 # EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")

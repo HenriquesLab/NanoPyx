@@ -1,8 +1,9 @@
-import nox
-from pathlib import Path
-import sys
-import shutil
 import os
+import shutil
+import sys
+from pathlib import Path
+
+import nox
 
 DIR = Path(__file__).parent.resolve()
 PYTHON_ALL_VERSIONS = ["3.8", "3.9", "3.10", "3.11"]
@@ -10,15 +11,6 @@ PYTHON_DEFAULT_VERSION = "3.8"
 MACOS_INSTALL_DEPENDENCIES = False
 if os.environ.get("MACOS_INSTALL_DEPENDENCIES"):
     MACOS_INSTALL_DEPENDENCIES = True
-LINT_DEPENDENCIES = [
-    "black==22.8.0",
-    "flake8==4.0.1",
-    "flake8-bugbear==21.11.29",
-    "mypy==0.930",
-    "types-jinja2",
-    "packaging>=20.0",
-    "isort==5.10.1",
-]
 
 # Platform logic
 if sys.platform == "darwin":
@@ -47,13 +39,15 @@ def build_wheel(session: nox.Session) -> None:
     temp_path = session.create_tmp()
     # session.run("python", "-m", "build", "--wheel", "-o", temp_path)
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
+    # get the produced wheel name
+    wheel_name = [name for name in os.listdir(temp_path) if name.endswith(".whl")][0]
 
     if PLATFORM == "unix":
         session.install("auditwheel")
         session.run(
             "auditwheel",
             "repair",
-            os.path.join(temp_path, "*.whl"),
+            os.path.join(temp_path, wheel_name),
             "-w",
             DIR / "wheelhouse",
         )
@@ -63,7 +57,7 @@ def build_wheel(session: nox.Session) -> None:
         session.run(
             "delocate-wheel",
             "-v",
-            os.path.join(temp_path, "*.whl"),
+            os.path.join(temp_path, wheel_name),
             "-w",
             DIR / "wheelhouse",
         )
@@ -81,27 +75,6 @@ def build_sdist(session: nox.Session) -> None:
     session.run("python", "-m", "build", "--sdist", "-o", "wheelhouse")
 
 
-@nox.session(python=PYTHON_DEFAULT_VERSION)
-def lint(session):
-    """
-    Run the linters
-    """
-    session.install(*LINT_DEPENDENCIES)
-    files = [str(Path("src") / "nanopyx"), "tests"] + [
-        str(p) for p in Path(".").glob("*.py")
-    ]
-    session.run("isort", "--check", "--diff", "--profile", "black", *files)
-    session.run("black", "--check", *files)
-    session.run("flake8", *files)
-    session.run(
-        "mypy",
-        "--strict-equality",
-        "--no-implicit-optional",
-        "--warn-unused-ignores",
-        *files,
-    )
-
-
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def tests_on_source(session):
     """
@@ -116,7 +89,18 @@ def tests_on_wheels(session):
     """
     Run the test suite
     """
-    session.run("pip", "install", "-U", "nanopyx[test]", "--find-links", "wheelhouse")
+    python_version_str = f"cp{session.python.replace('.', '')}"
+    # find the latest wheel
+    wheel_names = [
+        wheel
+        for wheel in os.listdir("wheelhouse")
+        if wheel.endswith(".whl") and python_version_str in wheel
+    ]
+    wheel_names.sort()
+    wheel_name = wheel_names[-1]
+
+    print(python_version_str)
+    session.run("pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]")
     with session.chdir(".nox"):
         session.run("pytest", DIR.joinpath("tests"))
 
@@ -127,4 +111,4 @@ def generate_docs(session: nox.Session) -> None:
     Generate the docs
     """
     session.run("pip", "install", "-e", ".[doc]")
-    session.run("pdoc", "src/nanopyx", "-o", DIR / "docs")
+    session.run("pdoc", DIR / "src" / "nanopyx", "-o", DIR / "docs")

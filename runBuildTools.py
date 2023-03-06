@@ -2,9 +2,9 @@
 
 import os
 import shutil
+import subprocess
 import sys
 from inspect import isfunction
-import subprocess
 
 
 def run_cmd(command: str):
@@ -174,12 +174,12 @@ def main(mode=None):
         if len(files2clean) > 0
         else "echo 'No files to clean'",
         "Run pytest": "pytest --nbmake --nbmake-timeout=600",
-        "Run nox with all sessions": "nox",
-        "Run nox with build and test wheels": "nox --session build_wheel build_sdist tests_on_wheels",
-        "Run nox with test wheels": "nox --session tests_on_wheels",
-        "Run nox with test source": "nox --session tests_on_source",
-        "Run nox with lint": "nox --session lint",
-        "Run nox with generate docs": "nox --session generate_docs",
+        "Run nox with all sessions": "pipx run nox",
+        "Run nox with build and test wheels": "pipx run nox --session build_wheel build_sdist tests_on_wheels",
+        "Run nox with test wheels": "pipx run nox --session tests_on_wheels",
+        "Run nox with test source": "pipx run nox --session tests_on_source",
+        "Run nox with lint": "pipx run nox --session lint",
+        "Run nox with generate docs": "pipx run nox --session generate_docs",
         "Clear notebook output": f"jupyter nbconvert --ClearOutputPreprocessor.enabled=True --inplace {notebook_files}",
         "Generate .docker/gha_runners/requirements.txt": extract_requirements_from_pyproject,
         "Update .gitignore": update_gitignore,
