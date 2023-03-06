@@ -28,7 +28,7 @@ on:
 
 jobs:
   oncall_mechanic:
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [self-hosted, deepthought]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
