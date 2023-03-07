@@ -37,12 +37,6 @@ jobs:
           pipx run nox --sessions build_wheel build_sdist
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
-      - name: Archive Wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheels
-          path: wheelhouse/*.whl
-          retention-days: 15
       - name: Save wheels to cache
         id: cache-wheels-save
         uses: actions/cache@v3
@@ -51,6 +45,12 @@ jobs:
           key: ${{ runner.os }}-wheelhouse-${{ hashFiles('**/setup.py') }}
           restore-keys: |
             ${{ runner.os }}-wheelhouse-
+      - name: Archive Wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheelhouse
+          path: wheelhouse/*.whl
+          retention-days: 15
 
   test_wheels:
     needs: build_wheels
