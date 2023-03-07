@@ -61,7 +61,7 @@ build_script:
   # build wheels for windows, also sdist
   - cmd: pipx run nox --sessions build_wheel build_sdist
   # build wheels for darwin
-  - sh: "[[ $OS_NAME == 'darwin' ]] && NPX_MACOS_INSTALL_DEPENDENCIES=1 pipx run nox --sessions build_wheel || true"
+  - sh: "[[ $OS_NAME == 'darwin' ]] && NPX_MACOS_INSTALL_DEPENDENCIES=1 NPX_CYTHON_THREADS=2 pipx run nox --sessions build_wheel || true"
   # build wheels for linux
   - sh: "[[ $OS_NAME == 'linux' ]] && CIBW_CACHE_PATH='cache-cibuildwheel' pipx run cibuildwheel --output-dir wheelhouse || true"
 
