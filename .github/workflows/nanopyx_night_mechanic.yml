@@ -19,7 +19,7 @@ on:
           - debug
 
 jobs:
-  night_mechanic:
+  build_wheels:
     runs-on: [self-hosted, deepthought]
     steps:
       - name: Checkout
@@ -30,10 +30,10 @@ jobs:
         uses: wntrblm/nox@2022.8.7
         with:
           python-versions: "3.8, 3.9, 3.10, 3.11"
-      - name: Run Nox
+      - name: Run Nox - build_wheel build_sdist
         run: |
           python3 -m pip install pipx
-          pipx run nox --sessions build_wheel build_sdist tests_on_wheels generate_docs
+          pipx run nox --sessions build_wheel build_sdist
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
       - name: Archive Wheels
@@ -42,9 +42,43 @@ jobs:
           name: wheels
           path: wheelhouse/*.whl
           retention-days: 15
+      - name: Save wheels to cache
+        id: cache-wheels-save
+        uses: actions/cache@v3
+        with:
+          path: wheelhouse
+          key: ${{ runner.os }}-wheelhouse-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-wheelhouse-
+
+  test_wheels:
+    needs: build_wheels
+    runs-on: [self-hosted, deepthought]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Restore cached wheels
+        id: cache-wheels-restore
+        uses: actions/cache/restore@v3
+        with:
+          path: wheelhouse
+          key: ${{ runner.os }}-wheelhouse-${{ hashFiles('**/setup.py') }}
+          restore-keys: |
+            ${{ runner.os }}-wheelhouse-
+      - name: Install Python's for Nox
+        uses: wntrblm/nox@2022.8.7
+        with:
+          python-versions: "3.8, 3.9, 3.10, 3.11"
+      - name: Run Nox - tests_on_wheels
+        run: |
+          python3 -m pip install pipx
+          pipx run nox --sessions tests_on_wheels
+        env:
+          LOG_LEVEL: ${{ github.event.inputs.logLevel }}
 
   deploy_doc:
-    needs: night_mechanic
     runs-on: [self-hosted, deepthought]
     # only run if main branch
     if: github.ref == 'refs/heads/main'
@@ -55,12 +89,23 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Python's for Nox
+        uses: wntrblm/nox@2022.8.7
+        with:
+          python-versions: "3.10"
+      - name: Run Nox - generate_docs
+        run: |
+          python3 -m pip install pipx
+          pipx run nox --sessions generate_docs
       - id: deployment
         uses: actions/deploy-pages@v1
 
   generate_movie:
-    needs: night_mechanic
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [self-hosted, deepthought]
     steps:
       - name: Generate movie
         run: |

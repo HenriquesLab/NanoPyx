@@ -5,12 +5,14 @@ from pathlib import Path
 
 import nox
 
+# List of environment variables to pass to the test session
+# NPX_MACOS_INSTALL_DEPENDENCIES (bool) - tries to brew install dependencies
+# NPX_PYTEST_ARGS - extra arguments to pass to pytest
+# NPX_MACOS_FIX_WHEELS (bool) - tries to fix macos wheels
+
 DIR = Path(__file__).parent.resolve()
 PYTHON_ALL_VERSIONS = ["3.8", "3.9", "3.10", "3.11"]
 PYTHON_DEFAULT_VERSION = "3.8"
-MACOS_INSTALL_DEPENDENCIES = False
-if os.environ.get("MACOS_INSTALL_DEPENDENCIES"):
-    MACOS_INSTALL_DEPENDENCIES = True
 
 # Platform logic
 if sys.platform == "darwin":
@@ -26,7 +28,7 @@ nox.options.reuse_existing_virtualenvs = True
 
 # Some platform specific actions
 if PLATFORM == "macos":
-    if os.environ.get("NOX_MACOS_INSTALL_DEPENDENCIES"):
+    if os.environ.get("NPX_MACOS_INSTALL_DEPENDENCIES"):
         os.system("brew install llvm libomp")
 
 
@@ -42,7 +44,7 @@ def build_wheel(session: nox.Session) -> None:
     # get the produced wheel name
     wheel_name = [name for name in os.listdir(temp_path) if name.endswith(".whl")][0]
 
-    if PLATFORM == "unix":
+    if PLATFORM == "unix" and os.environ.get("NPX_LINUX_FIX_WHEELS"):
         session.install("auditwheel")
         session.run(
             "auditwheel",
@@ -83,8 +85,9 @@ def tests_on_source(session):
     """
     Run the test suite by directly calling pip install -e .[test] and then pytest
     """
+    extra_args = os.environ.get("NPX_PYTEST_ARGS")
     session.run("pip", "install", "-e", ".[test]")
-    session.run("pytest", DIR.joinpath("tests"), "-p", "no:nbmake", "-n=auto")
+    session.run("pytest", DIR.joinpath("tests"), extra_args)
     session.run("coverage", "xml")
 
 
@@ -105,7 +108,8 @@ def tests_on_wheels(session):
 
     session.run("pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]")
     with session.chdir(".nox"):
-        session.run("pytest", DIR.joinpath("tests"), "-p", "no:nbmake", "-n=auto")
+        extra_args = os.environ.get("NPX_PYTEST_ARGS")
+        session.run("pytest", DIR.joinpath("tests"), extra_args)
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
