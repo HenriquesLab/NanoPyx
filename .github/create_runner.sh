@@ -1,6 +1,7 @@
 #!/bin/bash
 export RUNNER_ALLOW_RUNASROOT="1"
 apt update
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
 apt install -y curl systemctl build-essential lsb-release python3.11-full python3.10-full python3.10-venv python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb libavcodec
 python -m pip install --upgrade pip
 python -m pip install --upgrade pipx
