@@ -32,7 +32,7 @@ jobs:
           python-versions: "3.8, 3.9, 3.10, 3.11"
       - name: Run Nox - build_wheel build_sdist
         run: |
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv python3.11-full python3.10-full
           python3 -m pip install --upgrade pipx
           pipx run nox --sessions build_wheel build_sdist
         env:
@@ -74,7 +74,7 @@ jobs:
           python-versions: "3.8, 3.9, 3.10, 3.11"
       - name: Run Nox - tests_on_wheels
         run: |
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv python3.11-full python3.10-full
           python3 -m pip install --upgrade pipx
           pipx run nox --sessions tests_on_wheels
         env:
@@ -93,7 +93,7 @@ jobs:
     steps:
       - name: Setup Ubuntu dependencies
         run: |
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv python3.11-full python3.10-full
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -119,7 +119,7 @@ jobs:
     steps:
       - name: Setup Ubuntu dependencies
         run: |
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full
           python3 -m pip install --upgrade pipx
       - name: Checkout
         uses: actions/checkout@v3
