@@ -108,7 +108,7 @@ def tests_on_wheels(session):
 
     session.run("pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]")
     with session.chdir(".nox"):
-        extra_args = os.environ.get("NPX_PYTEST_ARGS")
+        extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
         session.run("pytest", DIR.joinpath("tests"), extra_args)
 
 

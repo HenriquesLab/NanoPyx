@@ -41,7 +41,8 @@ jobs:
           python-versions: "3.10"
       - name: Run Nox Quick-Tests
         run: |
-          python3 -m pip install pipx
+          python3 -m pip install --upgrade pip
+          python3 -m pip install --upgrade pipx
           pipx run nox --sessions tests_on_source-3.10
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}

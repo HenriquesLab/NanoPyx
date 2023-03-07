@@ -33,7 +33,7 @@ jobs:
       - name: Run Nox - build_wheel build_sdist
         run: |
           apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
-          python3 -m pip install pipx
+          python3 -m pip install --upgrade pipx
           pipx run nox --sessions build_wheel build_sdist
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
@@ -75,7 +75,7 @@ jobs:
       - name: Run Nox - tests_on_wheels
         run: |
           apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
-          python3 -m pip install pipx
+          python3 -m pip install --upgrade pipx
           pipx run nox --sessions tests_on_wheels
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
@@ -91,6 +91,9 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Setup Ubuntu dependencies
+        run: |
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -101,8 +104,7 @@ jobs:
           python-versions: "3.10"
       - name: Run Nox - generate_docs
         run: |
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
-          python3 -m pip install pipx
+          python3 -m pip install --upgrade pipx
           pipx run nox --sessions generate_docs
       - id: deployment
         uses: actions/deploy-pages@v1
@@ -110,6 +112,10 @@ jobs:
   generate_movie:
     runs-on: [self-hosted, linux]
     steps:
+      - name: Setup Ubuntu dependencies
+        run: |
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
+          python3 -m pip install --upgrade pipx
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -120,7 +126,6 @@ jobs:
           python-versions: "3.10"
       - name: Generate movie
         run: |
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
           xvfb-run gource --output-custom-log repo-activity.log
           python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
           xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir /home/docker/NanoPyx/faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
