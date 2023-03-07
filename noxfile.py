@@ -28,7 +28,7 @@ nox.options.reuse_existing_virtualenvs = True
 
 # Some platform specific actions
 if PLATFORM == "macos":
-    if os.environ.get("NPX_MACOS_INSTALL_DEPENDENCIES"):
+    if os.environ.get("NPX_MACOS_INSTALL_DEPENDENCIES", False):
         os.system("brew install llvm libomp")
 
 
@@ -44,7 +44,7 @@ def build_wheel(session: nox.Session) -> None:
     # get the produced wheel name
     wheel_name = [name for name in os.listdir(temp_path) if name.endswith(".whl")][0]
 
-    if PLATFORM == "unix" and os.environ.get("NPX_LINUX_FIX_WHEELS"):
+    if PLATFORM == "unix" and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
         session.install("auditwheel")
         session.run(
             "auditwheel",
@@ -85,7 +85,7 @@ def tests_on_source(session):
     """
     Run the test suite by directly calling pip install -e .[test] and then pytest
     """
-    extra_args = os.environ.get("NPX_PYTEST_ARGS")
+    extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
     session.run("pip", "install", "-e", ".[test]")
     session.run("pytest", DIR.joinpath("tests"), extra_args)
     session.run("coverage", "xml")
