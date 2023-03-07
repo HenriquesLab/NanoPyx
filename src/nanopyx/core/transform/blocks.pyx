@@ -20,7 +20,6 @@ cdef double[:, :] _assemble_frame_from_blocks(double[:, :, :] blocks_stack, int 
     with gil:
         assert blocks_stack.shape[0] == n_rows * n_cols
         reconstructed_image = np.empty((rows_len, cols_len), dtype=np.float64)
-        print(reconstructed_image.shape)
         assert reconstructed_image.shape[0] == rows_len
         assert reconstructed_image.shape[1] == cols_len
 
