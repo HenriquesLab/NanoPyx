@@ -11,6 +11,7 @@ on:
       - "tests/**"
       - "setup.py"
       - "noxfile.py"
+      - "pyproject.toml"
   pull_request:
     branches: ["main"]
 
