@@ -260,11 +260,7 @@ def collect_extensions():
     print(f"Found following .pyx files to build:\n {'; '.join(cython_files)}")
     print(f"Found the extra c files to build:\n {'; '.join(extra_c_files)}")
 
-    if multiprocessing.get_start_method() == "spawn":
-        print(
-            "multiprocessing default behaviour does not allow concurrent compilation\n",
-            "Proceeding compilation serially ...",
-        )
+    if os.getenv("NPX_CYTHON_THREADS", "0") == "0":
         collected_extensions = cythonize(
             cython_extensions, annotate=True, language_level="3"
         )

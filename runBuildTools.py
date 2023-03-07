@@ -173,7 +173,7 @@ def main(mode=None):
         "Clean files": f"{remove_call} {files2clean}"
         if len(files2clean) > 0
         else "echo 'No files to clean'",
-        "Run pytest": "pytest --nbmake --nbmake-timeout=600",
+        "Run pytest": "pytest -n=auto --nbmake --nbmake-timeout=600",
         "Run nox with all sessions": "pipx run nox",
         "Run nox with build and test wheels": "pipx run nox --session build_wheel build_sdist tests_on_wheels",
         "Run nox with test wheels": "pipx run nox --session tests_on_wheels",
