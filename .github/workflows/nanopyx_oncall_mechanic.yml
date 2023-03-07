@@ -10,6 +10,7 @@ on:
       - "src/**"
       - "tests/**"
       - "setup.py"
+      - "noxfile.py"
   pull_request:
     branches: ["main"]
 
