@@ -108,7 +108,12 @@ jobs:
           pipx run nox --sessions generate_docs
       - id: deployment
         uses: actions/deploy-pages@v1
-
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages
+          FOLDER: docs
+          CLEAN: true
+          VERBOSE: true
   generate_movie:
     runs-on: [self-hosted, linux]
     steps:
