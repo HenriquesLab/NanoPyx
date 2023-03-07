@@ -26,7 +26,7 @@ jobs:
         run: |
           rm -rvf /actions-runner/_work/_tool
           DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
           python3 -m pip install --upgrade pipx
       - name: Checkout
         uses: actions/checkout@v3
@@ -64,7 +64,7 @@ jobs:
         run: |
           rm -rvf /actions-runner/_work/_tool
           DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
           python3 -m pip install --upgrade pipx
       - name: Checkout
         uses: actions/checkout@v3
@@ -88,23 +88,15 @@ jobs:
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
 
-  deploy_doc:
+  build_doc:
     runs-on: [self-hosted, linux]
-    # only run if main branch
-    if: github.ref == 'refs/heads/main'
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Setup Ubuntu dependencies
         run: |
           rm -rvf /actions-runner/_work/_tool
           DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
           apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full
-          python3 -m pip install --upgrade pipx      
+          python3 -m pip install --upgrade pipx
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -116,14 +108,25 @@ jobs:
       - name: Run Nox - generate_docs
         run: |
           pipx run nox --sessions generate_docs
+      - uses: actions/upload-pages-artifact@v1
+        with:
+          path: docs/
+
+  deploy_doc:
+    needs: build_doc
+    # only run if main branch
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, linux]
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v1
-        with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: docs
-          CLEAN: true
-          VERBOSE: true
+
   generate_movie:
     runs-on: [self-hosted, linux]
     steps:
@@ -145,9 +148,8 @@ jobs:
         run: |
           mkdir -p faces
           pipx run gitfaces . faces
-          python3 -c "import os;if os.path.exists('faces/Bruno Manuel Santos Saraiva.png') and not os.path.exists('faces/Bruno Saraiva.png'):os.rename('faces/Bruno Manuel Santos Saraiva.png', 'faces/Bruno Saraiva.png')"
           xvfb-run gource --output-custom-log repo-activity.log
-          python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
+          python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Saraiva', 'Bruno Manuel Santos Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
           xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
       - name: Archive generated movie
         uses: actions/upload-artifact@v3
