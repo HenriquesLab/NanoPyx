@@ -27,7 +27,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Python's for Nox
-        uses: wntrblm/nox@2022.8.7
+        uses: wntrblm/nox@2022.11.21
         with:
           python-versions: "3.8, 3.9, 3.10, 3.11"
       - name: Run Nox - build_wheel build_sdist
@@ -69,7 +69,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-wheelhouse-
       - name: Install Python's for Nox
-        uses: wntrblm/nox@2022.8.7
+        uses: wntrblm/nox@2022.11.21
         with:
           python-versions: "3.8, 3.9, 3.10, 3.11"
       - name: Run Nox - tests_on_wheels
@@ -99,7 +99,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Install Python
-        uses: wntrblm/nox@2022.8.7
+        uses: wntrblm/nox@2022.11.21
         with:
           python-versions: "3.10"
       - name: Run Nox - generate_docs
@@ -121,7 +121,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Python
-        uses: wntrblm/nox@2022.8.7
+        uses: wntrblm/nox@2022.11.21
         with:
           python-versions: "3.10"
       - name: Generate movie
