@@ -114,7 +114,7 @@ jobs:
     steps:
       - name: Setup Ubuntu dependencies
         run: |
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv
+          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra
           python3 -m pip install --upgrade pipx
       - name: Checkout
         uses: actions/checkout@v3
