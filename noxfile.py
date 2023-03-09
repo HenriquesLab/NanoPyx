@@ -5,11 +5,6 @@ from pathlib import Path
 
 import nox
 
-# List of environment variables to pass to the test session
-# NPX_MACOS_INSTALL_DEPENDENCIES (bool) - tries to brew install dependencies
-# NPX_PYTEST_ARGS - extra arguments to pass to pytest
-# NPX_MACOS_FIX_WHEELS (bool) - tries to fix macos wheels
-
 DIR = Path(__file__).parent.resolve()
 PYTHON_ALL_VERSIONS = ["3.8", "3.9", "3.10", "3.11"]
 PYTHON_DEFAULT_VERSION = "3.10"
