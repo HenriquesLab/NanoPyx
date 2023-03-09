@@ -24,7 +24,6 @@ jobs:
     steps:
       - name: Setup Ubuntu dependencies
         run: |
-          rm -rvf /actions-runner/_work/_tool
           DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
           apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
           python3 -m pip install --upgrade pipx
@@ -48,7 +47,7 @@ jobs:
           path: wheelhouse
           key: ${{ runner.os }}-wheelhouse
           restore-keys: |
-            ${{ runner.os }}-wheelhouse-
+            ${{ runner.os }}-wheelhouse
       - name: Archive Wheels
         uses: actions/upload-artifact@v3
         with:
@@ -62,7 +61,6 @@ jobs:
     steps:
       - name: Setup Ubuntu dependencies
         run: |
-          rm -rvf /actions-runner/_work/_tool
           DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
           apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
           python3 -m pip install --upgrade pipx
@@ -75,9 +73,9 @@ jobs:
         uses: actions/cache/restore@v3
         with:
           path: wheelhouse
-          key: ${{ runner.os }}-wheelhouse-
+          key: ${{ runner.os }}-wheelhouse
           restore-keys: |
-            ${{ runner.os }}-wheelhouse-
+            ${{ runner.os }}-wheelhouse
       - name: Install Python's for Nox
         uses: wntrblm/nox@2022.11.21
         with:
@@ -93,7 +91,6 @@ jobs:
     steps:
       - name: Setup Ubuntu dependencies
         run: |
-          rm -rvf /actions-runner/_work/_tool
           DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
           apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full
           python3 -m pip install --upgrade pipx
@@ -102,7 +99,7 @@ jobs:
         with:
           fetch-depth: 1
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
       - name: Run Nox - generate_docs
@@ -132,7 +129,6 @@ jobs:
     steps:
       - name: Setup Ubuntu dependencies
         run: |
-          rm -rvf /actions-runner/_work/_tool
           DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
           apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full
           python3 -m pip install --upgrade pipx
@@ -141,16 +137,14 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.10"
       - name: Generate movie
         run: |
-          mkdir -p faces
-          pipx run gitfaces . faces
           xvfb-run gource --output-custom-log repo-activity.log
-          python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Saraiva', 'Bruno Manuel Santos Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
-          xvfb-run gource -a 1 -s 1 -c 2 --user-image-dir faces repo-activity.log -1280x720 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
+          python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
+          xvfb-run gource --highlight-dirs --highlight-users repo-activity.log -1280x720 --max-user-speed 100 --seconds-per-day 0.1 --auto-skip-seconds 1 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
       - name: Archive generated movie
         uses: actions/upload-artifact@v3
         with:
