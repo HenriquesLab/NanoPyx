@@ -67,9 +67,12 @@ build_script:
   - sh: "[[ $OS_NAME == 'linux' ]] && CIBW_CACHE_PATH='cache-cibuildwheel' pipx run cibuildwheel --output-dir wheelhouse || true"
 
 test_script:
-  - sh: "[[ $OS_NAME == 'linux' ]] && sudo apt update || true"
-  - sh: "[[ $OS_NAME == 'linux' ]] && sudo apt install -y python3.11-full python3.10-full python3.10-venv libpython3.10-dev libpython3.11-dev || true"
-  - pipx run nox --sessions tests_on_wheels
+  - cmd: pipx run nox --sessions tests_on_wheels
+  - sh: "[[ $OS_NAME == 'darwin' ]] && pipx run nox --sessions tests_on_wheels || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && $HOME/venv3.8/bin/pip install nox && $HOME/venv3.8/bin/nox --sessions tests_on_wheels-3.8 || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && $HOME/venv3.9/bin/pip install nox && $HOME/venv3.9/bin/nox --sessions tests_on_wheels-3.9 || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && $HOME/venv3.10/bin/pip install nox && $HOME/venv3.10/bin/nox --sessions tests_on_wheels-3.10 || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && $HOME/venv3.11/bin/pip install nox && $HOME/venv3.11/bin/nox --sessions tests_on_wheels-3.11 || true"
 
 artifacts:
   - path: "wheelhouse\\*.whl"
