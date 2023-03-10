@@ -20,15 +20,15 @@ only_commits:
 
 environment:
   matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      APPVEYOR_SAVE_CACHE_ON_ERROR: true
+      OS_NAME: linux
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
       OS_NAME: win
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
       OS_NAME: darwin
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      APPVEYOR_SAVE_CACHE_ON_ERROR: true
-      OS_NAME: linux
 
   access_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
@@ -67,6 +67,8 @@ build_script:
   - sh: "[[ $OS_NAME == 'linux' ]] && CIBW_CACHE_PATH='cache-cibuildwheel' pipx run cibuildwheel --output-dir wheelhouse || true"
 
 test_script:
+  - sh: "[[ $OS_NAME == 'linux' ]] && sudo apt update || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && sudo apt install -y python3.11-full python3.10-full python3.10-venv libpython3.10-dev libpython3.11-dev || true"
   - pipx run nox --sessions tests_on_wheels
 
 artifacts:
