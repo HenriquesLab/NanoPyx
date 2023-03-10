@@ -69,10 +69,10 @@ build_script:
 test_script:
   - cmd: pipx run nox --sessions tests_on_wheels
   - sh: "[[ $OS_NAME == 'darwin' ]] && pipx run nox --sessions tests_on_wheels || true"
-  - sh: "[[ $OS_NAME == 'linux' ]] && $HOME/venv3.8/bin/pip install nox && $HOME/venv3.8/bin/nox --sessions tests_on_wheels-3.8 || true"
-  - sh: "[[ $OS_NAME == 'linux' ]] && $HOME/venv3.9/bin/pip install nox && $HOME/venv3.9/bin/nox --sessions tests_on_wheels-3.9 || true"
-  - sh: "[[ $OS_NAME == 'linux' ]] && $HOME/venv3.10/bin/pip install nox && $HOME/venv3.10/bin/nox --sessions tests_on_wheels-3.10 || true"
-  - sh: "[[ $OS_NAME == 'linux' ]] && $HOME/venv3.11/bin/pip install nox && $HOME/venv3.11/bin/nox --sessions tests_on_wheels-3.11 || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && source $HOME/venv3.8/bin/activate && python install nox && python --sessions tests_on_wheels-3.8 && deactivate|| true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && source $HOME/venv3.9/bin/activate && python install nox && python --sessions tests_on_wheels-3.9 && deactivate|| true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && source $HOME/venv3.10/bin/activate && python install nox && python --sessions tests_on_wheels-3.10 && deactivate|| true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && source $HOME/venv3.11/bin/activate && python install nox && python --sessions tests_on_wheels-3.11 && deactivate|| true"
 
 artifacts:
   - path: "wheelhouse\\*.whl"
