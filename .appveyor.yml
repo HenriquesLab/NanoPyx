@@ -95,9 +95,9 @@ notifications:
 
 deploy:
   # skip_tags: true
-  on:
-    branch: main # release from main branch only
-    APPVEYOR_REPO_TAG: false # deploy on tag push only
+  #on:
+  #  branch: main # release from main branch only
+  #  APPVEYOR_REPO_TAG: false # deploy on tag push only
   provider: GitHub
   # tag: $(APPVEYOR_REPO_TAG_NAME)
   repository: "HenriquesLab/NanoPyx"
