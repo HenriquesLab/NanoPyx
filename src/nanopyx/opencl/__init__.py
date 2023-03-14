@@ -91,7 +91,7 @@ def print_opencl_info():
     print("\n")
 
 
-def get_fastest_device(benchmark="clock_frequency"):
+def get_fastest_device(benchmark="clock_frequency", type="gpu"):
     """
     Returns the fastest OpenCL device on the system
     :param benchmark: The benchmark to use to determine the fastest device (clock_frequency or compute_units)
@@ -99,17 +99,45 @@ def get_fastest_device(benchmark="clock_frequency"):
     """
 
     fastest_device = None
+    fastest_device_speed = 0
+
     for platform in cl.get_platforms():
         for device in platform.get_devices():
+            # Ignore devices that are not of the specified type
+            if type is not None:
+                if type != cl.device_type.to_string(device.type):
+                    continue
+
+            speed = device.max_clock_frequency * device.max_compute_units
+            # If no fastest device has been found, set it to the current device
             if fastest_device is None:
                 fastest_device = device
-            elif (benchmark == "clock_frequency") and (
-                device.max_clock_frequency > fastest_device.max_clock_frequency
-            ):
+                fastest_device_speed = speed
+
+            # Check if the current device is faster than the fastest device
+            elif speed > fastest_device_speed:
                 fastest_device = device
-            elif (benchmark == "compute_units") and (
-                device.max_compute_units > fastest_device.max_compute_units
-            ):
-                fastest_device = device
+                fastest_device_speed = speed
 
     return device
+
+
+def works():
+    """
+    Checks if the system has OpenCL compatibility
+    :return: True if the system has OpenCL compatibility, False otherwise
+    """
+    disabled = os.environ.get("NANOPYX_DISABLE_OPENCL", "0") == "1"
+    enabled = os.environ.get("NANOPYX_ENABLE_OPENCL", "1") == "1"
+
+    if disabled or not enabled:
+        return False
+    elif not disabled or enabled:
+        return True
+    try:
+        get_fastest_device()
+        os.environ["NANOPYX_ENABLE_OPENCL"] = "1"
+        return True
+    except Exception:
+        os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
+        return False

@@ -19,11 +19,12 @@ def mandelbrot(
     """
 
     fastest_device = get_fastest_device()
+    print("Mandelbrot: Using device: " + fastest_device.name)
     ctx = cl.Context([fastest_device])
     queue = cl.CommandQueue(ctx)
 
     # Create the mandelbrot set
-    mandelbrot = cl_array.zeros(queue, (size, size), dtype=np.int32)
+    im_mandelbrot = cl_array.zeros(queue, (size, size), dtype=np.int32)
 
     # Create the kernel
     kernel_txt = get_kernel_txt(__file__)
@@ -32,12 +33,12 @@ def mandelbrot(
     # Run the kernel
     prg.mandelbrot(
         queue,
-        mandelbrot.shape,
+        im_mandelbrot.shape,
         None,
-        mandelbrot.data,
+        im_mandelbrot.data,
         np.int32(max_iter),
-        np.float32(divergence),
+        np.float64(divergence),
     )
     queue.finish()
 
-    return mandelbrot.get()
+    return im_mandelbrot.get()
