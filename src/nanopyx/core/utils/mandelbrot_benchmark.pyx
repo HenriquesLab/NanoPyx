@@ -2,16 +2,18 @@
 
 from .omp cimport omp_get_num_procs
 
-from cython.parallel import prange
-import numpy as np
 import time
 
-cdef int _mandelbrot(double x, double y, int max_iter, double divergence) nogil:
+import numpy as np
+from cython.parallel import prange
+
+
+cdef int _mandelbrot(double row, double col, int max_iter, double divergence) nogil:
     cdef double real, imag
     cdef double real2, imag2
     cdef int i
-    real = 1.5 * (x - 500) / (0.5 * 1000)
-    imag = (y - 500) / (0.5 * 1000)
+    real = 1.5 * (row - 500) / (0.5 * 1000)
+    imag = (col - 500) / (0.5 * 1000)
     real2, imag2 = real, imag
     for i in range(max_iter):
         real2, imag2 = real2 * real2 - imag2 * imag2 + real, 2 * real2 * imag2 + imag
@@ -59,6 +61,18 @@ def create_fractal_cython_nonthreaded(int size, int max_iter, divergence: float=
     return image
 
 
+def create_fractal_opencl(int size, int max_iter, divergence: float=4):
+    """
+    Create a fractal image using the mandelbrot algorithm
+    using opencl
+    :param size: size of the image
+    :param max_iter: maximum number of iterations
+    :param divergence: divergence threshold
+    """
+    from ...opencl._cl_mandelbrot_benchmark import mandelbrot
+    return mandelbrot(size, max_iter, divergence)
+
+
 def check_acceleration(size: int = 1000, max_iter: int = 1000, divergence: float = 4):
     """
     Check the acceleration of the Cython code threaded vs non-threaded
@@ -76,6 +90,13 @@ def check_acceleration(size: int = 1000, max_iter: int = 1000, divergence: float
     end = time.time()
     delta_nonthreaded = end - start
     print(f"Cython nonthreaded took {round(delta_nonthreaded*1000., 3)}ms")
+    start = time.time()
+    create_fractal_opencl(size, max_iter, divergence)
+    end = time.time()
+    delta_cl = end - start
+    print(f"OpenCL took {round(delta_cl*1000., 3)}ms")
 
-    print(f"Threaded is {round(delta_nonthreaded/delta_threaded, 2)}x faster")
+    print(f"Cython-Threaded is {round(delta_nonthreaded/delta_threaded, 2)}x faster than Cython-Non-Threaded")
+    print(f"OpenCL is {round(delta_nonthreaded/delta_cl, 2)}x faster than Cython-Non-Threaded")
+    print(f"OpenCL is {round(delta_threaded/delta_cl, 2)}x faster than Cython-Threaded")
     return delta_threaded, delta_nonthreaded

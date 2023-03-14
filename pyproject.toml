@@ -88,7 +88,7 @@ repository = "https://github.com/HenriquesLab/NanoPyx"
 bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
 [tool.setuptools.package-data]
-"*" = ["*.yaml", "*.jpg"]
+"*" = ["*.yaml", "*.jpg", "*.cl"]
 
 [tool.versioneer]
 VCS = "git"
