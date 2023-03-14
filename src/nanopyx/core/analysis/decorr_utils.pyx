@@ -10,11 +10,11 @@ from cython.parallel import prange
 
 
 def normalizeFFT(fft_real: np.ndarray, fft_imag: np.ndarray):
-    return np.array(_normalizeFFT(fft_real, fft_imag), dtype=np.float32)
+    return _normalizeFFT(fft_real, fft_imag)
 
-cdef double[:, :, :] _normalizeFFT(double[:, :] fft_real, double[:, :] fft_imag):
+cdef float[:, :, :] _normalizeFFT(float[:, :] fft_real, float[:, :] fft_imag):
 
-    cdef double[:, :, :] output = np.zeros((2, fft_real.shape[0], fft_real.shape[1]), dtype=np.float64)
+    cdef float[:, :, :] output = np.zeros((2, fft_real.shape[0], fft_real.shape[1]), dtype=np.float32)
     cdef double mag
     cdef int x_i, y_i
     
@@ -30,11 +30,11 @@ cdef double[:, :, :] _normalizeFFT(double[:, :] fft_real, double[:, :] fft_imag)
     return output
 
 def apodize_edges(img: np.ndarray):
-    return np.array(_apodize_edges(img), dtype=np.float32)
+    return _apodize_edges(img)
 
-cdef double[:, :] _apodize_edges(float[:, :] img):
+cdef float[:, :] _apodize_edges(float[:, :] img):
 
-    cdef double[:, :] pin = np.copy(img)
+    cdef float[:, :] pin = np.copy(img)
     cdef double d, c
     cdef int y_i, x_i
     cdef int height = img.shape[0]
@@ -67,7 +67,7 @@ cdef double[:, :] _apodize_edges(float[:, :] img):
                     c = (cos(d * pi / offset - pi) + 1) / 2
                     pin[y_i, x_i] = <double> (c*(pin[y_i, x_i]-edge_mean)) + edge_mean
                 elif fabs(x_i - width/2) > width/2 and fabs(y_i - height/2) > height/2:
-                    pin[y_i, x_i] = <double> edge_mean
+                    pin[y_i, x_i] = <float> edge_mean
 
     return pin
 
@@ -84,15 +84,15 @@ cdef double _linmap(float val, float valmin, float valmax, float mapmin, float m
 
 def get_mask(w: int, r2: float):
 
-    return np.array(_get_mask(w, r2), dtype=np.float64)
+    return np.array(_get_mask(w, r2))
 
-cdef double[:, :] _get_mask(int w, float r2):
+cdef float[:, :] _get_mask(int w, float r2):
 
     cdef int y_i, x_i 
     cdef double radius = r2 * w * w / 4
     cdef double dist
 
-    cdef double[:, :] mask = np.zeros((w, w), dtype=np.float64)
+    cdef float[:, :] mask = np.zeros((w, w), dtype=np.float32)
 
     with nogil:
         for y_i in prange(w):
@@ -107,7 +107,7 @@ def get_corr_coef_norm(fft_real: np.ndarray, fft_imag: np.ndarray, mask: np.ndar
 
     return float(_get_corr_coef_norm(fft_real, fft_imag, mask))
 
-cdef double _get_corr_coef_norm(double[:, :] fft_real, double[:, :] fft_imag, double[:, :] mask):
+cdef double _get_corr_coef_norm(float[:, :] fft_real, float[:, :] fft_imag, float[:, :] mask):
 
     cdef int y_i, x_i
     cdef double c = 0
@@ -125,7 +125,7 @@ def get_max(arr: np.ndarray, x1: int, x2: int):
 
 cdef double[:] _get_max(float[:] arr, int x1, int x2):
     cdef int k
-    cdef double[:] out = np.zeros((2), dtype=np.float64)
+    cdef double[:] out = np.empty((2), dtype=np.float64)
     out[0] = x1
     out[1] = arr[x1]
 
@@ -141,7 +141,7 @@ def get_min(arr: np.ndarray, x1: int, x2: int):
 
 cdef double[:] _get_min(float[:] arr, int x1, int x2):
     cdef int k
-    cdef double[:] out = np.zeros((2), dtype=np.float64)
+    cdef double[:] out = np.empty((2), dtype=np.float64)
     out[0] = x1
     out[1] = arr[x1]
 
@@ -158,8 +158,8 @@ def get_best_score(kc: np.ndarray, a: np.ndarray):
 cdef _get_best_score(float[:] kc, float[:] a):
     cdef int k
     cdef double gm_max
-    cdef double[:] gm = np.zeros(kc.shape[0], dtype=np.float64)
-    cdef double[:] out = np.zeros((3), dtype=np.float64)
+    cdef double[:] gm = np.empty(kc.shape[0], dtype=np.float64)
+    cdef double[:] out = np.empty((3), dtype=np.float64)
     gm_max = 0.0
     
     for k in range(kc.shape[0]):
@@ -179,7 +179,7 @@ def get_max_score(kc: np.ndarray, a: np.ndarray):
 cdef _get_max_score(float[:] kc, float[:] a):
     cdef int k
     cdef double kc_max
-    cdef double[:] out = np.zeros((3), dtype=np.float64)
+    cdef double[:] out = np.empty((3), dtype=np.float64)
     kc_max = 0.0
 
     for k in range(kc.shape[0]):
