@@ -139,10 +139,10 @@ def works():
 
     elif enabled:
         try:
-            get_fastest_device()
+            assert get_fastest_device() is not None
             os.environ["NANOPYX_ENABLE_OPENCL"] = "1"
             return True
-        except Exception:
+        except cl._cl.LogicError:
             warnings.warn("tap... tap... tap... COMPUTER SAYS NO (OpenCL)!")
             os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
             return False

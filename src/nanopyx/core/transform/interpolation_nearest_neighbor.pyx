@@ -1,11 +1,12 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 import numpy as np
-cimport numpy as np
 
-from libc.math cimport pi, hypot, cos, sin, atan2, log, exp
+cimport numpy as np
+from libc.math cimport atan2, cos, exp, hypot, log, pi, sin
 
 from cython.parallel import prange
+
 
 # nearest-neighbor interpolation of a 2D array
 cdef double _interpolate(float[:,:] image, double x, double y) nogil:
@@ -43,6 +44,9 @@ cdef class Interpolator:
         """
 
         assert image.ndim == 2, "image must be 2D"
+
+        if not image.flags["C_CONTIGUOUS"]:
+            image = np.ascontiguousarray(image)
 
         if type(image) is np.ndarray:
             self.image = image.view(np.float32)
