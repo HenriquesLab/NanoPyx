@@ -259,17 +259,10 @@ def collect_extensions():
     print(f"Found following .pyx files to build:\n {'; '.join(cython_files)}")
     print(f"Found the extra c files to build:\n {'; '.join(extra_c_files)}")
 
-    if os.getenv("NPX_CYTHON_THREADS", "0") == "0":
-        collected_extensions = cythonize(
-            cython_extensions, annotate=True, language_level="3"
-        )
-    else:
-        collected_extensions = cythonize(
-            cython_extensions,
-            annotate=True,
-            language_level="3",
-            nthreads=os.cpu_count() - 1,
-        )
+    collected_extensions = cythonize(
+        cython_extensions, annotate=True, language_level="3"
+    )
+
     return collected_extensions
 
 

@@ -8,6 +8,7 @@ import numpy as np
 from cython.parallel import prange
 
 from ...opencl import works as opencl_works
+from ...opencl._cl_mandelbrot_benchmark import _cl_mandelbrot
 from ._njit_mandelbrot_benchmark import (create_fractal_njit_nonthreaded,
                                          create_fractal_njit_threaded,
                                          create_fractal_python)
@@ -60,8 +61,7 @@ def create_fractal_opencl(int size, int max_iter, divergence: float=4):
     :param max_iter: maximum number of iterations
     :param divergence: divergence threshold
     """
-    from ...opencl._cl_mandelbrot_benchmark import mandelbrot
-    return mandelbrot(size, max_iter, divergence)
+    return _cl_mandelbrot(size, max_iter, divergence)
 
 
 def check_acceleration(size: int = 1000, max_iter: int = 1000, divergence: float = 4):

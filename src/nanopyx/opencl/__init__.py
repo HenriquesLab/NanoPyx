@@ -143,7 +143,24 @@ def works():
             os.environ["NANOPYX_ENABLE_OPENCL"] = "1"
             return True
         except Exception:
+            warnings.warn("tap... tap... tap... COMPUTER SAYS NO (OpenCL)!")
             os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
             return False
 
     return False
+
+
+def opencl_available(func):
+    """
+    Decorator that returns None if OpenCL is not available
+    :param func: function to decorate
+    :return: None if OpenCL is not available, the function otherwise
+    """
+
+    def wrapper(*args, **kwargs):
+        if works():
+            return func(*args, **kwargs)
+        else:
+            return None
+
+    return wrapper
