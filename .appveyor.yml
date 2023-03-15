@@ -38,7 +38,7 @@ stack: python 3.8
 cache:
   - cache-pip
   - cache-cibuildwheel
-  - .nox
+  # - .nox
 
 init:
   - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%

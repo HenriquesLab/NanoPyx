@@ -49,6 +49,7 @@ dependencies = [
     "opencv-python>=4.7.0.68",
     "mastodon.py>=1.8.0",
     "pandas>=1.5.3",
+    "pyopencl>=2022.3.1",
 ]
 dynamic = ["version"]
 
@@ -88,7 +89,7 @@ repository = "https://github.com/HenriquesLab/NanoPyx"
 bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
 [tool.setuptools.package-data]
-"*" = ["*.yaml", "*.jpg"]
+"*" = ["*.yaml", "*.jpg", "*.cl"]
 
 [tool.versioneer]
 VCS = "git"
