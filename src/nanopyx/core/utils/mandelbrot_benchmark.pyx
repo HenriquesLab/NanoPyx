@@ -8,36 +8,9 @@ import numpy as np
 from cython.parallel import prange
 
 from ...opencl import works as opencl_works
-
-
-def mandelbrot(r, c, max_iter, divergence):
-    zr = 0.0
-    zi = 0.0
-    zr2 = 0.0
-    zi2 = 0.0
-    i = 0
-    while i < max_iter and zr2 + zi2 < divergence:
-        zi = 2.0 * zr * zi + c / 500 - 1
-        zr = zr2 - zi2 + r / 500 - 1.5
-        zr2 = zr * zr
-        zi2 = zi * zi
-        i += 1
-    return i
-
-
-def create_fractal_python(size: int, max_iter: int, divergence: float=4):
-    """
-    Create a fractal image using the mandelbrot algorithm
-    using pure python
-    :param size: size of the image
-    :param max_iter: maximum number of iterations
-    :param divergence: divergence threshold
-    """
-    image = np.zeros((size, size), dtype=np.int32)
-    for i in range(size):
-        for j in range(size):
-            image[i, j] = mandelbrot(j, i, max_iter, divergence)
-    return image
+from ._njit_mandelbrot_benchmark import (create_fractal_njit_nonthreaded,
+                                         create_fractal_njit_threaded,
+                                         create_fractal_python)
 
 
 def create_fractal_cython_threaded(int size, int max_iter, divergence: float=4):
@@ -105,20 +78,36 @@ def check_acceleration(size: int = 1000, max_iter: int = 1000, divergence: float
     delta_python= end - start
     msg_timing += f"- Python took: {round(delta_python*1000., 3)}ms\n"
     start = time.time()
-    im_nonthreaded = create_fractal_cython_nonthreaded(size, max_iter, divergence)
+    im_njit_nonthreaded = create_fractal_njit_nonthreaded(size, max_iter, divergence)
     end = time.time()
-    delta_nonthreaded = end - start
-    msg_timing += f"- Cython nonthreaded took: {round(delta_nonthreaded*1000., 3)}ms\n"
+    delta_njit_nonthreaded= end - start
+    msg_timing += f"- NJIT-Nonthreaded - took: {round(delta_python*1000., 3)}ms\n"
     start = time.time()
-    im_threaded = create_fractal_cython_threaded(size, max_iter, divergence)
+    im_njit_threaded = create_fractal_njit_threaded(size, max_iter, divergence)
     end = time.time()
-    delta_threaded = end - start
-    msg_timing += f"- Cython threaded took: {round(delta_threaded*1000., 3)}ms\n"
+    delta_njit_threaded= end - start
+    msg_timing += f"- NJIT-Threaded - took: {round(delta_python*1000., 3)}ms\n"
+    start = time.time()
+    im_cython_nonthreaded = create_fractal_cython_nonthreaded(size, max_iter, divergence)
+    end = time.time()
+    delta_cython_nonthreaded = end - start
+    msg_timing += f"- Cython nonthreaded took: {round(delta_cython_nonthreaded*1000., 3)}ms\n"
+    start = time.time()
+    im_cython_threaded = create_fractal_cython_threaded(size, max_iter, divergence)
+    end = time.time()
+    delta_cython_threaded = end - start
+    msg_timing += f"- Cython threaded took: {round(delta_cython_threaded*1000., 3)}ms\n"
 
     msg_comparison = "Comparison:\n"
-    msg_comparison += f"- Cython-Non-Threaded is {round(delta_python/delta_nonthreaded, 2)}x faster than Pure Python\n"
-    msg_comparison +=  f"- Cython-Threaded is {round(delta_python/delta_threaded, 2)}x faster than Pure Python\n"
-    msg_comparison +=  f"- Cython-Threaded is {round(delta_nonthreaded/delta_threaded, 2)}x faster than Cython-Non-Threaded\n"
+    msg_comparison += f"- NJIT-Nonthreaded is {round(delta_python/delta_njit_nonthreaded, 2)}x faster than Pure Python\n"
+    msg_comparison += f"- NJIT-Threaded is {round(delta_python/delta_njit_threaded, 2)}x faster than Pure Python\n"
+    msg_comparison += f"- Cython-Nonthreaded is {round(delta_python/delta_cython_nonthreaded, 2)}x faster than Pure Python\n"
+    msg_comparison += f"- Cython-Nonthreaded is {round(delta_njit_nonthreaded/delta_cython_nonthreaded, 2)}x faster than NJIT-Nonthreaded\n"
+    msg_comparison += f"- Cython-Nonthreaded is {round(delta_njit_threaded/delta_cython_nonthreaded, 2)}x faster than NJIT-Threaded\n"
+    msg_comparison +=  f"- Cython-Threaded is {round(delta_python/delta_cython_threaded, 2)}x faster than Pure Python\n"
+    msg_comparison +=  f"- Cython-Threaded is {round(delta_njit_nonthreaded/delta_cython_threaded, 2)}x faster than NJIT-Nonthreaded\n"
+    msg_comparison +=  f"- Cython-Threaded is {round(delta_njit_threaded/delta_cython_threaded, 2)}x faster than NJIT-Threaded\n"
+    msg_comparison +=  f"- Cython-Threaded is {round(delta_cython_nonthreaded/delta_cython_threaded, 2)}x faster than Cython-Nonthreaded\n"
 
     # check if opencl works
     delta_cl = 0
@@ -130,9 +119,11 @@ def check_acceleration(size: int = 1000, max_iter: int = 1000, divergence: float
         delta_cl = end - start
         msg_timing += f"- OpenCL took: {round(delta_cl*1000., 3)}ms\n"
         msg_comparison += f"- OpenCL is {round(delta_python/delta_cl, 2)}x faster than Pure Python\n"
-        msg_comparison += f"- OpenCL is {round(delta_nonthreaded/delta_cl, 2)}x faster than Cython-Non-Threaded\n"
-        msg_comparison += f"- OpenCL is {round(delta_threaded/delta_cl, 2)}x faster than Cython-Threaded\n"
+        msg_comparison += f"- OpenCL is {round(delta_njit_nonthreaded/delta_cl, 2)}x faster than NJIT-Nonthreaded\n"
+        msg_comparison += f"- OpenCL is {round(delta_njit_threaded/delta_cl, 2)}x faster than NJIT-Threaded\n"
+        msg_comparison += f"- OpenCL is {round(delta_cython_nonthreaded/delta_cl, 2)}x faster than Cython-Nonthreaded\n"
+        msg_comparison += f"- OpenCL is {round(delta_cython_threaded/delta_cl, 2)}x faster than Cython-Threaded\n"
 
     print(f"{msg_timing}\n{msg_comparison}")
 
-    return (im_python, delta_python), (im_nonthreaded, delta_nonthreaded), (im_threaded, delta_threaded), (im_cl, delta_cl)
+    return (im_python, delta_python), (im_njit_nonthreaded, delta_njit_threaded), (im_njit_threaded, delta_njit_threaded), (im_cython_nonthreaded, delta_cython_nonthreaded), (im_cython_threaded, delta_cython_threaded), (im_cl, delta_cl)

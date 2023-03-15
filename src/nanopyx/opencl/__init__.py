@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import pyopencl as cl
 
@@ -131,13 +132,18 @@ def works():
     enabled = os.environ.get("NANOPYX_ENABLE_OPENCL", "1") == "1"
 
     if disabled or not enabled:
+        warnings.warn(
+            "OpenCL is disabled. To enable it, set the environment variable NANOPYX_ENABLE_OPENCL=1"
+        )
         return False
-    elif not disabled or enabled:
-        return True
-    try:
-        get_fastest_device()
-        os.environ["NANOPYX_ENABLE_OPENCL"] = "1"
-        return True
-    except Exception:
-        os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
-        return False
+
+    elif enabled:
+        try:
+            get_fastest_device()
+            os.environ["NANOPYX_ENABLE_OPENCL"] = "1"
+            return True
+        except Exception:
+            os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
+            return False
+
+    return False
