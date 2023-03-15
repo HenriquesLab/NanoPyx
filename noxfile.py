@@ -81,8 +81,6 @@ def tests_on_source(session):
     Run the test suite by directly calling pip install -e .[test] and then pytest
     """
     extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
-    if PLATFORM in ["unix", "win"]:
-        session.run("pip", "install", "pyocl")
     session.run("pip", "install", "-e", ".[test]")
     session.run("pytest", DIR.joinpath("tests"), extra_args)
     session.run("coverage", "xml")

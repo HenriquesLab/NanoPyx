@@ -12,3 +12,10 @@ tar xzf ./actions-runner-linux-x64-2.302.1.tar.gz
 # call the commands to setup runner
 ./svc.sh install
 ./svc.sh start
+
+curl https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o Miniconda3-latest-Linux-x86_64.sh
+chmod +x Miniconda3-latest-Linux-x86_64.sh
+bash Miniconda3-latest-Linux-x86_64.sh
+curl micro.mamba.pm/install.sh | bash
+micromamba install -y -c conda-forge pocl
+conda install -y -c conda-forge pocl
