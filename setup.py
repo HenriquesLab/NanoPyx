@@ -12,10 +12,20 @@ import versioneer
 
 # EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
 EXTRA_C_FILES_PATH = os.path.join("src", "include")
-INCLUDE_DIRS = [EXTRA_C_FILES_PATH]
-LIBRARY_DIRS = []
-EXTRA_COMPILE_ARGS = []
+INCLUDE_DIRS = [
+    EXTRA_C_FILES_PATH,
+    os.path.join("build_tools", "libs_build", "include"),
+]
+LIBRARY_DIRS = [os.path.join("build_tools", "libs_build", "lib")]
+EXTRA_COMPILE_ARGS = [
+    "-g0"  # for info on -g0 see https://github.com/pypa/cibuildwheel/issues/331
+]
 EXTRA_LING_ARGS = []
+BUILD_TOOLS_PATH = os.path.join("build_tools", "libs_build")
+BUILD_TOOLS_PATH_EXISTS = os.path.exists(BUILD_TOOLS_PATH)
+if BUILD_TOOLS_PATH_EXISTS:
+    INCLUDE_DIRS += [os.path.join(BUILD_TOOLS_PATH, "include")]
+    LIBRARY_DIRS += [os.path.join(BUILD_TOOLS_PATH, "lib")]
 
 
 def run_command(command: str) -> str:
@@ -151,14 +161,16 @@ elif sys.platform == "darwin":
 
     if use_openmp_support:
         # some helpful info here REF: https://mac.r-project.org/openmp/
-        INCLUDE_DIRS += [
-            run_command("brew --prefix libomp").split()[0] + "/include",
-            # "/usr/local/opt/llvm/include", - if uncommented breaks cross-compilation
-        ]
-        LIBRARY_DIRS += [
-            run_command("brew --prefix libomp").split()[0] + "/lib",
-            # "/usr/local/opt/llvm/lib", - if uncommented breaks cross-compilation
-        ]
+        if not BUILD_TOOLS_PATH_EXISTS:
+            libomp_path = run_command("brew --prefix libomp").split()[0]
+            INCLUDE_DIRS += [
+                libomp_path + "/include",
+                # "/usr/local/opt/llvm/include", - if uncommented breaks cross-compilation
+            ]
+            LIBRARY_DIRS += [
+                libomp_path + "/lib",
+                # "/usr/local/opt/llvm/lib", - if uncommented breaks cross-compilation
+            ]
         # include, library = get_mpicc_path()
         # INCLUDE_DIRS += include
         # LIBRARY_DIRS += library
