@@ -18,7 +18,8 @@ cdef class DecorrAnalysis:
 
     # autogen_pxd: cdef float[:] d0, kc, a_g
     # autogen_pxd: cdef float[:, :] img, img_ref, d
-    # autogen_pxd: cdef float rmin, rmin2, rmax, rmax2, kc0, a0, kc_gm, agm, kc_max, a_max, pixel_size, resolution
+    # autogen_pxd: cdef float rmin, rmin2, rmax, rmax2, kc0, a0, kc_gm, agm, kc_max, a_max, pixel_size
+    # autogen_pxd: cdef public float resolution
     # autogen_pxd: cdef int n_r, n_g, x0, x1, y0, y1
     # autogen_pxd: cdef bint do_plot
     # autogen_pxd: cdef str units
@@ -381,7 +382,7 @@ cdef class DecorrAnalysis:
 
         return d_curve
 
-    cdef float _run_analysis(self):
+    cdef _run_analysis(self):
 
         cdef float[:] out
         cdef complex[:, :] img_fft
@@ -410,8 +411,6 @@ cdef class DecorrAnalysis:
         self.d = self._compute_d()
         
         self.resolution = 2 * self.pixel_size / self.kc_max
-
-        return self.resolution
 
     def plot_results(self):
         x = np.zeros((self.n_r))

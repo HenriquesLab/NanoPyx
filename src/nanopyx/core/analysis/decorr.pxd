@@ -4,7 +4,8 @@
 cdef class DecorrAnalysis:
     cdef float[:] d0, kc, a_g
     cdef float[:, :] img, img_ref, d
-    cdef float rmin, rmin2, rmax, rmax2, kc0, a0, kc_gm, agm, kc_max, a_max, pixel_size, resolution
+    cdef float rmin, rmin2, rmax, rmax2, kc0, a0, kc_gm, agm, kc_max, a_max, pixel_size
+    cdef public float resolution
     cdef int n_r, n_g, x0, x1, y0, y1
     cdef bint do_plot
     cdef str units
@@ -17,4 +18,4 @@ cdef class DecorrAnalysis:
     cdef float[:] _compute_d0(self, float[:, :] fft_real, float[:, :] fft_imag)
     cdef float[:] _get_d_corr_max(self, float[:] d, float r1, float r2)
     cdef float[:, :] _compute_d(self)
-    cdef float _run_analysis(self)
+    cdef _run_analysis(self)
