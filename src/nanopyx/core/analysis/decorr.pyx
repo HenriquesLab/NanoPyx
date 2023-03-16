@@ -116,11 +116,10 @@ cdef class DecorrAnalysis:
         cdef int y_i, x_i
         cdef float c = 0
 
-        with nogil:
-            for y_i in prange(fft_real.shape[0]):
-                for x_i in range(fft_real.shape[1]):
-                    if mask[y_i, x_i] == 1:
-                        c += fft_real[y_i, x_i]**2 + fft_imag[y_i, x_i]**2
+        for y_i in range(fft_real.shape[0]):
+            for x_i in range(fft_real.shape[1]):
+                if mask[y_i, x_i] == 1:
+                    c += fft_real[y_i, x_i]**2 + fft_imag[y_i, x_i]**2
 
         return sqrt(c)
 
@@ -179,24 +178,23 @@ cdef class DecorrAnalysis:
         oy = <int>(height * (1-crmax)/2)
         w = <int>(width * crmax)
         h = <int>(height * crmax)
-
-        with nogil:
-            for x_i in prange(ox, ox+w):
-                for y_i in range(oy, oy+h):
-                    dist = (x_i-width/2)**2 + (y_i-height/2)**2
-                    dist = sqrt(4*dist/(width**2))
-                    k = x_i*self.img_ref.shape[0] + y_i
-                    if k > width*height/2 + height/2:
-                        return out
-                    else:
-                        if dist >= 0 and dist <= crmax:
-                            dist = self._linmap(dist, crmin, crmax, 0, self.n_r-1)
-                            if dist < 0:
-                                dist = 0
-                            d = <int>(round(dist))
-                            if d+self.n_r < out.shape[0]:
-                                out[d] += fft_real[y_i, x_i] * normalized_fft_real[y_i, x_i] + fft_imag[y_i, x_i] * normalized_fft_imag[y_i, x_i]
-                                out[d+self.n_r] += normalized_fft_real[y_i, x_i]**2 + normalized_fft_imag[y_i, x_i]**2
+        
+        for x_i in range(ox, ox+w):
+            for y_i in range(oy, oy+h):
+                dist = (x_i-width/2)**2 + (y_i-height/2)**2
+                dist = sqrt(4*dist/(width**2))
+                k = x_i*self.img_ref.shape[0] + y_i
+                if k > width*height/2 + height/2:
+                    return out
+                else:
+                    if dist >= 0 and dist <= crmax:
+                        dist = self._linmap(dist, crmin, crmax, 0, self.n_r-1)
+                        if dist < 0:
+                            dist = 0
+                        d = <int>(round(dist))
+                        if d+self.n_r < out.shape[0]:
+                            out[d] += fft_real[y_i, x_i] * normalized_fft_real[y_i, x_i] + fft_imag[y_i, x_i] * normalized_fft_imag[y_i, x_i]
+                            out[d+self.n_r] += normalized_fft_real[y_i, x_i]**2 + normalized_fft_imag[y_i, x_i]**2
 
         return out
 
@@ -324,16 +322,15 @@ cdef class DecorrAnalysis:
                 a = np.zeros((self.n_g+1), dtype=np.float32)
                 dg = np.zeros((self.n_r), dtype=np.float32)
                 result = np.zeros((2), dtype=np.float32)
-
-                with nogil:
-                    for j in range(self.n_g):
-                        for h in prange(self.n_r):
-                            dg[h] = d_curve[h][j]
-                        result = self._get_d_corr_max(dg, crmin, crmax)
-                        kc[j] = result[0]
-                        a[j] = result[1]
-                        self.kc[j] = result[0]
-                        self.a_g[j] = result[1]
+                
+                for j in range(self.n_g):
+                    for h in range(self.n_r):
+                        dg[h] = d_curve[h][j]
+                    result = self._get_d_corr_max(dg, crmin, crmax)
+                    kc[j] = result[0]
+                    a[j] = result[1]
+                    self.kc[j] = result[0]
+                    self.a_g[j] = result[1]
 
                 result = self._get_d_corr_max(self.d0, crmin, crmax)
                 
@@ -373,16 +370,15 @@ cdef class DecorrAnalysis:
                 a = np.zeros((self.n_g), dtype=np.float32)
                 dg = np.zeros((self.n_r), dtype=np.float32)
                 result = np.zeros((2), dtype=np.float32)
-
-                with nogil:
-                    for j in range(self.n_g):
-                        for h in prange(self.n_r):
-                            dg[h] = d_curve[h][j+self.n_g]
-                        result = self._get_d_corr_max(dg, crmin, crmax)
-                        kc[j] = result[0]
-                        a[j] = result[1]
-                        self.kc[j] = result[0]
-                        self.a_g[j] = result[1]
+                
+                for j in range(self.n_g):
+                    for h in range(self.n_r):
+                        dg[h] = d_curve[h][j+self.n_g]
+                    result = self._get_d_corr_max(dg, crmin, crmax)
+                    kc[j] = result[0]
+                    a[j] = result[1]
+                    self.kc[j] = result[0]
+                    self.a_g[j] = result[1]
                 results_gm = self._get_best_score(kc, a)
                 results_max = self._get_max_score(kc, a)
 
