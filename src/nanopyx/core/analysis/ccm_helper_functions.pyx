@@ -51,7 +51,7 @@ def make_even_square(np.ndarray image_arr):
     :param image_arr: numpy array with shape (t, y, x); image to be cropped
     :return: numpy array with shape (t, y, x)
     """
-    return _make_even_square(image_arr)
+    return np.array(_make_even_square(image_arr))
 
 
 cdef float[:, :, :] _make_even_square(float[:, :, :] image_arr) nogil:
