@@ -93,9 +93,9 @@ class DecorrAnalysis(object):
 		
 		pixelsIn = img.ravel()
 		
-		meanIm = pixelsIn[0]; 
+		meanIm = pixelsIn[0]
 		
-		pixelsOut = np.zeros((newSize*newSize), dtype=np.float32);
+		pixelsOut = np.empty((newSize*newSize), dtype=np.float32);
 		for k in range(newSize*newSize):
 			pixelsOut[k] = meanIm
 		
@@ -257,8 +257,8 @@ class DecorrAnalysis(object):
 				blurred = self.img_ref.copy() - blurred
 								
 				fft = np.fft.fftshift(np.fft.fft2(blurred))
-				fft_real = fft.real.astype(np.float64)
-				fft_imag = fft.imag.astype(np.float64)
+				fft_real = fft.real.astype(np.float32)
+				fft_imag = fft.imag.astype(np.float32)
 				normalized_fft = self.normalizeFFT(fft_real, fft_imag)
 				cr = self.get_corr_coef_norm(fft_real, fft_imag, mask)
 				coef = self.get_corr_coef_ring(fft_real, fft_imag, normalized_fft[0], normalized_fft[1], crmin, crmax)
@@ -379,8 +379,8 @@ class DecorrAnalysis(object):
 			temp = self.get_preprocessed_image(img_f)
 			self.img_ref = temp.copy()
 			img_fft = np.fft.fftshift(np.fft.fft2(temp))
-			fft_real = img_fft.real.astype(np.float64)
-			fft_imag = img_fft.imag.astype(np.float64)
+			fft_real = img_fft.real.astype(np.float32)
+			fft_imag = img_fft.imag.astype(np.float32)
 			fft_real[fft_real.shape[0]//2, fft_real.shape[1]//2] = 0
 			fft_imag[fft_imag.shape[0]//2, fft_imag.shape[1]//2] = 0
 			

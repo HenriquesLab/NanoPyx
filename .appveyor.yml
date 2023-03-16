@@ -20,12 +20,16 @@ only_commits:
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      APPVEYOR_SAVE_CACHE_ON_ERROR: true
-      OS_NAME: win
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
       OS_NAME: darwin
+      LD_LIBRARY_PATH: ./build_utils/libs_build/lib
+      LIBRARY_PATH: $(LD_LIBRARY_PATH)
+      LD_RUNPATH_SEARCH_PATH: $(LD_LIBRARY_PATH)
+      DYLD_FALLBACK_LIBRARY_PATH: $(LD_LIBRARY_PATH)
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      APPVEYOR_SAVE_CACHE_ON_ERROR: true
+      OS_NAME: win
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
       OS_NAME: linux
@@ -61,27 +65,26 @@ build_script:
   # build wheels for windows, also sdist
   - cmd: pipx run nox --sessions build_wheel build_sdist
   # build wheels for darwin
-  - sh: "[[ $OS_NAME == 'darwin' ]] && brew install python@3.8 python@3.9 python@3.10 python@3.11 llvm libomp || true"
+  - sh: "[[ $OS_NAME == 'darwin' ]] && bash build_tools/build_libomp.sh || true"
+  - sh: "[[ $OS_NAME == 'darwin' ]] && brew install python@3.8 python@3.9 python@3.10 python@3.11 || true" # llvm libomp
   - sh: "[[ $OS_NAME == 'darwin' ]] && NPX_CYTHON_THREADS=2 pipx run nox --sessions build_wheel || true"
   # build wheels for linux
   - sh: "[[ $OS_NAME == 'linux' ]] && CIBW_CACHE_PATH='cache-cibuildwheel' pipx run cibuildwheel --output-dir wheelhouse || true"
 
 test_script:
-  - pipx run nox --sessions tests_on_wheels
+  - pipx run twine check wheelhouse/*.whl
+  - cmd: pipx run nox --sessions tests_on_wheels
+  - sh: "[[ $OS_NAME == 'darwin' ]] && pipx run nox --sessions tests_on_wheels || true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && source $HOME/venv3.8/bin/activate && pip install nox && nox --sessions tests_on_wheels-3.8 && deactivate|| true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && source $HOME/venv3.9/bin/activate && pip install nox && nox --sessions tests_on_wheels-3.9 && deactivate|| true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && source $HOME/venv3.10/bin/activate && pip install nox && nox --sessions tests_on_wheels-3.10 && deactivate|| true"
+  - sh: "[[ $OS_NAME == 'linux' ]] && source $HOME/venv3.11/bin/activate && pip install nox && nox --sessions tests_on_wheels-3.11 && deactivate|| true"
 
 artifacts:
   - path: "wheelhouse\\*.whl"
     name: Wheels
   - path: "wheelhouse\\*.tar.gz"
     name: SDist
-
-# build_script:
-#   - ps: $env:CIBW_CACHE_PATH = "cache-cibuildwheel"
-#   - pipx run cibuildwheel --output-dir wheelhouse
-#   - sh: "[[ $OS_NAME == 'linux' ]] && pipx run build --sdist --outdir wheelhouse || true"
-# test_script:
-#   - pipx run twine check wheelhouse/*.whl
-#   - pipx run tox
 
 notifications:
   - provider: Email
@@ -97,9 +100,9 @@ notifications:
 
 deploy:
   # skip_tags: true
-  on:
-    branch: main # release from main branch only
-    APPVEYOR_REPO_TAG: true # deploy on tag push only
+  #on:
+  #  branch: main # release from main branch only
+  #  APPVEYOR_REPO_TAG: false # deploy on tag push only
   provider: GitHub
   # tag: $(APPVEYOR_REPO_TAG_NAME)
   repository: "HenriquesLab/NanoPyx"
