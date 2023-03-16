@@ -29,7 +29,6 @@ cdef class DecorrAnalysis:
         """_summary_
 
         Args:
-            img (np.ndarray): image, numpy array with shape (y, x)
             rmin (float, optional): Minimum radius [0,rMax] (normalized frequencies) used for decorrelation analysis. Defaults to 0.
             rmax (float, optional): Maximum radius [rMin,1] (normalized frequencies) used for decorrelation analysis. Defaults to 1.
             n_r (int, optional): [10,100], Sampling of decorrelation curve. Defaults to 50.
@@ -38,7 +37,6 @@ cdef class DecorrAnalysis:
             units (str, optional): string name of the units to use. Defaults to "pixel".
             roi (tuple, optional): Coordinates used to crop the image (x0, y0, x1, y1). Defaults to None.
             do_plot (bool, optional): Defaults to False.
-            save_path (str, optional): Defaults to None.
         """
         self.img = None
         self.img_ref = None
@@ -65,6 +63,11 @@ cdef class DecorrAnalysis:
 
     @timeit2
     def run_analysis(self,  img: np.ndarray):
+        """
+        Method used to run the analysis. Starting parameters are defined on class instance initialization.
+        Args:
+            img (np.ndarray): image to analyze
+        """
         self.img = img.astype(np.float32)
         return self._run_analysis()
 
@@ -419,6 +422,9 @@ cdef class DecorrAnalysis:
         self.d = self._compute_d()
         
         self.resolution = 2 * self.pixel_size / self.kc_max
+
+        if self.do_plot:
+            self.plot_results()
 
     def plot_results(self):
         x = np.zeros((self.n_r))
