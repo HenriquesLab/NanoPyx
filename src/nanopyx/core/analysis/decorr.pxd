@@ -10,12 +10,12 @@ cdef class DecorrAnalysis:
     cdef bint do_plot
     cdef str units
     cdef float[:, :] _get_preprocessed_image(self, img)
-    cdef float _linmap(self, float val, float valmin, float valmax, float mapmin, float mapmax)
+    cdef float _linmap(self, float val, float valmin, float valmax, float mapmin, float mapmax) nogil
     cdef float _get_corr_coef_norm(self, float[:, :] fft_real, float[:, :] fft_imag, float[:, :] mask)
     cdef float[:] _get_best_score(self, float[:] kc, float[:] a)
     cdef float[:] _get_max_score(self, float[:] kc, float[:] a)
     cdef float [:] _get_corr_coef_ring(self, float[:, :] fft_real, float[:, :] fft_imag, float[:, :] normalized_fft_real, float[:, :] normalized_fft_imag, float crmin, float crmax)
     cdef float[:] _compute_d0(self, float[:, :] fft_real, float[:, :] fft_imag)
-    cdef float[:] _get_d_corr_max(self, float[:] d, float r1, float r2)
+    cdef float[:] _get_d_corr_max(self, float[:] d, float r1, float r2) nogil
     cdef float[:, :] _compute_d(self)
     cdef _run_analysis(self)
