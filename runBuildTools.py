@@ -169,7 +169,7 @@ def main(mode=None):
     notebook_files += " ".join(find_files("tests", ".ipynb"))
     options = {
         "Build nanopyx extensions": f"{python_call} setup.py build_ext --inplace",
-        "Auto-generate pxd files via pyx2pxd": "pyx2pxd src",
+        "Auto-generate pxd files via pyx2pxd": "nanopyx-pyx2pxd src",
         "Clean files": f"{remove_call} {files2clean}"
         if len(files2clean) > 0
         else "echo 'No files to clean'",

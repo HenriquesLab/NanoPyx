@@ -53,6 +53,9 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.scripts]
+nanopyx-pyx2pxd = "nanopyx.scripts.pyx2pxd:main"
+
 [project.optional-dependencies]
 all = ["nanopyx[developer,test,jupyter,doc]"]
 developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
