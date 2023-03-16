@@ -20,15 +20,19 @@ only_commits:
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
-      APPVEYOR_SAVE_CACHE_ON_ERROR: true
-      OS_NAME: linux
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      APPVEYOR_SAVE_CACHE_ON_ERROR: true
-      OS_NAME: win
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
       OS_NAME: darwin
+      LD_LIBRARY_PATH: ./build_utils/libs_build/lib
+      LIBRARY_PATH: $(LD_LIBRARY_PATH)
+      LD_RUNPATH_SEARCH_PATH: $(LD_LIBRARY_PATH)
+      DYLD_FALLBACK_LIBRARY_PATH: $(LD_LIBRARY_PATH)
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      APPVEYOR_SAVE_CACHE_ON_ERROR: true
+      OS_NAME: win
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      APPVEYOR_SAVE_CACHE_ON_ERROR: true
+      OS_NAME: linux
 
   access_token:
     secure: VDbNqf7th0x0/u2BDKnebeGa6ljTeME+9WKs2hnZPiBbIttfvHuaBsku/tL/JURS
@@ -38,7 +42,7 @@ stack: python 3.8
 cache:
   - cache-pip
   - cache-cibuildwheel
-  # - .nox
+  - .nox
 
 init:
   - cmd: set PATH=C:\Python38;C:\Python38\Scripts;%PATH%
@@ -61,7 +65,8 @@ build_script:
   # build wheels for windows, also sdist
   - cmd: pipx run nox --sessions build_wheel build_sdist
   # build wheels for darwin
-  - sh: "[[ $OS_NAME == 'darwin' ]] && brew install python@3.8 python@3.9 python@3.10 python@3.11 llvm libomp || true"
+  - sh: "[[ $OS_NAME == 'darwin' ]] && bash build_tools/build_libomp.sh || true"
+  - sh: "[[ $OS_NAME == 'darwin' ]] && brew install python@3.8 python@3.9 python@3.10 python@3.11 || true" # llvm libomp
   - sh: "[[ $OS_NAME == 'darwin' ]] && NPX_CYTHON_THREADS=2 pipx run nox --sessions build_wheel || true"
   # build wheels for linux
   - sh: "[[ $OS_NAME == 'linux' ]] && CIBW_CACHE_PATH='cache-cibuildwheel' pipx run cibuildwheel --output-dir wheelhouse || true"

@@ -5,7 +5,7 @@ import pyopencl.array as cl_array
 from . import get_fastest_device, get_kernel_txt
 
 
-def mandelbrot(
+def _cl_mandelbrot(
     size: int,
     max_iter: int,
     divergence: float = 4,

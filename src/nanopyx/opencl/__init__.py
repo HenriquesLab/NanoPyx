@@ -1,4 +1,5 @@
 import os
+import warnings
 
 import pyopencl as cl
 
@@ -131,13 +132,35 @@ def works():
     enabled = os.environ.get("NANOPYX_ENABLE_OPENCL", "1") == "1"
 
     if disabled or not enabled:
+        warnings.warn(
+            "OpenCL is disabled. To enable it, set the environment variable NANOPYX_ENABLE_OPENCL=1"
+        )
         return False
-    elif not disabled or enabled:
-        return True
-    try:
-        get_fastest_device()
-        os.environ["NANOPYX_ENABLE_OPENCL"] = "1"
-        return True
-    except Exception:
-        os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
-        return False
+
+    elif enabled:
+        try:
+            get_fastest_device()
+            os.environ["NANOPYX_ENABLE_OPENCL"] = "1"
+            return True
+        except ImportError or cl._cl.LogicError:
+            warnings.warn("tap... tap... tap... COMPUTER SAYS NO (OpenCL)!")
+            os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
+            return False
+
+    return False
+
+
+def opencl_available(func):
+    """
+    Decorator that returns None if OpenCL is not available
+    :param func: function to decorate
+    :return: None if OpenCL is not available, the function otherwise
+    """
+
+    def wrapper(*args, **kwargs):
+        if works():
+            return func(*args, **kwargs)
+        else:
+            return None
+
+    return wrapper

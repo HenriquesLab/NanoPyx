@@ -2,7 +2,11 @@ import numpy as np
 import pyopencl as cl
 import pyopencl.array as pycl_array  # Import PyOpenCL Array (a Numpy array plus an OpenCL buffer object)
 
+import nanopyx.opencl as npxcl
+from nanopyx.opencl import _cl_mandelbrot_benchmark
 
+
+@npxcl.opencl_available
 def test_sum_images():
     a = np.arange(128 * 128, dtype=np.float32).reshape(128, 128)
     b = np.arange(128 * 128, dtype=np.float32).reshape(128, 128)
@@ -43,3 +47,8 @@ def test_sum_images():
 
             assert c_cl.get().all() == c_np_result.all()
             print("Execution time of test: %g s" % elapsed)
+
+
+@npxcl.opencl_available
+def test_mandelbrot_benchmark():
+    _cl_mandelbrot_benchmark._cl_mandelbrot(1000, 1000, 4)
