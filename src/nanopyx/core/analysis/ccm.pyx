@@ -90,6 +90,8 @@ cdef float[:, :] _calculate_slice_ccm(float[:, :] img_ref, float[:, :] img_slice
 
     return ccm_slice[0:ccm_slice.shape[0], 0:ccm_slice.shape[1]]
 
+def calculate_slice_ccm(np.ndarray img_ref, np.ndarray img_slice):
+    return np.array(_calculate_slice_ccm(img_ref, img_slice))
 
 cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :] ccm_slice) nogil:
     """
