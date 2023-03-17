@@ -213,11 +213,10 @@ cdef class DecorrAnalysis:
         for k in range(self.n_r):
             d = 0
             c = 0
-
-            with nogil:
-                for n in prange(k+1):
-                    d += coef[n]
-                    c += coef[n+self.n_r]
+            
+            for n in range(k+1):
+                d += coef[n]
+                c += coef[n+self.n_r]
 
             if cr == 0 or c == 0:
                 d0[k] = float("nan")
@@ -306,10 +305,10 @@ cdef class DecorrAnalysis:
                 for i in range(self.n_r):
                     d = 0
                     c = 0
-                    with nogil:
-                        for n in prange(i+1):
-                            d += coef[n]
-                            c += coef[n+self.n_r]
+                    
+                    for n in range(i+1):
+                        d += coef[n]
+                        c += coef[n+self.n_r]
                     if cr == 0 or c == 0:
                         d_curve[i][count] = float("nan") # TODO: check this is ok, this is a workaround for differences in java and python
                     else:
