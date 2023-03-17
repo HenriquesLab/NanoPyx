@@ -52,6 +52,7 @@ class Registration:
         self.reg_result = {'Image':translated, 'Translation':(y_shift,x_shift), 'Scaling':None, 'Rotation':None, 'Max_Sim':max_sim}
 
         return translated
+    
 
     def scaled_rotation(self):
         """
@@ -107,9 +108,9 @@ class Registration:
 
             shifts, max_sim_1 = self.phase_correlation(lpolar_ref_image, lpolar_image)
 
-            angle = -np.deg2rad((h/2 - shifts[0]))
+            angle = -np.deg2rad((h/2 - shifts[0])) 
             log_translation = (w/2-shifts[1]) * np.log(w) / w
-            scale = np.exp(-1*log_translation) # NEGATIVE SIGN
+            scale = np.exp(-1*log_translation) # NEGATIVE SIGN HERE IS MANDATORY
 
             total_angle += angle
             total_scale *= scale
@@ -117,11 +118,28 @@ class Registration:
             scaled = Interpolator(self.image).scale_xy(total_scale, total_scale)
             rotated = Interpolator(scaled).rotate(total_angle)
             iter_image = rotated
+     
+        # Step 3: Find translation AND the correct angle
+        # As outlined in the ref, in the frequency space 180-angle or angle have the same effect so there is ambiguity
+        # We test for both options and choose the one with the highest peak in the ccm
 
-        final_iter_image = iter_image
-        
-        # Step 3: Find translation
-        shifts, max_sim_2 = self.phase_correlation(self.ref_image, final_iter_image)
+        final_scaled_img = Interpolator(self.image).scale_xy(total_scale, total_scale)
+
+        final_option_1 = Interpolator(final_scaled_img).rotate(total_angle)
+        final_option_2 = Interpolator(final_scaled_img).rotate(-total_angle)
+
+        shifts_1, sim_1 = self.phase_correlation(self.ref_image, final_option_1)
+        shifts_2, sim_2 = self.phase_correlation(self.ref_image, final_option_2)
+
+        if sim_1 > sim_2:
+            final_iter_image = final_option_1
+            shifts = shifts_1
+            max_sim_2 = sim_1
+        else:
+            final_iter_image = final_option_2
+            shifts = shifts_2
+            max_sim_2 = sim_2
+            
         y_shift = (self.h/2.0 - shifts[0])
         x_shift = (self.w/2.0 - shifts[1])
 
@@ -143,7 +161,7 @@ class Registration:
         ccm = calculate_slice_ccm(im1, im2)
         optimizer = GetMaxOptimizer(ccm)
         shifts = optimizer.get_max()
-        maxsim = optimizer.get_interpolated_px_value(shifts)
+        maxsim = -optimizer.get_interpolated_px_value(shifts)
 
         return shifts, maxsim
 
