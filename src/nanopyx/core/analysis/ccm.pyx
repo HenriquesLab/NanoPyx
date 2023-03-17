@@ -90,6 +90,8 @@ cdef float[:, :] _calculate_slice_ccm(float[:, :] img_ref, float[:, :] img_slice
 
     return ccm_slice[0:ccm_slice.shape[0], 0:ccm_slice.shape[1]]
 
+def calculate_slice_ccm(np.ndarray img_ref, np.ndarray img_slice):
+    return np.array(_calculate_slice_ccm(img_ref, img_slice))
 
 cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :] ccm_slice) nogil:
     """
@@ -184,7 +186,7 @@ cdef float[:,:,:] _calculate_rccm(float[:, :] img_slice, float[:, :] img_ref):
 
     return rccm
 
-def calculate_ccm_cartesian(np.ndarray img_slice, np.ndarray img_ref):
+def calculate_ccm_cartesian(np.ndarray img_slice, np.ndarray img_ref): # TODO DEPRECATED?
     """
     Function used to generate a cross correlation matrix of an image against a reference image
     Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two polar images.
@@ -194,7 +196,7 @@ def calculate_ccm_cartesian(np.ndarray img_slice, np.ndarray img_ref):
     """
     return np.array(_calculate_ccm_cartesian(img_slice, img_ref))
 
-cdef float[:,:] _calculate_ccm_cartesian(float[:, :] img_slice, float[:, :] img_ref):
+cdef float[:,:] _calculate_ccm_cartesian(float[:, :] img_slice, float[:, :] img_ref): # TODO DEPRECATED?
 
     cdef float[:,:,:] tmp
 
@@ -210,7 +212,7 @@ cdef float[:,:] _calculate_ccm_cartesian(float[:, :] img_slice, float[:, :] img_
 
     return _calculate_slice_ccm(img_ref, img_slice)
 
-def calculate_ccm_polar(np.ndarray img_slice, np.ndarray img_ref):
+def calculate_ccm_polar(np.ndarray img_slice, np.ndarray img_ref): # TODO DEPRECATED?
     """
     Function used to generate a cross correlation matrix of an image against a reference image where both are to be expressed in polar coordinates (theta,r)
     Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two polar images.
@@ -221,7 +223,7 @@ def calculate_ccm_polar(np.ndarray img_slice, np.ndarray img_ref):
     """
     return np.array(_calculate_ccm_polar(img_slice, img_ref))
 
-cdef float[:,:] _calculate_ccm_polar(float[:, :] img_slice, float[:, :] img_ref):
+cdef float[:,:] _calculate_ccm_polar(float[:, :] img_slice, float[:, :] img_ref): # TODO DEPRECATED?
 
     cdef float[:,:] polar_slice = Interpolator(img_slice).polar()
     cdef float[:,:] polar_ref = Interpolator(img_ref).polar()
@@ -229,7 +231,7 @@ cdef float[:,:] _calculate_ccm_polar(float[:, :] img_slice, float[:, :] img_ref)
     return _calculate_slice_ccm(polar_ref, polar_slice)
 
 
-def calculate_ccm_logpolar(np.ndarray img_slice, np.ndarray img_ref):
+def calculate_ccm_logpolar(np.ndarray img_slice, np.ndarray img_ref): # TODO DEPRECATED?
     """
     Function used to generate a cross correlation matrix of an image against a reference image where both are to be expressed in logpolar coordinates (theta, log(r))
     Cross correlation values are normalized by the minimum and maximum Pearson's correlation between the two logpolar images.
@@ -240,7 +242,7 @@ def calculate_ccm_logpolar(np.ndarray img_slice, np.ndarray img_ref):
     """
     return np.array(_calculate_ccm_logpolar(img_slice, img_ref))
 
-cdef float[:,:] _calculate_ccm_logpolar(float[:, :] img_slice, float[:, :] img_ref):
+cdef float[:,:] _calculate_ccm_logpolar(float[:, :] img_slice, float[:, :] img_ref): # TODO DEPRECATED?
 
     cdef float[:,:] polar_slice = Interpolator(img_slice).polar(scale='log')
     cdef float[:,:] polar_ref = Interpolator(img_ref).polar(scale='log')
