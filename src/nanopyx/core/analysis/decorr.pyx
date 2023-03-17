@@ -115,12 +115,11 @@ cdef class DecorrAnalysis:
 
         cdef int y_i, x_i
         cdef float c = 0
-
-        with nogil:
-            for y_i in prange(fft_real.shape[0]):
-                for x_i in range(fft_real.shape[1]):
-                    if mask[y_i, x_i] == 1:
-                        c += fft_real[y_i, x_i]**2 + fft_imag[y_i, x_i]**2
+        
+        for y_i in prange(fft_real.shape[0]):
+            for x_i in range(fft_real.shape[1]):
+                if mask[y_i, x_i] == 1:
+                    c += fft_real[y_i, x_i]**2 + fft_imag[y_i, x_i]**2
 
         return sqrt(c)
 
