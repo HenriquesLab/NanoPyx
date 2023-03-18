@@ -9,12 +9,44 @@ try:
 
     fastest_device = None
     fastest_device_speed = 0
-    ctx = None
-    queue = None
+    cl_ctx = None
+    cl_queue = None
 
     for platform in cl.get_platforms():
         for device in platform.get_devices():
-            speed = device.max_clock_frequency * device.max_compute_units
+            # check if the device is a GPU
+            if "GPU" not in cl.device_type.to_string(device.type):
+                continue
+
+            # print("\t" + "-" * 56)
+            # print("\tDevice - Name: " + device.name)
+            # print("\tDevice - Type: " + cl.device_type.to_string(device.type))
+            # print(
+            #     f"\tDevice - Max Clock Speed:  {device.max_clock_frequency} Mhz"
+            # )
+
+            # print(f"\tDevice - Compute Units:  {device.max_compute_units}")
+            # print(
+            #     f"\tDevice - Local Memory:  {device.local_mem_size / 1024.0:.0f} KB"
+            # )
+            # print(
+            #     f"\tDevice - Constant Memory:  {device.max_constant_buffer_size / 1024.0:.0f} KB"
+            # )
+            # print(
+            #     f"\tDevice - Global Memory: {device.global_mem_size / 1073741824.0:.0f} GB"
+            # )
+            # print(
+            #     f"\tDevice - Max Buffer/Image Size: {device.max_mem_alloc_size / 1048576.0:.0f} MB"
+            # )
+            # print(
+            #     f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}"
+            # )
+
+            speed = (
+                device.max_clock_frequency
+                * device.max_compute_units
+                * device.global_mem_size
+            )
             # If no fastest device has been found, set it to the current device
             if fastest_device is None:
                 fastest_device = device
@@ -24,15 +56,16 @@ try:
             elif speed > fastest_device_speed:
                 fastest_device = device
                 fastest_device_speed = speed
-    print(cl.device_type.to_string(fastest_device.type))
 
-    ctx = cl.Context([fastest_device])
-    queue = cl.CommandQueue(ctx)
+    print("Selecting OpenCL device: " + fastest_device.name)
+
+    cl_ctx = cl.Context([fastest_device])
+    cl_queue = cl.CommandQueue(cl_ctx)
 
 except (ImportError, OSError, AttributeError):
     cl = None
-    ctx = None
-    queue = None
+    cl_ctx = None
+    cl_queue = None
 
 
 def works():
@@ -58,48 +91,40 @@ def works():
     return True
 
 
-def find_kernel_path(cl_file_name: str):
+def print_opencl_info():
     """
-    Find the path to a kernel file
-    :param cl_file_name: name of the kernel file
-    :return: path to the kernel file
+    Prints information about the OpenCL devices on the system
     """
-    if not cl_file_name.endswith(".cl"):
-        cl_file_name = os.path.splitext(cl_file_name)[0] + ".cl"
+    # REF: https://github.com/benshope/PyOpenCL-Tutorial
 
-    # Find if its an absolute path
-    if os.path.exists(cl_file_name):
-        file_path = cl_file_name
-        return file_path
+    print("\n" + "=" * 60 + "\nOpenCL Platforms and Devices")
+    # Print each platform on this computer
+    for platform in cl.get_platforms():
+        print("=" * 60)
+        print("Platform - Name:  " + platform.name)
+        print("Platform - Vendor:  " + platform.vendor)
+        print("Platform - Version:  " + platform.version)
+        print("Platform - Profile:  " + platform.profile)
+        # Print each device per-platform
+        for device in platform.get_devices():
+            print("\t" + "-" * 56)
+            print("\tDevice - Name: " + device.name)
+            print("\tDevice - Type: " + cl.device_type.to_string(device.type))
+            print(f"\tDevice - Max Clock Speed:  {device.max_clock_frequency} Mhz")
 
-    # Find if its in the current directory
-    path = os.path.split(__file__)[0]
-    file_path = os.path.join(path, cl_file_name)
-    if os.path.exists(file_path):
-        return file_path
-
-    # Find if its in the current directory tree
-    for root, dirs, files in os.walk(path):
-        # Check if the current directory contains the target file
-        if cl_file_name in files:
-            # If found, print the full path to the file
-            cl_file_name = os.path.join(root, cl_file_name)
-            return cl_file_name
-
-    raise RuntimeError(f"Could not find kernel {cl_file_name}")
+            print(f"\tDevice - Compute Units:  {device.max_compute_units}")
+            print(f"\tDevice - Local Memory:  {device.local_mem_size / 1024.0:.0f} KB")
+            print(
+                f"\tDevice - Constant Memory:  {device.max_constant_buffer_size / 1024.0:.0f} KB"
+            )
+            print(
+                f"\tDevice - Global Memory: {device.global_mem_size / 1073741824.0:.0f} GB"
+            )
+            print(
+                f"\tDevice - Max Buffer/Image Size: {device.max_mem_alloc_size / 1048576.0:.0f} MB"
+            )
+            print(f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}")
+    print("\n")
 
 
-def get_kernel_txt(cl_file_name: str):
-    """
-    Finds the path to an opencl kernel file
-    :param file_name: Name of the kernel file
-    :return: Path to the kernel file
-    """
-
-    cl_file_path = find_kernel_path(cl_file_name)
-
-    # Read the kernel file
-    with open(cl_file_path, "r") as f:
-        kernel_txt = f.read()
-
-    return kernel_txt
+from ._le_mandelbrot_benchmark import MandelbrotBenchmark

@@ -53,8 +53,11 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
 
     # read the cl file
     functions_to_copy = []
+    defines_to_copy = []
 
     tag_copy_functions = "// c2cl-function: "
+    tag_copy_define = "// c2cl-define: "
+
     with open(cl_filename, "r") as f:
         cl_txt = f.read()
         if tag_copy_functions not in cl_txt:
@@ -65,8 +68,40 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
             if line.startswith(tag_copy_functions):
                 functions_to_copy.append(line.replace(tag_copy_functions, ""))
 
+            if line.startswith(tag_copy_define):
+                defines_to_copy.append(line.replace(tag_copy_define, ""))
+
     with open(c_filename, "r") as f:
         c_txt = f.read()
+
+        for define in defines_to_copy:
+            tag = tag_copy_define + define
+
+            c_define_prefix = f"#define {define}"
+            c_define = ""
+
+            for line in c_txt.splitlines():
+                if line.startswith(c_define_prefix):
+                    c_define = line
+                    break
+
+            assert (
+                c_define != "",
+                f"Could not find define {define} in {c_filename}",
+            )
+
+            # check if we already defined in the past, remove it if so
+            if c_define_prefix in cl_txt:
+                define_idx = cl_txt.find(c_define_prefix)
+                cl_txt = (
+                    cl_txt[:define_idx] + cl_txt[cl_txt.find("\n", define_idx) + 1 :]
+                )
+
+            # add new define
+            tag_end_position = cl_txt.find(tag) + len(tag) + 1
+            cl_txt = (
+                cl_txt[:tag_end_position] + c_define + "\n" + cl_txt[tag_end_position:]
+            )
 
         for function in functions_to_copy:
             tag = tag_copy_functions + function
