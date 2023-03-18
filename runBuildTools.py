@@ -29,18 +29,26 @@ def get_version():
     return versioneer.get_version()
 
 
-def find_files(root_dir: str, extension: str) -> list:
+def find_files(root_dir: str, extension: str, partner_extension: str = None) -> list:
     """
     Find all files with a given extension in a directory
     :param root_dir: root directory to search
     :param extension: file extension to search for
+    :param partner_extension: partner extension to search for (e.g. .pyx and .pxd)
     :return: list of files
     """
     target_files = []
     for root, dirs, files in os.walk(root_dir):
         for file in files:
-            if file.endswith(extension):
-                target_files.append(os.path.join(root, file))
+            file_name = os.path.splitext(file)[0]
+            if partner_extension is None:
+                if file.endswith(extension):
+                    target_files.append(os.path.join(root, file))
+            else:
+                if file.endswith(extension) and os.path.exists(
+                    os.path.join(root, file_name + partner_extension)
+                ):
+                    target_files.append(os.path.join(root, file))
 
         # auto remove empty directories
         for dir in dirs:
@@ -93,6 +101,7 @@ def update_gitignore():
         "*.egg-info",
         "*.so",
         "src/nanopyx/**/*.c",
+        "!src/nanopyx/**/*_.c",
         "src/**/*.html",
         ".coverage*",
         "tests_plots",
@@ -152,9 +161,9 @@ def main(mode=None):
     files2clean = " ".join(
         find_files(base_path, ".so")
         + find_files(base_path, ".pyc")
-        + find_files(base_path, ".pyd")  # Windows .dll-like file
-        + find_files(base_path, ".c")
-        + find_files(base_path, ".html")
+        + find_files(base_path, ".pyd")
+        + find_files(base_path, ".c", partner_extension=".pyx")
+        + find_files(base_path, ".html", partner_extension=".pyx")
         + find_files(base_path, ".profile")
         + find_files(os.path.join("tests"), ".profile")
     )
@@ -169,7 +178,8 @@ def main(mode=None):
     notebook_files += " ".join(find_files("tests", ".ipynb"))
     options = {
         "Build nanopyx extensions": f"{python_call} setup.py build_ext --inplace",
-        "Auto-generate pxd files via pyx2pxd": "nanopyx-pyx2pxd src",
+        "Auto-generate pxd files via pyx2pxd": f"{python_call} src/nanopyx/scripts/pyx2pxd.py",
+        "Auto-copy c to cl files via c2cl": f"{python_call} src/nanopyx/scripts/c2cl.py",
         "Clean files": f"{remove_call} {files2clean}"
         if len(files2clean) > 0
         else "echo 'No files to clean'",

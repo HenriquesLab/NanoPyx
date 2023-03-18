@@ -55,6 +55,7 @@ dynamic = ["version"]
 
 [project.scripts]
 nanopyx-pyx2pxd = "nanopyx.scripts.pyx2pxd:main"
+nanopyx-c2cl = "nanopyx.scripts.c2cl:main"
 
 [project.optional-dependencies]
 all = ["nanopyx[developer,test,jupyter,doc]"]
