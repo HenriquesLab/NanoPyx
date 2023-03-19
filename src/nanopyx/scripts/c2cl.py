@@ -9,6 +9,7 @@ def extract_function_code(file_txt, function_name):
     Extract function code from C file
     :param file_txt: file text
     :param function_name: Function name to extract
+    :return: Function signature and code (str, str)
     """
     function_code_lines = []
 
@@ -16,7 +17,7 @@ def extract_function_code(file_txt, function_name):
     brackets = 0
 
     for line in file_txt.splitlines():
-        if function_name in line and "(" in line and ")" in line:
+        if function_name in line and "(" in line and ")" in line and ";" not in line:
             function_started = True
             brackets = 0
 
@@ -35,7 +36,9 @@ def extract_function_code(file_txt, function_name):
     if len(function_code_lines) == 0:
         return None
 
-    return "\n".join(function_code_lines)
+    function_signature = function_code_lines[0].split("{")[0].strip() + ";"
+
+    return function_signature, "\n".join(function_code_lines)
 
 
 def copy_c_function_to_cl(cl_filename: str) -> str:
@@ -106,17 +109,25 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
         for function in functions_to_copy:
             tag = tag_copy_functions + function
 
-            c_function_code = extract_function_code(c_txt, function)
+            c_function_signature, c_function_code = extract_function_code(
+                c_txt, function
+            )
             assert (
                 c_function_code is not None
             ), f"Could not find function {function} in {c_filename}"
 
-            cl_function_code = extract_function_code(cl_txt, function)
+            cl_function_signature, cl_function_code = extract_function_code(
+                cl_txt, function
+            )
+
             if cl_function_code is not None:
                 # remove previous function
-                cl_txt = cl_txt.replace(cl_function_code, "")
+                cl_txt = cl_txt.replace(cl_function_code, "").replace(
+                    cl_function_signature, ""
+                )
 
             # add new function
+            cl_txt = c_function_signature + cl_txt
             tag_end_position = cl_txt.find(tag) + len(tag) + 1
             cl_txt = (
                 cl_txt[:tag_end_position] + c_function_code + cl_txt[tag_end_position:]

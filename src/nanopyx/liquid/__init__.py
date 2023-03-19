@@ -18,30 +18,6 @@ try:
             if "GPU" not in cl.device_type.to_string(device.type):
                 continue
 
-            # print("\t" + "-" * 56)
-            # print("\tDevice - Name: " + device.name)
-            # print("\tDevice - Type: " + cl.device_type.to_string(device.type))
-            # print(
-            #     f"\tDevice - Max Clock Speed:  {device.max_clock_frequency} Mhz"
-            # )
-
-            # print(f"\tDevice - Compute Units:  {device.max_compute_units}")
-            # print(
-            #     f"\tDevice - Local Memory:  {device.local_mem_size / 1024.0:.0f} KB"
-            # )
-            # print(
-            #     f"\tDevice - Constant Memory:  {device.max_constant_buffer_size / 1024.0:.0f} KB"
-            # )
-            # print(
-            #     f"\tDevice - Global Memory: {device.global_mem_size / 1073741824.0:.0f} GB"
-            # )
-            # print(
-            #     f"\tDevice - Max Buffer/Image Size: {device.max_mem_alloc_size / 1048576.0:.0f} MB"
-            # )
-            # print(
-            #     f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}"
-            # )
-
             speed = (
                 device.max_clock_frequency
                 * device.max_compute_units

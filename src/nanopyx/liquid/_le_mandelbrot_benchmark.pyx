@@ -2,14 +2,15 @@
 
 import numpy as np
 
-from . import cl, cl_array, cl_ctx, cl_queue
-from .__le__ import LiquidEngine
-
-cimport numpy as c_np
+cimport numpy as np
 
 from pathlib import Path
 
-from cython.parallel import prange
+from cython.parallel import parallel, prange
+
+from . import cl, cl_array, cl_ctx, cl_queue
+from .__liquid_engine__ import LiquidEngine
+from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 
 
 class MandelbrotBenchmark(LiquidEngine):
@@ -19,22 +20,22 @@ class MandelbrotBenchmark(LiquidEngine):
 
     _has_opencl = True
     _has_threaded = True
+    _has_threaded_static = True
+    _has_threaded_dynamic = True
+    _has_threaded_guided = True
     _has_unthreaded = True
+    _has_python = True
 
     def run(self, int size=1000, double r_start=-1.5, double r_end=0.5, double c_start=-1, double c_end=1) -> np.ndarray:
         """
         Run the mandelbrot benchmark
         :param size: Size of the image to generate (size x size)
         :param r_start: Start of the row axis
-        :param r_end: End of the row axis, if 0 then r_end = size
+        :param r_end: End of the row axis
         :param c_start: Start of the column axis
-        :param c_end: End of the column axis, if 0 then c_end = size
+        :param c_end: End of the column axis
         :return: The mandelbrot set as a numpy array
         """
-        if r_end == 0:
-            r_end = size
-        if c_end == 0:
-            c_end = size
         return self._run(size, r_start, r_end, c_start, c_end)
 
     def benchmark(self, int size, double r_start=-1.5, double r_end=0.5, double c_start=-1, double c_end=1):
@@ -96,4 +97,57 @@ class MandelbrotBenchmark(LiquidEngine):
                     row = r_start + i * (r_end - r_start) / size
                     _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
 
+        return im_mandelbrot
+
+    def _run_threaded_static(self, int size, double r_start, double r_end, double c_start, double c_end) -> np.ndarray:
+        im_mandelbrot = np.empty((size, size), dtype=np.int32)
+        cdef int[:,:] _im_mandelbrot = im_mandelbrot
+
+        # Calculate the mandelbrot set
+        cdef int i, j
+        cdef double row, col
+        with nogil:
+            for j in prange(size, schedule="static"):
+                col = c_start + j * (c_end - c_start) / size
+                for i in range(size):
+                    row = r_start + i * (r_end - r_start) / size
+                    _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
+
+        return im_mandelbrot
+
+    def _run_threaded_dynamic(self, int size, double r_start, double r_end, double c_start, double c_end) -> np.ndarray:
+        im_mandelbrot = np.empty((size, size), dtype=np.int32)
+        cdef int[:,:] _im_mandelbrot = im_mandelbrot
+
+        # Calculate the mandelbrot set
+        cdef int i, j
+        cdef double row, col
+        with nogil:
+            for j in prange(size, schedule="dynamic"):
+                col = c_start + j * (c_end - c_start) / size
+                for i in range(size):
+                    row = r_start + i * (r_end - r_start) / size
+                    _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
+
+        return im_mandelbrot
+
+    def _run_threaded_guided(self, int size, double r_start, double r_end, double c_start, double c_end) -> np.ndarray:
+        im_mandelbrot = np.empty((size, size), dtype=np.int32)
+        cdef int[:,:] _im_mandelbrot = im_mandelbrot
+
+        # Calculate the mandelbrot set
+        cdef int i, j
+        cdef double row, col
+        with nogil:
+            for j in prange(size, schedule="guided"):
+                col = c_start + j * (c_end - c_start) / size
+                for i in range(size):
+                    row = r_start + i * (r_end - r_start) / size
+                    _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
+
+        return im_mandelbrot
+
+    def _run_python(self, int size, double r_start, double r_end, double c_start, double c_end) -> np.ndarray:
+        im_mandelbrot = np.empty((size, size), dtype=np.int32)
+        _py_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
         return im_mandelbrot

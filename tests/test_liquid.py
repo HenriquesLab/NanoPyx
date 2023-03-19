@@ -3,20 +3,31 @@ from nanopyx.liquid import MandelbrotBenchmark
 
 def test_mandelbrot_benchmark(plt):
     mb = MandelbrotBenchmark()
-    images = mb.benchmark(128)
-    assert len(images) == 3
-    for image in images:
-        assert image.shape == (128, 128)
+    values = mb.benchmark(128)
 
-    # check that images have same value
-    if images[0] is not None and images[1] is not None:
-        assert (images[0] == images[1]).all()
-    if images[1] is not None and images[2] is not None:
-        assert (images[1] == images[2]).all()
+    images = []
+    titles = []
+    run_times = []
+    # unzip the values
+    for run_time, title, image in values:
+        images.append(image)
+        titles.append(title)
+        run_times.append(run_time)
 
-    # show the 3 images with titles
-    fig, axes = plt.subplots(1, 3)
-    for i, ax in enumerate(axes):
-        ax.imshow(images[i])
-        ax.set_title(mb.RUN_TYPE_DESIGNATION[i])
-    plt.show()
+    # check that all the images have the same value
+    for i in range(len(images)):
+        for j in range(i + 1, len(images)):
+            if images[i] is not None and images[j] is not None:
+                assert (images[i] == images[j]).all()
+
+    # check that the run times are in the correct order
+    for i in range(len(run_times)):
+        for j in range(i + 1, len(run_times)):
+            assert run_times[i] <= run_times[j]
+
+    # plot the images in subplots
+    fig, axs = plt.subplots(1, len(images), figsize=(20, 20))
+    for i in range(len(images)):
+        axs[i].imshow(images[i], cmap="hot")
+        axs[i].set_title(titles[i])
+        axs[i].axis("off")
