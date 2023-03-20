@@ -1,10 +1,10 @@
 
 // copy of _c_mandelbrot() from _c_mandelbrot_benchmark.h
 int _c_mandelbrot(float r, float c, int max_iter, float divergence) {
-  double zr = 0.0;
-  double zi = 0.0;
-  double zr2 = 0.0;
-  double zi2 = 0.0;
+  float zr = 0.0;
+  float zi = 0.0;
+  float zr2 = 0.0;
+  float zi2 = 0.0;
   int i = 0;
   while (i < max_iter && zr2 + zi2 < divergence) {
     zi = 2.0 * zr * zi + c / 500 - 1;
@@ -17,7 +17,7 @@ int _c_mandelbrot(float r, float c, int max_iter, float divergence) {
 }
 
 __kernel void mandelbrot(__global int *output, const int max_iter,
-                         const double divergence) {
+                         const float divergence) {
 
   const int r = get_global_id(0);
   const int c = get_global_id(1);

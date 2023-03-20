@@ -37,7 +37,7 @@ def _cl_mandelbrot(
         None,
         im_mandelbrot.data,
         np.int32(max_iter),
-        np.float64(divergence),
+        np.float32(divergence),
     )
     queue.finish()
 
