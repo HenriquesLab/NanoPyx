@@ -13,6 +13,9 @@ from .__liquid_engine__ import LiquidEngine
 from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 
 
+cdef extern from "_c_mandelbrot_benchmark.h":
+    int _c_mandelbrot(double row, double col) nogil
+
 class MandelbrotBenchmark(LiquidEngine):
     """
     Mandelbrot Benchmark using the NanoPyx Liquid Engine

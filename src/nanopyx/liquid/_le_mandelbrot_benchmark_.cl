@@ -1,11 +1,12 @@
 int _c_mandelbrot(double row, double col);
 
-// c2cl-define: MAX_ITERATIONS
+// c2cl-define: MAX_ITERATIONS from _c_mandelbrot_benchmark.c
 #define MAX_ITERATIONS 1000
-// c2cl-define: DIVERGENCE
+
+// c2cl-define: DIVERGENCE from _c_mandelbrot_benchmark.c
 #define DIVERGENCE 10
 
-// c2cl-function: _c_mandelbrot
+// c2cl-function: _c_mandelbrot from _c_mandelbrot_benchmark.c
 int _c_mandelbrot(double row, double col) {
   double zrow = 0;
   double zcol = 0;

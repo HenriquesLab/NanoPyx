@@ -54,9 +54,14 @@ def autogenerate_pxd_file(pyx_filename: str):
                 pxd_lines.append(line)
             elif "# autogen_pxd: " in line:
                 pxd_lines.append(line.replace("# autogen_pxd: ", ""))
-            elif (line.startswith("cdef") or line.startswith("    cdef")) and (
-                "):" in line or ") nogil:" in line
-            ):
+            elif "# pyx2pxd: " in line:
+                pxd_lines.append(line.replace("# pyx2pxd: ", ""))
+            elif (
+                line.startswith("cdef")
+                or line.startswith("    cdef")
+                or line.startswith("cpdef")
+                or line.startswith("    cpdef")
+            ) and ("):" in line or ") nogil:" in line):
                 pxd_lines.append(line[: line.rfind(":")])
 
         pxd_lines.append("")
