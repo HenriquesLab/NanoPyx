@@ -1,6 +1,8 @@
 import os
 import time
+from pathlib import Path
 
+import numpy as np
 import yaml
 
 from .. import __config_folder__
@@ -84,8 +86,8 @@ class LiquidEngine:
         :return: None
         """
         # Create some lists to store runtimes and return values of run types
-        run_times = [None] * len(self.RUN_TYPE_DESIGNATION)
-        returns = [None] * len(self.RUN_TYPE_DESIGNATION)
+        run_times = {}
+        returns = {}
         run_types = []
 
         if self._has_opencl:
@@ -110,11 +112,17 @@ class LiquidEngine:
             run_times[run_type] = self._last_run_time
             returns[run_type] = r
 
-        # Print some statistics
-        speed_sort = sorted(
-            zip(run_times, self.RUN_TYPE_DESIGNATION.values(), returns),
-            key=lambda x: x[0],
-        )
+        # Sort run_times by value
+        speed_sort = []
+        for run_type in sorted(run_times, key=run_times.get, reverse=False):
+            speed_sort.append(
+                (
+                    run_times[run_type],
+                    self.RUN_TYPE_DESIGNATION[run_type],
+                    returns[run_type],
+                )
+            )
+
         print(f"Fastest run type: {speed_sort[0][1]}")
         print(f"Slowest run type: {speed_sort[-1][1]}")
 
@@ -149,7 +157,7 @@ class LiquidEngine:
         :return: None
         """
         self._last_run_time = delta
-        call_args = self._get_args_repr(*args, **kwargs)
+        call_args = self._get_args_repr(args, kwargs)
         run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
 
         r = self._cfg[run_type_designation]
@@ -171,7 +179,7 @@ class LiquidEngine:
         """
         Retrieves the fastest run type for the given args and kwargs
         """
-        call_args = self._get_args_repr(*args, **kwargs)
+        call_args = self._get_args_repr(args, kwargs)
         run_times = [v + 99999999999999999990 for v in self.RUN_TYPE_DESIGNATION.keys()]
 
         for run_type in self.RUN_TYPE_DESIGNATION.keys():
@@ -191,12 +199,27 @@ class LiquidEngine:
         """
         Retrieves the OpenCL code from the corresponding .cl file
         """
-        cl_file = os.path.splitext(os.path.abspath(file_name))[0] + ".cl"
+        cl_file = os.path.splitext(file_name)[0] + ".cl"
+        if not os.path.exists(cl_file):
+            cl_file = Path(__file__).parent / file_name
+
         assert os.path.exists(cl_file), "Could not find OpenCL file: " + cl_file
         return open(cl_file, "r").read()
 
-    def _get_args_repr(self, *args, **kwargs):
-        return repr((args, kwargs))
+    def _get_args_repr(self, args, kwargs):
+        _args = []
+        for arg in args[0]:
+            if hasattr(arg, "shape"):
+                _args.append(arg.shape)
+            else:
+                _args.append(arg)
+        _kwargs = {}
+        for k, v in kwargs.items():
+            if hasattr(v, "shape"):
+                _kwargs[k] = v.shape
+            else:
+                _kwargs[k] = v
+        return repr((_args, _kwargs))
 
     ###############
     # _run methods #

@@ -1,4 +1,4 @@
-int _c_mandelbrot(double row, double col);
+int _c_mandelbrot(float row, float col);int _c_mandelbrot(float row, float col);
 
 // c2cl-define: MAX_ITERATIONS from _c_mandelbrot_benchmark.c
 #define MAX_ITERATIONS 1000
@@ -7,10 +7,10 @@ int _c_mandelbrot(double row, double col);
 #define DIVERGENCE 10
 
 // c2cl-function: _c_mandelbrot from _c_mandelbrot_benchmark.c
-int _c_mandelbrot(double row, double col) {
-  double zrow = 0;
-  double zcol = 0;
-  double zrow_new, zcol_new;
+int _c_mandelbrot(float row, float col) {
+  float zrow = 0;
+  float zcol = 0;
+  float zrow_new, zcol_new;
   int iterations = 0;
   while (zrow * zrow + zcol * zcol <= DIVERGENCE &&
          iterations < MAX_ITERATIONS) {
@@ -23,19 +23,19 @@ int _c_mandelbrot(double row, double col) {
   return iterations;
 }
 
-__kernel void mandelbrot(__global int *output, double r_start, double r_end,
-                         double c_start, double c_end) {
+__kernel void mandelbrot(__global int *output, float r_start, float r_end,
+                         float c_start, float c_end) {
 
   const int r = get_global_id(0);
   const int c = get_global_id(1);
   const int rows = get_global_size(0);
   const int cols = get_global_size(1);
 
-  double r_step = (r_end - r_start) / rows;
-  double c_step = (c_end - c_start) / cols;
+  float r_step = (r_end - r_start) / rows;
+  float c_step = (c_end - c_start) / cols;
 
-  double row = r_start + r * r_step;
-  double col = c_start + c * c_step;
+  float row = r_start + r * r_step;
+  float col = c_start + c * c_step;
   // const int idx = r + c * rows;
   const int idx = c + r * cols;
 

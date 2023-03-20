@@ -11,6 +11,9 @@ def extract_function_code(file_txt, function_name):
     :param function_name: Function name to extract
     :return: Function signature and code (str, str)
     """
+    # make all "float *" global
+    file_txt = file_txt.replace("float *", "__global float *")
+
     function_code_lines = []
 
     function_started = False
@@ -48,9 +51,24 @@ def find_function_header(file_txt, function_name):
     :param function_name: Function name to extract
     :return: Function header (str)
     """
-    for line in file_txt.splitlines():
-        if function_name in line and "(" in line and ")" in line and ";" in line:
-            return line
+    p_function_name = file_txt.find(function_name)
+    if p_function_name == -1:
+        return None
+
+    p_next_semicolon = file_txt.find(";", p_function_name)
+    if p_next_semicolon == -1:
+        return None
+
+    p_next_open_bracket = file_txt.find("{", p_function_name)
+    if p_next_open_bracket != -1 and p_next_open_bracket < p_next_semicolon:
+        return None
+
+    header = file_txt[p_function_name : p_next_semicolon + 1]
+
+    # add previous word to header
+    header = file_txt[:p_function_name].split()[-1] + " " + header
+
+    return header
 
 
 def extract_define_code(file_txt, define_name):
