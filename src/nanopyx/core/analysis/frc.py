@@ -26,7 +26,7 @@ class FIRECalculator(object):
         
     def get_squared_tapered_image(self, img):
         taper_x = tukey(img.shape[1], alpha=0.25)
-        taper_y = tukey(img.shape[0], alpha=0.25)  
+        taper_y = tukey(img.shape[0], alpha=0.25)
         
         img_data = img.ravel()
         new_data = np.empty(img_data.shape, dtype=np.float32)
@@ -45,7 +45,6 @@ class FIRECalculator(object):
                 new_data[ii] = img_data[i] * taper_x[x_i] * y_tmp
                 i += 1
                 ii += 1
-                
         return new_data.reshape((img.shape[0], img.shape[1]))
         
     def calculate_frc_value(self, centre, size, images, pixel_size):
@@ -95,6 +94,7 @@ class FIRECalculator(object):
         
         fft_1 = np.fft.fftshift(np.fft.fft2(img_1))
         fft_2 = np.fft.fftshift(np.fft.fft2(img_2))
+        print(img_1.shape, img_1[1, 1], np.sum(np.fft.fftshift(np.fft.fft2(img_1))), np.sum(img_1), np.sum(fft_1))
         
         size = fft_1.shape[0]
         self.field_of_view = size
