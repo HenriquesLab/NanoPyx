@@ -126,7 +126,7 @@ class Registration:
         final_scaled_img = Interpolator(self.image).scale_xy(total_scale, total_scale)
 
         final_option_1 = Interpolator(final_scaled_img).rotate(total_angle)
-        final_option_2 = Interpolator(final_scaled_img).rotate(-total_angle)
+        final_option_2 = Interpolator(final_scaled_img).rotate(np.pi+total_angle)
 
         shifts_1, sim_1 = self.phase_correlation(self.ref_image, final_option_1)
         shifts_2, sim_2 = self.phase_correlation(self.ref_image, final_option_2)
