@@ -138,7 +138,7 @@ testpaths = ["tests", "src"]
 # https://flake8.pycqa.org/en/latest/user/configuration.html
 filename = [".py", "*.pyx", "*.px*"]
 exclude = [".eggs", "*.egg,build"]
-ignore = ["E901", "E225", "E226", "E227", "W503", "E401"]
+ignore = ["E901", "E225", "E226", "E227", "W503", "F401"]
 max-line-length = 120
 
 

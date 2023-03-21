@@ -114,6 +114,3 @@ def print_opencl_info():
             )
             print(f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}")
     print("\n")
-
-
-from ._le_mandelbrot_benchmark import MandelbrotBenchmark
