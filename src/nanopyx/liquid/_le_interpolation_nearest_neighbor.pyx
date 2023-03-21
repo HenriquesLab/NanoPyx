@@ -21,9 +21,9 @@ class ShiftAndMagnify(LiquidEngine):
 
     _has_opencl = True
     _has_threaded = True
-    _has_threaded_static = False
-    _has_threaded_dynamic = False
-    _has_threaded_guided = False
+    _has_threaded_static = True
+    _has_threaded_dynamic = True
+    _has_threaded_guided = True
     _has_unthreaded = True
     _has_python = False
 
