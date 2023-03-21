@@ -44,7 +44,7 @@ except (ImportError, OSError, Exception):
     cl_queue = None
 
 
-def works():
+def opencl_works():
     """
     Checks if the system has OpenCL compatibility
     :return: True if the system has OpenCL compatibility, False otherwise
@@ -65,6 +65,19 @@ def works():
             return False
 
     return True
+
+
+def njit_works():
+    """
+    Checks if the system has Numba compatibility
+    :return: True if the system has Numba compatibility, False otherwise
+    """
+    try:
+        from numba import njit, prange
+
+        return True
+    except ImportError:
+        return False
 
 
 def print_opencl_info():

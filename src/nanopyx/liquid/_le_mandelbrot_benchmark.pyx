@@ -10,6 +10,7 @@ from cython.parallel import prange
 from . import cl, cl_array, cl_ctx, cl_queue
 from .__liquid_engine__ import LiquidEngine
 from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
+from ._le_mandelbrot_benchmark_ import njit_mandelbrot as _njit_mandelbrot
 
 
 cdef extern from "_c_mandelbrot_benchmark.h":
@@ -27,6 +28,7 @@ class MandelbrotBenchmark(LiquidEngine):
     _has_threaded_guided = True
     _has_unthreaded = True
     _has_python = True
+    _has_njit = True
 
     def run(self, int size=1000, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1) -> np.ndarray:
         """
@@ -152,4 +154,9 @@ class MandelbrotBenchmark(LiquidEngine):
     def _run_python(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         _py_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
+        return im_mandelbrot
+
+    def _run_njit(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        im_mandelbrot = np.empty((size, size), dtype=np.int32)
+        _njit_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
         return im_mandelbrot

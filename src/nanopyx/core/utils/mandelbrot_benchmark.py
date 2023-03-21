@@ -1,4 +1,4 @@
-from ...liquid import MandelbrotBenchmark
+from ...liquid._le_mandelbrot_benchmark import MandelbrotBenchmark
 
 
 def check_acceleration(size: int = 128):

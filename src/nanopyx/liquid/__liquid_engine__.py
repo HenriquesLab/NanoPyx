@@ -6,7 +6,7 @@ import numpy as np
 import yaml
 
 from .. import __config_folder__
-from . import works
+from . import njit_works, opencl_works
 
 
 class LiquidEngine:
@@ -21,6 +21,7 @@ class LiquidEngine:
     RUN_TYPE_THREADED_DYNAMIC: int = 4
     RUN_TYPE_THREADED_GUIDED: int = 5
     RUN_TYPE_PYTHON: int = 6
+    RUN_TYPE_NJIT: int = 7
 
     # designations are stored in the config files, to associate runtime statistics
     RUN_TYPE_DESIGNATION = {
@@ -31,6 +32,7 @@ class LiquidEngine:
         RUN_TYPE_THREADED_DYNAMIC: "Threaded_dynamic",
         RUN_TYPE_THREADED_GUIDED: "Threaded_guided",
         RUN_TYPE_PYTHON: "Python",
+        RUN_TYPE_NJIT: "Numba",
     }
 
     _has_opencl: bool = False
@@ -40,8 +42,9 @@ class LiquidEngine:
     _has_threaded_dynamic: bool = False
     _has_threaded_guided: bool = False
     _has_python: bool = False
+    _has_njit: bool = False
 
-    _default_fastest: int = RUN_TYPE_OPENCL
+    _default_fastest: int = RUN_TYPE_THREADED
     _last_run_type: int | None = None
     _last_run_time: float | None = None
 
@@ -51,8 +54,12 @@ class LiquidEngine:
         :param clear_config: whether to clear the config file
         """
         # Check if OpenCL is available
-        if not works():
+        if not opencl_works():
             self._has_opencl = False
+
+        # Check if Numba is available
+        if not njit_works():
+            self._has_njit = False
 
         # Load the config file
         base_path = os.path.join(__config_folder__, "liquid")
@@ -105,6 +112,8 @@ class LiquidEngine:
             run_types.append(self.RUN_TYPE_UNTHREADED)
         if self._has_python:
             run_types.append(self.RUN_TYPE_PYTHON)
+        if self._has_njit:
+            run_types.append(self.RUN_TYPE_NJIT)
 
         for run_type in run_types:
             designation = self.RUN_TYPE_DESIGNATION[run_type]
@@ -138,6 +147,9 @@ class LiquidEngine:
                 )
 
         print(f"Run-times log: {self.get_run_times_log()}")
+        print(
+            f"Recorded fastest: {self.RUN_TYPE_DESIGNATION[self._get_fastest_run_type(*args, **kwargs)]}"
+        )
 
         return speed_sort
 
@@ -158,7 +170,7 @@ class LiquidEngine:
         :return: None
         """
         self._last_run_time = delta
-        call_args = self._get_args_repr(args, kwargs)
+        call_args = self._get_args_repr(*args, **kwargs)
         run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
 
         r = self._cfg[run_type_designation]
@@ -180,20 +192,31 @@ class LiquidEngine:
         """
         Retrieves the fastest run type for the given args and kwargs
         """
-        call_args = self._get_args_repr(args, kwargs)
-        run_times = [v + 99999999999999999990 for v in self.RUN_TYPE_DESIGNATION.keys()]
+
+        fastest = self._default_fastest
+        fastest_speed = None
+
+        call_args = self._get_args_repr(*args, **kwargs)
+        # print(call_args)
 
         for run_type in self.RUN_TYPE_DESIGNATION.keys():
             run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
-            if (
-                run_type_designation in self._cfg
-                and call_args in self._cfg[run_type_designation]
-            ):
-                runtime_sum = self._cfg[run_type_designation][call_args][0]
-                runtime_count = self._cfg[run_type_designation][call_args][2]
-                run_times[run_type] = runtime_sum / runtime_count
+            if run_type_designation not in self._cfg:
+                continue
 
-        fastest = run_times.index(min(run_times))
+            if call_args not in self._cfg[run_type_designation]:
+                continue
+
+            # print("Found run info for " + run_type_designation)
+            run_info = self._cfg[run_type_designation][call_args]
+            runtime_sum = run_info[0]
+            runtime_count = run_info[2]
+            speed = runtime_count / runtime_sum
+
+            if fastest_speed is None or speed > fastest_speed:
+                fastest_speed = speed
+                fastest = run_type
+
         return fastest
 
     def _get_cl_code(self, file_name):
@@ -207,9 +230,11 @@ class LiquidEngine:
         assert os.path.exists(cl_file), "Could not find OpenCL file: " + cl_file
         return open(cl_file, "r").read()
 
-    def _get_args_repr(self, args, kwargs):
+    def _get_args_repr(self, *args, **kwargs):
+        # print("Args: ", args)
+        # print("Kwargs: ", kwargs)
         _args = []
-        for arg in args[0]:
+        for arg in args:
             if hasattr(arg, "shape"):
                 _args.append(arg.shape)
             else:
@@ -256,14 +281,16 @@ class LiquidEngine:
             r = self._run_threaded_guided(*args, **kwargs)
         elif run_type == self.RUN_TYPE_PYTHON and self._has_python:
             r = self._run_python(*args, **kwargs)
+        elif run_type == self.RUN_TYPE_NJIT and self._has_njit:
+            r = self._run_njit(*args, **kwargs)
         else:
             raise NotImplementedError("No run method defined")
 
         self._store_run_time(
             run_type,
             time.time() - t_start,
-            args,
-            kwargs,
+            *args,
+            **kwargs,
         )
         self._last_run_type = run_type
         return r
@@ -313,6 +340,13 @@ class LiquidEngine:
     def _run_python(*args, **kwargs):
         """
         Runs the python version of the function
+        Should be overridden by the any class that inherits from this class
+        """
+        pass
+
+    def _run_njit(*args, **kwargs):
+        """
+        Runs the njit version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass

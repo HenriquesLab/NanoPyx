@@ -7,7 +7,6 @@ from cython.parallel import parallel, prange
 
 from . import cl, cl_array, cl_ctx, cl_queue
 from .__liquid_engine__ import LiquidEngine
-from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 
 
 cdef extern from "_c_interpolation_nearest_neighbor.h":
