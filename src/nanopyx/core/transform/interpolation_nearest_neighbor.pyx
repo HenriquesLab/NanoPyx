@@ -45,10 +45,9 @@ cdef class Interpolator:
 
         assert image.ndim == 2, "image must be 2D"
 
-        if not image.flags["C_CONTIGUOUS"]:
-            image = np.ascontiguousarray(image)
-
         if type(image) is np.ndarray:
+            if not image.flags["C_CONTIGUOUS"]:
+                image = np.ascontiguousarray(image)
             self.image = image.view(np.float32)
             self.original_dtype = image.dtype
         else: # assume its a memoryview
