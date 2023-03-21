@@ -6,6 +6,7 @@ from scipy.signal import savgol_filter
 from scipy.signal.windows import tukey
 from ..transform.padding import pad_w_zeros_2d
 
+cimport numpy as np
 from cython.parallel import prange
 from libc.math cimport sqrt, fabs, pi, cos, fmin
 from ..utils.math cimport _get_sine
@@ -117,7 +118,8 @@ cdef class FIRECalculator:
         self.frc_curve[:, 1] = smoothed_values
 
     cdef _calculate_threshold_curve(self):
-        self.threshold_curve = np.full((self.frc_curve.shape[0]), 1/7, dtype=np.float32)
+        cdef int curve_dims = self.frc_curve.shape[0]
+        self.threshold_curve = np.full((curve_dims), 1.0/7.0, dtype=np.float32)
 
     cdef _calculate_frc_value(self, int centre, int size, float[:, :] images, float pixel_size):
         cdef int radius = 1
@@ -154,6 +156,7 @@ cdef class FIRECalculator:
             results[r][0] = spatial_frequency[r]
             results[r][1] = sum_0/sqrt(sum_1*sum_2)
             results[r][2] = n_sum
+
         return results
 
     def calculate_fft(self, img: np.ndarray):
@@ -176,10 +179,9 @@ cdef class FIRECalculator:
         img_1 = self._get_squared_tapered_image(img_1)
         img_2 = self._get_squared_tapered_image(img_2)
         
-        cdef complex[:, :] fft_1 = self.calculate_fft(np.array(img_1))
-        cdef complex[:, :] fft_2 = self.calculate_fft(np.array(img_2))
-        print(np.array(img_1).shape, img_1[1, 1], np.sum(self.calculate_fft(np.array(img_1))), np.sum(img_1), np.sum(fft_1))
-
+        cdef complex[:, :] fft_1 = self.calculate_fft(np.array(img_1, dtype=np.float32))
+        cdef complex[:, :] fft_2 = self.calculate_fft(np.array(img_2, dtype=np.float32))
+        
         cdef int size = fft_1.shape[0]
         self.field_of_view = size
         cdef int centre = size // 2
@@ -192,6 +194,7 @@ cdef class FIRECalculator:
 
         images = np.zeros((3, data_a1.shape[0]), dtype=np.float32)
         self._compute(images, data_a1, data_b1, data_a2, data_b2)
+
         self.frc_curve = self._calculate_frc_value(centre, size, images, self.pixel_size)
 
     cdef _get_intersections(self):
@@ -242,6 +245,7 @@ cdef class FIRECalculator:
                     arr = np.array([px, y1], dtype=np.float32)
                     intersections[count] = arr
                     count += 1
+
         self.intersections = np.copy(intersections[:count])
 
     cdef _calculate_fire_number(self, float[:, :] img_1, float[:, :] img_2):

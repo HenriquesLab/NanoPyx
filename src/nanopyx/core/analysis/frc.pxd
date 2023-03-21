@@ -15,6 +15,6 @@ cdef class FIRECalculator:
     cdef _get_smoothed_curve(self)
     cdef _calculate_threshold_curve(self)
     cdef _calculate_frc_value(self, int centre, int size, float[:, :] images, float pixel_size)
-    cdef _calculate_frc_curve(self, float[:, :] img_1, float[:, :] img_2)
+    cdef _calculate_frc_curve(self, float[:, :] img1, float[:, :] img2)
     cdef _get_intersections(self)
     cdef _calculate_fire_number(self, float[:, :] img_1, float[:, :] img_2)
