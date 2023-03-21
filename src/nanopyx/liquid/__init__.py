@@ -38,7 +38,7 @@ try:
     cl_ctx = cl.Context([fastest_device])
     cl_queue = cl.CommandQueue(cl_ctx)
 
-except (ImportError, OSError, AttributeError):
+except (ImportError, OSError, Exception):
     cl = None
     cl_ctx = None
     cl_queue = None
