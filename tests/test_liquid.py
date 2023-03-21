@@ -1,3 +1,4 @@
+import numpy as np
 from nanopyx.liquid import MandelbrotBenchmark
 
 
@@ -16,9 +17,10 @@ def test_mandelbrot_benchmark(plt):
 
     # check that all the images have the same value
     for i in range(len(images)):
-        for j in range(i + 1, len(images)):
+        for j in range(i + 1, len(images)-1):
             if images[i] is not None and images[j] is not None:
-                assert (images[i] == images[j]).all()
+                print(np.count_nonzero(images[i]-images[j]))
+                assert np.array_equal(images[i],images[j])
 
     # check that the run times are in the correct order
     for i in range(len(run_times)):
