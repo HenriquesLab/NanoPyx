@@ -83,7 +83,8 @@ class LiquidEngine:
         Benchmark the different run types
         :param args: args for the run method
         :param kwargs: kwargs for the run method
-        :return: None
+        :return:  a list of tuples containing the run time, run type name and return value
+        :rtype: [[run_time, run_type_name, return_value], ...]
         """
         # Create some lists to store runtimes and return values of run types
         run_times = {}
