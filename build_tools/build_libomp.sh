@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
+
 # based on https://github.com/Czaki/imagecodecs_build/tree/master/build_utils
+# Kudos to Czaki for getting this to work
+
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 build_dir=${DIR}/libs_build
 

@@ -10,17 +10,18 @@ from setuptools import Extension, setup
 
 import versioneer
 
-# EXTRA_C_FILES_PATH = os.path.join(os.path.split(__file__)[0], "src", "include")
-EXTRA_C_FILES_PATH = os.path.join("src", "include")
-INCLUDE_DIRS = [
-    EXTRA_C_FILES_PATH,
-    os.path.join("build_tools", "libs_build", "include"),
+EXTRA_C_FILES_PATH = [
+    os.path.join("src", "nanopyx", "liquid"),
+    os.path.join("src", "include"),
 ]
-LIBRARY_DIRS = [os.path.join("build_tools", "libs_build", "lib")]
+
+INCLUDE_DIRS = EXTRA_C_FILES_PATH
+LIBRARY_DIRS = []
 EXTRA_COMPILE_ARGS = [
     "-g0"  # for info on -g0 see https://github.com/pypa/cibuildwheel/issues/331
 ]
 EXTRA_LING_ARGS = []
+
 BUILD_TOOLS_PATH = os.path.join("build_tools", "libs_build")
 BUILD_TOOLS_PATH_EXISTS = os.path.exists(BUILD_TOOLS_PATH)
 if BUILD_TOOLS_PATH_EXISTS:
@@ -93,20 +94,21 @@ def search_for_c_files_referrenced_in_pyx_text(text: str):
             if c_file not in c_files:
                 c_files.append(c_file)
 
-    # search for the file path under EXTRA_C_FILES_PATH path tree
-    for i, c_file in enumerate(c_files):
-        c_file_path = os.path.join(EXTRA_C_FILES_PATH, c_file)
-        if os.path.exists(c_file_path):
-            c_files[i] = c_file_path
-        else:
-            # try to find the file
-            for root, dirs, files in os.walk(EXTRA_C_FILES_PATH):
-                # Check if the current directory contains the target file
-                if c_file in files:
-                    # If found, print the full path to the file
-                    c_file = os.path.join(root, c_file)
-                    c_files[i] = c_file
-                    break
+    # search for the file path under EXTRA_C_FILES_PATH paths tree
+    for path in EXTRA_C_FILES_PATH:
+        for i, c_file in enumerate(c_files):
+            c_file_path = os.path.join(path, c_file)
+            if os.path.exists(c_file_path):
+                c_files[i] = c_file_path
+            else:
+                # try to find the file
+                for root, dirs, files in os.walk(path):
+                    # Check if the current directory contains the target file
+                    if c_file in files:
+                        # If found, print the full path to the file
+                        c_file = os.path.join(root, c_file)
+                        c_files[i] = c_file
+                        break
 
     return c_files
 

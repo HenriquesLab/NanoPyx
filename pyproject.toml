@@ -53,6 +53,10 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.scripts]
+nanopyx-pyx2pxd = "nanopyx.scripts.pyx2pxd:main"
+nanopyx-c2cl = "nanopyx.scripts.c2cl:main"
+
 [project.optional-dependencies]
 all = ["nanopyx[developer,test,jupyter,doc]"]
 developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
@@ -134,7 +138,7 @@ testpaths = ["tests", "src"]
 # https://flake8.pycqa.org/en/latest/user/configuration.html
 filename = [".py", "*.pyx", "*.px*"]
 exclude = [".eggs", "*.egg,build"]
-ignore = ["E901", "E225", "E226", "E227", "W503"]
+ignore = ["E901", "E225", "E226", "E227", "W503", "F401"]
 max-line-length = 120
 
 
