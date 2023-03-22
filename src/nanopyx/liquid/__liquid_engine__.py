@@ -114,6 +114,11 @@ class LiquidEngine:
             run_types.append(self.RUN_TYPE_PYTHON)
         if self._has_njit:
             run_types.append(self.RUN_TYPE_NJIT)
+            # Trigger compilation
+            try:
+                self._run_njit()
+            except TypeError:
+                print("Consider adding default arguments to njit implementation to trigger early compilation")
 
         for run_type in run_types:
             designation = self.RUN_TYPE_DESIGNATION[run_type]
