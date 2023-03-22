@@ -18,7 +18,7 @@ cdef extern from "_c_interpolation_nearest_neighbor.h":
 
 class ShiftAndMagnify(LiquidEngine):
     """
-    Mandelbrot Benchmark using the NanoPyx Liquid Engine
+    Shift and Magnify Benchmark using the NanoPyx Liquid Engine
     """
 
     _has_opencl = True
@@ -264,6 +264,11 @@ class ShiftAndMagnify(LiquidEngine):
         image_out = _py_nearest_neighbor(image, shift_row, shift_col, magnification_row, magnification_col)
         return image_out
 
-    def _run_njit(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
+    def _run_njit(
+        self, 
+        image=np.zeros((1,10,10),dtype=np.float32), 
+        shift_row=np.zeros((1,),dtype=np.float32), 
+        shift_col=np.zeros((1,),dtype=np.float32), 
+        magnification_row=1, magnification_col=1) -> np.ndarray:
         image_out = _njit_nearest_neighbor(image, shift_row, shift_col, magnification_row, magnification_col)
         return image_out
