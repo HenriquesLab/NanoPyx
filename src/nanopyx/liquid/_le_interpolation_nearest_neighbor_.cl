@@ -28,8 +28,8 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
   int cols = (int)(colsM / magnification_col);
   int nPixels = rowsM * colsM;
 
-  float row = rM / magnification_row + shift_row[f];
-  float col = cM / magnification_col + shift_col[f];
+  float row = rM / magnification_row - shift_row[f];
+  float col = cM / magnification_col - shift_col[f];
 
   image_out[f * nPixels + rM * colsM + cM] =
       _c_interpolate(&image_in[f * nPixels], row, col, rows, cols);
