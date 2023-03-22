@@ -8,6 +8,9 @@ from cython.parallel import parallel, prange
 from . import cl, cl_array, cl_ctx, cl_queue
 from .__liquid_engine__ import LiquidEngine
 
+from ._le_interpolation_nearest_neighbor_ import nearest_neighbor as _py_nearest_neighbor
+from ._le_interpolation_nearest_neighbor_ import njit_nearest_neighbor as _njit_nearest_neighbor
+
 
 cdef extern from "_c_interpolation_nearest_neighbor.h":
     float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
@@ -24,7 +27,9 @@ class ShiftAndMagnify(LiquidEngine):
     _has_threaded_dynamic = True
     _has_threaded_guided = True
     _has_unthreaded = True
-    _has_python = False
+    _has_python = True
+    _has_njit = True
+
 
     def _parse_arguments(self, image, shift_row, shift_col):
         """
@@ -253,4 +258,12 @@ class ShiftAndMagnify(LiquidEngine):
                         row = i / magnification_row - shift_row[f]
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
+        return image_out
+
+    def _run_python(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
+        image_out = _py_nearest_neighbor(image, shift_row, shift_col, magnification_row, magnification_col)
+        return image_out
+
+    def _run_njit(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
+        image_out = _njit_nearest_neighbor(image, shift_row, shift_col, magnification_row, magnification_col)
         return image_out
