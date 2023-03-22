@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from _tools import find_files
+from ._tools import find_files
 
 
 def extract_function_code(file_txt, function_name):
