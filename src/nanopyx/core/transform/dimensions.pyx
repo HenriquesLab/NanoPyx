@@ -21,27 +21,31 @@ cdef np.ndarray _padding(np.ndarray image_arr, int padrow, int padcol):
     cdef int nrow = image_arr.shape[ndim-2]
     
     cdef int nt 
+    cdef float[:,:,:] buffer
+
     if ndim == 2:
         nt = 1
+        buffer = image_arr[np.newaxis,:,:]
     else: 
         nt = image_arr.shape[0]
-
-    cdef float[:,:,:] padded = np.zeros((nt,nrow+padrow,ncol+padcol))
+        buffer = image_arr
+        
+    padded = np.zeros((nt,nrow+padrow,ncol+padcol), dtype=np.float32)
     
     cdef int row_start, row_finish, col_start, col_finish
     row_start = padrow//2
     if padrow % 2 != 0:
-        row_finish = nrow - padrow // 2 - 1
+        row_finish = (nrow+padrow) - padrow // 2 - 1
     else:
-        row_finish = nrow - padrow // 2
+        row_finish = (nrow+padrow) - padrow // 2
 
     col_start = padcol//2
     if padcol % 2 != 0:
-        col_finish = ncol - padcol // 2 - 1
+        col_finish = (ncol+padcol) - padcol // 2 - 1
     else:
-        col_finish = ncol - padcol // 2 
+        col_finish = (ncol+padcol) - padcol // 2 
 
-    padded[:, row_start:row_finish, col_start:col_finish] = image_arr
+    padded[:, row_start:row_finish, col_start:col_finish] = buffer
 
     if ndim == 2:
         return padded[0,:,:]
