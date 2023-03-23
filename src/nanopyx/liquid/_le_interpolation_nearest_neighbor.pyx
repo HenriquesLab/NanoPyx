@@ -18,7 +18,7 @@ cdef extern from "_c_interpolation_nearest_neighbor.h":
 
 class ShiftAndMagnify(LiquidEngine):
     """
-    Shift and Magnify Benchmark using the NanoPyx Liquid Engine
+    Shift and Magnify using the NanoPyx Liquid Engine
     """
 
     _has_opencl = True
@@ -272,3 +272,4 @@ class ShiftAndMagnify(LiquidEngine):
         magnification_row=1, magnification_col=1) -> np.ndarray:
         image_out = _njit_nearest_neighbor(image, shift_row, shift_col, magnification_row, magnification_col)
         return image_out
+
