@@ -38,7 +38,7 @@ def _njit_interpolate(image, row, col, rows, cols):
         return image[r,c]
 
 
-def nearest_neighbor(
+def shift_magnify(
     image: np.ndarray,
     shift_row: np.ndarray,
     shift_col: np.ndarray,
@@ -46,7 +46,7 @@ def nearest_neighbor(
     magnification_col: float,
 ) -> np.ndarray:
     """
-    Nearest Neighbor interpolation.
+    Shift and magnify using nearest neighbor interpolation.
     :param image: 3D numpy array to interpolate with size (nFrames, nRow, nCol)
     :param shift_row: 1D array with size (nFrames) with values to shift the rows 
     :param shift_col: 1D array with size (nFrames) with values to shift the cols
@@ -73,7 +73,7 @@ def nearest_neighbor(
 
 
 @njit(cache=True, parallel=True)
-def njit_nearest_neighbor(    
+def njit_shift_magnify(    
     image: np.ndarray,
     shift_row: np.ndarray,
     shift_col: np.ndarray,
@@ -81,7 +81,7 @@ def njit_nearest_neighbor(
     magnification_col: float,
 ) -> np.ndarray:
     """
-    Nearest Neighbor interpolation.
+    Shift and magnify using nearest neighbor interpolation.
     :param image: 3D numpy array to interpolate with size (nFrames, nRow, nCol)
     :param shift_row: 1D array with size (nFrames) with values to shift the rows 
     :param shift_col: 1D array with size (nFrames) with values to shift the cols
