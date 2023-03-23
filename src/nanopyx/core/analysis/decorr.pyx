@@ -426,14 +426,11 @@ cdef class DecorrAnalysis:
             self.plot_results()
 
     def plot_results(self):
-        x = np.zeros((self.n_r))
-        for k in range(self.d0.shape[0]):
-            x[k] = 0 + (1-0)*k/(self.n_r-1)
-
-        plt.plot(x, np.array(self.d0), c="r")
-        
+        x = np.linspace(0.0, 1.0, self.n_r)
         for k in range(self.d0.shape[0]):
             x[k] = self.rmin + (self.rmax-self.rmin)*k/(self.n_r-1)
+
+        plt.plot(x, np.array(self.d0), c="k")
 
         dg = np.zeros((self.n_r))
         for k in range(self.n_g):
@@ -446,10 +443,13 @@ cdef class DecorrAnalysis:
             for j in range(self.n_r):
                 dg[j] = np.array(self.d[j][k])
             plt.plot(x, dg, c="b")
-        plt.plot(np.array(self.kc), np.array(self.a_g), c="g", marker="*")
-        plt.plot(self.kc0, self.a0, c="r", marker="x")
+        kc = np.array(self.kc)
+        a_g = np.array(self.a_g)
+        # for k in range(kc.shape[0]):
+        #     plt.plot(kc[k], a_g[k], c="g", marker="x")
+        # plt.plot(self.kc0, self.a0, c="r", marker="x")
         plt.axvline(x=self.kc_max, color='b', linestyle='-', label="Cut-off frequency")
-        plt.xlabel(f'Spatial frequency [1/{self.units}]')
+        plt.xlabel(f'Normalized frequency')
         plt.ylabel('Cross-correlation coefficients')
         plt.title(f"Decorrelation analysis resolution: {np.round(self.resolution, 4)} {self.units}")
         plt.show()
