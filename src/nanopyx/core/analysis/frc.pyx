@@ -268,4 +268,5 @@ cdef class FIRECalculator:
         plt.xlabel(f'Spatial frequency [1/{self.units}]')
         plt.ylabel('FRC')
         plt.title(f"FRC resolution: {np.round(self.fire_number, 1)} {self.units}")
+        plt.grid()
         plt.show()

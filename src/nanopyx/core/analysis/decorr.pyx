@@ -452,5 +452,6 @@ cdef class DecorrAnalysis:
         plt.xlabel(f'Normalized frequency')
         plt.ylabel('Cross-correlation coefficients')
         plt.title(f"Decorrelation analysis resolution: {np.round(self.resolution, 4)} {self.units}")
+        plt.grid()
         plt.show()
 
