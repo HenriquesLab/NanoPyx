@@ -34,3 +34,37 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
   image_out[f * nPixels + rM * colsM + cM] =
       _c_interpolate(&image_in[f * nPixels], row, col, rows, cols);
 }
+
+__kernel void
+ShiftScaleRotate(__global float *image_in, __global float *image_out,
+                __global float *shift_row, __global float *shift_col,
+                float scale_row, float scale_col, float angle) {
+  // these are the indexes of the loop                
+  int f = get_global_id(0);
+  int rM = get_global_id(1);
+  int cM = get_global_id(2);
+
+  // these are the sizes of the array
+  // int nFrames = get_global_size(0);
+  int rows = get_global_size(1);
+  int cols = get_global_size(2);
+
+  float center_col = cols/2;
+  float center_row = rows/2;
+
+  float center_rowM = (rows * scale_row) / 2;
+  float center_colM = (cols * scale_col) / 2;
+  
+  float a = cos(angle)/scale_col;
+  float b = -sin(angle);
+  float c = sin(angle);
+  float d = cos(angle)/scale_row;
+  
+  int nPixels = rows * cols;
+
+  float col = (a*(cM-center_colM)+b*(rM-center_rowM)) - shift_col[f] + center_col;
+  float row = (c*(cM-center_colM)+d*(rM-center_rowM)) - shift_row[f] + center_row;
+
+  image_out[f * nPixels + rM * cols + cM] =
+      _c_interpolate(&image_in[f * nPixels], row, col, rows, cols);
+}
