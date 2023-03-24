@@ -196,8 +196,8 @@ def njit_shift_scale_rotate(
     center_colM = (cols * scale_col) / 2
 
     a = np.cos(angle)/scale_col
-    b = -np.sin(angle)
-    c = np.sin(angle)
+    b = -np.sin(angle)/scale_col
+    c = np.sin(angle)/scale_row
     d = np.cos(angle)/scale_row
 
     image_out = np.zeros((nFrames, rows, cols), dtype=np.float32)
