@@ -1,9 +1,7 @@
-float _c_interpolate(__global float *image, float row, float col, int rows,
-                     int cols);
+float _c_interpolate(__global float *image, float row, float col, int rows, int cols);
 
 // c2cl-function: _c_interpolate from _c_interpolation_nearest_neighbor.c
-float _c_interpolate(__global float *image, float row, float col, int rows,
-                     int cols) {
+float _c_interpolate(__global float *image, float row, float col, int rows, int cols) {
   int r = (int)row;
   int c = (int)col;
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
@@ -39,7 +37,7 @@ __kernel void
 ShiftScaleRotate(__global float *image_in, __global float *image_out,
                 __global float *shift_row, __global float *shift_col,
                 float scale_row, float scale_col, float angle) {
-  // these are the indexes of the loop                
+  // these are the indexes of the loop
   int f = get_global_id(0);
   int rM = get_global_id(1);
   int cM = get_global_id(2);
@@ -54,12 +52,12 @@ ShiftScaleRotate(__global float *image_in, __global float *image_out,
 
   float center_rowM = (rows * scale_row) / 2;
   float center_colM = (cols * scale_col) / 2;
-  
+
   float a = cos(angle)/scale_col;
   float b = -sin(angle);
   float c = sin(angle);
   float d = cos(angle)/scale_row;
-  
+
   int nPixels = rows * cols;
 
   float col = (a*(cM-center_colM)+b*(rM-center_rowM)) - shift_col[f] + center_col;

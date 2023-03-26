@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from ._tools import find_files
+from .__tools__ import find_files
 
 
 def autogenerate_pxd_file(pyx_filename: str):

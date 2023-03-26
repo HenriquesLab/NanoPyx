@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 
-from ._tools import find_files
+from .__tools__ import find_files
 
 
 def extract_function_code(file_txt, function_name):
@@ -13,6 +13,7 @@ def extract_function_code(file_txt, function_name):
     """
     # make all "float *" global
     file_txt = file_txt.replace("float *", "__global float *")
+    file_txt = file_txt.replace("float* ", "__global float *")
 
     function_code_lines = []
 
@@ -40,7 +41,7 @@ def extract_function_code(file_txt, function_name):
         return None
 
     function_signature = function_code_lines[0].split("{")[0].strip() + ";"
-
+    # print("\n".join(function_code_lines))
     return function_signature, "\n".join(function_code_lines)
 
 
@@ -67,6 +68,7 @@ def find_function_header(file_txt, function_name):
 
     # add previous word to header
     header = file_txt[:p_function_name].split()[-1] + " " + header
+    print(header)
 
     return header
 
@@ -134,22 +136,31 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
         for i, line in enumerate(cl_lines):
             if line.startswith(tag_copy_functions):
                 # example: // c2cl-function: _c_mandelbrot from _c_mandelbrot_benchmark.c
-                info = line.replace(tag_copy_functions, "").split(" from ")
-                function_name = info[0]
-                function_filename = confirm_c_file_absolute_path(info[1])
+                _line = line.replace(tag_copy_functions, "")
+                function_name, function_filename = _line.split(" from ")
+                function_filename = confirm_c_file_absolute_path(function_filename)
                 function_signature_and_code = extract_function_code(
                     open(function_filename, "r").read(), function_name
                 )
-                functions_to_copy[info[0]] = function_signature_and_code
-                # clear any text after the tag that is not a \n
+                functions_to_copy[function_name] = function_signature_and_code
+
+                # clear any old function code immediately after the tag
+                if i + 1 < len(cl_lines) and function_name in cl_lines[i + 1]:
+                    start = cl_txt.find(line) + len(line) + 1
+                    end = cl_txt.find("\n}\n", start) + 3
+                    cl_txt = cl_txt[:start] + cl_txt[end:]
+                    # print(start, end, cl_txt[start:end])
+
+                # copy function code
                 start = cl_txt.find(line) + len(line)
-                end = cl_txt.find("\n\n", start)
                 cl_txt = (
                     cl_txt[:start]
                     + "\n"
-                    + function_signature_and_code[1]
-                    + cl_txt[end:]
+                    + function_signature_and_code[1].strip()
+                    + "\n"
+                    + cl_txt[start:]
                 )
+
                 # clear function signature from cl file if it exists
                 function_header = find_function_header(cl_txt, function_name)
                 if function_header:
@@ -157,7 +168,7 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
                         function_header, function_signature_and_code[0]
                     )
                 else:
-                    cl_txt = function_signature_and_code[0] + cl_txt
+                    cl_txt = function_signature_and_code[0] + "\n" + cl_txt
 
             if line.startswith(tag_copy_define):
                 # example: // c2cl-define: MAX_ITERATIONS from _c_mandelbrot_benchmark.c
@@ -173,6 +184,8 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
                 end = cl_txt.find("\n\n", start)
                 cl_txt = cl_txt[:start] + "\n" + define_code + cl_txt[end:]
 
+    # clear double newlines
+    cl_txt = cl_txt.replace("\n\n\n", "\n\n")
     with open(cl_filename, "w") as f:
         f.write(cl_txt)
         return "- Generating .cl file: " + cl_filename
