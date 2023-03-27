@@ -65,7 +65,9 @@ class LiquidEngine:
         base_path = os.path.join(__config_folder__, "liquid")
         os.makedirs(base_path, exist_ok=True)
 
-        self._config_file = os.path.join(base_path, self.__class__.__name__ + ".yml")
+        self._config_file = os.path.join(
+            base_path, self.__class__.__name__ + ".yml"
+        )
 
         if not clear_config and os.path.exists(self._config_file):
             with open(self._config_file) as f:
@@ -127,7 +129,9 @@ class LiquidEngine:
             r = self._run(*args, run_type=run_type, **kwargs)
             run_times[run_type] = self._last_run_time
             returns[run_type] = r
-            mean, std, n = self.get_mean_std_run_time(run_type, *args, **kwargs)
+            mean, std, n = self.get_mean_std_run_time(
+                run_type, *args, **kwargs
+            )
             print(
                 f"{designation} run time: {format_time(self._last_run_time)}; "
                 + f"mean: {format_time(mean)}; std: {format_time(std)}; runs: {n}"
@@ -183,7 +187,10 @@ class LiquidEngine:
         sum_sq = c[1]
         n = c[2]
         mean = sum / n
-        std = np.sqrt((sum_sq - n * mean**2) / (n - 1))
+        if (n - 1) > 0:
+            std = np.sqrt((sum_sq - n * mean**2) / (n - 1))
+        else:
+            std = 0
         return mean, std, n
 
     def get_run_times_log(self):
@@ -260,7 +267,9 @@ class LiquidEngine:
         if not os.path.exists(cl_file):
             cl_file = Path(__file__).parent / file_name
 
-        assert os.path.exists(cl_file), "Could not find OpenCL file: " + cl_file
+        assert os.path.exists(cl_file), (
+            "Could not find OpenCL file: " + cl_file
+        )
         return open(cl_file).read()
 
     def _get_args_repr(self, *args, **kwargs):
@@ -306,11 +315,20 @@ class LiquidEngine:
             r = self._run_unthreaded(*args, **kwargs)
         elif run_type == self.RUN_TYPE_THREADED and self._has_threaded:
             r = self._run_threaded(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_STATIC and self._has_threaded_static:
+        elif (
+            run_type == self.RUN_TYPE_THREADED_STATIC
+            and self._has_threaded_static
+        ):
             r = self._run_threaded_static(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_DYNAMIC and self._has_threaded_dynamic:
+        elif (
+            run_type == self.RUN_TYPE_THREADED_DYNAMIC
+            and self._has_threaded_dynamic
+        ):
             r = self._run_threaded_dynamic(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_GUIDED and self._has_threaded_guided:
+        elif (
+            run_type == self.RUN_TYPE_THREADED_GUIDED
+            and self._has_threaded_guided
+        ):
             r = self._run_threaded_guided(*args, **kwargs)
         elif run_type == self.RUN_TYPE_PYTHON and self._has_python:
             r = self._run_python(*args, **kwargs)
