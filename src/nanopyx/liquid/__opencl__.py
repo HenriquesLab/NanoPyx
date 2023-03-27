@@ -40,6 +40,7 @@ try:
 
 except (ImportError, OSError, Exception):
     cl = None
+    cl_array = None
     cl_ctx = None
     cl_queue = None
 
@@ -63,10 +64,14 @@ def print_opencl_info():
             print("\t" + "-" * 56)
             print("\tDevice - Name: " + device.name)
             print("\tDevice - Type: " + cl.device_type.to_string(device.type))
-            print(f"\tDevice - Max Clock Speed:  {device.max_clock_frequency} Mhz")
+            print(
+                f"\tDevice - Max Clock Speed:  {device.max_clock_frequency} Mhz"
+            )
 
             print(f"\tDevice - Compute Units:  {device.max_compute_units}")
-            print(f"\tDevice - Local Memory:  {device.local_mem_size / 1024.0:.0f} KB")
+            print(
+                f"\tDevice - Local Memory:  {device.local_mem_size / 1024.0:.0f} KB"
+            )
             print(
                 f"\tDevice - Constant Memory:  {device.max_constant_buffer_size / 1024.0:.0f} KB"
             )
@@ -76,7 +81,9 @@ def print_opencl_info():
             print(
                 f"\tDevice - Max Buffer/Image Size: {device.max_mem_alloc_size / 1048576.0:.0f} MB"
             )
-            print(f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}")
+            print(
+                f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}"
+            )
     print("\n")
 
 

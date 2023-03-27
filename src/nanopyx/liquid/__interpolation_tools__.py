@@ -15,7 +15,7 @@ def check_image(image: np.ndarray) -> np.ndarray:
     return image
 
 
-def value2array(shift: np.ndarray, n_frames: int) -> np.ndarray:
+def value2array(shift: np.ndarray | int | float, n_frames: int) -> np.ndarray:
     if type(shift) in (int, float):
         shift = np.ones(n_frames, dtype=np.float32) * shift
     return shift
