@@ -153,8 +153,10 @@ class LiquidEngine:
 
         # Compare each run type against each other, sorted by speed
         for i in range(len(speed_sort)):
+            if i not in run_times or run_times[i] is None:
+                continue
             for j in range(i + 1, len(speed_sort)):
-                if run_times[i] is None or run_times[j] is None:
+                if j not in run_times or run_times[j] is None:
                     continue
 
                 print(
