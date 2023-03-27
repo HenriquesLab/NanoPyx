@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 # adaptation of https://github.com/HenriquesLab/NanoJ-eSRRF/blob/master/src/nanoj/liveSRRF/ErrorMapLiveSRRF.java into NanoPyx
 
@@ -16,7 +16,11 @@ from ..analysis.pearson_correlation import pearson_correlation
 
 
 cdef class ErrorMap:
-    
+    cdef float _vRSE
+    cdef float _vRSP
+    cdef public float _alpha, _beta, _sigma
+    cdef float[:, :] img_ref, img_sr, imRSE, im_sr_intensity_scaled_blurred
+
     def __init__(self):
 
         self._vRSE: float = 0
