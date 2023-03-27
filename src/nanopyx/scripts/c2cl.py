@@ -1,7 +1,10 @@
 import os
 from pathlib import Path
 
-from .__tools__ import find_files
+try:
+    from .__tools__ import find_files
+except ImportError:
+    from __tools__ import find_files
 
 
 def extract_function_code(file_txt, function_name):
@@ -126,7 +129,7 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
     tag_copy_functions = "// c2cl-function: "
     tag_copy_define = "// c2cl-define: "
 
-    with open(cl_filename, "r") as f:
+    with open(cl_filename) as f:
         cl_txt = f.read()
         if tag_copy_functions not in cl_txt:
             return f"- Skipping .cl autocopy (no {repr(tag_copy_functions)} tag): {cl_filename}"
@@ -140,7 +143,7 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
                 function_name, function_filename = _line.split(" from ")
                 function_filename = confirm_c_file_absolute_path(function_filename)
                 function_signature_and_code = extract_function_code(
-                    open(function_filename, "r").read(), function_name
+                    open(function_filename).read(), function_name
                 )
                 functions_to_copy[function_name] = function_signature_and_code
 
@@ -176,7 +179,7 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
                 define_name = info[0]
                 define_filename = confirm_c_file_absolute_path(info[1])
                 define_code = extract_define_code(
-                    open(define_filename, "r").read(), define_name
+                    open(define_filename).read(), define_name
                 )
                 defines_to_copy[info[0]] = define_code
                 # clear any text after the tag that is not a \n

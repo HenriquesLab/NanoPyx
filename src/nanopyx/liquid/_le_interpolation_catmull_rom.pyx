@@ -9,22 +9,25 @@ from cython.parallel import parallel, prange
 from libc.math cimport cos, sin
 
 from . import cl, cl_array, cl_ctx, cl_queue
+from .__interpolation_tools__ import check_image, value2array
 from .__liquid_engine__ import LiquidEngine
-from ._le_interpolation_nearest_neighbor import \
-    ShiftAndMagnify as NNShiftAndMagnify
-from ._le_interpolation_nearest_neighbor import \
-    ShiftScaleRotate as NNShiftScaleRotate
 
 
 cdef extern from "_c_interpolation_catmull_rom.h":
     float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
 
 
-class ShiftAndMagnify(NNShiftAndMagnify):
+class ShiftAndMagnify(LiquidEngine):
     """
     Shift and Magnify using the NanoPyx Liquid Engine
     """
 
+    _has_opencl = True
+    _has_threaded = True
+    _has_threaded_static = True
+    _has_threaded_dynamic = True
+    _has_threaded_guided = True
+    _has_unthreaded = True
     _has_python = False
     _has_njit = False
 
@@ -43,20 +46,34 @@ class ShiftAndMagnify(NNShiftAndMagnify):
         :type magnification_col: float
         :return: The shifted and magnified image
         """
-        image, shift_row, shift_col = self._parse_arguments(image, shift_row, shift_col)
+        image = check_image(image)
+        shift_row = value2array(shift_row, image.shape[0])
+        shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, magnification_row, magnification_col)
+
+    def benchmark(self, image: np.ndarray, shift_row: np.ndarray | int | float, shift_col: np.ndarray | int | float, float magnification_row, float magnification_col):
+        """
+        Benchmark the ShiftAndMagnify run function in multiple run types
+        :param image: The image to shift and magnify
+        :type image: np.ndarray
+        :param shift_row: The number of rows to shift the image
+        :type shift_row: int or float or np.ndarray
+        :param shift_col: The number of columns to shift the image
+        :type shift_col: int or float or np.ndarray
+        :param magnification_row: The magnification factor for the rows
+        :type magnification_row: float
+        :param magnification_col: The magnification factor for the columns
+        :type magnification_col: float
+        :return: The benchmark results
+        :rtype: [[run_time, run_type_name, return_value], ...]
+        """
+        image = check_image(image)
+        shift_row = value2array(shift_row, image.shape[0])
+        shift_col = value2array(shift_col, image.shape[0])
+        return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
 
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
-
-        assert image.dtype == np.float32, "Image must be of type np.float32"
-        assert image.ndim == 3, "Image must be 3D (sequence of 2D images)"
-        assert shift_row.dtype == np.float32, "Shift row must be of type np.float32"
-        assert shift_row.ndim == 1, "Shift row must be 1D"
-        assert shift_row.shape[0] == image.shape[0], "Shift row must have the same length as the number of frames"
-        assert shift_col.dtype == np.float32, "Shift col must be of type np.float32"
-        assert shift_col.ndim == 1, "Shift col must be 1D"
-        assert shift_col.shape[0] == image.shape[0], "Shift col must have the same length as the number of frames"
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = <int>(image.shape[1] * magnification_row)
@@ -209,14 +226,19 @@ class ShiftAndMagnify(NNShiftAndMagnify):
         return image_out
 
 
-class ShiftScaleRotate(NNShiftScaleRotate):
+class ShiftScaleRotate(LiquidEngine):
     """
     Shift, Scale and Rotate (affine transform) using the NanoPyx Liquid Engine
     """
 
+    _has_opencl = True
+    _has_threaded = True
+    _has_threaded_static = True
+    _has_threaded_dynamic = True
+    _has_threaded_guided = True
+    _has_unthreaded = True
     _has_python = False
     _has_njit = False
-
 
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         """
@@ -235,20 +257,36 @@ class ShiftScaleRotate(NNShiftScaleRotate):
         :type angle: float
         :return: The shifted, magnified and rotated image
         """
-        image, shift_row, shift_col = self._parse_arguments(image, shift_row, shift_col)
+        image = check_image(image)
+        shift_row = value2array(shift_row, image.shape[0])
+        shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, scale_row, scale_col, angle)
+
+    def benchmark(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle):
+        """
+        Benchmark the ShiftMagnifyScale run function in multiple run types
+        :param image: The image to shift, scale and rotate
+        :type image: np.ndarray
+        :param shift_row: The number of rows to shift the image
+        :type shift_row: int or float or np.ndarray
+        :param shift_col: The number of columns to shift the image
+        :type shift_col: int or float or np.ndarray
+        :param scale_row: The scale factor for the rows
+        :type scale_row: float
+        :param scale_col: The scale factor for the columns
+        :type scale_col: float
+        :param angle: Angle of rotation in radians. Positive is counter clockwise
+        :type angle: float
+        :return: The benchmark results
+        :rtype: [[run_time, run_type_name, return_value], ...]
+        """
+        image = check_image(image)
+        shift_row = value2array(shift_row, image.shape[0])
+        shift_col = value2array(shift_col, image.shape[0])
+        return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
 
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
-
-        assert image.dtype == np.float32, "Image must be of type np.float32"
-        assert image.ndim == 3, "Image must be 3D (sequence of 2D images)"
-        assert shift_row.dtype == np.float32, "Shift row must be of type np.float32"
-        assert shift_row.ndim == 1, "Shift row must be 1D"
-        assert shift_row.shape[0] == image.shape[0], "Shift row must have the same length as the number of frames"
-        assert shift_col.dtype == np.float32, "Shift col must be of type np.float32"
-        assert shift_col.ndim == 1, "Shift col must be 1D"
-        assert shift_col.shape[0] == image.shape[0], "Shift col must have the same length as the number of frames"
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = image.shape[1]
@@ -383,6 +421,7 @@ class ShiftScaleRotate(NNShiftScaleRotate):
 
         return image_out
 
+
     def _run_threaded_dynamic(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -416,6 +455,7 @@ class ShiftScaleRotate(NNShiftScaleRotate):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
+
 
     def _run_threaded_guided(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]

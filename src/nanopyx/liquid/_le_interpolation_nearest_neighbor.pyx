@@ -1,19 +1,24 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
+
 cimport numpy as np
 
 from cython.parallel import parallel, prange
+
 from libc.math cimport cos, sin
 
 from . import cl, cl_array, cl_ctx, cl_queue
+from .__interpolation_tools__ import check_image, value2array
 from .__liquid_engine__ import LiquidEngine
-
-from ._le_interpolation_nearest_neighbor_ import shift_magnify as _py_shift_magnify
-from ._le_interpolation_nearest_neighbor_ import njit_shift_magnify as _njit_shift_magnify
-
-from ._le_interpolation_nearest_neighbor_ import shift_scale_rotate as _py_shift_magnify_rotate
-from ._le_interpolation_nearest_neighbor_ import njit_shift_scale_rotate as _njit_shift_magnify_rotate
+from ._le_interpolation_nearest_neighbor_ import \
+    njit_shift_magnify as _njit_shift_magnify
+from ._le_interpolation_nearest_neighbor_ import \
+    njit_shift_scale_rotate as _njit_shift_magnify_rotate
+from ._le_interpolation_nearest_neighbor_ import \
+    shift_magnify as _py_shift_magnify
+from ._le_interpolation_nearest_neighbor_ import \
+    shift_scale_rotate as _py_shift_magnify_rotate
 
 
 cdef extern from "_c_interpolation_nearest_neighbor.h":
@@ -34,36 +39,7 @@ class ShiftAndMagnify(LiquidEngine):
     _has_python = True
     _has_njit = True
 
-
-    def _parse_arguments(self, image, shift_row, shift_col):
-        """
-        Parse the arguments to the run function
-        :param image: The image to shift and magnify
-        :type image: np.ndarray
-        :param shift_row: The number of rows to shift the image
-        :type shift_row: int or float or np.ndarray
-        :param shift_col: The number of columns to shift the image
-        :type shift_col: int or float or np.ndarray
-        :return: The parsed arguments
-        :rtype: np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray
-        """
-        if type(image) is not np.ndarray:
-            raise TypeError("Image must be of type np.ndarray")
-        if image.ndim != 2 and image.ndim != 3:
-            raise ValueError("Image must be 2D and 3D (sequence of 2D images)")
-        if image.dtype != np.float32:
-            raise TypeError("Image must be of type np.float32")
-        if image.ndim == 2:
-            image = image.reshape((1, image.shape[0], image.shape[1])).astype(np.float32, copy=False)
-
-        if type(shift_row) in (int, float):
-            shift_row = np.ones(image.shape[0], dtype=np.float32) * shift_row
-        if type(shift_col) in (int, float):
-            shift_col = np.ones(image.shape[0], dtype=np.float32) * shift_col
-
-        return image, shift_row, shift_col
-
-    def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def run(self, image: np.ndarray, shift_row: np.ndarray | int | float, shift_col: np.ndarray | int | float, float magnification_row, float magnification_col) -> np.ndarray:
         """
         Shift and magnify an image using nearest neighbor interpolation
         :param image: The image to shift and magnify
@@ -78,10 +54,12 @@ class ShiftAndMagnify(LiquidEngine):
         :type magnification_col: float
         :return: The shifted and magnified image
         """
-        image, shift_row, shift_col = self._parse_arguments(image, shift_row, shift_col)
+        image = check_image(image)
+        shift_row = value2array(shift_row, image.shape[0])
+        shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, magnification_row, magnification_col)
 
-    def benchmark(self, image, shift_row, shift_col, float magnification_row, float magnification_col):
+    def benchmark(self, image: np.ndarray, shift_row: np.ndarray | int | float, shift_col: np.ndarray | int | float, float magnification_row, float magnification_col):
         """
         Benchmark the ShiftAndMagnify run function in multiple run types
         :param image: The image to shift and magnify
@@ -97,20 +75,13 @@ class ShiftAndMagnify(LiquidEngine):
         :return: The benchmark results
         :rtype: [[run_time, run_type_name, return_value], ...]
         """
-        image, shift_row, shift_col = self._parse_arguments(image, shift_row, shift_col)
+        image = check_image(image)
+        shift_row = value2array(shift_row, image.shape[0])
+        shift_col = value2array(shift_col, image.shape[0])
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
 
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
-
-        assert image.dtype == np.float32, "Image must be of type np.float32"
-        assert image.ndim == 3, "Image must be 3D (sequence of 2D images)"
-        assert shift_row.dtype == np.float32, "Shift row must be of type np.float32"
-        assert shift_row.ndim == 1, "Shift row must be 1D"
-        assert shift_row.shape[0] == image.shape[0], "Shift row must have the same length as the number of frames"
-        assert shift_col.dtype == np.float32, "Shift col must be of type np.float32"
-        assert shift_col.ndim == 1, "Shift col must be 1D"
-        assert shift_col.shape[0] == image.shape[0], "Shift col must have the same length as the number of frames"
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = <int>(image.shape[1] * magnification_row)
@@ -269,10 +240,10 @@ class ShiftAndMagnify(LiquidEngine):
         return image_out
 
     def _run_njit(
-        self, 
-        image=np.zeros((1,10,10),dtype=np.float32), 
-        shift_row=np.zeros((1,),dtype=np.float32), 
-        shift_col=np.zeros((1,),dtype=np.float32), 
+        self,
+        image=np.zeros((1,10,10),dtype=np.float32),
+        shift_row=np.zeros((1,),dtype=np.float32),
+        shift_col=np.zeros((1,),dtype=np.float32),
         magnification_row=1, magnification_col=1) -> np.ndarray:
         image_out = _njit_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
         return image_out
@@ -291,35 +262,6 @@ class ShiftScaleRotate(LiquidEngine):
     _has_python = True
     _has_njit = True
 
-
-    def _parse_arguments(self, image, shift_row, shift_col):
-        """
-        Parse the arguments to the run function
-        :param image: The image to shift and magnify
-        :type image: np.ndarray
-        :param shift_row: The number of rows to shift the image
-        :type shift_row: int or float or np.ndarray
-        :param shift_col: The number of columns to shift the image
-        :type shift_col: int or float or np.ndarray
-        :return: The parsed arguments
-        :rtype: np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray
-        """
-        if type(image) is not np.ndarray:
-            raise TypeError("Image must be of type np.ndarray")
-        if image.ndim != 2 and image.ndim != 3:
-            raise ValueError("Image must be 2D and 3D (sequence of 2D images)")
-        if image.dtype != np.float32:
-            raise TypeError("Image must be of type np.float32")
-        if image.ndim == 2:
-            image = image.reshape((1, image.shape[0], image.shape[1])).astype(np.float32, copy=False)
-
-        if type(shift_row) in (int, float):
-            shift_row = np.ones(image.shape[0], dtype=np.float32) * shift_row
-        if type(shift_col) in (int, float):
-            shift_col = np.ones(image.shape[0], dtype=np.float32) * shift_col
-
-        return image, shift_row, shift_col
-
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         """
         Shift and scale an image using nearest neighbor interpolation
@@ -337,7 +279,9 @@ class ShiftScaleRotate(LiquidEngine):
         :type angle: float
         :return: The shifted, magnified and rotated image
         """
-        image, shift_row, shift_col = self._parse_arguments(image, shift_row, shift_col)
+        image = check_image(image)
+        shift_row = value2array(shift_row, image.shape[0])
+        shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, scale_row, scale_col, angle)
 
     def benchmark(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle):
@@ -358,24 +302,17 @@ class ShiftScaleRotate(LiquidEngine):
         :return: The benchmark results
         :rtype: [[run_time, run_type_name, return_value], ...]
         """
-        image, shift_row, shift_col = self._parse_arguments(image, shift_row, shift_col)
+        image = check_image(image)
+        shift_row = value2array(shift_row, image.shape[0])
+        shift_col = value2array(shift_col, image.shape[0])
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
 
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
 
-        assert image.dtype == np.float32, "Image must be of type np.float32"
-        assert image.ndim == 3, "Image must be 3D (sequence of 2D images)"
-        assert shift_row.dtype == np.float32, "Shift row must be of type np.float32"
-        assert shift_row.ndim == 1, "Shift row must be 1D"
-        assert shift_row.shape[0] == image.shape[0], "Shift row must have the same length as the number of frames"
-        assert shift_col.dtype == np.float32, "Shift col must be of type np.float32"
-        assert shift_col.ndim == 1, "Shift col must be 1D"
-        assert shift_col.shape[0] == image.shape[0], "Shift col must have the same length as the number of frames"
-
         cdef int nFrames = image.shape[0]
         cdef int rowsM = image.shape[1]
-        cdef int colsM = image.shape[2] 
+        cdef int colsM = image.shape[2]
 
         image_in = cl_array.to_device(cl_queue, image)
         shift_col_in = cl_array.to_device(cl_queue, shift_col)
@@ -421,7 +358,7 @@ class ShiftScaleRotate(LiquidEngine):
 
         cdef float center_rowM = (rows * scale_row) / 2
         cdef float center_colM = (cols * scale_col) / 2
-        
+
         cdef float a,b,c,d
         a = cos(angle)/scale_col
         b = -sin(angle)
@@ -455,7 +392,7 @@ class ShiftScaleRotate(LiquidEngine):
 
         cdef float center_rowM = (rows * scale_row) / 2
         cdef float center_colM = (cols * scale_col) / 2
-        
+
         cdef float a,b,c,d
         a = cos(angle)/scale_col
         b = -sin(angle)
@@ -486,10 +423,10 @@ class ShiftScaleRotate(LiquidEngine):
 
         cdef float center_col = cols/2
         cdef float center_row = rows/2
-        
+
         cdef float center_rowM = (rows * scale_row) / 2
         cdef float center_colM = (cols * scale_col) / 2
-        
+
         cdef float a,b,c,d
         a = cos(angle)/scale_col
         b = -sin(angle)
@@ -498,7 +435,7 @@ class ShiftScaleRotate(LiquidEngine):
 
         with nogil:
             for f in range(nFrames):
-                for j in prange(cols, schedule='static'):
+                for j in prange(cols, schedule="static"):
                     for i in range(rows):
                         col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
                         row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
@@ -524,7 +461,7 @@ class ShiftScaleRotate(LiquidEngine):
 
         cdef float center_rowM = (rows * scale_row) / 2
         cdef float center_colM = (cols * scale_col) / 2
-        
+
         cdef float a,b,c,d
         a = cos(angle)/scale_col
         b = -sin(angle)
@@ -533,7 +470,7 @@ class ShiftScaleRotate(LiquidEngine):
 
         with nogil:
             for f in range(nFrames):
-                for j in prange(cols, schedule='dynamic'):
+                for j in prange(cols, schedule="dynamic"):
                     for i in range(rows):
                         col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
                         row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
@@ -559,7 +496,7 @@ class ShiftScaleRotate(LiquidEngine):
 
         cdef float center_rowM = (rows * scale_row) / 2
         cdef float center_colM = (cols * scale_col) / 2
-        
+
         cdef float a,b,c,d
         a = cos(angle)/scale_col
         b = -sin(angle)
@@ -568,7 +505,7 @@ class ShiftScaleRotate(LiquidEngine):
 
         with nogil:
             for f in range(nFrames):
-                for j in prange(cols, schedule='guided'):
+                for j in prange(cols, schedule="guided"):
                     for i in range(rows):
                         col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
                         row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
@@ -581,11 +518,10 @@ class ShiftScaleRotate(LiquidEngine):
         return image_out
 
     def _run_njit(
-        self, 
-        image=np.zeros((1,10,10),dtype=np.float32), 
-        shift_row=np.zeros((1,),dtype=np.float32), 
-        shift_col=np.zeros((1,),dtype=np.float32), 
+        self,
+        image=np.zeros((1,10,10),dtype=np.float32),
+        shift_row=np.zeros((1,),dtype=np.float32),
+        shift_col=np.zeros((1,),dtype=np.float32),
         scale_row=1, scale_col=1, angle=0) -> np.ndarray:
         image_out = _njit_shift_magnify_rotate(image, shift_row, shift_col, scale_row, scale_col, angle)
         return image_out
-
