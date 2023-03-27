@@ -133,17 +133,29 @@ def shift_scale_rotate(
 
     center_row = rows / 2
     center_col = cols / 2
-
     center_rowM = (rows * scale_row) / 2
     center_colM = (cols * scale_col) / 2
 
-    a = np.cos(angle)/scale_col
-    b = -np.sin(angle)
-    c = np.sin(angle)
-    d = np.cos(angle)/scale_row
+    # Composing an affine transform 
+    # Its shift => scale => rotate, but we iterate the final image so shift is the last operation on the vector
+    # SHIFT     SCALE        ROTATE
+    # 1 0 tx    sx 0 0     +cos -sin 0   j     col
+    # 0 1 ty  . 0 sy 0  .  +sin +cos 0 . i  =  row
+    # 0 0  1    0  0 1       0   0   1   1      1
+
+    # After calculations we have
+    # SHIFT . SCALE . ROTATE = a  b  shift_col
+    #                          c  d  shift_row
+    #                          0  0  1
+
+    a = np.cos(angle) / scale_col
+    b = -np.sin(angle)/ scale_col
+    c = np.sin(angle) / scale_row
+    d = np.cos(angle) / scale_col
+
+    # In reality we have to translate before and after shift scale rotate to have centered coordinates
 
     image_out = np.zeros((nFrames, rows, cols), dtype=np.float32)
-
     for f in range(nFrames):
         for j in range(cols):
             for i in range(rows):
@@ -184,8 +196,8 @@ def njit_shift_scale_rotate(
     center_colM = (cols * scale_col) / 2
 
     a = np.cos(angle)/scale_col
-    b = -np.sin(angle)
-    c = np.sin(angle)
+    b = -np.sin(angle)/scale_col
+    c = np.sin(angle)/scale_row
     d = np.cos(angle)/scale_row
 
     image_out = np.zeros((nFrames, rows, cols), dtype=np.float32)
