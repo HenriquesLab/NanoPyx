@@ -1,4 +1,5 @@
-float _c_interpolate(__global float *image, float r, float c, int rows, int cols);
+float _c_interpolate(__global float *image, float r, float c, int rows,
+                     int cols);
 float _c_cubic(float v);
 
 // c2cl-function: _c_cubic from _c_interpolation_catmull_rom.c
@@ -17,7 +18,8 @@ float _c_cubic(float v) {
 }
 
 // c2cl-function: _c_interpolate from _c_interpolation_catmull_rom.c
-float _c_interpolate(__global float *image, float r, float c, int rows, int cols) {
+float _c_interpolate(__global float *image, float r, float c, int rows,
+                     int cols) {
   // return 0 if x OR y positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
@@ -63,13 +65,12 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
   int colsM = get_global_size(2);
   int rows = (int)(rowsM / magnification_row);
   int cols = (int)(colsM / magnification_col);
-  int nPixels = rowsM * colsM;
 
-  float row = rM / magnification_row - shift_row[f];
-  float col = cM / magnification_col - shift_col[f];
+  float row = rM / magnification_row + shift_row[f];
+  float col = cM / magnification_col + shift_col[f];
 
-  image_out[f * nPixels + rM * colsM + cM] =
-      _c_interpolate(&image_in[f * nPixels], row, col, rows, cols);
+  image_out[f * rowsM * colsM + rM * colsM + cM] =
+      _c_interpolate(&image_in[f * rows * cols], row, col, rows, cols);
 }
 
 __kernel void ShiftScaleRotate(__global float *image_in,

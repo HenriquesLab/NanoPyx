@@ -1,10 +1,12 @@
 import numpy as np
 
 from nanopyx.core.generate.noise_add_simplex import get_simplex_noise
-from nanopyx.liquid._le_interpolation_catmull_rom import \
-    ShiftAndMagnify as CRShiftAndMagnify
-from nanopyx.liquid._le_interpolation_nearest_neighbor import \
-    ShiftAndMagnify as NNShiftAndMagnify
+from nanopyx.liquid._le_interpolation_catmull_rom import (
+    ShiftAndMagnify as CRShiftAndMagnify,
+)
+from nanopyx.liquid._le_interpolation_nearest_neighbor import (
+    ShiftAndMagnify as NNShiftAndMagnify,
+)
 from nanopyx.liquid._le_mandelbrot_benchmark import MandelbrotBenchmark
 
 
@@ -59,6 +61,11 @@ def test_interpolation_nearest_neighbor_ShiftAndMagnify(plt):
         titles.append(title)
         images.append(image)
 
+    # ensure images are similar
+    for i in range(len(images)):
+        for j in range(i + 1, len(images)):
+            np.testing.assert_almost_equal(images[i], images[j])
+
     # show images
     fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
     for i in range(nFrames):
@@ -87,6 +94,11 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
         run_times.append(run_time)
         titles.append(title)
         images.append(image)
+
+    # ensure images are similar
+    for i in range(len(images)):
+        for j in range(i + 1, len(images)):
+            np.testing.assert_almost_equal(images[i], images[j])
 
     # show images
     fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))

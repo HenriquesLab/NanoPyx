@@ -4,11 +4,10 @@ import numpy as np
 
 cimport numpy as np
 
-
 from cython.parallel import prange
 
-from .__opencl__ import cl, cl_array, cl_ctx, cl_queue
 from .__liquid_engine__ import LiquidEngine
+from .__opencl__ import cl, cl_array, cl_ctx, cl_queue
 from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 from ._le_mandelbrot_benchmark_ import njit_mandelbrot as _njit_mandelbrot
 
