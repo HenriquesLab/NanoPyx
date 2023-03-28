@@ -2,8 +2,9 @@
 
 # Import necessary libraries
 import numpy as np
+
 cimport numpy as np
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport free, malloc
 
 from cython.parallel import prange
 
@@ -20,7 +21,12 @@ def get_simplex_noise(int rows, int columns, *args, **kwargs):
     :return: The simplex noise image
     :rtype: np.ndarray
     """
-    image = np.zeros((rows, columns), dtype=np.float32)
+    if "frames" in kwargs:
+        frames = kwargs["frames"]
+        image = np.zeros((frames, rows, columns), dtype=np.float32)
+        del kwargs["frames"]
+    else:
+        image = np.zeros((rows, columns), dtype=np.float32)
     add_simplex_noise(image, *args, **kwargs)
     return image
 

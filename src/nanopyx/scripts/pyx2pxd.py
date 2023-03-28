@@ -1,7 +1,10 @@
 import os
 from pathlib import Path
 
-from ._tools import find_files
+try:
+    from .__tools__ import find_files
+except ImportError:
+    from __tools__ import find_files
 
 
 def autogenerate_pxd_file(pyx_filename: str):
@@ -24,7 +27,7 @@ def autogenerate_pxd_file(pyx_filename: str):
 
     # extract pre-existing pxd imports
     if os.path.exists(pxd_filename):
-        with open(pxd_filename, "r") as f:
+        with open(pxd_filename) as f:
             pxd_file_txt = f.read()
 
             tag = "# pyx2pxd: starting point"
@@ -39,7 +42,7 @@ def autogenerate_pxd_file(pyx_filename: str):
                     pxd_lines.append(line)
 
     # read the pyx file
-    with open(pyx_filename, "r") as f:
+    with open(pyx_filename) as f:
         pyx_txt = f.read()
         lines = pyx_txt.splitlines()
 

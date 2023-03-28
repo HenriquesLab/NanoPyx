@@ -1,5 +1,4 @@
 import os
-import sys
 
 
 def find_files(root_dir: str, extension: str) -> list:

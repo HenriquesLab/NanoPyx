@@ -1,41 +1,25 @@
-import warnings
 import numpy as np
 
-try:
-    from numba import njit, prange
+from .__njit__ import njit, prange
 
-except ImportError:
-    # raise a warning that numba is not installed
-    # and that the njit functions will not be used
-    # and that the pure python functions will be used instead
-
-    prange = range
-
-    def njit(*args, **kwargs):
-        def wrapper(func):
-            warnings.warn(
-                f"Numba is not installed. Using pure python for {func.__name__}"
-            )
-            return func
-
-        return wrapper
 
 def _interpolate(image, row, col, rows, cols):
     r = int(row)
     c = int(col)
-    if r<0 or r>=rows or c<0 or c>=cols:
+    if r < 0 or r >= rows or c < 0 or c >= cols:
         return 0
     else:
-        return image[r,c]
-    
+        return image[r, c]
+
+
 @njit(cache=True)
 def _njit_interpolate(image, row, col, rows, cols):
     r = int(row)
     c = int(col)
-    if r<0 or r>=rows or c<0 or c>=cols:
+    if r < 0 or r >= rows or c < 0 or c >= cols:
         return 0
     else:
-        return image[r,c]
+        return image[r, c]
 
 
 def shift_magnify(
@@ -48,7 +32,7 @@ def shift_magnify(
     """
     Shift and magnify using nearest neighbor interpolation.
     :param image: 3D numpy array to interpolate with size (nFrames, nRow, nCol)
-    :param shift_row: 1D array with size (nFrames) with values to shift the rows 
+    :param shift_row: 1D array with size (nFrames) with values to shift the rows
     :param shift_col: 1D array with size (nFrames) with values to shift the cols
     :param magnification_row: float magnification factor for the rows
     :param magnification_col: float magnification factor for the cols
@@ -67,13 +51,13 @@ def shift_magnify(
             col = j / magnification_col - shift_col[f]
             for i in range(rowsM):
                 row = i / magnification_row - shift_row[f]
-                image_out[f, i, j] = _interpolate(image[f,:,:],row,col,rows,cols)
+                image_out[f, i, j] = _interpolate(image[f, :, :], row, col, rows, cols)
 
     return image_out
 
 
 @njit(cache=True, parallel=True)
-def njit_shift_magnify(    
+def njit_shift_magnify(
     image: np.ndarray,
     shift_row: np.ndarray,
     shift_col: np.ndarray,
@@ -83,7 +67,7 @@ def njit_shift_magnify(
     """
     Shift and magnify using nearest neighbor interpolation.
     :param image: 3D numpy array to interpolate with size (nFrames, nRow, nCol)
-    :param shift_row: 1D array with size (nFrames) with values to shift the rows 
+    :param shift_row: 1D array with size (nFrames) with values to shift the rows
     :param shift_col: 1D array with size (nFrames) with values to shift the cols
     :param magnification_row: float magnification factor for the rows
     :param magnification_col: float magnification factor for the cols
@@ -102,10 +86,11 @@ def njit_shift_magnify(
             col = j / magnification_col - shift_col[f]
             for i in range(rowsM):
                 row = i / magnification_row - shift_row[f]
-                image_out[f, i, j] = _njit_interpolate(image[f,:,:],row,col,rows,cols)
+                image_out[f, i, j] = _njit_interpolate(
+                    image[f, :, :], row, col, rows, cols
+                )
 
     return image_out
-
 
 
 def shift_scale_rotate(
@@ -119,7 +104,7 @@ def shift_scale_rotate(
     """
     Shift, magnify and rotate using nearest neighbor interpolation.
     :param image: 3D numpy array to interpolate with size (nFrames, nRow, nCol)
-    :param shift_row: 1D array with size (nFrames) with values to shift the rows 
+    :param shift_row: 1D array with size (nFrames) with values to shift the rows
     :param shift_col: 1D array with size (nFrames) with values to shift the cols
     :param scale_row: float scale factor for the rows
     :param scale_col: float scale factor for the cols
@@ -136,7 +121,7 @@ def shift_scale_rotate(
     center_rowM = (rows * scale_row) / 2
     center_colM = (cols * scale_col) / 2
 
-    # Composing an affine transform 
+    # Composing an affine transform
     # Its shift => scale => rotate, but we iterate the final image so shift is the last operation on the vector
     # SHIFT     SCALE        ROTATE
     # 1 0 tx    sx 0 0     +cos -sin 0   j     col
@@ -159,11 +144,20 @@ def shift_scale_rotate(
     for f in range(nFrames):
         for j in range(cols):
             for i in range(rows):
-                col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
-                row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
-                image_out[f, i, j] = _interpolate(image[f,:,:],row,col,rows,cols)
+                col = (
+                    (a * (j - center_colM) + b * (i - center_rowM))
+                    - shift_col[f]
+                    + center_col
+                )
+                row = (
+                    (c * (j - center_colM) + d * (i - center_rowM))
+                    - shift_row[f]
+                    + center_row
+                )
+                image_out[f, i, j] = _interpolate(image[f, :, :], row, col, rows, cols)
 
     return image_out
+
 
 @njit(cache=True, parallel=True)
 def njit_shift_scale_rotate(
@@ -177,7 +171,7 @@ def njit_shift_scale_rotate(
     """
     Shift, magnify and rotate using nearest neighbor interpolation.
     :param image: 3D numpy array to interpolate with size (nFrames, nRow, nCol)
-    :param shift_row: 1D array with size (nFrames) with values to shift the rows 
+    :param shift_row: 1D array with size (nFrames) with values to shift the rows
     :param shift_col: 1D array with size (nFrames) with values to shift the cols
     :param scale_row: float scale factor for the rows
     :param scale_col: float scale factor for the cols
@@ -195,18 +189,28 @@ def njit_shift_scale_rotate(
     center_rowM = (rows * scale_row) / 2
     center_colM = (cols * scale_col) / 2
 
-    a = np.cos(angle)/scale_col
-    b = -np.sin(angle)/scale_col
-    c = np.sin(angle)/scale_row
-    d = np.cos(angle)/scale_row
+    a = np.cos(angle) / scale_col
+    b = -np.sin(angle)
+    c = np.sin(angle)
+    d = np.cos(angle) / scale_row
 
     image_out = np.zeros((nFrames, rows, cols), dtype=np.float32)
 
     for f in range(nFrames):
         for j in prange(cols):
             for i in range(rows):
-                col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
-                row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
-                image_out[f, i, j] = _njit_interpolate(image[f,:,:],row,col,rows,cols)
+                col = (
+                    (a * (j - center_colM) + b * (i - center_rowM))
+                    - shift_col[f]
+                    + center_col
+                )
+                row = (
+                    (c * (j - center_colM) + d * (i - center_rowM))
+                    - shift_row[f]
+                    + center_row
+                )
+                image_out[f, i, j] = _njit_interpolate(
+                    image[f, :, :], row, col, rows, cols
+                )
 
     return image_out
