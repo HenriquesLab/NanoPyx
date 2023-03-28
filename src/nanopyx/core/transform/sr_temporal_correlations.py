@@ -15,7 +15,7 @@ def calculate_SRRF_temporal_correlations(im: np.array, order: int = 1, do_integr
     elif order == -1:
         out_array = calculate_pairwise_product_sum(im)
 
-    else: #order = 3 or order = 4
+    else: # order = 2 or order = 3 or order = 4
         out_array = calculate_acrf_(im, order, do_integrate_lag_times)
     
     return out_array
