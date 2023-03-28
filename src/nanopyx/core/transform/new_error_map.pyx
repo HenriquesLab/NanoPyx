@@ -16,10 +16,9 @@ from ..analysis.pearson_correlation import pearson_correlation
 
 
 cdef class ErrorMap:
-    cdef float _vRSE
-    cdef float _vRSP
-    cdef public float _alpha, _beta, _sigma
-    cdef float[:, :] img_ref, img_sr, imRSE, im_sr_intensity_scaled_blurred
+    cdef public float _vRSE, _vRSP, _alpha, _beta, _sigma
+    cdef float[:, :] img_ref, img_sr, im_sr_intensity_scaled_blurred
+    cdef public float[:, :] imRSE
 
     def __init__(self):
 
