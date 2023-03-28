@@ -1,6 +1,7 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 from ...core.transform.sr_radiality cimport Radiality
+from ...core.transform.sr_temporal_correlations import *
 
 import numpy as np
 cimport numpy as np
@@ -28,7 +29,7 @@ cdef class SRRF:
 
         self.radiality = Radiality(magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting)
 
-    def calculate(self, dataset: np.ndarray, int frames_per_timepoint):
+    def calculate(self, dataset: np.ndarray, int frames_per_timepoint, int SRRForder = 1):
 
         if frames_per_timepoint == 0:
             frames_per_timepoint = dataset.shape[0]
@@ -44,8 +45,11 @@ cdef class SRRF:
 
                 data_block_radiality, data_block_intensity = self.radiality.calculate(data_block)[:2]
 
-                data_block_srrf = np.asarray(data_block_radiality).mean(axis=0)
-                data_block_intensity = np.asarray(data_block_intensity).mean(axis=0)
+                data_block_srrf = calculate_SRRF_temporal_correlations(data_block_radiality, SRRForder)
+                data_block_intensity = calculate_SRRF_temporal_correlations(data_block_intensity, SRRForder)
+
+                #data_block_srrf = np.asarray(data_block_radiality).mean(axis=0) 
+                #data_block_intensity = np.asarray(data_block_intensity).mean(axis=0)
 
                 data_srrf.append(data_block_srrf)
                 data_intensity.append(data_block_intensity)
