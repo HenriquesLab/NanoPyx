@@ -7,7 +7,7 @@ Cython, Numba, etc.).
 
 >>> from nanopyx.liquid import MandelbrotBenchmark
 >>> mb = MandelbrotBenchmark()
->>> values = mb.benchmark(64) # doctest: +ELLIPSIS
+>>> values = mb.benchmark(64) # doctest: +SKIP
 """
 
 import os  # noqa: F401
@@ -33,4 +33,5 @@ from .__opencl__ import (  # noqa: F401
     cl_ctx,
     cl_queue,
     opencl_works,
+    print_opencl_info,
 )

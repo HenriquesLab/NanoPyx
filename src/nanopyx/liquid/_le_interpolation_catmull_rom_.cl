@@ -1,5 +1,4 @@
-float _c_interpolate(__global float *image, float r, float c, int rows,
-                     int cols);
+float _c_interpolate(__global float *image, float r, float c, int rows, int cols);
 float _c_cubic(float v);
 
 // c2cl-function: _c_cubic from _c_interpolation_catmull_rom.c
@@ -18,35 +17,34 @@ float _c_cubic(float v) {
 }
 
 // c2cl-function: _c_interpolate from _c_interpolation_catmull_rom.c
-float _c_interpolate(__global float *image, float r, float c, int rows,
-                     int cols) {
+float _c_interpolate(__global float *image, float r, float c, int rows, int cols) {
   // return 0 if x OR y positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
   }
 
-  const int u0 = (int)floor(r - 0.5);
-  const int v0 = (int)floor(c - 0.5);
+  const int r_int = (int)floor(r - 0.5);
+  const int c_int = (int)floor(c - 0.5);
   float q = 0;
   float p = 0;
 
-  int u, v;
+  int r_neighbor, c_neighbor;
 
   for (int j = 0; j < 4; j++) {
-    v = v0 - 1 + j;
+    c_neighbor = c_int - 1 + j;
     p = 0;
-    if (v < 0 || v >= cols) {
+    if (c_neighbor < 0 || c_neighbor >= cols) {
       continue;
     }
 
     for (int i = 0; i < 4; i++) {
-      u = u0 - 1 + i;
-      if (u < 0 || u >= rows) {
+      r_neighbor = r_int - 1 + i;
+      if (r_neighbor < 0 || r_neighbor >= rows) {
         continue;
       }
-      p = p + image[u * cols + v] * _c_cubic(r - (u + 0.5));
+      p = p + image[r_neighbor * cols + c_neighbor] * _c_cubic(r - (r_neighbor + 0.5));
     }
-    q = q + p * _c_cubic(c - (v + 0.5));
+    q = q + p * _c_cubic(c - (c_neighbor + 0.5));
   }
   return q;
 }
