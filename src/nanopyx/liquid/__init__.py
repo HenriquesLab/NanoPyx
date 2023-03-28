@@ -33,4 +33,5 @@ from .__opencl__ import (  # noqa: F401
     cl_ctx,
     cl_queue,
     opencl_works,
+    print_opencl_info,
 )
