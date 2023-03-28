@@ -46,8 +46,8 @@ class LiquidEngine:
     _has_njit: bool = False
 
     _default_fastest: int = RUN_TYPE_OPENCL
-    _last_run_type: int | None = None
-    _last_run_time: float | None = None
+    _last_run_type: int = None
+    _last_run_time: float = None
 
     def __init__(self, clear_config=False):
         """
