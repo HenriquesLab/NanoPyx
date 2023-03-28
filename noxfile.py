@@ -37,7 +37,9 @@ def build_wheel(session: nox.Session) -> None:
     # session.run("python", "-m", "build", "--wheel", "-o", temp_path)
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
     # get the produced wheel name
-    wheel_name = [name for name in os.listdir(temp_path) if name.endswith(".whl")][0]
+    wheel_name = [
+        name for name in os.listdir(temp_path) if name.endswith(".whl")
+    ][0]
 
     if PLATFORM == "unix" and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
         session.install("auditwheel")
@@ -82,7 +84,11 @@ def tests_on_source(session):
     """
     extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
     session.run("pip", "install", "-e", ".[test]")
-    session.run("pytest", DIR.joinpath("tests"), extra_args)
+    if extra_args != "":
+        extra_args = extra_args.split(" ")
+        session.run("pytest", DIR.joinpath("tests"), *extra_args)
+    else:
+        session.run("pytest", DIR.joinpath("tests"))
     session.run("coverage", "xml")
 
 
@@ -101,10 +107,16 @@ def tests_on_wheels(session):
     wheel_names.sort()
     wheel_name = wheel_names[-1]
 
-    session.run("pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]")
+    session.run(
+        "pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]"
+    )
     with session.chdir(".nox"):
         extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
-        session.run("pytest", DIR.joinpath("tests"), extra_args)
+        if extra_args != "":
+            extra_args = extra_args.split(" ")
+            session.run("pytest", DIR.joinpath("tests"), *extra_args)
+        else:
+            session.run("pytest", DIR.joinpath("tests"))
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)

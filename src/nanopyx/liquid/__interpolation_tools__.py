@@ -15,7 +15,14 @@ def check_image(image: np.ndarray) -> np.ndarray:
     return image
 
 
-def value2array(shift: np.ndarray | int | float, n_frames: int) -> np.ndarray:
-    if type(shift) in (int, float):
-        shift = np.ones(n_frames, dtype=np.float32) * shift
-    return shift
+def value2array(v, n_frames: int) -> np.ndarray:
+    """
+    Convert a value to an array of the same length as the number of frames
+    :param v: value to convert
+    :type v: int, float, np.ndarray
+    :param n_frames: number of frames
+    :return: array of the same length as the number of frames
+    """
+    if type(v) in (int, float):
+        v = np.ones(n_frames, dtype=np.float32) * v
+    return v
