@@ -3,9 +3,9 @@
 
 // Cubic function used in Catmull-Rom interpolation
 // https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull.E2.80.93Rom_spline
-double _c_cubic(double v);
+float _c_cubic(float v);
 
 // Catmull-Rom interpolation
-double _c_interpolate(float* image, double r, double c, int rows, int cols);
+float _c_interpolate(float* image, float r, float c, int rows, int cols);
 
 #endif  // _C_INTERPOLATION_CATMULL_ROM_H

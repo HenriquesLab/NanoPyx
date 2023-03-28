@@ -5,6 +5,11 @@
   "python.linting.enabled": true,
   "python.linting.pycodestyleEnabled": false,
   "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": [
+    "--max-line-length=120",
+    "--ignore=W503,E203,F401",
+    "--max-complexity=18"
+  ],
   "flake8.args": [
     "--max-line-length=120",
     "--ignore=W503,E203,F401",

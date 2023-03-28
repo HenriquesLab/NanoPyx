@@ -1,15 +1,54 @@
-float _c_interpolate(__global float *image, float row, float col, int rows,
+float _c_interpolate(__global float *image, float r, float c, int rows,
                      int cols);
+float _c_cubic(float v);
 
-// c2cl-function: _c_interpolate from _c_interpolation_nearest_neighbor.c
-float _c_interpolate(__global float *image, float row, float col, int rows,
+// c2cl-function: _c_cubic from _c_interpolation_catmull_rom.c
+float _c_cubic(float v) {
+  float a = 0.5;
+  float z = 0;
+  if (v < 0) {
+    v = -v;
+  }
+  if (v < 1) {
+    z = v * v * (v * (-a + 2) + (a - 3)) + 1;
+  } else if (v < 2) {
+    z = -a * v * v * v + 5 * a * v * v - 8 * a * v + 4 * a;
+  }
+  return z;
+}
+
+// c2cl-function: _c_interpolate from _c_interpolation_catmull_rom.c
+float _c_interpolate(__global float *image, float r, float c, int rows,
                      int cols) {
-  int r = (int)row;
-  int c = (int)col;
+  // return 0 if x OR y positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
   }
-  return image[r * cols + c];
+
+  const int u0 = (int)floor(r - 0.5);
+  const int v0 = (int)floor(c - 0.5);
+  float q = 0;
+  float p = 0;
+
+  int u, v;
+
+  for (int j = 0; j < 4; j++) {
+    v = v0 - 1 + j;
+    p = 0;
+    if (v < 0 || v >= cols) {
+      continue;
+    }
+
+    for (int i = 0; i < 4; i++) {
+      u = u0 - 1 + i;
+      if (u < 0 || u >= rows) {
+        continue;
+      }
+      p = p + image[u * cols + v] * _c_cubic(r - (u + 0.5));
+    }
+    q = q + p * _c_cubic(c - (v + 0.5));
+  }
+  return q;
 }
 
 __kernel void
@@ -21,16 +60,16 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
   int rM = get_global_id(1);
   int cM = get_global_id(2);
 
+  // int nFrames = get_global_size(0);
   int rowsM = get_global_size(1);
   int colsM = get_global_size(2);
   int rows = (int)(rowsM / magnification_row);
   int cols = (int)(colsM / magnification_col);
-  int nPixels = rowsM * colsM;
 
   float row = rM / magnification_row + shift_row[f];
   float col = cM / magnification_col + shift_col[f];
 
-  image_out[f * nPixels + rM * colsM + cM] =
+  image_out[f * rowsM * colsM + rM * colsM + cM] =
       _c_interpolate(&image_in[f * rows * cols], row, col, rows, cols);
 }
 

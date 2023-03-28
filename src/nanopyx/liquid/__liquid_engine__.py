@@ -6,7 +6,8 @@ import numpy as np
 import yaml
 
 from .. import __config_folder__
-from . import njit_works, opencl_works
+from .__njit__ import njit_works
+from .__opencl__ import opencl_works
 
 
 class LiquidEngine:
@@ -65,10 +66,12 @@ class LiquidEngine:
         base_path = os.path.join(__config_folder__, "liquid")
         os.makedirs(base_path, exist_ok=True)
 
-        self._config_file = os.path.join(base_path, self.__class__.__name__ + ".yml")
+        self._config_file = os.path.join(
+            base_path, self.__class__.__name__ + ".yml"
+        )
 
         if not clear_config and os.path.exists(self._config_file):
-            with open(self._config_file, "r") as f:
+            with open(self._config_file) as f:
                 self._cfg = yaml.load(f, Loader=yaml.FullLoader)
         else:
             self._cfg = {}
@@ -118,14 +121,22 @@ class LiquidEngine:
             try:
                 self._run_njit()
             except TypeError:
-                print("Consider adding default arguments to njit implementation to trigger early compilation")
+                print(
+                    "Consider adding default arguments to njit implementation to trigger early compilation"
+                )
 
         for run_type in run_types:
             designation = self.RUN_TYPE_DESIGNATION[run_type]
             r = self._run(*args, run_type=run_type, **kwargs)
-            print(f"{designation} run time: {format_time(self._last_run_time)}")
             run_times[run_type] = self._last_run_time
             returns[run_type] = r
+            mean, std, n = self.get_mean_std_run_time(
+                run_type, *args, **kwargs
+            )
+            print(
+                f"{designation} run time: {format_time(self._last_run_time)}; "
+                + f"mean: {format_time(mean)}; std: {format_time(std)}; runs: {n}"
+            )
 
         # Sort run_times by value
         speed_sort = []
@@ -143,8 +154,10 @@ class LiquidEngine:
 
         # Compare each run type against each other, sorted by speed
         for i in range(len(speed_sort)):
+            if i not in run_times or run_times[i] is None:
+                continue
             for j in range(i + 1, len(speed_sort)):
-                if run_times[i] is None or run_times[j] is None:
+                if j not in run_times or run_times[j] is None:
                     continue
 
                 print(
@@ -157,6 +170,31 @@ class LiquidEngine:
         )
 
         return speed_sort
+
+    def get_mean_std_run_time(self, run_type: int, *args, **kwargs):
+        """
+        Get the mean and standard deviation of the run time for the given run type
+        :param run_type: the run type
+        :param args: args for the run method
+        :param kwargs: kwargs for the run method
+        :return: the mean, standard deviation of the run time and the number of runs
+        """
+        call_args = self._get_args_repr(*args, **kwargs)
+        run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
+        r = self._cfg[run_type_designation]
+        if call_args not in r:
+            return None, None, None
+
+        c = r[call_args]
+        sum = c[0]
+        sum_sq = c[1]
+        n = c[2]
+        mean = sum / n
+        if (n - 1) > 0:
+            std = np.sqrt((sum_sq - n * mean**2) / (n - 1))
+        else:
+            std = 0
+        return mean, std, n
 
     def get_run_times_log(self):
         """
@@ -232,8 +270,10 @@ class LiquidEngine:
         if not os.path.exists(cl_file):
             cl_file = Path(__file__).parent / file_name
 
-        assert os.path.exists(cl_file), "Could not find OpenCL file: " + cl_file
-        return open(cl_file, "r").read()
+        assert os.path.exists(cl_file), (
+            "Could not find OpenCL file: " + cl_file
+        )
+        return open(cl_file).read()
 
     def _get_args_repr(self, *args, **kwargs):
         # print("Args: ", args)
@@ -278,11 +318,20 @@ class LiquidEngine:
             r = self._run_unthreaded(*args, **kwargs)
         elif run_type == self.RUN_TYPE_THREADED and self._has_threaded:
             r = self._run_threaded(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_STATIC and self._has_threaded_static:
+        elif (
+            run_type == self.RUN_TYPE_THREADED_STATIC
+            and self._has_threaded_static
+        ):
             r = self._run_threaded_static(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_DYNAMIC and self._has_threaded_dynamic:
+        elif (
+            run_type == self.RUN_TYPE_THREADED_DYNAMIC
+            and self._has_threaded_dynamic
+        ):
             r = self._run_threaded_dynamic(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_GUIDED and self._has_threaded_guided:
+        elif (
+            run_type == self.RUN_TYPE_THREADED_GUIDED
+            and self._has_threaded_guided
+        ):
             r = self._run_threaded_guided(*args, **kwargs)
         elif run_type == self.RUN_TYPE_PYTHON and self._has_python:
             r = self._run_python(*args, **kwargs)

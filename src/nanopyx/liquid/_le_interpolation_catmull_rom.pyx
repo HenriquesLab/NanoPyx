@@ -11,17 +11,9 @@ from libc.math cimport cos, sin
 from .__interpolation_tools__ import check_image, value2array
 from .__liquid_engine__ import LiquidEngine
 from .__opencl__ import cl, cl_array, cl_ctx, cl_queue
-from ._le_interpolation_nearest_neighbor_ import \
-    njit_shift_magnify as _njit_shift_magnify
-from ._le_interpolation_nearest_neighbor_ import \
-    njit_shift_scale_rotate as _njit_shift_magnify_rotate
-from ._le_interpolation_nearest_neighbor_ import \
-    shift_magnify as _py_shift_magnify
-from ._le_interpolation_nearest_neighbor_ import \
-    shift_scale_rotate as _py_shift_magnify_rotate
 
 
-cdef extern from "_c_interpolation_nearest_neighbor.h":
+cdef extern from "_c_interpolation_catmull_rom.h":
     float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
 
 
@@ -36,12 +28,12 @@ class ShiftAndMagnify(LiquidEngine):
     _has_threaded_dynamic = True
     _has_threaded_guided = True
     _has_unthreaded = True
-    _has_python = True
-    _has_njit = True
+    _has_python = False
+    _has_njit = False
 
-    def run(self, image: np.ndarray, shift_row: np.ndarray | int | float, shift_col: np.ndarray | int | float, float magnification_row, float magnification_col) -> np.ndarray:
+    def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         """
-        Shift and magnify an image using nearest neighbor interpolation
+        Shift and magnify an image using Catmull-Rom interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray
         :param shift_row: The number of rows to shift the image
@@ -81,7 +73,7 @@ class ShiftAndMagnify(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
 
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
-        code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
+        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = <int>(image.shape[1] * magnification_row)
@@ -185,7 +177,6 @@ class ShiftAndMagnify(LiquidEngine):
 
         return image_out
 
-
     def _run_threaded_dynamic(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -209,7 +200,6 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
-
 
     def _run_threaded_guided(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
@@ -235,18 +225,6 @@ class ShiftAndMagnify(LiquidEngine):
 
         return image_out
 
-    def _run_python(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
-        image_out = _py_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
-        return image_out
-
-    def _run_njit(
-        self,
-        image=np.zeros((1,10,10),dtype=np.float32),
-        shift_row=np.zeros((1,),dtype=np.float32),
-        shift_col=np.zeros((1,),dtype=np.float32),
-        magnification_row=1, magnification_col=1) -> np.ndarray:
-        image_out = _njit_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
-        return image_out
 
 class ShiftScaleRotate(LiquidEngine):
     """
@@ -259,12 +237,12 @@ class ShiftScaleRotate(LiquidEngine):
     _has_threaded_dynamic = True
     _has_threaded_guided = True
     _has_unthreaded = True
-    _has_python = True
-    _has_njit = True
+    _has_python = False
+    _has_njit = False
 
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         """
-        Shift and scale an image using nearest neighbor interpolation
+        Shift and scale an image using Catmull-Rom interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray
         :param shift_row: The number of rows to shift the image
@@ -308,7 +286,7 @@ class ShiftScaleRotate(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
 
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
-        code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
+        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = image.shape[1]
@@ -511,17 +489,4 @@ class ShiftScaleRotate(LiquidEngine):
                         row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
-        return image_out
-
-    def _run_python(self, image, shift_row, shift_col, scale_row, scale_col, angle) -> np.ndarray:
-        image_out = _py_shift_magnify_rotate(image, shift_row, shift_col, scale_row, scale_col, angle)
-        return image_out
-
-    def _run_njit(
-        self,
-        image=np.zeros((1,10,10),dtype=np.float32),
-        shift_row=np.zeros((1,),dtype=np.float32),
-        shift_col=np.zeros((1,),dtype=np.float32),
-        scale_row=1, scale_col=1, angle=0) -> np.ndarray:
-        image_out = _njit_shift_magnify_rotate(image, shift_row, shift_col, scale_row, scale_col, angle)
         return image_out

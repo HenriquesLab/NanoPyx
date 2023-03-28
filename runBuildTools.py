@@ -162,6 +162,7 @@ def main(mode=None):
         find_files(base_path, ".so")
         + find_files(base_path, ".pyc")
         + find_files(base_path, ".pyd")
+        # + find_files(base_path, ".pyi")
         + find_files(base_path, ".c", partner_extension=".pyx")
         + find_files(base_path, ".html", partner_extension=".pyx")
         + find_files(base_path, ".profile")
