@@ -48,8 +48,8 @@ cdef class SRRF:
                 data_block_srrf = calculate_SRRF_temporal_correlations(data_block_radiality, SRRForder)
                 data_block_intensity = calculate_SRRF_temporal_correlations(data_block_intensity, SRRForder)
 
-                #data_block_srrf = np.asarray(data_block_radiality).mean(axis=0) 
-                #data_block_intensity = np.asarray(data_block_intensity).mean(axis=0)
+                # data_block_srrf = np.asarray(data_block_radiality).mean(axis=0) 
+                # data_block_intensity = np.asarray(data_block_intensity).mean(axis=0)
 
                 data_srrf.append(data_block_srrf)
                 data_intensity.append(data_block_intensity)
