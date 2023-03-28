@@ -8,7 +8,7 @@ from cython.parallel import parallel, prange
 
 from libc.math cimport cos, sin
 
-from . import cl, cl_array, cl_ctx, cl_queue
+from .__opencl__ import cl, cl_array, cl_ctx, cl_queue
 from .__interpolation_tools__ import check_image, value2array
 from .__liquid_engine__ import LiquidEngine
 

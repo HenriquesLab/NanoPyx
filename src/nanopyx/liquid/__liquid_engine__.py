@@ -6,7 +6,8 @@ import numpy as np
 import yaml
 
 from .. import __config_folder__
-from . import njit_works, opencl_works
+from .__njit__ import njit_works
+from .__opencl__ import opencl_works
 
 
 class LiquidEngine:

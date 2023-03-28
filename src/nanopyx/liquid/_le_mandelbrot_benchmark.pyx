@@ -7,7 +7,7 @@ cimport numpy as np
 
 from cython.parallel import prange
 
-from . import cl, cl_array, cl_ctx, cl_queue
+from .__opencl__ import cl, cl_array, cl_ctx, cl_queue
 from .__liquid_engine__ import LiquidEngine
 from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 from ._le_mandelbrot_benchmark_ import njit_mandelbrot as _njit_mandelbrot
@@ -102,6 +102,7 @@ class MandelbrotBenchmark(LiquidEngine):
                     _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
 
         return im_mandelbrot
+
 
     def _run_threaded_static(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
