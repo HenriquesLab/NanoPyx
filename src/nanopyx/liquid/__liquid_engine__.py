@@ -45,7 +45,7 @@ class LiquidEngine:
     _has_python: bool = False
     _has_njit: bool = False
 
-    _default_fastest: int = RUN_TYPE_THREADED
+    _default_fastest: int = RUN_TYPE_OPENCL
     _last_run_type: int | None = None
     _last_run_time: float | None = None
 
@@ -57,6 +57,8 @@ class LiquidEngine:
         # Check if OpenCL is available
         if not opencl_works():
             self._has_opencl = False
+            if self._default_fastest == self.RUN_TYPE_OPENCL:
+                self._default_fastest = self.RUN_TYPE_THREADED
 
         # Check if Numba is available
         if not njit_works():
@@ -245,7 +247,7 @@ class LiquidEngine:
         for run_type in self.RUN_TYPE_DESIGNATION.keys():
             run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
             if run_type_designation not in self._cfg:
-                continue
+                self._cfg[run_type_designation] = {}
 
             if call_args not in self._cfg[run_type_designation]:
                 continue

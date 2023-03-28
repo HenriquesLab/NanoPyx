@@ -23,12 +23,6 @@ def test_mandelbrot_benchmark(plt):
         titles.append(title)
         run_times.append(run_time)
 
-    # # check that all the images have the same value
-    # for i in range(len(images)):
-    #     for j in range(i + 1, len(images) - 1):
-    #         if images[i] is not None and images[j] is not None:
-    #             np.testing.assert_almost_equal(images[i], images[j], decimal=0)
-
     # check that the run times are in the correct order
     for i in range(len(run_times)):
         for j in range(i + 1, len(run_times)):
