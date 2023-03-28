@@ -1,0 +1,13 @@
+label: MFM_mitochondria
+nickname: mitmfm
+description: |
+  Live-cell MFM of HeLa cells expressing TOM20-HaloTag labeled with JF549.
+data_dims: "time, height, width"
+data_shape: 1000, 163, 163
+data_dtype: uint16
+reference: ""
+reference_doi: ""
+tiff_sequence_url: https://drive.google.com/file/d/1sqSp-llo_QV98gVUmyByo8g5iFKgCDXt/view?usp=share_link
+tiff_sequence_url_type: "gdrive"
+tiff_sequence_size: "51.1MB"
+tiff_sequence_checksum:

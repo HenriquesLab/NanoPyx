@@ -10,6 +10,7 @@ Contains helper methods for downloading and loading example test data
  - Cell2_TIRF_COS7_IC
  - ImmunoSynapseFormation_LifeActGFP
  - LongContinuous_UtrGFP
+ - MFM_mitochondria
  - MTsGFP_EMBO_AdvMicroscopy_2018
  - PumpyCos7_UtrGFP
  - SMLMS2013_HDTubulinAlexa647
