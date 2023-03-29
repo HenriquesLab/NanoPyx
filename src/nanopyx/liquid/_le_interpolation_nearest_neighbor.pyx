@@ -81,6 +81,11 @@ class ShiftAndMagnify(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
 
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        # Swap row and columns because opencl is strange and stores the 
+        # array in a buffer in fortran ordering despite the original
+        # numpy array being in C order.
+        image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
+
         code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
 
         cdef int nFrames = image.shape[0]
@@ -111,8 +116,9 @@ class ShiftAndMagnify(LiquidEngine):
         # Wait for queue to finish
         cl_queue.finish()
 
-        return image_out.get()
-
+        # Swap rows and columns back
+        return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
+        
     def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -308,6 +314,12 @@ class ShiftScaleRotate(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
 
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        
+        # Swap row and columns because opencl is strange and stores the 
+        # array in a buffer in fortran ordering despite the original
+        # numpy array being in C order.
+        image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
+        
         code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
 
         cdef int nFrames = image.shape[0]
@@ -339,7 +351,8 @@ class ShiftScaleRotate(LiquidEngine):
         # Wait for queue to finish
         cl_queue.finish()
 
-        return image_out.get()
+        # Swap rows and columns back
+        return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
 
     def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
