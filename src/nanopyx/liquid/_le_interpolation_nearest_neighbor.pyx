@@ -356,21 +356,21 @@ class ShiftScaleRotate(LiquidEngine):
         cdef float center_col = cols/2
         cdef float center_row = rows/2
 
-        cdef float center_rowM = (rows * scale_row) / 2
-        cdef float center_colM = (cols * scale_col) / 2
+        # cdef float center_rowM = (rows * scale_row) / 2
+        # cdef float center_colM = (cols * scale_col) / 2
 
         cdef float a,b,c,d
         a = cos(angle)/scale_col
-        b = -sin(angle)
-        c = sin(angle)
+        b = -sin(angle)/scale_col
+        c = sin(angle)/scale_row
         d = cos(angle)/scale_row
 
         with nogil:
             for f in range(nFrames):
                 for j in range(cols):
                     for i in range(rows):
-                        col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
-                        row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
+                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
+                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
@@ -390,21 +390,18 @@ class ShiftScaleRotate(LiquidEngine):
         cdef float center_col = cols/2
         cdef float center_row = rows/2
 
-        cdef float center_rowM = (rows * scale_row) / 2
-        cdef float center_colM = (cols * scale_col) / 2
-
         cdef float a,b,c,d
         a = cos(angle)/scale_col
-        b = -sin(angle)
-        c = sin(angle)
+        b = -sin(angle)/scale_col
+        c = sin(angle)/scale_row
         d = cos(angle)/scale_row
 
         with nogil:
             for f in range(nFrames):
                 for j in prange(cols):
                     for i in range(rows):
-                        col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
-                        row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
+                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
+                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
@@ -424,21 +421,18 @@ class ShiftScaleRotate(LiquidEngine):
         cdef float center_col = cols/2
         cdef float center_row = rows/2
 
-        cdef float center_rowM = (rows * scale_row) / 2
-        cdef float center_colM = (cols * scale_col) / 2
-
         cdef float a,b,c,d
         a = cos(angle)/scale_col
-        b = -sin(angle)
-        c = sin(angle)
+        b = -sin(angle)/scale_col
+        c = sin(angle)/scale_row
         d = cos(angle)/scale_row
 
         with nogil:
             for f in range(nFrames):
                 for j in prange(cols, schedule="static"):
                     for i in range(rows):
-                        col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
-                        row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
+                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
+                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
@@ -459,21 +453,18 @@ class ShiftScaleRotate(LiquidEngine):
         cdef float center_col = cols/2
         cdef float center_row = rows/2
 
-        cdef float center_rowM = (rows * scale_row) / 2
-        cdef float center_colM = (cols * scale_col) / 2
-
         cdef float a,b,c,d
         a = cos(angle)/scale_col
-        b = -sin(angle)
-        c = sin(angle)
+        b = -sin(angle)/scale_col
+        c = sin(angle)/scale_row
         d = cos(angle)/scale_row
 
         with nogil:
             for f in range(nFrames):
                 for j in prange(cols, schedule="dynamic"):
                     for i in range(rows):
-                        col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
-                        row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
+                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
+                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
@@ -494,21 +485,18 @@ class ShiftScaleRotate(LiquidEngine):
         cdef float center_col = cols/2
         cdef float center_row = rows/2
 
-        cdef float center_rowM = (rows * scale_row) / 2
-        cdef float center_colM = (cols * scale_col) / 2
-
         cdef float a,b,c,d
         a = cos(angle)/scale_col
-        b = -sin(angle)
-        c = sin(angle)
+        b = -sin(angle)/scale_col
+        c = sin(angle)/scale_row
         d = cos(angle)/scale_row
 
         with nogil:
             for f in range(nFrames):
                 for j in prange(cols, schedule="guided"):
                     for i in range(rows):
-                        col = (a*(j-center_colM)+b*(i-center_rowM)) - shift_col[f] + center_col
-                        row = (c*(j-center_colM)+d*(i-center_rowM)) - shift_row[f] + center_row
+                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
+                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
