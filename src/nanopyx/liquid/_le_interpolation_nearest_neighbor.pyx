@@ -39,9 +39,10 @@ class ShiftAndMagnify(LiquidEngine):
     _has_python = True
     _has_njit = True
 
-    def run(self, image: np.ndarray, shift_row: np.ndarray | int | float, shift_col: np.ndarray | int | float, float magnification_row, float magnification_col) -> np.ndarray:
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run
+    def run(self, image: np.ndarray, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         """
-        Shift and magnify an image using nearest neighbor interpolation
+        Shift and magnify an image using Nearest-Neighbor interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray
         :param shift_row: The number of rows to shift the image
@@ -49,7 +50,7 @@ class ShiftAndMagnify(LiquidEngine):
         :param shift_col: The number of columns to shift the image
         :type shift_col: int or float or np.ndarray
         :param magnification_row: The magnification factor for the rows
-        :type magnification_row: flot
+        :type magnification_row: float
         :param magnification_col: The magnification factor for the columns
         :type magnification_col: float
         :return: The shifted and magnified image
@@ -58,8 +59,10 @@ class ShiftAndMagnify(LiquidEngine):
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, magnification_row, magnification_col)
+    # tag-end
 
-    def benchmark(self, image: np.ndarray, shift_row: np.ndarray | int | float, shift_col: np.ndarray | int | float, float magnification_row, float magnification_col):
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify.benchmark
+    def benchmark(self, image: np.ndarray, shift_row, shift_col, float magnification_row, float magnification_col):
         """
         Benchmark the ShiftAndMagnify run function in multiple run types
         :param image: The image to shift and magnify
@@ -79,9 +82,10 @@ class ShiftAndMagnify(LiquidEngine):
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
+    # tag-end
 
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
-        # Swap row and columns because opencl is strange and stores the 
+        # Swap row and columns because opencl is strange and stores the
         # array in a buffer in fortran ordering despite the original
         # numpy array being in C order.
         image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
@@ -118,7 +122,8 @@ class ShiftAndMagnify(LiquidEngine):
 
         # Swap rows and columns back
         return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
-        
+
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -142,7 +147,9 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
+    # tag-end
 
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(colsM)", "prange(colsM)")
     def _run_threaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -166,7 +173,9 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
+    # tag-end
 
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(colsM)", 'prange(colsM, schedule="static")')
     def _run_threaded_static(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -190,8 +199,9 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
+    # tag-end
 
-
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(colsM)", 'prange(colsM, schedule="dynamic")')
     def _run_threaded_dynamic(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -215,8 +225,9 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
+    # tag-end
 
-
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(colsM)", 'prange(colsM, schedule="guided")')
     def _run_threaded_guided(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -240,6 +251,7 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
+    # tag-end
 
     def _run_python(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
         image_out = _py_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
@@ -314,12 +326,12 @@ class ShiftScaleRotate(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
 
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
-        
-        # Swap row and columns because opencl is strange and stores the 
+
+        # Swap row and columns because opencl is strange and stores the
         # array in a buffer in fortran ordering despite the original
         # numpy array being in C order.
         image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
-        
+
         code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
 
         cdef int nFrames = image.shape[0]

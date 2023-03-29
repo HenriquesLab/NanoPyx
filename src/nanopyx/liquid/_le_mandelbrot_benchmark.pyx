@@ -141,7 +141,7 @@ class MandelbrotBenchmark(LiquidEngine):
 
         return im_mandelbrot
     # tag-end
-    
+
     # tag-copy: _le_mandelbrot_benchmark.MandelbrotBenchmark._run_unthreaded; replace('_run_unthreaded', '_run_threaded_guided'); replace('j in range(size)', 'j in prange(size, schedule="guided")')
     def _run_threaded_guided(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)

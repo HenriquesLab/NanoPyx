@@ -31,7 +31,8 @@ class ShiftAndMagnify(LiquidEngine):
     _has_python = False
     _has_njit = False
 
-    def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Catmull-Rom")
+    def run(self, image: np.ndarray, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         """
         Shift and magnify an image using Catmull-Rom interpolation
         :param image: The image to shift and magnify
@@ -41,7 +42,7 @@ class ShiftAndMagnify(LiquidEngine):
         :param shift_col: The number of columns to shift the image
         :type shift_col: int or float or np.ndarray
         :param magnification_row: The magnification factor for the rows
-        :type magnification_row: flot
+        :type magnification_row: float
         :param magnification_col: The magnification factor for the columns
         :type magnification_col: float
         :return: The shifted and magnified image
@@ -50,8 +51,10 @@ class ShiftAndMagnify(LiquidEngine):
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, magnification_row, magnification_col)
+    # tag-end
 
-    def benchmark(self, image: np.ndarray, shift_row: np.ndarray | int | float, shift_col: np.ndarray | int | float, float magnification_row, float magnification_col):
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.benchmark
+    def benchmark(self, image: np.ndarray, shift_row, shift_col, float magnification_row, float magnification_col):
         """
         Benchmark the ShiftAndMagnify run function in multiple run types
         :param image: The image to shift and magnify
@@ -71,6 +74,7 @@ class ShiftAndMagnify(LiquidEngine):
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
+    # tag-end
 
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
