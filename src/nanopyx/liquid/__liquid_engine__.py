@@ -1,5 +1,6 @@
 import os
 import time
+import difflib
 from pathlib import Path
 
 import numpy as np
@@ -248,9 +249,14 @@ class LiquidEngine:
             run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
             if run_type_designation not in self._cfg:
                 self._cfg[run_type_designation] = {}
+                continue
 
             if call_args not in self._cfg[run_type_designation]:
-                continue
+                # find the most similar call_args
+                similar_args = difflib.get_close_matches(
+                    call_args, self._cfg[run_type_designation].keys()
+                )
+                call_args = similar_args[0]
 
             # print("Found run info for " + run_type_designation)
             run_info = self._cfg[run_type_designation][call_args]
