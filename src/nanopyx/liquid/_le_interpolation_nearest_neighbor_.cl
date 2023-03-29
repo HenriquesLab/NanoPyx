@@ -50,19 +50,16 @@ __kernel void ShiftScaleRotate(__global float *image_in,
   float center_col = cols / 2;
   float center_row = rows / 2;
 
-  float center_rowM = (rows * scale_row) / 2;
-  float center_colM = (cols * scale_col) / 2;
-
   float a = cos(angle) / scale_col;
-  float b = -sin(angle);
-  float c = sin(angle);
+  float b = -sin(angle) / scale_col;
+  float c = sin(angle) / scale_row;
   float d = cos(angle) / scale_row;
 
   int nPixels = rows * cols;
 
-  float col = (a * (cM - center_colM) + b * (rM - center_rowM)) - shift_col[f] +
+  float col = (a * (cM - center_col + shift_col[f]) + b * (rM - center_row + shift_row[f])) + 
               center_col;
-  float row = (c * (cM - center_colM) + d * (rM - center_rowM)) - shift_row[f] +
+  float row = (c * (cM - center_col + shift_col[f]) + d * (rM - center_row + shift_row[f])) +
               center_row;
 
   image_out[f * nPixels + rM * cols + cM] =
