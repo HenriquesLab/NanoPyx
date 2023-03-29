@@ -7,6 +7,10 @@ from nanopyx.liquid._le_interpolation_catmull_rom import (
 from nanopyx.liquid._le_interpolation_nearest_neighbor import (
     ShiftAndMagnify as NNShiftAndMagnify,
 )
+
+from nanopyx.liquid._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScaleRotate
+from nanopyx.liquid._le_interpolation_catmull_rom import ShiftScaleRotate as CRShiftScaleRotate
+
 from nanopyx.liquid._le_mandelbrot_benchmark import MandelbrotBenchmark
 
 
@@ -78,6 +82,75 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
     shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
     CR = CRShiftAndMagnify()
     bench_values = CR.benchmark(image, shift_row, shift_col, M, M)
+
+    images = []
+    titles = []
+    run_times = []
+
+    # unzip the values
+    for run_time, title, image in bench_values:
+        run_times.append(run_time)
+        titles.append(title)
+        images.append(image)
+
+    # ensure images are similar
+    for i in range(len(images)):
+        for j in range(i + 1, len(images)):
+            np.testing.assert_almost_equal(images[i], images[j])
+
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
+
+def test_interpolation_nearest_neighbor_ShiftScaleRotate(plt):
+    M = 4
+    nFrames = 3
+    image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
+    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
+    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    angle = np.pi/4
+    SM = NNShiftScaleRotate()
+    bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
+
+    images = []
+    titles = []
+    run_times = []
+
+    # unzip the values
+    for run_time, title, image in bench_values:
+        run_times.append(run_time)
+        titles.append(title)
+        images.append(image)
+
+    # ensure images are similar
+    for i in range(len(images)):
+        for j in range(i + 1, len(images)):
+            np.testing.assert_almost_equal(images[i], images[j])
+
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
+
+
+def test_interpolation_catmull_rom_ShiftScaleRotate(plt):
+    M = 4
+    nFrames = 3
+    image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
+    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
+    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    angle = np.pi/4
+    CR = CRShiftScaleRotate()
+    bench_values = CR.benchmark(image, shift_row, shift_col, M, M, angle)
 
     images = []
     titles = []
