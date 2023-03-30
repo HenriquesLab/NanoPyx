@@ -70,6 +70,7 @@ class MandelbrotBenchmark(LiquidEngine):
 
         return im_mandelbrot.get()
 
+    # tag-start: _le_mandelbrot_benchmark.MandelbrotBenchmark._run_unthreaded
     def _run_unthreaded(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
@@ -85,7 +86,9 @@ class MandelbrotBenchmark(LiquidEngine):
                     _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
 
         return im_mandelbrot
+    # tag-end
 
+    # tag-copy: _le_mandelbrot_benchmark.MandelbrotBenchmark._run_unthreaded; replace('_run_unthreaded', '_run_threaded'); replace('j in range(size)', 'j in prange(size)')
     def _run_threaded(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
@@ -101,8 +104,9 @@ class MandelbrotBenchmark(LiquidEngine):
                     _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
 
         return im_mandelbrot
+    # tag-end
 
-
+    # tag-copy: _le_mandelbrot_benchmark.MandelbrotBenchmark._run_unthreaded; replace('_run_unthreaded', '_run_threaded_static'); replace('j in range(size)', 'j in prange(size, schedule="static")')
     def _run_threaded_static(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
@@ -118,7 +122,9 @@ class MandelbrotBenchmark(LiquidEngine):
                     _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
 
         return im_mandelbrot
+    # tag-end
 
+    # tag-copy: _le_mandelbrot_benchmark.MandelbrotBenchmark._run_unthreaded; replace('_run_unthreaded', '_run_threaded_dynamic'); replace('j in range(size)', 'j in prange(size, schedule="dynamic")')
     def _run_threaded_dynamic(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
@@ -134,7 +140,9 @@ class MandelbrotBenchmark(LiquidEngine):
                     _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
 
         return im_mandelbrot
+    # tag-end
 
+    # tag-copy: _le_mandelbrot_benchmark.MandelbrotBenchmark._run_unthreaded; replace('_run_unthreaded', '_run_threaded_guided'); replace('j in range(size)', 'j in prange(size, schedule="guided")')
     def _run_threaded_guided(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
@@ -150,6 +158,7 @@ class MandelbrotBenchmark(LiquidEngine):
                     _im_mandelbrot[i, j] = _c_mandelbrot(row, col)
 
         return im_mandelbrot
+    # tag-end
 
     def _run_python(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
