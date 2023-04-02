@@ -29,7 +29,9 @@ def get_version():
     return versioneer.get_version()
 
 
-def find_files(root_dir: str, extension: str, partner_extension: str = None) -> list:
+def find_files(
+    root_dir: str, extension: str, partner_extension: str = None
+) -> list:
     """
     Find all files with a given extension in a directory
     :param root_dir: root directory to search
@@ -70,9 +72,14 @@ def change_cython_profiler_flag(base_path: str, flag: bool):
         with open(pyx_file, "r") as f:
             lines = f.read().splitlines()
             for i, line in enumerate(lines):
-                if line.startswith("# cython:") and f"profile={not flag}" in line:
+                if (
+                    line.startswith("# cython:")
+                    and f"profile={not flag}" in line
+                ):
                     print(f"Changing profile flag to {flag}: {pyx_file}")
-                    lines[i] = line.replace(f"profile={not flag}", f"profile={flag}")
+                    lines[i] = line.replace(
+                        f"profile={not flag}", f"profile={flag}"
+                    )
                     break
         with open(pyx_file, "w") as f:
             f.write("\n".join(lines))
@@ -152,7 +159,9 @@ def extract_requirements_from_pyproject():
         end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
     requirements = [line for line in requirements if "nanopyx" not in line]
-    with open(os.path.join(".docker", "gha_runners", "requirements.txt"), "w") as f:
+    with open(
+        os.path.join(".docker", "gha_runners", "requirements.txt"), "w"
+    ) as f:
         f.write("\n".join(requirements))
 
 
@@ -181,6 +190,7 @@ def main(mode=None):
         "Build nanopyx extensions": f"{python_call} setup.py build_ext --inplace",
         "Auto-generate pxd files via pyx2pxd": f"{python_call} src/nanopyx/scripts/pyx2pxd.py",
         "Auto-copy c to cl files via c2cl": f"{python_call} src/nanopyx/scripts/c2cl.py",
+        "Auto-generate code with tag2tag": f"{python_call} src/nanopyx/scripts/tag2tag.py",
         "Clean files": f"{remove_call} {files2clean}"
         if len(files2clean) > 0
         else "echo 'No files to clean'",

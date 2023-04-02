@@ -18,7 +18,7 @@ EXTRA_C_FILES_PATH = [
 INCLUDE_DIRS = EXTRA_C_FILES_PATH
 LIBRARY_DIRS = []
 EXTRA_COMPILE_ARGS = [
-    "-g0"  # for info on -g0 see https://github.com/pypa/cibuildwheel/issues/331
+    "-g0",  # for info on -g0 see https://github.com/pypa/cibuildwheel/issues/331,
 ]
 EXTRA_LING_ARGS = []
 
@@ -95,11 +95,13 @@ def search_for_c_files_referrenced_in_pyx_text(text: str):
                 c_files.append(c_file)
 
     # search for the file path under EXTRA_C_FILES_PATH paths tree
+    _c_files = []
     for path in EXTRA_C_FILES_PATH:
         for i, c_file in enumerate(c_files):
             c_file_path = os.path.join(path, c_file)
             if os.path.exists(c_file_path):
                 c_files[i] = c_file_path
+                _c_files.append(c_file_path)
             else:
                 # try to find the file
                 for root, dirs, files in os.walk(path):
@@ -108,7 +110,12 @@ def search_for_c_files_referrenced_in_pyx_text(text: str):
                         # If found, print the full path to the file
                         c_file = os.path.join(root, c_file)
                         c_files[i] = c_file
+                        _c_files.append(c_file)
                         break
+
+    c_files = _c_files
+    # if len(c_files) > 0:
+    #    print(f"Found c files: {c_files}")
 
     return c_files
 
@@ -221,7 +228,8 @@ def collect_extensions():
         if file.endswith(".pyx")
         or (
             file.endswith(".py")
-            and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read()
+            and "# nanopyx-cythonize: True\n"
+            in open(os.path.join(dir, file)).read()
         )
     ]
 
@@ -240,16 +248,16 @@ def collect_extensions():
         )
         if os.path.exists(pxd_file):
             with open(pxd_file, "r") as f:
-                extra_c_files_candadates = search_for_c_files_referrenced_in_pyx_text(
-                    f.read()
+                extra_c_files_candadates = (
+                    search_for_c_files_referrenced_in_pyx_text(f.read())
                 )
             sources += extra_c_files_candadates
             extra_c_files += extra_c_files_candadates
 
         # Now search in the pyx file
         with open(file, "r") as f:
-            extra_c_files_candadates = search_for_c_files_referrenced_in_pyx_text(
-                f.read()
+            extra_c_files_candadates = (
+                search_for_c_files_referrenced_in_pyx_text(f.read())
             )
             sources += extra_c_files_candadates
             extra_c_files += extra_c_files_candadates
@@ -260,7 +268,9 @@ def collect_extensions():
 
         # Remove files that don't exist
         sources = [file for file in sources if os.path.exists(file)]
-        extra_c_files = [file for file in extra_c_files if os.path.exists(file)]
+        extra_c_files = [
+            file for file in extra_c_files if os.path.exists(file)
+        ]
 
         # Make sure we have all the include paths
         for path in extra_c_files:
