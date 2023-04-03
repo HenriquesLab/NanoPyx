@@ -84,6 +84,7 @@ class ShiftAndMagnify(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
     # tag-end
 
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_opencl
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         # Swap row and columns because opencl is strange and stores the
         # array in a buffer in fortran ordering despite the original
@@ -122,6 +123,7 @@ class ShiftAndMagnify(LiquidEngine):
 
         # Swap rows and columns back
         return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
+    # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
@@ -253,10 +255,13 @@ class ShiftAndMagnify(LiquidEngine):
         return image_out
     # tag-end
 
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_python
     def _run_python(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
         image_out = _py_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
         return image_out
+    # tag-end
 
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_njit
     def _run_njit(
         self,
         image=np.zeros((1,10,10),dtype=np.float32),
@@ -265,6 +270,7 @@ class ShiftAndMagnify(LiquidEngine):
         magnification_row=1, magnification_col=1) -> np.ndarray:
         image_out = _njit_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
         return image_out
+    # tag-end
 
 class ShiftScaleRotate(LiquidEngine):
     """
@@ -280,9 +286,10 @@ class ShiftScaleRotate(LiquidEngine):
     _has_python = True
     _has_njit = True
 
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         """
-        Shift and scale an image using nearest neighbor interpolation
+        Shift and scale an image using Nearest-Neighbor interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray
         :param shift_row: The number of rows to shift the image
@@ -301,7 +308,10 @@ class ShiftScaleRotate(LiquidEngine):
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, scale_row, scale_col, angle)
+    # tag-end
 
+
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate.benchmark
     def benchmark(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle):
         """
         Benchmark the ShiftMagnifyScale run function in multiple run types
@@ -324,7 +334,10 @@ class ShiftScaleRotate(LiquidEngine):
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
+    # tag-end
 
+
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_opencl
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
 
         # Swap row and columns because opencl is strange and stores the
@@ -365,6 +378,7 @@ class ShiftScaleRotate(LiquidEngine):
 
         # Swap rows and columns back
         return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
+    # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
@@ -546,10 +560,14 @@ class ShiftScaleRotate(LiquidEngine):
         return image_out
     # tag-end
 
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_python
     def _run_python(self, image, shift_row, shift_col, scale_row, scale_col, angle) -> np.ndarray:
         image_out = _py_shift_magnify_rotate(image, shift_row, shift_col, scale_row, scale_col, angle)
         return image_out
+    # tag-end
 
+
+    # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_njit
     def _run_njit(
         self,
         image=np.zeros((1,10,10),dtype=np.float32),
@@ -558,3 +576,4 @@ class ShiftScaleRotate(LiquidEngine):
         scale_row=1, scale_col=1, angle=0) -> np.ndarray:
         image_out = _njit_shift_magnify_rotate(image, shift_row, shift_col, scale_row, scale_col, angle)
         return image_out
+    # tag-end
