@@ -31,12 +31,15 @@ class ShiftAndMagnify(LiquidEngine):
     _has_python = False
     _has_njit = False
 
+    def __init__(self):
+        super().__init__()
+
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Catmull-Rom")
-    def run(self, image: np.ndarray, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         """
         Shift and magnify an image using Catmull-Rom interpolation
         :param image: The image to shift and magnify
-        :type image: np.ndarray
+        :type image: np.ndarray or memoryview
         :param shift_row: The number of rows to shift the image
         :type shift_row: int or float or np.ndarray
         :param shift_col: The number of columns to shift the image
@@ -54,11 +57,11 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.benchmark
-    def benchmark(self, image: np.ndarray, shift_row, shift_col, float magnification_row, float magnification_col):
+    def benchmark(self, image, shift_row, shift_col, float magnification_row, float magnification_col):
         """
         Benchmark the ShiftAndMagnify run function in multiple run types
         :param image: The image to shift and magnify
-        :type image: np.ndarray
+        :type image: np.ndarray or memoryview
         :param shift_row: The number of rows to shift the image
         :type shift_row: int or float or np.ndarray
         :param shift_col: The number of columns to shift the image
@@ -243,6 +246,9 @@ class ShiftScaleRotate(LiquidEngine):
     _has_unthreaded = True
     _has_python = False
     _has_njit = False
+
+    def __init__(self):
+        super().__init__()
 
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         """

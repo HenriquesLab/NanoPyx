@@ -2,6 +2,8 @@ import os
 import time
 import difflib
 from pathlib import Path
+import inspect
+import random
 
 import numpy as np
 import yaml
@@ -45,6 +47,8 @@ class LiquidEngine:
     _has_threaded_guided: bool = False
     _has_python: bool = False
     _has_njit: bool = False
+    _random_testing: bool = True
+    _show_info: bool = False  # print what's going on
 
     _default_fastest: int = RUN_TYPE_OPENCL
     _last_run_type: int = None
@@ -66,7 +70,14 @@ class LiquidEngine:
             self._has_njit = False
 
         # Load the config file
-        base_path = os.path.join(__config_folder__, "liquid")
+        # e.g.: ~/.nanopyx/liquid/_le_interpolation_nearest_neighbor.cpython-310-darwin/ShiftAndMagnify.yml
+        base_path = os.path.join(
+            __config_folder__,
+            "liquid",
+            os.path.split(
+                os.path.splitext(inspect.getfile(self.__class__))[0]
+            )[1],
+        )
         os.makedirs(base_path, exist_ok=True)
 
         self._config_file = os.path.join(
@@ -136,7 +147,7 @@ class LiquidEngine:
             mean, std, n = self.get_mean_std_run_time(
                 run_type, *args, **kwargs
             )
-            print(
+            self._print(
                 f"{designation} run time: {format_time(self._last_run_time)}; "
                 + f"mean: {format_time(mean)}; std: {format_time(std)}; runs: {n}"
             )
@@ -167,7 +178,7 @@ class LiquidEngine:
                     f"{speed_sort[i][1]} is {speed_sort[j][0]/speed_sort[i][0]:.2f} faster than {speed_sort[j][1]}"
                 )
 
-        print(f"Run-times log: {self.get_run_times_log()}")
+        self._print(f"Run-times log: {self.get_run_times_log()}")
         print(
             f"Recorded fastest: {self.RUN_TYPE_DESIGNATION[self._get_fastest_run_type(*args, **kwargs)]}"
         )
@@ -206,6 +217,14 @@ class LiquidEngine:
         """
         return self._cfg
 
+    def set_show_info(self, show_info: bool):
+        """
+        Set whether to show info
+        :param show_info: whether to show info
+        :return: None
+        """
+        self._show_info = show_info
+
     def _store_run_time(self, run_type, delta, *args, **kwargs):
         """
         Store the run time in the config file
@@ -231,6 +250,12 @@ class LiquidEngine:
         # increment the number of times it was run
         c[2] += 1
 
+        self._print(
+            f"Storing run time: {delta} (m={c[0]/c[2]:.2f},n={c[2]})",
+            call_args,
+            run_type_designation,
+        )
+
         with open(self._config_file, "w") as f:
             yaml.dump(self._cfg, f)
 
@@ -240,35 +265,66 @@ class LiquidEngine:
         """
 
         fastest = self._default_fastest
-        fastest_speed = None
+        speed_and_type = []
 
         call_args = self._get_args_repr(*args, **kwargs)
         # print(call_args)
 
-        for run_type in self.RUN_TYPE_DESIGNATION.keys():
+        for run_type in self.RUN_TYPE_DESIGNATION:
             run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
+
             if run_type_designation not in self._cfg:
                 self._cfg[run_type_designation] = {}
                 continue
 
-            if call_args not in self._cfg[run_type_designation]:
-                # find the most similar call_args
-                similar_args = difflib.get_close_matches(
-                    call_args, self._cfg[run_type_designation].keys()
+            if (
+                call_args not in self._cfg[run_type_designation]
+                and len(self._cfg[run_type_designation]) > 0
+            ):
+                # find the most similar call_args by score
+                score_current = self._get_args_score(call_args)
+                delta_best = 1e99
+                similar_call_args: str = None
+                for _call_args in self._cfg[run_type_designation]:
+                    score = self._get_args_score(_call_args)
+                    delta = abs(score - score_current)
+                    if delta < delta_best:
+                        delta_best = delta
+                        similar_call_args = _call_args
+                if similar_call_args is not None:
+                    call_args = similar_call_args
+                else:
+                    # find the most similar call_args by string similarity
+                    similar_args = difflib.get_close_matches(
+                        call_args, self._cfg[run_type_designation].keys()
+                    )
+                    if len(similar_args) > 0:
+                        call_args = similar_args[0]
+
+            if call_args in self._cfg[run_type_designation]:
+                run_info = self._cfg[run_type_designation][call_args]
+                runtime_sum = run_info[0]
+                runtime_count = run_info[2]
+                speed = runtime_count / runtime_sum
+                speed_and_type.append((speed, run_type))
+                self._print(
+                    f"{run_type_designation} run time: {speed:.2f} runs/s"
                 )
-                call_args = similar_args[0]
 
-            # print("Found run info for " + run_type_designation)
-            run_info = self._cfg[run_type_designation][call_args]
-            runtime_sum = run_info[0]
-            runtime_count = run_info[2]
-            speed = runtime_count / runtime_sum
+        if len(speed_and_type) == 0:
+            return fastest
 
-            if fastest_speed is None or speed > fastest_speed:
-                fastest_speed = speed
-                fastest = run_type
+        elif self._random_testing:
+            # randomly choose a run type based on a squared speed weight
+            run_type = [x[1] for x in speed_and_type]
+            weights = [x[0] ** 2 for x in speed_and_type]
+            return random.choices(run_type, weights=weights, k=1)[0]
 
-        return fastest
+        else:
+            # just return the fastest
+            return sorted(speed_and_type, key=lambda x: x[0], reverse=True)[0][
+                1
+            ]
 
     def _get_cl_code(self, file_name):
         """
@@ -283,26 +339,92 @@ class LiquidEngine:
         )
         return open(cl_file).read()
 
-    def _get_args_repr(self, *args, **kwargs):
+    def _get_args_repr(self, *args, **kwargs) -> str:
+        """
+        Get a string representation of the args and kwargs
+        """
         # print("Args: ", args)
         # print("Kwargs: ", kwargs)
         _args = []
         for arg in args:
-            if hasattr(arg, "shape"):
-                _args.append(arg.shape)
+            if type(arg) in (float, int):
+                _args.append(f"number({arg})")
+            elif hasattr(arg, "shape"):
+                _args.append(f"shape{arg.shape}")
             else:
                 _args.append(arg)
         _kwargs = {}
         for k, v in kwargs.items():
+            if type(v) in (float, int):
+                _kwargs[k] = f"number({v})"
             if hasattr(v, "shape"):
-                _kwargs[k] = v.shape
+                _kwargs[k] = f"shape{arg.shape}"
             else:
                 _kwargs[k] = v
         return repr((_args, _kwargs))
 
-    ###############
+    def _get_args_shapes_numbers(self, txt: str):
+        """
+        Get the shapes and numbers from the string representation of the args and kwargs
+        :param txt: the string representation of the args and kwargs
+        :return: a tuple of the shapes and numbers
+        """
+        shapes = []
+        numbers = []
+
+        # example (['shape(3, 64, 32)', 'shape(3,)', 'shape(3,)', 'number(4.0)', 'number(4.0)'], {})
+
+        # find shape values
+        _txt = txt
+        marker = 0
+        while 1:
+            start = _txt.find("shape(", marker)
+            end = _txt.find(")", start)
+            if start == -1 or end == -1:
+                break
+            elements = _txt[start + 6 : end].split(",")
+            for element in elements:
+                if element.strip() != "":
+                    shapes.append(float(element))
+            marker = end
+
+        # find number values
+        _txt = txt
+        marker = 0
+        while 1:
+            start = _txt.find("number(", marker)
+            end = _txt.find(")", start)
+            if start == -1 or end == -1:
+                break
+            numbers.append(float(_txt[start + 7 : end]))
+            marker = end
+
+        return shapes, numbers
+
+    def _get_args_score(self, txt: str) -> float:
+        """
+        Get the score for the given args and kwargs
+        :param txt: the string representation of the args and kwargs
+        :return: the score
+        """
+        shapes, numbers = self._get_args_shapes_numbers(txt)
+        score = 1
+        if len(shapes) > 0:
+            score = score * np.prod(shapes)
+        if len(numbers) > 0:
+            score = score * np.prod(numbers)
+        return score
+
+    def _print(self, *args, **kwargs):
+        """
+        Prints the args and kwargs
+        """
+        if self._show_info:
+            print(*args, **kwargs)
+
+    ################
     # _run methods #
-    ###############
+    ################
 
     def _run(self, *args, run_type=None, **kwargs):
         """
@@ -314,10 +436,10 @@ class LiquidEngine:
         """
 
         if run_type is None:
-            print(
-                f"No run type specified, using fastest run type: {self.RUN_TYPE_DESIGNATION[run_type]}"
-            )
             run_type = self._get_fastest_run_type(*args, **kwargs)
+            self._print(
+                f"Using run type: {self.RUN_TYPE_DESIGNATION[run_type]}"
+            )
 
         t_start = time.time()
         if run_type == self.RUN_TYPE_OPENCL and self._has_opencl:
