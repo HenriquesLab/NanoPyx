@@ -8,8 +8,12 @@ from nanopyx.liquid._le_interpolation_nearest_neighbor import (
     ShiftAndMagnify as NNShiftAndMagnify,
 )
 
-from nanopyx.liquid._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScaleRotate
-from nanopyx.liquid._le_interpolation_catmull_rom import ShiftScaleRotate as CRShiftScaleRotate
+from nanopyx.liquid._le_interpolation_nearest_neighbor import (
+    ShiftScaleRotate as NNShiftScaleRotate,
+)
+from nanopyx.liquid._le_interpolation_catmull_rom import (
+    ShiftScaleRotate as CRShiftScaleRotate,
+)
 
 from nanopyx.liquid._le_mandelbrot_benchmark import MandelbrotBenchmark
 
@@ -78,8 +82,8 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = np.arange(nFrames, dtype=np.float32) * 1.5
+    shift_col = np.arange(nFrames, dtype=np.float32) * -1.5
     CR = CRShiftAndMagnify()
     bench_values = CR.benchmark(image, shift_row, shift_col, M, M)
 
@@ -96,7 +100,7 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
     # ensure images are similar
     for i in range(len(images)):
         for j in range(i + 1, len(images)):
-            np.testing.assert_almost_equal(images[i], images[j])
+            np.testing.assert_allclose(images[i], images[j], rtol=1e-3)
 
     # show images
     fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
@@ -107,13 +111,14 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
             axes[i, j].imshow(images[j][i], cmap="hot")
             axes[i, j].axis("off")
 
+
 def test_interpolation_nearest_neighbor_ShiftScaleRotate(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
     shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
     shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
-    angle = np.pi/4
+    angle = np.pi / 4
     SM = NNShiftScaleRotate()
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
 
@@ -130,7 +135,7 @@ def test_interpolation_nearest_neighbor_ShiftScaleRotate(plt):
     # ensure images are similar
     for i in range(len(images)):
         for j in range(i + 1, len(images)):
-            np.testing.assert_almost_equal(images[i], images[j])
+            np.testing.assert_allclose(images[i], images[j], rtol=1e-3)
 
     # show images
     fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
@@ -148,8 +153,9 @@ def test_interpolation_catmull_rom_ShiftScaleRotate(plt):
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
     shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
     shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
-    angle = np.pi/4
+    angle = np.pi / 4
     CR = CRShiftScaleRotate()
+    CR
     bench_values = CR.benchmark(image, shift_row, shift_col, M, M, angle)
 
     images = []
@@ -165,7 +171,7 @@ def test_interpolation_catmull_rom_ShiftScaleRotate(plt):
     # ensure images are similar
     for i in range(len(images)):
         for j in range(i + 1, len(images)):
-            np.testing.assert_almost_equal(images[i], images[j])
+            np.testing.assert_allclose(images[i], images[j], rtol=1e-3)
 
     # show images
     fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))

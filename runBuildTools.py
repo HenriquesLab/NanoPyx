@@ -188,9 +188,9 @@ def main(mode=None):
     notebook_files += " ".join(find_files("tests", ".ipynb"))
     options = {
         "Build nanopyx extensions": f"{python_call} setup.py build_ext --inplace",
-        "Auto-generate pxd files via pyx2pxd": f"{python_call} src/nanopyx/scripts/pyx2pxd.py",
-        "Auto-copy c to cl files via c2cl": f"{python_call} src/nanopyx/scripts/c2cl.py",
-        "Auto-generate code with tag2tag": f"{python_call} src/nanopyx/scripts/tag2tag.py",
+        "Auto-generate pxd files via pyx2pxd": f"{python_call} src/scripts/pyx2pxd.py",
+        "Auto-copy c to cl files via c2cl": f"{python_call} src/scripts/c2cl.py",
+        "Auto-generate code with tag2tag": f"{python_call} src/scripts/tag2tag.py",
         "Clean files": f"{remove_call} {files2clean}"
         if len(files2clean) > 0
         else "echo 'No files to clean'",

@@ -113,7 +113,7 @@ def main():
     """
     )
 
-    path = Path(__file__).parent.parent
+    path = Path(__file__).parent.parent / "nanopyx"
     autogenerate_pxd_files(path)
 
 

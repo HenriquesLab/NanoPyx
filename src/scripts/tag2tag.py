@@ -147,7 +147,7 @@ def main():
     """
     )
 
-    path = Path(__file__).parent.parent / "liquid"
+    path = Path(__file__).parent.parent / "nanopyx" / "liquid"
     parse_files(path)
 
 

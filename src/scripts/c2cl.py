@@ -24,7 +24,12 @@ def extract_function_code(file_txt, function_name):
     brackets = 0
 
     for line in file_txt.splitlines():
-        if function_name in line and "(" in line and ")" in line and ";" not in line:
+        if (
+            function_name in line
+            and "(" in line
+            and ")" in line
+            and ";" not in line
+        ):
             function_started = True
             brackets = 0
 
@@ -98,7 +103,7 @@ def confirm_c_file_absolute_path(c_filename):
         return os.path.abspath(c_filename)
 
     # find file in include directory
-    file_path = Path(__file__).parent.parent.parent / "include" / c_filename
+    file_path = Path(__file__).parent.parent / "include" / c_filename
     if os.path.exists(file_path):
         return os.path.abspath(file_path)
 
@@ -141,7 +146,9 @@ def copy_c_function_to_cl(cl_filename: str) -> str:
                 # example: // c2cl-function: _c_mandelbrot from _c_mandelbrot_benchmark.c
                 _line = line.replace(tag_copy_functions, "")
                 function_name, function_filename = _line.split(" from ")
-                function_filename = confirm_c_file_absolute_path(function_filename)
+                function_filename = confirm_c_file_absolute_path(
+                    function_filename
+                )
                 function_signature_and_code = extract_function_code(
                     open(function_filename).read(), function_name
                 )
@@ -219,7 +226,7 @@ def main():
     """
     )
 
-    path = Path(__file__).parent.parent / "liquid"
+    path = Path(__file__).parent.parent / "nanopyx" / "liquid"
     autocopy_files(path)
 
 
