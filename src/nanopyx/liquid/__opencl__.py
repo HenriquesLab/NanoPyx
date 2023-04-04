@@ -35,6 +35,11 @@ try:
 
     print("Selecting OpenCL device: " + fastest_device.name)
 
+    if 'cl_khr_fp64' in fastest_device.extensions.strip().split(' '):
+        cl_dp = True
+    else:
+        cl_dp = False
+
     cl_ctx = cl.Context([fastest_device])
     cl_queue = cl.CommandQueue(cl_ctx)
 
@@ -43,6 +48,7 @@ except (ImportError, OSError, Exception):
     cl_array = None
     cl_ctx = None
     cl_queue = None
+    cl_dp = False
 
 
 def print_opencl_info():
