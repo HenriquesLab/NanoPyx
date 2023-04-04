@@ -10,7 +10,7 @@ import yaml
 
 from .. import __config_folder__
 from .__njit__ import njit_works
-from .__opencl__ import opencl_works
+from .__opencl__ import opencl_works, cl_dp
 
 
 class LiquidEngine:
@@ -337,7 +337,13 @@ class LiquidEngine:
         assert os.path.exists(cl_file), (
             "Could not find OpenCL file: " + cl_file
         )
-        return open(cl_file).read()
+
+        kernel_str = open(cl_file).read()
+
+        if not cl_dp:
+            kernel_str = kernel_str.replace('double', 'float')
+
+        return kernel_str
 
     def _get_args_repr(self, *args, **kwargs) -> str:
         """
