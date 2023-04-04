@@ -61,7 +61,7 @@ class ShiftAndMagnify(LiquidEngine):
         image = check_image(image)
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
-        return self._run(image, shift_row, shift_col, magnification_row, magnification_col, run_type=None)
+        return self._run(image, shift_row, shift_col, magnification_row, magnification_col, run_type=run_type)
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify.benchmark
@@ -313,7 +313,7 @@ class ShiftScaleRotate(LiquidEngine):
         image = check_image(image)
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
-        return self._run(image, shift_row, shift_col, scale_row, scale_col, angle, run_type=None)
+        return self._run(image, shift_row, shift_col, scale_row, scale_col, angle, run_type=run_type)
     # tag-end
 
 
