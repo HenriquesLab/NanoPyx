@@ -35,7 +35,7 @@ class ShiftAndMagnify(LiquidEngine):
         super().__init__()
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Catmull-Rom")
-    def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
         """
         Shift and magnify an image using Catmull-Rom interpolation
         :param image: The image to shift and magnify
@@ -53,7 +53,7 @@ class ShiftAndMagnify(LiquidEngine):
         image = check_image(image)
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
-        return self._run(image, shift_row, shift_col, magnification_row, magnification_col)
+        return self._run(image, shift_row, shift_col, magnification_row, magnification_col, run_type=None)
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.benchmark
@@ -268,7 +268,7 @@ class ShiftScaleRotate(LiquidEngine):
         super().__init__()
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run; replace("Nearest-Neighbor", "Catmull-Rom")
-    def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+    def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:
         """
         Shift and scale an image using Catmull-Rom interpolation
         :param image: The image to shift and magnify
@@ -288,7 +288,7 @@ class ShiftScaleRotate(LiquidEngine):
         image = check_image(image)
         shift_row = value2array(shift_row, image.shape[0])
         shift_col = value2array(shift_col, image.shape[0])
-        return self._run(image, shift_row, shift_col, scale_row, scale_col, angle)
+        return self._run(image, shift_row, shift_col, scale_row, scale_col, angle, run_type=None)
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.benchmark
