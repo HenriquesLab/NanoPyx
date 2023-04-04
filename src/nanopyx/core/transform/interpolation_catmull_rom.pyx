@@ -1,9 +1,7 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 import numpy as np
-
 cimport numpy as np
-from cython cimport view
 
 
 def interpolate(np.ndarray im, double x, double y) -> float:
@@ -17,7 +15,7 @@ def interpolate(np.ndarray im, double x, double y) -> float:
     return _interpolate(im.view(np.float32), x, y)
 
 
-cdef double _interpolate(float[:,:] image, double x, double y) nogil:
+cdef float _interpolate(float[:,:] image, float x, float y) nogil:
     """
     Interpolate image using Catmull-Rom interpolation
     :param image: image to interpolate
