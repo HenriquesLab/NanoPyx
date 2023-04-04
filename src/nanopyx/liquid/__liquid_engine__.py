@@ -47,6 +47,7 @@ class LiquidEngine:
     _has_threaded_guided: bool = False
     _has_python: bool = False
     _has_njit: bool = False
+
     _random_testing: bool = True
     _show_info: bool = False  # print what's going on
 
@@ -94,6 +95,44 @@ class LiquidEngine:
         for run_type_designation in self.RUN_TYPE_DESIGNATION.values():
             if run_type_designation not in self._cfg:
                 self._cfg[run_type_designation] = {}
+
+    def is_opencl_enabled(self):
+        """
+        Returns whether OpenCL is enabled
+        :return: whether OpenCL is enabled
+        :rtype: bool
+        """
+        return self._has_opencl
+
+    def is_njit_enabled(self):
+        """
+        Returns whether Numba is enabled
+        :return: whether Numba is enabled
+        :rtype: bool
+        """
+        return self._has_njit
+
+    def set_opencl_enabled(self, enabled: bool = True):
+        """
+        Sets whether OpenCL is enabled
+        :param enabled: whether OpenCL is enabled
+        """
+        self._has_opencl = enabled
+
+    def set_opencl_disabled_if_no_double_support(self):
+        """
+        Sets whether OpenCL is enabled
+        :param enabled: whether OpenCL is enabled
+        """
+        if not cl_dp:
+            self._has_opencl = False
+
+    def set_njit_enabled(self, enabled: bool = True):
+        """
+        Sets whether Numba is enabled
+        :param enabled: whether Numba is enabled
+        """
+        self._has_njit = enabled
 
     def run(self, *args, **kwds):
         """
@@ -341,7 +380,7 @@ class LiquidEngine:
         kernel_str = open(cl_file).read()
 
         if not cl_dp:
-            kernel_str = kernel_str.replace('double', 'float')
+            kernel_str = kernel_str.replace("double", "float")
 
         return kernel_str
 
