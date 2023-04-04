@@ -1,19 +1,23 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
+from math import cos, fabs, sqrt
+
 import numpy as np
-from scipy.ndimage import gaussian_filter
-from math import sqrt, fabs, cos
 from matplotlib import pyplot as plt
+from scipy.ndimage import gaussian_filter
+
 from ..utils.timeit import timeit2
 
 cimport numpy as np
+from libc.math cimport ceil, exp, fmax, fmin, isnan, log, pow, round, sqrt
 
-from libc.math cimport sqrt, pow, ceil, log, isnan, exp, fmin, fmax, round
 from cython.parallel import prange
+
 from ..generate.mask cimport _get_circular_mask
-from ..transform.normalize cimport _normalizeFFT
 from ..transform.edges cimport _apodize_edges
+from ..transform.normalize cimport _normalizeFFT
 from ..utils.array cimport _get_max, _get_min
+
 
 cdef class DecorrAnalysis:
 
@@ -91,11 +95,16 @@ cdef class DecorrAnalysis:
         x_out = ox
         y_in = 0
         y_out = oy
-        
+        cdef int _u
+        cdef int _v
+
         for x_in in range(img.shape[1]):
             y_out = 0
             for y_in in range(img.shape[0]):
-                pixels_out[x_out + y_out*new_size] = pixels_in[x_in + y_in*img.shape[1]]
+                _u = x_out + y_out*new_size
+                _v = x_in + y_in*img.shape[1]
+                pixels_out[_u] = pixels_in[_v]
+                # pixels_out[x_out + y_out*new_size] = pixels_in[x_in + y_in*img.shape[1]] - how it was before
                 y_out += 1
             x_out += 1
 
@@ -115,7 +124,7 @@ cdef class DecorrAnalysis:
 
         cdef int y_i, x_i
         cdef float c = 0
-        
+
         with nogil:
             for y_i in prange(fft_real.shape[0]):
                 for x_i in range(fft_real.shape[1]):
@@ -128,21 +137,21 @@ cdef class DecorrAnalysis:
         cdef int k
         cdef float gm_max
         cdef float[:] gm, out
-        
+
         gm = np.empty(kc.shape[0], dtype=np.float32)
         out = np.empty((3), dtype=np.float32)
 
         gm_max = 0.0
-        
+
         for k in range(kc.shape[0]):
             gm[k] = kc[k]*a[k]
-            
+
             if gm[k] > gm_max:
                 gm_max = gm[k]
                 out[0] = kc[k]
                 out[1] = a[k]
                 out[2] = k
-                
+
         return out
 
     cdef float[:] _get_max_score(self, float[:] kc, float[:] a):
@@ -159,7 +168,7 @@ cdef class DecorrAnalysis:
                 out[0] = kc[k]
                 out[1] = a[k]
                 out[2] = k
-                
+
         return out
 
     cdef float [:] _get_corr_coef_ring(self, float[:, :] fft_real, float[:, :] fft_imag, float[:, :] normalized_fft_real, float[:, :] normalized_fft_imag, float crmin, float crmax):
@@ -179,7 +188,7 @@ cdef class DecorrAnalysis:
         oy = <int>(height * (1-crmax)/2)
         w = <int>(width * crmax)
         h = <int>(height * crmax)
-        
+
         with nogil:
             for x_i in range(ox, ox+w):
                 for y_i in range(oy, oy+h):
@@ -213,7 +222,7 @@ cdef class DecorrAnalysis:
         for k in range(self.n_r):
             d = 0
             c = 0
-            
+
             for n in range(k+1):
                 d += coef[n]
                 c += coef[n+self.n_r]
@@ -232,7 +241,7 @@ cdef class DecorrAnalysis:
         cdef float[:] t, out, temp_min
         cdef int d_length
         cdef float dt = 0.001
-        
+
         with gil:
             t = np.copy(d)
 
@@ -250,13 +259,13 @@ cdef class DecorrAnalysis:
             else:
                 out = _get_max(t, 0, self.n_r)
                 temp_min = _get_min(t, int(out[0]), d_length-1)
-                
+
                 if t[<int>(out[0])] - temp_min[1] > dt:
                     return out
                 else:
                     t[<int>(out[0])] = temp_min[1]
                     out[0] = d_length - 1
-                    
+
         out[0] = r1 + (r2-r1)*out[0]/(self.n_r-1)
         return out
 
@@ -270,7 +279,7 @@ cdef class DecorrAnalysis:
         cdef float g_max, g_min, crmin, crmax, d, c, ind1, ind2, cr
         cdef double sig
         cdef int refine, k, j, h, i
-        
+
         d_curve = np.zeros((self.n_r, 2*self.n_g), dtype=np.float32)
 
         if self.kc0 == 0:
@@ -305,7 +314,7 @@ cdef class DecorrAnalysis:
                 for i in range(self.n_r):
                     d = 0
                     c = 0
-                    
+
                     for n in range(i+1):
                         d += coef[n]
                         c += coef[n+self.n_r]
@@ -323,7 +332,7 @@ cdef class DecorrAnalysis:
                 a = np.zeros((self.n_g+1), dtype=np.float32)
                 dg = np.zeros((self.n_r), dtype=np.float32)
                 result = np.zeros((2), dtype=np.float32)
-                
+
                 with nogil:
                     for j in range(self.n_g):
                         for h in prange(self.n_r):
@@ -335,7 +344,7 @@ cdef class DecorrAnalysis:
                         self.a_g[j] = result[1]
 
                 result = self._get_d_corr_max(self.d0, crmin, crmax)
-                
+
                 kc[self.n_g] = result[0]
                 a[self.n_g] = result[1]
                 self.kc[self.n_g] = result[0]
@@ -351,14 +360,14 @@ cdef class DecorrAnalysis:
                 crmax = fmax(results_gm[0], results_max[0]) + 0.3
                 if crmax > self.rmax:
                     crmax = self.rmax
-                    
+
                 crmax = 0.5
                 self.rmin2 = crmin
                 self.rmax2 = crmax
 
                 ind1 = fmin(results_gm[2], results_max[2]) - 1
                 ind2 = fmax(results_gm[2], results_max[2])
-                
+
                 if ind2 < self.n_g:
                     g_temp = exp(log(g_min) + (log(g_max)-log(g_min))*(ind1/(self.n_g-1)))
                     g_max = exp(log(g_min) + (log(g_max)-log(g_min))*(ind2/(self.n_g-1)))
@@ -366,13 +375,13 @@ cdef class DecorrAnalysis:
                 else:
                     g_max = g_min
                     g_min = 2 / self.img_ref.shape[1]
-                    
+
             else:
                 kc = np.zeros((self.n_g), dtype=np.float32)
                 a = np.zeros((self.n_g), dtype=np.float32)
                 dg = np.zeros((self.n_r), dtype=np.float32)
                 result = np.zeros((2), dtype=np.float32)
-                
+
                 with nogil:
                     for j in range(self.n_g):
                         for h in prange(self.n_r):
@@ -400,7 +409,7 @@ cdef class DecorrAnalysis:
         cdef float resolution
         img_ref = np.copy(self.img)
         img_f = np.copy(self.img)
-        
+
         if self.x0 == self.x1 or self.y0 == self.y1:
             self.img_ref = img_ref
         else:
@@ -419,7 +428,7 @@ cdef class DecorrAnalysis:
         self.kc0 = out[0]
         self.a0 = out[1]
         self.d = self._compute_d()
-        
+
         self.resolution = 2 * self.pixel_size / self.kc_max
 
         if self.do_plot:
@@ -448,10 +457,9 @@ cdef class DecorrAnalysis:
         # for k in range(kc.shape[0]):
         #     plt.plot(kc[k], a_g[k], c="g", marker="x")
         # plt.plot(self.kc0, self.a0, c="r", marker="x")
-        plt.axvline(x=self.kc_max, color='b', linestyle='-', label="Cut-off frequency")
-        plt.xlabel(f'Normalized frequency')
-        plt.ylabel('Cross-correlation coefficients')
+        plt.axvline(x=self.kc_max, color="b", linestyle="-", label="Cut-off frequency")
+        plt.xlabel(f"Normalized frequency")
+        plt.ylabel("Cross-correlation coefficients")
         plt.title(f"Decorrelation analysis resolution: {np.round(self.resolution, 4)} {self.units}")
         plt.grid()
         plt.show()
-
