@@ -3,9 +3,9 @@
 
 // Cubic function used in Catmull-Rom interpolation
 // https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull.E2.80.93Rom_spline
-float _c_cubic(float v) {
-  float a = 0.5;
-  float z = 0;
+double _c_cubic(double v) {
+  double a = 0.5;
+  double z = 0;
   if (v < 0) {
     v = -v;
   }
@@ -26,8 +26,8 @@ float _c_interpolate(float* image, float r, float c, int rows, int cols) {
 
   const int r_int = (int)floor(r - 0.5);
   const int c_int = (int)floor(c - 0.5);
-  float q = 0;
-  float p = 0;
+  double q = 0;
+  double p = 0;
 
   int r_neighbor, c_neighbor;
 
@@ -43,7 +43,8 @@ float _c_interpolate(float* image, float r, float c, int rows, int cols) {
       if (r_neighbor < 0 || r_neighbor >= rows) {
         continue;
       }
-      p = p + image[r_neighbor * cols + c_neighbor] * _c_cubic(r - (r_neighbor + 0.5));
+      p = p + image[r_neighbor * cols + c_neighbor] *
+                  _c_cubic(r - (r_neighbor + 0.5));
     }
     q = q + p * _c_cubic(c - (c_neighbor + 0.5));
   }

@@ -1,10 +1,10 @@
 float _c_interpolate(__global float *image, float r, float c, int rows, int cols);
-float _c_cubic(float v);
+double _c_cubic(double v);
 
 // c2cl-function: _c_cubic from _c_interpolation_catmull_rom.c
-float _c_cubic(float v) {
-  float a = 0.5;
-  float z = 0;
+double _c_cubic(double v) {
+  double a = 0.5;
+  double z = 0;
   if (v < 0) {
     v = -v;
   }
@@ -25,8 +25,8 @@ float _c_interpolate(__global float *image, float r, float c, int rows, int cols
 
   const int r_int = (int)floor(r - 0.5);
   const int c_int = (int)floor(c - 0.5);
-  float q = 0;
-  float p = 0;
+  double q = 0;
+  double p = 0;
 
   int r_neighbor, c_neighbor;
 
@@ -42,7 +42,8 @@ float _c_interpolate(__global float *image, float r, float c, int rows, int cols
       if (r_neighbor < 0 || r_neighbor >= rows) {
         continue;
       }
-      p = p + image[r_neighbor * cols + c_neighbor] * _c_cubic(r - (r_neighbor + 0.5));
+      p = p + image[r_neighbor * cols + c_neighbor] *
+                  _c_cubic(r - (r_neighbor + 0.5));
     }
     q = q + p * _c_cubic(c - (c_neighbor + 0.5));
   }
@@ -96,7 +97,7 @@ __kernel void ShiftScaleRotate(__global float *image_in,
 
   int nPixels = rows * cols;
 
-  float col = (a * (cM - center_col - shift_col[f]) + b * (rM - center_row - shift_row[f])) + 
+  float col = (a * (cM - center_col - shift_col[f]) + b * (rM - center_row - shift_row[f])) +
               center_col;
   float row = (c * (cM - center_col - shift_col[f]) + d * (rM - center_row - shift_row[f])) +
               center_row;
