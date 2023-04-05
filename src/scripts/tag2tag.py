@@ -7,7 +7,7 @@ except ImportError:
     from __tools__ import find_files
 
 
-def get_py_tags(filename: str):
+def get_tags(filename: str, comment_prefix: str = "#"):
     """
     Get all tags from a python or cython file, tags are defined as follows:
     # tag-start: tag_name
@@ -16,13 +16,10 @@ def get_py_tags(filename: str):
     :param filename: filename to search for tags
     :return: dictionary of tags and their code
     """
-    ext = os.path.splitext(filename)[1]
-    assert ext in (".py", ".pyx"), "File must be a .py or .pyx file"
-
     # example:
     # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded
-    tag_start_str = "# tag-start: "
-    tag_end_str = "# tag-end"
+    tag_start_str = comment_prefix + " tag-start: "
+    tag_end_str = comment_prefix + " tag-end"
     tags = {}
 
     with open(filename, "r") as f:
@@ -34,9 +31,9 @@ def get_py_tags(filename: str):
             if tag_start == -1:
                 return tags
             tag_command_end = file_txt.find("\n", tag_start)
-            tag_end = file_txt.find("# tag-end", tag_command_end)
+            tag_end = file_txt.find(tag_end_str, tag_command_end)
             if tag_end == -1:
-                raise ValueError(f"{filename}: missing # tag-end")
+                raise ValueError(f"{filename}: missing {tag_end_str}")
 
             tag_name = file_txt[
                 tag_start + len(tag_start_str) : tag_command_end
@@ -44,13 +41,15 @@ def get_py_tags(filename: str):
             tag_code = file_txt[tag_command_end + 1 : tag_end]
 
             tags[tag_name] = tag_code
-            print(f"Found tag: {tag_name} in {filename}")
+            print(
+                f"Found tag: ...{tag_name.split('.')[-1]} in {os.path.split(filename)[-1]}"
+            )
             file_txt = file_txt[tag_end + len(tag_end_str) + 1 :]
 
     return tags
 
 
-def replace_py_tags(filename: str, tags: dict):
+def replace_tags(filename: str, tags: dict, comment_prefix: str = "#"):
     """
     Replace all tags in a python or cython file, tags are defined as follows:
     # tag-copy: tag_name; replace("old", "new")
@@ -59,13 +58,10 @@ def replace_py_tags(filename: str, tags: dict):
     :param filename: filename to search for tags
     :param tags: dictionary of tags and their code
     """
-    ext = os.path.splitext(filename)[1]
-    assert ext in (".py", ".pyx"), "File must be a .py or .pyx file"
-
     # example:
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(colsM)", "prange(colsM)")
-    tag_start_str = "# tag-copy: "
-    tag_end_str = "# tag-end"
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(colsM)", "prange(colsM)") # noqa
+    tag_start_str = comment_prefix + " tag-copy: "
+    tag_end_str = comment_prefix + " tag-end"
     marker = 0
     file_txt = ""
 
@@ -100,7 +96,9 @@ def replace_py_tags(filename: str, tags: dict):
         file_txt = (
             file_txt[: tag_command_end + 1] + tag_code + file_txt[tag_end:]
         )
-        print(f"Adapted code: {tag_name} in {filename}")
+        print(
+            f"Adapted code: ...{tag_name.split('.')[-1]} in {os.path.split(filename)[-1]}:{tag_command_end}"
+        )
         marker = tag_end
 
     if marker > 0:
@@ -117,16 +115,25 @@ def parse_files(root_dir: str):
     print(f"Searching {root_dir} for files...")
     py_files = find_files(root_dir, ".py")
     pyx_files = find_files(root_dir, ".pyx")
+    cl_files = find_files(root_dir, ".cl")
 
     print("Auto-generating code for .py and .pyx files...")
-
     # step 1: get all tags
     tags = {}
     for file in py_files + pyx_files:
-        tags.update(get_py_tags(file))
+        tags.update(get_tags(file, comment_prefix="#"))
     # step 2: replace tags
     for file in py_files + pyx_files:
-        replace_py_tags(file, tags)
+        replace_tags(file, tags, comment_prefix="#")
+
+    print("Auto-generating code for .cl files...")
+    # step 1: get all tags
+    tags = {}
+    for file in cl_files:
+        tags.update(get_tags(file, comment_prefix="//"))
+    # step 2: replace tags
+    for file in cl_files:
+        replace_tags(file, tags, comment_prefix="//")
 
     # print(tags)
 
@@ -147,8 +154,9 @@ def main():
     """
     )
 
-    path = Path(__file__).parent.parent / "nanopyx" / "liquid"
-    parse_files(path)
+    root = Path(__file__).parent.parent.parent
+    parse_files(root / "src" / "nanopyx" / "liquid")
+    parse_files(root / "tests")
 
 
 if __name__ == "__main__":

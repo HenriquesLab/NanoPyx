@@ -34,10 +34,10 @@ class ShiftAndMagnify(LiquidEngine):
     def __init__(self):
         super().__init__()
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Catmull-Rom")
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Lanczos")
     def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
         """
-        Shift and magnify an image using Catmull-Rom interpolation
+        Shift and magnify an image using Lanczos interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray or memoryview
         :param shift_row: The number of rows to shift the image
@@ -79,14 +79,14 @@ class ShiftAndMagnify(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
     # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_opencl; replace("nearest_neighbor", "catmull_rom")
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_opencl; replace("nearest_neighbor", "lanczos")
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         # Swap row and columns because opencl is strange and stores the
         # array in a buffer in fortran ordering despite the original
         # numpy array being in C order.
         image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
 
-        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
+        code = self._get_cl_code("_le_interpolation_lanczos_.cl")
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = <int>(image.shape[1] * magnification_row)
@@ -267,10 +267,10 @@ class ShiftScaleRotate(LiquidEngine):
     def __init__(self):
         super().__init__()
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run; replace("Nearest-Neighbor", "Catmull-Rom")
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run; replace("Nearest-Neighbor", "Lanczos")
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:
         """
-        Shift and scale an image using Catmull-Rom interpolation
+        Shift and scale an image using Lanczos interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray
         :param shift_row: The number of rows to shift the image
@@ -316,7 +316,7 @@ class ShiftScaleRotate(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
     # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_opencl; replace("nearest_neighbor", "catmull_rom")
+    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_opencl; replace("nearest_neighbor", "lanczos")
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
 
         # Swap row and columns because opencl is strange and stores the
@@ -324,7 +324,7 @@ class ShiftScaleRotate(LiquidEngine):
         # numpy array being in C order.
         image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
 
-        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
+        code = self._get_cl_code("_le_interpolation_lanczos_.cl")
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = image.shape[1]
