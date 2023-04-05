@@ -6,7 +6,7 @@ cimport numpy as np
 
 from cython.parallel import parallel, prange
 
-from libc.math cimport cos, sin
+from libc.math cimport cos, sin, pi, hypot, exp, log
 
 from .__interpolation_tools__ import check_image, value2array
 from .__liquid_engine__ import LiquidEngine
@@ -582,4 +582,262 @@ class ShiftScaleRotate(LiquidEngine):
         scale_row=1, scale_col=1, angle=0) -> np.ndarray:
         image_out = _njit_shift_magnify_rotate(image, shift_row, shift_col, scale_row, scale_col, angle)
         return image_out
+    # tag-end
+
+
+
+class PolarTransform(LiquidEngine):
+    """
+    Polar Transformations using the NanoPyx Liquid Engine
+    """
+
+    _has_opencl = False
+    _has_threaded = True
+    _has_threaded_static = True
+    _has_threaded_dynamic = True
+    _has_threaded_guided = True
+    _has_unthreaded = True
+    _has_python = False
+    _has_njit = False
+
+    def __init__(self):
+        super().__init__()
+
+    # tag-start: _le_interpolation_nearest_neighbor.PolarTransform.run
+    def run(self, image, tuple out_shape, str scale, run_type=None) -> np.ndarray:
+        """
+        Polar Transform an image using Nearest-Neighbor interpolation
+        :param image: The image to transform
+        :type image: np.ndarray or memoryview
+        :param out_shape: Desired shape for the output image
+        :type out_shape: tuple (n_row, n_col)
+        :param scale: Linear or Log transform
+        :type scale: str, either 'log' or 'linear'
+        :return: The tranformed image in polar coordinates
+        """
+        image = check_image(image)
+        nrow, ncol = out_shape
+        if scale not in ['linear', 'log']:
+            scale = 'linear'
+        return self._run(image, nrow, ncol, scale, run_type=run_type)
+    # tag-end
+
+    # tag-start: _le_interpolation_nearest_neighbor.PolarTransform.benchmark
+    def benchmark(self, image, tuple out_shape, str scale):
+        """
+        Benchmark the PolarTransform run function in multiple run types
+        :param image: The image to transform
+        :type image: np.ndarray or memoryview
+        :param out_shape: Desired shape for the output image
+        :type out_shape: tuple (n_row, n_col)
+        :param scale: Linear or Log transform
+        :type scale: str, either 'log' or 'linear'
+        :return: The benchmark results
+        :rtype: [[run_time, run_type_name, return_value], ...]
+        """
+        image = check_image(image)
+        nrow, ncol = out_shape
+        if scale not in ['linear', 'log']:
+            scale = 'linear'
+        return super().benchmark(image, nrow, ncol, scale)
+    # tag-end
+
+    # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_opencl
+    def _run_opencl(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        return 0
+    # tag-end
+
+    # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded
+    def _run_unthreaded(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in range(ncol):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    # tag-end
+
+    # tag-copy: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(ncol)", "prange(ncol)")
+    def _run_threaded(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in prange(ncol):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    # tag-end
+
+    # tag-copy: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(ncol)", 'prange(ncol, schedule="static")')  
+    def _run_threaded_static(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in prange(ncol, schedule="static"):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    # tag-end
+
+    # tag-copy: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(ncol)", 'prange(ncol, schedule="dynamic")')
+    def _run_threaded_dynamic(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in prange(ncol, schedule="dynamic"):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    # tag-end
+
+    # tag-copy: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(ncol)", 'prange(ncol, schedule="guided")')
+    def _run_threaded_guided(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in prange(ncol, schedule="guided"):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    # tag-end
+
+    # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_python
+    def _run_python(self, image, nrow, ncol, scale):
+        return 0
+    # tag-end
+
+    # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_njit
+    def _run_njit(self, image, nrow, ncol, scale):
+        return 0
     # tag-end
