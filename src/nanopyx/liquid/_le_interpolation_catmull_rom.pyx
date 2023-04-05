@@ -339,7 +339,7 @@ class ShiftScaleRotate(LiquidEngine):
         prg = cl.Program(cl_ctx, code).build()
 
         # Run the kernel
-        prg.ShiftScaleRotate(
+        prg.shiftScaleRotate(
             cl_queue,
             image_out.shape,
             None,

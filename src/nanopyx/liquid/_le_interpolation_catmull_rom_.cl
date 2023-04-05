@@ -50,6 +50,7 @@ float _c_interpolate(__global float *image, float r, float c, int rows, int cols
   return q;
 }
 
+// tag-copy: _le_interpolation_nearest_neighbor_.cl.shiftAndMagnify
 __kernel void
 shiftAndMagnify(__global float *image_in, __global float *image_out,
                 __global float *shift_row, __global float *shift_col,
@@ -59,20 +60,22 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
   int rM = get_global_id(1);
   int cM = get_global_id(2);
 
-  // int nFrames = get_global_size(0);
   int rowsM = get_global_size(1);
   int colsM = get_global_size(2);
   int rows = (int)(rowsM / magnification_row);
   int cols = (int)(colsM / magnification_col);
+  int nPixels = rowsM * colsM;
 
   float row = rM / magnification_row - shift_row[f];
   float col = cM / magnification_col - shift_col[f];
 
-  image_out[f * rowsM * colsM + rM * colsM + cM] =
+  image_out[f * nPixels + rM * colsM + cM] =
       _c_interpolate(&image_in[f * rows * cols], row, col, rows, cols);
 }
+// tag-end
 
-__kernel void ShiftScaleRotate(__global float *image_in,
+// tag-copy: _le_interpolation_nearest_neighbor_.cl.shiftScaleRotate
+__kernel void shiftScaleRotate(__global float *image_in,
                                __global float *image_out,
                                __global float *shift_row,
                                __global float *shift_col, float scale_row,
@@ -97,7 +100,7 @@ __kernel void ShiftScaleRotate(__global float *image_in,
 
   int nPixels = rows * cols;
 
-  float col = (a * (cM - center_col - shift_col[f]) + b * (rM - center_row - shift_row[f])) +
+  float col = (a * (cM - center_col - shift_col[f]) + b * (rM - center_row - shift_row[f])) + 
               center_col;
   float row = (c * (cM - center_col - shift_col[f]) + d * (rM - center_row - shift_row[f])) +
               center_row;
@@ -105,3 +108,4 @@ __kernel void ShiftScaleRotate(__global float *image_in,
   image_out[f * nPixels + rM * cols + cM] =
       _c_interpolate(&image_in[f * nPixels], row, col, rows, cols);
 }
+// tag-end

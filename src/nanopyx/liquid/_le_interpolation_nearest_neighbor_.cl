@@ -10,6 +10,7 @@ float _c_interpolate(__global float *image, float row, float col, int rows, int 
   return image[r * cols + c];
 }
 
+// tag-start: _le_interpolation_nearest_neighbor_.cl.shiftAndMagnify
 __kernel void
 shiftAndMagnify(__global float *image_in, __global float *image_out,
                 __global float *shift_row, __global float *shift_col,
@@ -31,8 +32,10 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
   image_out[f * nPixels + rM * colsM + cM] =
       _c_interpolate(&image_in[f * rows * cols], row, col, rows, cols);
 }
+// tag-end
 
-__kernel void ShiftScaleRotate(__global float *image_in,
+// tag-start: _le_interpolation_nearest_neighbor_.cl.shiftScaleRotate
+__kernel void shiftScaleRotate(__global float *image_in,
                                __global float *image_out,
                                __global float *shift_row,
                                __global float *shift_col, float scale_row,
@@ -65,3 +68,4 @@ __kernel void ShiftScaleRotate(__global float *image_in,
   image_out[f * nPixels + rM * cols + cM] =
       _c_interpolate(&image_in[f * nPixels], row, col, rows, cols);
 }
+// tag-end

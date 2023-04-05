@@ -5,19 +5,11 @@
 #include <math.h>
 
 #ifndef M_PI
-#define M_PI 3.14159265358979323846
+#define M_PI 3.14159265359f
+// #define PI 3.14159265358979323846
 #endif
 
-// Calculate the Lanczos kernel (windowed sinc function) value for a given
-// value. REF: https://en.wikipedia.org/wiki/Lanczos_resampling
-double _c_lanczos_kernel(double v, int taps) {
-  if (v == 0) {
-    return 1.0;
-  } else if (fabs(v) < taps) {
-    return taps * sin(M_PI * v) * sin(M_PI * v / taps) / (M_PI * M_PI * v * v);
-  } else {
-    return 0.0;
-  }
-}
+double _c_lanczos_kernel(double v);
+float _c_interpolate(float *image, float r, float c, int rows, int cols);
 
 #endif  // _C_INTERPOLATION_LANCZOS_H
