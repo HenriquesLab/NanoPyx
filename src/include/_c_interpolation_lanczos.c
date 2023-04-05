@@ -37,7 +37,6 @@ float _c_interpolate(float* image, float r, float c, int rows, int cols) {
     if (c_neighbor < 0 || c_neighbor >= cols) {
       continue;
     }
-    p = 0;
     col_factor = _c_lanczos_kernel(c - (c_neighbor + 0.5));
 
     for (int i = 0; i <= TAPS; i++) {
