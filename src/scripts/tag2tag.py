@@ -154,8 +154,9 @@ def main():
     """
     )
 
-    path = Path(__file__).parent.parent / "nanopyx" / "liquid"
-    parse_files(path)
+    root = Path(__file__).parent.parent.parent
+    parse_files(root / "src" / "nanopyx" / "liquid")
+    parse_files(root / "tests")
 
 
 if __name__ == "__main__":
