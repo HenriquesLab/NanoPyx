@@ -1,4 +1,5 @@
 #define TAPS 4
+#define HALF_TAPS 2
 
 #include <math.h>
 
@@ -15,34 +16,42 @@ double _c_lanczos_kernel(double v) {
 }
 
 // Lanczos interpolation
-float _c_interpolate(float *image, float r, float c, int rows, int cols) {
+float _c_interpolate(float* image, float r, float c, int rows, int cols) {
   // return 0 if x OR y positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
   }
 
-  // Determine the low and high indices for the row and column dimensions
-  const int r_low = (int)fmax(floor(r) - TAPS, 0);
-  const int r_high = (int)fmin(ceil(r) + TAPS + 1, rows);
-  const int c_low = (int)fmax(floor(c) - TAPS + 1, 0);
-  const int c_high = (int)fmin(ceil(c) + TAPS, cols);
+  const int r_int = (int)floor(r - 0.5);
+  const int c_int = (int)floor(c - 0.5);
+  double v_interpolated = 0;
 
-  double interpolated_value = 0;
   double weight = 0;
   double weight_sum = 0;
 
+  int r_neighbor, c_neighbor;
   double row_factor, col_factor;
 
-  for (int r_neighbor = r_low; r_neighbor <= r_high; r_neighbor++) {
-    row_factor = _c_lanczos_kernel(r - r_neighbor);
-    for (int c_neighbor = c_low; c_neighbor <= c_high; c_neighbor++) {
-      col_factor = _c_lanczos_kernel(c - c_neighbor);
+  for (int j = 0; j <= TAPS; j++) {
+    c_neighbor = c_int - HALF_TAPS + j;
+    if (c_neighbor < 0 || c_neighbor >= cols) {
+      continue;
+    }
+    p = 0;
+    col_factor = _c_lanczos_kernel(c - (c_neighbor + 0.5));
+
+    for (int i = 0; i <= TAPS; i++) {
+      r_neighbor = r_int - HALF_TAPS + i;
+      if (r_neighbor < 0 || r_neighbor >= rows) {
+        continue;
+      }
+      row_factor = _c_lanczos_kernel(r - (r_neighbor + 0.5));
 
       // Add the contribution from this tap to the interpolation
       weight = row_factor * col_factor;
-      interpolated_value += image[r_neighbor * cols + c_neighbor] * weight;
+      v_interpolated += image[r_neighbor * cols + c_neighbor] * weight;
       weight_sum += weight;
     }
   }
-  return interpolated_value / weight_sum;
+  return v_interpolated / weight_sum;
 }
