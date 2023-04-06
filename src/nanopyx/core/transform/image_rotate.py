@@ -22,8 +22,8 @@ def catmull_rom_rotate(image: np.ndarray, angle:float):
 
 
 @timeit2
-def lanczos_rotate(image: np.ndarray, angle:float, taps: int = 3):
-    interpolator = interpolation_lanczos.Interpolator(image, taps)
+def lanczos_rotate(image: np.ndarray, angle:float):
+    interpolator = interpolation_lanczos.Interpolator(image)
     return interpolator.rotate(angle)
 
 

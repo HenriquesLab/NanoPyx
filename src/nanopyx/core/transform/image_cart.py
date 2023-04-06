@@ -18,8 +18,8 @@ def catmull_rom_cart(image: np.ndarray, x_shape: int, y_shape: int, scale:str='l
 
 
 @timeit2
-def lanczos_cart(image: np.ndarray, x_shape: int, y_shape: int, scale:str='linear', taps: int = 3):
-    interpolator = interpolation_lanczos.Interpolator(image, taps)
+def lanczos_cart(image: np.ndarray, x_shape: int, y_shape: int, scale:str='linear'):
+    interpolator = interpolation_lanczos.Interpolator(image)
     return interpolator.cartesian(x_shape,y_shape,scale)
 
 

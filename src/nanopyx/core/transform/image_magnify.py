@@ -49,8 +49,7 @@ def catmull_rom_zoom_xy(image: np.ndarray, magnification_y: int = 2, magnificati
 
 @timeit2
 def lanczos_zoom(
-    image: np.ndarray, magnification: int = 2, taps: int = 3
-) -> np.ndarray:
+    image: np.ndarray, magnification: int = 2) -> np.ndarray:
     """
     Zoom an image by Lanczos interpolation
     :param image: 2D grid of pixel values.
@@ -59,7 +58,7 @@ def lanczos_zoom(
     :return: zoomed image.
     """
 
-    interpolator = interpolation_lanczos.Interpolator(image, taps)
+    interpolator = interpolation_lanczos.Interpolator(image)
     return interpolator.magnify(magnification)
 
 

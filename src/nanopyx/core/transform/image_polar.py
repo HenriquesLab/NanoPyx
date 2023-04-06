@@ -20,8 +20,8 @@ def catmull_rom_polar(image: np.ndarray, scale:str='linear'):
 
 
 @timeit2
-def lanczos_polar(image: np.ndarray, scale:str='linear', taps: int = 3):
-    interpolator = interpolation_lanczos.Interpolator(image, taps)
+def lanczos_polar(image: np.ndarray, scale:str='linear'):
+    interpolator = interpolation_lanczos.Interpolator(image)
     return interpolator.polar(scale)
 
 

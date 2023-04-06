@@ -23,8 +23,8 @@ def catmull_rom_shift(image: np.ndarray, dx: float, dy: float):
 
 
 @timeit2
-def lanczos_shift(image: np.ndarray, dx: float, dy: float, taps: int = 3):
-    interpolator = interpolation_lanczos.Interpolator(image, taps)
+def lanczos_shift(image: np.ndarray, dx: float, dy: float):
+    interpolator = interpolation_lanczos.Interpolator(image)
     return interpolator.shift(dx, dy)
 
 
