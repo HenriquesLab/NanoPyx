@@ -18,6 +18,7 @@ class LiquidEngine:
     Base class for parts of the NanoPyx Liquid Engine
     """
 
+    # gives an unique id to each instance of the class
     RUN_TYPE_OPENCL: int = 0
     RUN_TYPE_UNTHREADED: int = 1
     RUN_TYPE_THREADED: int = 2
@@ -39,6 +40,7 @@ class LiquidEngine:
         RUN_TYPE_NJIT: "Numba",
     }
 
+    # the following variables are used to identify if each type of run is available
     _has_opencl: bool = False
     _has_unthreaded: bool = False
     _has_threaded: bool = False
@@ -48,16 +50,24 @@ class LiquidEngine:
     _has_python: bool = False
     _has_njit: bool = False
 
-    _random_testing: bool = True
+    _random_testing: bool = True  # used to sometimes try different run types when using the run(...) method
     _show_info: bool = False  # print what's going on
 
-    _default_fastest: int = RUN_TYPE_OPENCL
-    _last_run_type: int = None
-    _last_run_time: float = None
+    _default_fastest: int = RUN_TYPE_OPENCL  # the default run type to use when using the run(...) method
+    _last_run_type: int = None  # the last run type used
+    _last_run_time: float = None  # the time the last run took
 
     def __init__(self, clear_config=False):
         """
         Initialize the Liquid Engine
+
+        The code does the following:
+        1. Checks whether OpenCL is available (by running a simple OpenCL kernel)
+        2. Checks whether Numba is available (by running the njit decorator)
+        3. Creates a path to store the config file (e.g. ~/.nanopyx/liquid/_le_interpolation_nearest_neighbor.cpython-310-darwin/ShiftAndMagnify.yml)
+        4. Loads the config file (if it exists)
+        5. Creates empty dictionaries for each run type (e.g. 'Threaded', 'OpenCL', 'Numba')
+
         :param clear_config: whether to clear the config file
         """
         # Check if OpenCL is available
@@ -81,10 +91,12 @@ class LiquidEngine:
         )
         os.makedirs(base_path, exist_ok=True)
 
+        # set path to config file
         self._config_file = os.path.join(
             base_path, self.__class__.__name__ + ".yml"
         )
 
+        # Load config file if it exists, otherwise create an empty config
         if not clear_config and os.path.exists(self._config_file):
             with open(self._config_file) as f:
                 self._cfg = yaml.load(f, Loader=yaml.FullLoader)
@@ -144,6 +156,14 @@ class LiquidEngine:
     def benchmark(self, *args, **kwargs):
         """
         Benchmark the different run types
+
+        The code does the following:
+        1. Create a list of run types to benchmark
+        2. Run each run type and record the run time and return value
+        3. Sort the run times from fastest to slowest
+        4. Compare each run type against each other, sorted by speed
+        5. Print the results
+
         :param args: args for the run method
         :param kwargs: kwargs for the run method
         :return:  a list of tuples containing the run time, run type name and return value
@@ -154,6 +174,7 @@ class LiquidEngine:
         returns = {}
         run_types = []
 
+        # Create a list of run types to benchmark
         if self._has_opencl:
             run_types.append(self.RUN_TYPE_OPENCL)
         if self._has_threaded:
@@ -178,6 +199,7 @@ class LiquidEngine:
                     "Consider adding default arguments to njit implementation to trigger early compilation"
                 )
 
+        # Run each run type and record the run time and return value
         for run_type in run_types:
             designation = self.RUN_TYPE_DESIGNATION[run_type]
             r = self._run(*args, run_type=run_type, **kwargs)
@@ -232,16 +254,23 @@ class LiquidEngine:
         :param kwargs: kwargs for the run method
         :return: the mean, standard deviation of the run time and the number of runs
         """
+
+        # Get the call args
         call_args = self._get_args_repr(*args, **kwargs)
+        # Get the run type designation
         run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
+
+        # Check if the run type has been run
         r = self._cfg[run_type_designation]
+        # If not, return None
         if call_args not in r:
             return None, None, None
 
+        # Get the run times
         c = r[call_args]
-        sum = c[0]
-        sum_sq = c[1]
-        n = c[2]
+        sum = c[0]  # Sum of run times
+        sum_sq = c[1]  # Sum of squared run times (for std)
+        n = c[2]  # Number of runs
         mean = sum / n
         if (n - 1) > 0:
             std = np.sqrt((sum_sq - n * mean**2) / (n - 1))
@@ -273,14 +302,17 @@ class LiquidEngine:
         :param kwargs: kwargs for the run method
         :return: None
         """
-        self._last_run_time = delta
-        call_args = self._get_args_repr(*args, **kwargs)
+        self._last_run_time = delta  # Store the last run time
+        call_args = self._get_args_repr(*args, **kwargs)  # Get the call args
+        # Get the run type designation
         run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
 
+        # Check if the run type has been run
         r = self._cfg[run_type_designation]
         if call_args not in r:
             r[call_args] = [0, 0, 0]
 
+        # Get the run times
         c = r[call_args]
         # add the time it took to run, later used for average
         c[0] = c[0] + delta
@@ -298,9 +330,17 @@ class LiquidEngine:
         with open(self._config_file, "w") as f:
             yaml.dump(self._cfg, f)
 
-    def _get_fastest_run_type(self, *args, **kwargs):
+    def _get_fastest_run_type(self, *args, **kwargs) -> int:
         """
         Retrieves the fastest run type for the given args and kwargs
+
+        The code does the following:
+        1. Get the fastest run type based on the args and kwargs
+        2. If the args and kwargs are not in the config, it will find the most similar args and kwargs
+        3. It will also use the runtime of the function to determine the fastest run type
+
+        :return: the fastest run type
+        :rtype: int (see RUN_TYPE_DESIGNATION)
         """
 
         fastest = self._default_fastest
@@ -387,6 +427,14 @@ class LiquidEngine:
     def _get_args_repr(self, *args, **kwargs) -> str:
         """
         Get a string representation of the args and kwargs
+
+        The code does the following:
+        1. It uses the "repr" function to get a string representation of the args and kwargs
+        2.  It converts any args that are floats or ints to "number()" strings, and any args that are tensors to "shape()" strings
+        3.  It converts any kwargs that are floats or ints to "number()" strings, and any kwargs that are tensors to "shape()" strings
+
+        :return: the string representation of the args and kwargs
+        :rtype: str
         """
         # print("Args: ", args)
         # print("Kwargs: ", kwargs)
@@ -411,6 +459,12 @@ class LiquidEngine:
     def _get_args_shapes_numbers(self, txt: str):
         """
         Get the shapes and numbers from the string representation of the args and kwargs
+
+        The code does the following:
+        1. Finds all shape values in the text
+        2. Finds all number values in the text
+        3. Converts the found values to float
+
         :param txt: the string representation of the args and kwargs
         :return: a tuple of the shapes and numbers
         """
@@ -474,6 +528,17 @@ class LiquidEngine:
     def _run(self, *args, run_type=None, **kwargs):
         """
         Runs the function with the given args and kwargs
+
+        The code above does the following:
+        1. Check if you have the specified run_type
+            - if you do not, it will raise a NotImplementedError
+        2. Check if you have the _run_XXX function
+            - if you do not, it will raise a NotImplementedError
+        3. It will run the _run_XXX function
+            - it will also store the run time
+            - it will also store the last run type
+        4. It will return the result
+
         :param args: args for the function
         :param run_type: the run type to use, if None use the fastest run type
         :param kwargs: kwargs for the function
