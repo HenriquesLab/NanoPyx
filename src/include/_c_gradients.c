@@ -16,3 +16,17 @@ void gradient_roberts_cross(float *image, float *imGr, float *imGc, int rows,
     }
   }
 }
+
+void gradient_2point(float *image, float *imGx, float *imGy, int h, int w) {
+  int x0, y0, x1, y1;
+  for (int j = 1; j < h; j++) {
+    y1 = j * w;
+    y0 = (j - 1) * w;
+    for (int i = 1; i < w; i++) {
+      x1 = i;
+      x0 = i - 1;
+      imGx[y1 + i] = image[y1 + x1] - image[y1 + x0];
+      imGy[y1 + i] = image[y1 + x1] - image[y0 + x1];
+    }
+  }
+}

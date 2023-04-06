@@ -1,25 +1,23 @@
-float _c_interpolate(__global float *image, float r, float c, int rows,
-                     int cols);
-double _c_cubic(double v);
+double _c_lanczos_kernel(double v);
+float _c_interpolate(__global float *image, float r, float c, int rows, int cols);
 
-// c2cl-function: _c_cubic from _c_interpolation_catmull_rom.c
-double _c_cubic(double v) {
-  double a = 0.5;
-  double z = 0;
-  if (v < 0) {
-    v = -v;
+#define TAPS 4
+#define HALF_TAPS 2
+
+// c2cl-function: _c_lanczos_kernel from _c_interpolation_lanczos.c
+double _c_lanczos_kernel(double v) {
+  if (v == 0) {
+    return 1.0;
+  } else if (fabs(v) < TAPS) {
+    double v_pi = v * M_PI;
+    return TAPS * sin(v_pi) * sin(v_pi / TAPS) / (v_pi * v_pi);
+  } else {
+    return 0.0;
   }
-  if (v < 1) {
-    z = v * v * (v * (-a + 2) + (a - 3)) + 1;
-  } else if (v < 2) {
-    z = -a * v * v * v + 5 * a * v * v - 8 * a * v + 4 * a;
-  }
-  return z;
 }
 
-// c2cl-function: _c_interpolate from _c_interpolation_catmull_rom.c
-float _c_interpolate(__global float *image, float r, float c, int rows,
-                     int cols) {
+// c2cl-function: _c_interpolate from _c_interpolation_lanczos.c
+float _c_interpolate(__global float *image, float r, float c, int rows, int cols) {
   // return 0 if x OR y positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
@@ -27,29 +25,35 @@ float _c_interpolate(__global float *image, float r, float c, int rows,
 
   const int r_int = (int)floor(r - 0.5);
   const int c_int = (int)floor(c - 0.5);
-  double q = 0;
-  double p = 0;
+  double v_interpolated = 0;
+
+  double weight = 0;
+  double weight_sum = 0;
 
   int r_neighbor, c_neighbor;
+  double row_factor, col_factor;
 
-  for (int j = 0; j < 4; j++) {
-    c_neighbor = c_int - 1 + j;
-    p = 0;
+  for (int j = 0; j <= TAPS; j++) {
+    c_neighbor = c_int - HALF_TAPS + j;
     if (c_neighbor < 0 || c_neighbor >= cols) {
       continue;
     }
+    col_factor = _c_lanczos_kernel(c - (c_neighbor + 0.5));
 
-    for (int i = 0; i < 4; i++) {
-      r_neighbor = r_int - 1 + i;
+    for (int i = 0; i <= TAPS; i++) {
+      r_neighbor = r_int - HALF_TAPS + i;
       if (r_neighbor < 0 || r_neighbor >= rows) {
         continue;
       }
-      p = p + image[r_neighbor * cols + c_neighbor] *
-                  _c_cubic(r - (r_neighbor + 0.5));
+      row_factor = _c_lanczos_kernel(r - (r_neighbor + 0.5));
+
+      // Add the contribution from this tap to the interpolation
+      weight = row_factor * col_factor;
+      v_interpolated += image[r_neighbor * cols + c_neighbor] * weight;
+      weight_sum += weight;
     }
-    q = q + p * _c_cubic(c - (c_neighbor + 0.5));
   }
-  return q;
+  return v_interpolated / weight_sum;
 }
 
 // tag-copy: _le_interpolation_*.cl

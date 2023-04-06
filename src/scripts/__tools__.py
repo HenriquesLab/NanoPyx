@@ -11,7 +11,8 @@ def find_files(root_dir: str, extension: str) -> list:
     target_files = []
     for root, dirs, files in os.walk(root_dir):
         for file in files:
-            if file.endswith(extension):
+            _extension = os.path.splitext(file)[1]
+            if _extension in (extension, "." + extension):
                 path = os.path.join(root, file)
                 target_files.append(path)
                 # print(f"Found file: {path}")
