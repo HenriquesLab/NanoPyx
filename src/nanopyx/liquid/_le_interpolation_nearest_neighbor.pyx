@@ -644,7 +644,43 @@ class PolarTransform(LiquidEngine):
 
     # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_opencl
     def _run_opencl(self, float[:,:,:] image, int nrow, int ncol, str scale):
-        return 0
+        
+        # Swap row and columns because opencl is strange and stores the
+        # array in a buffer in fortran ordering despite the original
+        # numpy array being in C order.
+        image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
+
+        code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
+
+        cdef int nFrames = image.shape[0]
+        cdef int rowsM = image.shape[1]
+        cdef int colsM = image.shape[2]
+
+        image_in = cl_array.to_device(cl_queue, image)
+        image_out = cl_array.zeros(cl_queue, (nFrames, nrow, ncol), dtype=np.float32)
+        
+        cdef int scale_int = 0
+        if scale == 'log':
+            scale_int = 1
+
+        # Create the program
+        prg = cl.Program(cl_ctx, code).build()
+
+        # Run the kernel
+        prg.PolarTransform(
+            cl_queue,
+            image_out.shape,
+            None,
+            image_in.data,
+            image_out.data,
+            scale_int
+        )
+
+        # Wait for queue to finish
+        cl_queue.finish()
+
+        # Swap rows and columns back
+        return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded
