@@ -113,6 +113,17 @@ exclude = '''
   | dist
 )/
 '''
+line-length = 120
+import-order = ["stdlib", "thirdparty", "local"]
+py37 = true
+
+[tool.flake8]
+# https://pypi.org/project/Flake8-pyproject/
+# https://flake8.pycqa.org/en/latest/user/configuration.html
+filename = [".py", "*.pyx", "*.px*"]
+exclude = [".eggs", "*.egg,build"]
+ignore = ["E901", "E225", "E226", "E227", "W503", "F401"]
+max-line-length = 120
 
 [tool.pyright]
 reportUndefinedVariable = false
@@ -133,14 +144,6 @@ filterwarnings = [
     "ignore:.*Deprecated NumPy.*:DeprecationWarning:.*",
 ]
 testpaths = ["tests", "src"]
-
-[tool.flake8]
-# https://pypi.org/project/Flake8-pyproject/
-# https://flake8.pycqa.org/en/latest/user/configuration.html
-filename = [".py", "*.pyx", "*.px*"]
-exclude = [".eggs", "*.egg,build"]
-ignore = ["E901", "E225", "E226", "E227", "W503", "F401"]
-max-line-length = 120
 
 
 [tool.cibuildwheel]
