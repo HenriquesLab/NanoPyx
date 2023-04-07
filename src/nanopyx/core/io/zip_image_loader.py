@@ -25,7 +25,6 @@ class ZipTiffIterator:
             if name.endswith(".tif") and not name.startswith("_")
         ]
         self.tiff_file_names = sorted(self.tiff_file_names)
-        # print(self.tiff_file_names)
 
     def __getitem__(self, index: int) -> np.ndarray:
         if index >= len(self.tiff_file_names):
@@ -53,11 +52,11 @@ class ZipTiffIterator:
             self._dtype = self._im0.dtype
         return self._im0
 
-    def get_shape(self) -> list:
+    def get_shape(self) -> List[int]:
         """
         Returns the shape of the image stack
         :return: shape of the image stack
-        :rtype: list
+        :rtype: list[int]
         """
         self._get_im0()
         return self._shape
@@ -81,7 +80,7 @@ class ZipTiffIterator:
         _max = thumb.max()
         _min = thumb.min()
         thumb = (thumb.astype("float32") - _min / (_max - _min)) * 255
-        if save_path != None:
+        if save_path is not None:
             # Save the thumbnail as a JPEG file
             skimage.io.imsave(os.path.join(save_path, "thumbnail.jpg"), thumb)
 
