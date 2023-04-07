@@ -75,7 +75,7 @@ Before you submit a pull request, check that it meets these guidelines:
 The default way to recognise contributions is via the [contributors](https://github.com/HenriquesLab/NanoPyx/graphs/contributors) section of the repository. The attribution of authorship to future publications derived from the NanoPyx project are not given "automatically" to contributors and follow the guidelines:
 
 - Authorship roles and expectations are discussed early on in the project and ultimately decided by the senior project lead (Ricardo Henriques). This is often an ongoing conversation throughout the project, as roles and contributions may change over time.
-- All authors are expected to contributed significantly to the project. This includes conception, design, development of functionality, data acquisition, analysis and interpretation, and drafting and revising the manuscripts. These contributions are done with prior discussion and agreement of the senior project lead and core development team.
+- All authors are expected to contribute significantly to the project. This includes conception, design, development of functionality, data acquisition, analysis and interpretation, and drafting and revising the manuscripts. These contributions are done with prior discussion and agreement of the senior project lead and core development team.
 
 ## **Code of Conduct**
 
