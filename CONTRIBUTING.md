@@ -68,3 +68,21 @@ Before you submit a pull request, check that it meets these guidelines:
 - The pull request should work for Python 3.8, 3.9 and 3.10
 - If the pull request adds functionality, new automated tests should be included in the pull request covering the new functionality
 - Please ensure pytest coverage at least stays the same before you submit a pull request.
+- The core development team reserves the write to reject pull requests, particularly if these only entail cosmetic changes to the code such as orthographic correction or the addition of type hint to variables.
+
+## **Authorship Expectations**
+
+The default way to recognise contributions is via the [contributors](https://github.com/HenriquesLab/NanoPyx/graphs/contributors) section of the repository. The attribution of authorship to future publications derived from the NanoPyx project are not given "automatically" to contributors and follow the guidelines:
+
+- Authorship roles and expectations are discussed early on in the project and ultimately decided by the senior project lead (Ricardo Henriques). This is often an ongoing conversation throughout the project, as roles and contributions may change over time.
+- All authors are expected to contributed significantly to the project. This includes conception, design, development of functionality, data acquisition, analysis and interpretation, and drafting and revising the manuscripts. These contributions are done with prior discussion and agreement of the senior project lead and core development team.
+
+## **Code of Conduct**
+
+Please note that this project is follows a [Contributor Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/). By participating in this project you agree to abide by its terms.
+
+## **Communication**
+
+If you have questions, feel free to ask via GitHub issues. For general inquiries, please contact the project senior project lead Ricardo Henriques.
+
+Thank you for contributing to **nanopyx**! We appreciate your time and effort in making this project better.
