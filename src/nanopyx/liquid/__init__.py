@@ -10,28 +10,19 @@ Cython, Numba, etc.).
 >>> values = mb.benchmark(64) # doctest: +SKIP
 """
 
-import os  # noqa: F401
-import warnings  # noqa: F401
+# flake8: noqa: F401
 
-from ._le_interpolation_catmull_rom import (  # noqa: F401
-    ShiftAndMagnify as CRShiftAndMagnify,
-)
-from ._le_interpolation_catmull_rom import (  # noqa: F401
-    ShiftScaleRotate as CRShiftScaleRotate,
-)
-from ._le_interpolation_nearest_neighbor import (  # noqa: F401
-    ShiftAndMagnify as NNShiftAndMagnify,
-)
-from ._le_interpolation_nearest_neighbor import (  # noqa: F401
-    ShiftScaleRotate as NNShiftScaleRotate,
-)
-from ._le_mandelbrot_benchmark import MandelbrotBenchmark  # noqa: F401
-from .__njit__ import njit_works  # noqa: F401
-from .__opencl__ import (  # noqa: F401
-    cl,
-    cl_array,
-    cl_ctx,
-    cl_queue,
-    opencl_works,
-    print_opencl_info,
-)
+import os
+import warnings
+
+from .__njit__ import njit_works
+from .__opencl__ import cl, cl_array, cl_ctx, cl_queue, opencl_works, print_opencl_info
+from ._le_interpolation_bicubic import ShiftAndMagnify as BCShiftAndMagnify
+from ._le_interpolation_bicubic import ShiftScaleRotate as BCShiftScaleRotate
+from ._le_interpolation_catmull_rom import ShiftAndMagnify as CRShiftAndMagnify
+from ._le_interpolation_catmull_rom import ShiftScaleRotate as CRShiftScaleRotate
+from ._le_interpolation_lanczos import ShiftAndMagnify as LZShiftAndMagnify
+from ._le_interpolation_lanczos import ShiftScaleRotate as LZShiftScaleRotate
+from ._le_interpolation_nearest_neighbor import ShiftAndMagnify as NNShiftAndMagnify
+from ._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScaleRotate
+from ._le_mandelbrot_benchmark import MandelbrotBenchmark
