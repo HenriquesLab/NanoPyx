@@ -1,9 +1,7 @@
-float _c_interpolate(__global float *image, float row, float col, int rows,
-                     int cols);
+float _c_interpolate(__global float *image, float row, float col, int rows, int cols);
 
 // c2cl-function: _c_interpolate from _c_interpolation_nearest_neighbor.c
-float _c_interpolate(__global float *image, float row, float col, int rows,
-                     int cols) {
+float _c_interpolate(__global float *image, float row, float col, int rows, int cols) {
   int r = (int)row;
   int c = (int)col;
   if (r < 0 || r >= rows || c < 0 || c >= cols) {

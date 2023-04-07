@@ -1,5 +1,4 @@
-float _c_interpolate(__global float *image, float r, float c, int rows,
-                     int cols);
+float _c_interpolate(__global float *image, float r, float c, int rows, int cols);
 double _c_cubic(double v);
 
 // c2cl-function: _c_cubic from _c_interpolation_catmull_rom.c
@@ -18,9 +17,8 @@ double _c_cubic(double v) {
 }
 
 // c2cl-function: _c_interpolate from _c_interpolation_catmull_rom.c
-float _c_interpolate(__global float *image, float r, float c, int rows,
-                     int cols) {
-  // return 0 if x OR y positions do not exist in image
+float _c_interpolate(__global float *image, float r, float c, int rows, int cols) {
+  // return 0 if r OR c positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
   }
