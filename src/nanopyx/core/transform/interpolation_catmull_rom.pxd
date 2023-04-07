@@ -1,7 +1,6 @@
 cdef extern from "_c_interpolation_catmull_rom.h":
     float _c_interpolate(float * image, float r, float c, int rows, int cols) nogil
 
-
 from .interpolation_nearest_neighbor cimport \
     Interpolator as InterpolatorNearestNeighbor
 

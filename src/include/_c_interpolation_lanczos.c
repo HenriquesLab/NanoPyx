@@ -17,7 +17,7 @@ double _c_lanczos_kernel(double v) {
 
 // Lanczos interpolation
 float _c_interpolate(float* image, float r, float c, int rows, int cols) {
-  // return 0 if x OR y positions do not exist in image
+  // return 0 if r OR c positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
   }
