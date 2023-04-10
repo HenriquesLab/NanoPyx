@@ -46,7 +46,7 @@ cdef class RadialGradientConvergence:
         """
         Calculate the RGC of an image-stack.
         :param im: the image to calculate the RGC of
-        :return: the RGC of the image
+        :return: the RGC map of the image
         """
         assert im.ndim == 3
 
