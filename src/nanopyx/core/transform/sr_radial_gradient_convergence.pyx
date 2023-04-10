@@ -28,7 +28,7 @@ cdef class RadialGradientConvergence:
         """
         Calculate the Radial Gradient Convergence (RGC) of an image.
         :param magnification: magnification of the image
-        :param radius: radius of the RGC (the PSF Full-Width-Half-Maximum)
+        :param radius: radius (in pixels) for the RGC calculation (the PSF Full-Width-Half-Maximum)
         :param sensitivity: sensitivity of the RGC (sharpening factor)
         :param doIntensityWeighting: whether to do intensity weighting
         """
