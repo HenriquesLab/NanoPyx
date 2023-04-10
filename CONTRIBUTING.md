@@ -68,7 +68,7 @@ Before you submit a pull request, check that it meets these guidelines:
 - The pull request should work for Python 3.8, 3.9 and 3.10
 - If the pull request adds functionality, new automated tests should be included in the pull request covering the new functionality
 - Please ensure pytest coverage at least stays the same before you submit a pull request.
-- The core development team reserves the write to reject pull requests, particularly if these only entail cosmetic changes to the code such as orthographic correction or the addition of type hint to variables.
+- The core development team reserves the right to reject pull requests, particularly if these only entail cosmetic changes to the code such as orthographic correction or the addition of type hint to variables.
 
 ## **Authorship Expectations**
 
