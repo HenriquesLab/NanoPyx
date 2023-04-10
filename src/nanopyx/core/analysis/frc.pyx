@@ -267,15 +267,15 @@ cdef class FIRECalculator:
         """
         Returns the plot of the results of the analysis as a numpy array
         """
-        fig = plt.figure(dpi=300)
-        plt.plot(np.array(self.frc_curve[:, 0]), np.array(self.frc_curve[:, 1]))
-        plt.axhline(1/7, color='r', linestyle='-')
-        plt.xlabel(f'Spatial frequency [1/{self.units}]')
-        plt.ylabel('FRC')
-        plt.title(f"FRC resolution: {np.round(self.fire_number, 1)} {self.units}")
-        plt.grid()
+        plt.ioff()
+        fig, ax= plt.subplots(dpi=150)
+        ax.plot(np.array(self.frc_curve[:, 0]), np.array(self.frc_curve[:, 1]))
+        ax.axhline(1/7, color='r', linestyle='-')
+        ax.set_xlabel(f'Spatial frequency [1/{self.units}]')
+        ax.set_ylabel('FRC')
+        ax.set_title(f"FRC resolution: {np.round(self.fire_number, 1)} {self.units}")
         with io.BytesIO() as buf:
-            fig.savefig(buf, format="raw", dpi=300)
+            fig.savefig(buf, format="raw", dpi=150)
             buf.seek(0)
             data = np.frombuffer(buf.getvalue(), dtype=np.uint8)
         w, h = fig.canvas.get_width_height()

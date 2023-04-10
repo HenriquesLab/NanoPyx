@@ -439,12 +439,13 @@ cdef class DecorrAnalysis:
         """
         Returns the plot of the results of the analysis as a numpy array
         """
-        fig = plt.figure(dpi=300)
+        plt.ioff()
+        fig, ax = plt.subplots(dpi=150)
         x = np.linspace(0.0, 1.0, self.n_r)
         for k in range(self.d0.shape[0]):
             x[k] = self.rmin + (self.rmax-self.rmin)*k/(self.n_r-1)
 
-        plt.plot(x, np.array(self.d0), c="k")
+        ax.plot(x, np.array(self.d0), c="k")
 
         dg = np.zeros((self.n_r))
         for k in range(self.n_g):
@@ -459,13 +460,12 @@ cdef class DecorrAnalysis:
             plt.plot(x, dg, c="b")
         kc = np.array(self.kc)
         a_g = np.array(self.a_g)
-        plt.axvline(x=self.kc_max, color="b", linestyle="-", label="Cut-off frequency")
-        plt.xlabel(f"Normalized frequency")
-        plt.ylabel("Cross-correlation coefficients")
-        plt.title(f"Decorrelation analysis resolution: {np.round(self.resolution, 4)} {self.units}")
-        plt.grid()
+        ax.axvline(x=self.kc_max, color="b", linestyle="-", label="Cut-off frequency")
+        ax.set_xlabel(f"Normalized frequency")
+        ax.set_ylabel("Cross-correlation coefficients")
+        ax.set_title(f"Decorrelation analysis resolution: {np.round(self.resolution, 4)} {self.units}")
         with io.BytesIO() as buf:
-            fig.savefig(buf, format="raw", dpi=300)
+            fig.savefig(buf, format="raw", dpi=150)
             buf.seek(0)
             data = np.frombuffer(buf.getvalue(), dtype=np.uint8)
         w, h = fig.canvas.get_width_height()
