@@ -1,5 +1,6 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
+import io
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.signal import savgol_filter
@@ -263,10 +264,21 @@ cdef class FIRECalculator:
         return self._calculate_fire_number(img_1.astype(np.float32), img_2.astype(np.float32))
     
     def plot_frc_curve(self):
+        """
+        Returns the plot of the results of the analysis as a numpy array
+        """
+        fig = plt.figure(dpi=300)
         plt.plot(np.array(self.frc_curve[:, 0]), np.array(self.frc_curve[:, 1]))
         plt.axhline(1/7, color='r', linestyle='-')
         plt.xlabel(f'Spatial frequency [1/{self.units}]')
         plt.ylabel('FRC')
         plt.title(f"FRC resolution: {np.round(self.fire_number, 1)} {self.units}")
         plt.grid()
-        plt.show()
+        with io.BytesIO() as buf:
+            fig.savefig(buf, format="raw", dpi=300)
+            buf.seek(0)
+            data = np.frombuffer(buf.getvalue(), dtype=np.uint8)
+        w, h = fig.canvas.get_width_height()
+        im = data.reshape((int(h), int(w), -1))
+
+        return im

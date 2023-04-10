@@ -2,6 +2,7 @@
 
 from math import cos, fabs, sqrt
 
+import io
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.ndimage import gaussian_filter
@@ -435,6 +436,10 @@ cdef class DecorrAnalysis:
             self.plot_results()
 
     def plot_results(self):
+        """
+        Returns the plot of the results of the analysis as a numpy array
+        """
+        fig = plt.figure(dpi=300)
         x = np.linspace(0.0, 1.0, self.n_r)
         for k in range(self.d0.shape[0]):
             x[k] = self.rmin + (self.rmax-self.rmin)*k/(self.n_r-1)
@@ -454,12 +459,16 @@ cdef class DecorrAnalysis:
             plt.plot(x, dg, c="b")
         kc = np.array(self.kc)
         a_g = np.array(self.a_g)
-        # for k in range(kc.shape[0]):
-        #     plt.plot(kc[k], a_g[k], c="g", marker="x")
-        # plt.plot(self.kc0, self.a0, c="r", marker="x")
         plt.axvline(x=self.kc_max, color="b", linestyle="-", label="Cut-off frequency")
         plt.xlabel(f"Normalized frequency")
         plt.ylabel("Cross-correlation coefficients")
         plt.title(f"Decorrelation analysis resolution: {np.round(self.resolution, 4)} {self.units}")
         plt.grid()
-        plt.show()
+        with io.BytesIO() as buf:
+            fig.savefig(buf, format="raw", dpi=300)
+            buf.seek(0)
+            data = np.frombuffer(buf.getvalue(), dtype=np.uint8)
+        w, h = fig.canvas.get_width_height()
+        im = data.reshape((int(h), int(w), -1))
+
+        return im
