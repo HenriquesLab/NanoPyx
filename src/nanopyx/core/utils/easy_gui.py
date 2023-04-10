@@ -192,7 +192,6 @@ class EasyGui:
         
 def view_image(image):
     
-    plt.ion()
     fig, ax = plt.subplots()
     fig.canvas.header_visible = False
     fig.canvas.footer_visible = False
@@ -207,8 +206,6 @@ def view_image_stack(image, cmap="viridis"):
     Sliders to move across the dimensions are added.
     :param cmap: colormap to be use to plot the image
     """
-
-    plt.ion()
     cm = plt.get_cmap(cmap)
     dims = image.shape
     params = {}
@@ -241,7 +238,6 @@ def view_curtain_stack(image_1: np.ndarray, image_2: np.ndarray, cmap: str = "vi
         image_2 (np.ndarray): Right image to be plotted on the curtain
         cmap (str, optional): Matplotlib colormap to be used to plot the images. Defaults to "viridis".
     """
-    plt.ion()
     assert image_1.shape == image_2.shape
     dims = image_1.shape
     params = {}

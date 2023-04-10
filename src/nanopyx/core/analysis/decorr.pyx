@@ -439,7 +439,6 @@ cdef class DecorrAnalysis:
         """
         Returns the plot of the results of the analysis as a numpy array
         """
-        plt.ioff()
         fig, ax = plt.subplots(dpi=150)
         x = np.linspace(0.0, 1.0, self.n_r)
         for k in range(self.d0.shape[0]):
@@ -470,5 +469,6 @@ cdef class DecorrAnalysis:
             data = np.frombuffer(buf.getvalue(), dtype=np.uint8)
         w, h = fig.canvas.get_width_height()
         im = data.reshape((int(h), int(w), -1))
+        plt.close(fig)
 
         return im

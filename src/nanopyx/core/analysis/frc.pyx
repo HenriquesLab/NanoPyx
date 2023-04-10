@@ -267,7 +267,6 @@ cdef class FIRECalculator:
         """
         Returns the plot of the results of the analysis as a numpy array
         """
-        plt.ioff()
         fig, ax= plt.subplots(dpi=150)
         ax.plot(np.array(self.frc_curve[:, 0]), np.array(self.frc_curve[:, 1]))
         ax.axhline(1/7, color='r', linestyle='-')
@@ -280,5 +279,6 @@ cdef class FIRECalculator:
             data = np.frombuffer(buf.getvalue(), dtype=np.uint8)
         w, h = fig.canvas.get_width_height()
         im = data.reshape((int(h), int(w), -1))
+        plt.close(fig)
 
         return im
