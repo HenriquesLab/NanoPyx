@@ -3,12 +3,11 @@ A module to help simplify the create of GUIs in Jupyter notebooks using ipywidge
 """
 
 import os
-import cv2
 import yaml
+import platform
 import numpy as np
-from PIL import Image
+from functools import cache, lru_cache
 from skimage.exposure import rescale_intensity
-from skimage.util import img_as_uint
 
 try:
     import ipywidgets as widgets
@@ -220,14 +219,27 @@ def view_image_stack(image, cmap="viridis"):
     fig.canvas.header_visible = False
     fig.canvas.footer_visible = False
 
-    def show_slice(**kwargs):
-        tmp_1 = rescale_intensity(image)
-        for k, value in kwargs.items():
-            if k != "curtain":
-                tmp_1 = tmp_1[value]
-        ax.imshow(tmp_1, cmap=cmap)
-        plt.axis("off")
-        plt.draw()
+    version = platform.python_version().split(".")
+    if int(version[0]) == 3 and int(version[1]) > 8:
+        @cache
+        def show_slice(**kwargs):
+            tmp_1 = rescale_intensity(image)
+            for k, value in kwargs.items():
+                if k != "curtain":
+                    tmp_1 = tmp_1[value]
+            ax.imshow(tmp_1, cmap=cmap)
+            plt.axis("off")
+            plt.draw()
+    else:
+        @lru_cache
+        def show_slice(**kwargs):
+            tmp_1 = rescale_intensity(image)
+            for k, value in kwargs.items():
+                if k != "curtain":
+                    tmp_1 = tmp_1[value]
+            ax.imshow(tmp_1, cmap=cmap)
+            plt.axis("off")
+            plt.draw()
     widgets.interact(show_slice, **params)
 
 def view_curtain_stack(image_1: np.ndarray, image_2: np.ndarray, cmap: str = "viridis"):
@@ -260,21 +272,42 @@ def view_curtain_stack(image_1: np.ndarray, image_2: np.ndarray, cmap: str = "vi
     fig.canvas.header_visible = False
     fig.canvas.footer_visible = False
 
-    def show_slice(**kwargs):
-        tmp_1 = rescale_intensity(image_1)
-        tmp_2 = rescale_intensity(image_2)
-        for k, value in kwargs.items():
-            if k != "curtain":
-                tmp_1 = tmp_1[value]
-                tmp_2 = tmp_2[value]
+    version = platform.python_version().split(".")
+    if int(version[0]) == 3 and int(version[1]) > 8:
+        @cache
+        def show_slice(**kwargs):
+            tmp_1 = rescale_intensity(image_1)
+            tmp_2 = rescale_intensity(image_2)
+            for k, value in kwargs.items():
+                if k != "curtain":
+                    tmp_1 = tmp_1[value]
+                    tmp_2 = tmp_2[value]
 
-        for k, value in kwargs.items():
-            if k == "curtain":
-                combined = np.zeros((image_1.shape[-2], image_1.shape[-1]))
-                combined[:, :int(value)] += tmp_1[:, :int(value)]
-                combined[:, int(value):] += tmp_2[:, int(value):]
-        ax.imshow(combined, cmap=cmap)
-        plt.axis("off")
-        plt.draw()
+            for k, value in kwargs.items():
+                if k == "curtain":
+                    combined = np.zeros((image_1.shape[-2], image_1.shape[-1]))
+                    combined[:, :int(value)] += tmp_1[:, :int(value)]
+                    combined[:, int(value):] += tmp_2[:, int(value):]
+            ax.imshow(combined, cmap=cmap)
+            plt.axis("off")
+            plt.draw()
+    else:
+        @lru_cache
+        def show_slice(**kwargs):
+            tmp_1 = rescale_intensity(image_1)
+            tmp_2 = rescale_intensity(image_2)
+            for k, value in kwargs.items():
+                if k != "curtain":
+                    tmp_1 = tmp_1[value]
+                    tmp_2 = tmp_2[value]
+
+            for k, value in kwargs.items():
+                if k == "curtain":
+                    combined = np.zeros((image_1.shape[-2], image_1.shape[-1]))
+                    combined[:, :int(value)] += tmp_1[:, :int(value)]
+                    combined[:, int(value):] += tmp_2[:, int(value):]
+            ax.imshow(combined, cmap=cmap)
+            plt.axis("off")
+            plt.draw()
 
     widgets.interact(show_slice, **params)
