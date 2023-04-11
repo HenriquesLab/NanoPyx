@@ -4,10 +4,10 @@
 void _c_gradient_radiality(float* image, float* imGc, float* imGr, int rows,
                            int cols);
 
-void gradient_2point(float* image, float* imGc, float* imGr, int rows,
+void _c_gradient_2point(float* image, float* imGc, float* imGr, int rows,
                      int cols);
 
-void gradient_3d(float* image, float* imGx, float* imGy, float* imGz, int d,
+void _c_gradient_3d(float* image, float* imGx, float* imGy, float* imGz, int d,
                  int h, int w);
 
 #endif

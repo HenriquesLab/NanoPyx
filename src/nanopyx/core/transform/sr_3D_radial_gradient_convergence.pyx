@@ -16,7 +16,7 @@ from cython.parallel import prange
 cdef float Gx_Gy_MAGNIFICATION = 2.0
 
 cdef extern from "_c_gradients.h":
-    void gradient_3d(float* image, float* imGx, float* imGy, float* imGz, int d, int h, int w) nogil
+    void _c_gradient_3d(float* image, float* imGx, float* imGy, float* imGz, int d, int h, int w) nogil
 
 cdef class RadialGradientConvergence3D:
 
@@ -66,7 +66,7 @@ cdef class RadialGradientConvergence3D:
 
         with nogil:
             for n in prange(nFrames):
-                gradient_3d(&imRaw[n,0,0,0], &imGx[n,0,0,0], &imGy[n,0,0,0], &imGz[n,0,0,0], imRaw.shape[1], imRaw.shape[2], imRaw.shape[3])
+                _c_gradient_3d(&imRaw[n,0,0,0], &imGx[n,0,0,0], &imGy[n,0,0,0], &imGz[n,0,0,0], imRaw.shape[1], imRaw.shape[2], imRaw.shape[3])
 
         cdef int p
         for p in range(nFrames):

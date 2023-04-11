@@ -26,7 +26,7 @@ void _c_gradient_radiality(float* image, float* imGc, float* imGr, int rows,
 // as in REF:
 // https://github.com/HenriquesLab/NanoJ-eSRRF/blob/785c71b3bd508c938f63bb780cba47b0f1a5b2a7/resources/liveSRRF.cl
 // under calculateGradient_2point
-void gradient_2point(float* image, float* imGc, float* imGr, int rows,
+void _c_gradient_2point(float* image, float* imGc, float* imGr, int rows,
                      int cols) {
   int c0, r0, c1, r1;
   for (int j = 1; j < rows; j++) {
@@ -43,7 +43,7 @@ void gradient_2point(float* image, float* imGc, float* imGr, int rows,
 
 // as in https://www.nature.com/articles/s41592-022-01669-y#MOESM1
 // 3D Gradient calculation
-void gradient_3d(float* image, float* imGx, float* imGy, float* imGz, int d,
+void _c_gradient_3d(float* image, float* imGx, float* imGy, float* imGz, int d,
                  int h, int w) {
   float ip0, ip1, ip2, ip3, ip4, ip5, ip6, ip7;
 
