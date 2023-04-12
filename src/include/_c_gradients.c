@@ -45,7 +45,7 @@ void _c_gradient_2point(float* image, float* imGc, float* imGr, int rows,
 // under calculateGradientRobX
 void _c_gradient_roberts_cross(float* image, float* imGc, float* imGr, int rows, int cols) {
     int c1, r1, c0, r0;
-    float im_x0_y1, im_x1_y0, im_x0_y0, im_x1_y1;
+    float im_c0_r1, im_c1_r0, im_c0_r0, im_c1_r1;
 
     for (r1 = 0; r1 < rows; r1++) {
         for (c1 = 0; c1 < cols; c1++) {
@@ -53,13 +53,13 @@ void _c_gradient_roberts_cross(float* image, float* imGc, float* imGr, int rows,
             c0 = c1 > 0 ? c1 - 1 : 0;
             r0 = r1 > 0 ? r1 - 1 : 0;
 
-            im_x0_y1 = image[r0 * cols + c1];
-            im_x1_y0 = image[r1 * cols + c0];
-            im_x0_y0 = image[r0 * cols + c0];
-            im_x1_y1 = image[r1 * cols + c1];
+            im_c0_r1 = image[r0 * cols + c1];
+            im_c1_r0 = image[r1 * cols + c0];
+            im_c0_r0 = image[r0 * cols + c0];
+            im_c1_r1 = image[r1 * cols + c1];
 
-            imGc[r1 * cols + c1] = im_x0_y1 - im_x1_y0 + im_x1_y1 - im_x0_y0;
-            imGr[r1 * cols + c1] = -im_x0_y1 + im_x1_y0 + im_x1_y1 - im_x0_y0;
+            imGc[r1 * cols + c1] = im_c0_r1 - im_c1_r0 + im_c1_r1 - im_c0_r0;
+            imGr[r1 * cols + c1] = -im_c0_r1 + im_c1_r0 + im_c1_r1 - im_c0_r0;
         }
     }
 }
