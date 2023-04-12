@@ -136,6 +136,19 @@ class EasyGui:
             kwargs["value"] = self.cfg[tag]
         self._widgets[tag] = widgets.IntText(
             *args, **kwargs, layout=self._layout, style=self._style)
+        
+    def add_float_text(self, tag, *args, remember_value=False, **kwargs):
+        """
+        Add a float text widget to the container.
+        :param tag: tag to identify the widget
+        :param args: args for the widget
+        :param remember_value: remember the last value
+        :param kwargs: kwargs for the widget
+        """
+        if remember_value and tag in self.cfg:
+            kwargs["value"] = self.cfg[tag]
+        self._widgets[tag] = widgets.FloatText(
+            *args, **kwargs, layout=self._layout, style=self._style)
 
     def add_dropdown(self, tag, *args, remember_value=False, **kwargs):
         """
