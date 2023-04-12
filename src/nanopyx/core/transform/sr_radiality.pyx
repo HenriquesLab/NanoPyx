@@ -97,10 +97,11 @@ cdef class Radiality:
         # Radiality Variable
         cdef float Dk, DivDFactor = 0
 
-        for j in range(1, h-1):
-            for i in range(1, w-1):
-                imGx[j,i] = -imRaw[j,i-1]+imRaw[j,i+1]
-                imGy[j,i] = -imRaw[j-1,i]+imRaw[j+1,i]
+        # for j in range(1, h-1):
+        #     for i in range(1, w-1):
+        #         imGx[j,i] = -imRaw[j,i-1]+imRaw[j,i+1]
+        #         imGy[j,i] = -imRaw[j-1,i]+imRaw[j+1,i]
+        _c_gradient_radiality(&imRaw[0,0], &imGx[0,0], &imGy[0,0], imRaw.shape[0], imRaw.shape[1])
 
         for j in range((1 + self.border) * self.magnification, (h - 1 - self.border) * self.magnification):
             for i in range((1 + self.border) * self.magnification, (w - 1 - self.border) * self.magnification):
