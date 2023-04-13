@@ -6,6 +6,7 @@ import os
 import yaml
 import platform
 import numpy as np
+from ipyfilechooser import FileChooser
 from skimage.exposure import rescale_intensity
 
 # import cache if python >= 3.9, otherwise import lru_cache
@@ -160,7 +161,7 @@ class EasyGui:
             kwargs["value"] = self.cfg[tag]
         self._widgets[tag] = widgets.Dropdown(*args, **kwargs, layout=self._layout, style=self._style)
 
-    def add_file_upload(self, tag, *args, accept="image/*", multiple=False, **kwargs):
+    def add_file_upload(self, tag, *args, accept="*", multiple=False, **kwargs):
         """
         Add a file upload widget to the container.
         :param tag: tag to identify the widget
@@ -169,9 +170,7 @@ class EasyGui:
         :param multiple: allow multiple files to be uploaded
         :param kwargs: kwargs for the widget
         """
-        self._widgets[tag] = widgets.FileUpload(
-            *args, accept=accept, multiple=multiple, **kwargs, layout=self._layout, style=self._style
-        )
+        self._widgets[tag] = FileChooser()
 
     def save_settings(self):
         # remember widget values for next time and store them in a config file
