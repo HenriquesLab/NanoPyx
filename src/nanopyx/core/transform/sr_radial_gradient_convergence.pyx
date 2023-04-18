@@ -1,10 +1,13 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
-from libc.math cimport sqrt, fabs, exp, isnan, floor
+from libc.math cimport sqrt, fabs, exp, isnan, floor, pow
 
 from ..transform.interpolation_catmull_rom cimport _interpolate, Interpolator
 from ..transform.image_magnify import cv2_zoom as zoom
+# from ..transform.image_magnify import fourier_zoom as zoom
 from ..utils.timeit import timeit2
+from ..transform.interpolation_fft_zoom import magnify as fft_zoom
+from nanopyx.liquid import CRShiftAndMagnify
 
 
 import numpy as np
@@ -53,75 +56,51 @@ cdef class RadialGradientConvergence:
         nFrames = im.shape[0]
 
         cdef float [:,:,:] imRaw = im.astype(np.float32, copy=False)
-        cdef float [:,:,:] imRad = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32)
-        cdef float [:,:,:] imInt = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32) # interpolated image
-        cdef float [:,:,:] imGx = np.zeros_like(imInt) # Gradient of the interpolated image
-        cdef float [:,:,:] imGy = np.zeros_like(imInt)
+
+        # Interpolate the image stack for intensity weighting
+        crsm = CRShiftAndMagnify()
+        cdef float [:,:,:] imInt = crsm.run(imRaw, 0, 0, self.magnification, self.magnification)
+
+        # Calculate intensity gradients of the Raw image
+        cdef float [:,:,:] imGx = np.zeros_like(imRaw) 
+        cdef float [:,:,:] imGy = np.zeros_like(imRaw)
 
         cdef int n
-        for n in range(nFrames):
-            self._single_frame_RGC_map(imRaw[n,:,:], imRad[n,:,:], imInt[n,:,:], imGx[n,:,:], imGy[n,:,:])
+        with nogil: # will change this soon (to go under single_frame_RGC_map)
+            for n in prange(nFrames):
+                _c_gradient_roberts_cross(&imRaw[n,0,0], &imGx[n,0,0], &imGy[n,0,0], imRaw.shape[1], imRaw.shape[2])
+        
+        # Interpolate the Gradients
+        cdef float [:,:,:] imIntGx = crsm.run(imGx, 0, 0, self.magnification*Gx_Gy_MAGNIFICATION, self.magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] imIntGy = crsm.run(imGy, 0, 0, self.magnification*Gx_Gy_MAGNIFICATION, self.magnification*Gx_Gy_MAGNIFICATION)
+    
+        cdef float [:,:,:] imRad = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32)
 
-        return imRad, imInt, imGx, imGy
+        cdef int p
+        for p in range(nFrames):
+            self._single_frame_RGC_map(imRaw[p,:,:], imRad[p,:,:], imInt[p,:,:], imIntGx[p,:,:], imIntGy[p,:,:])
+
+        return imRad, imInt, imIntGx, imIntGy
 
 
-    cdef void _single_frame_RGC_map(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imInt, float[:,:] imGx, float[:,:] imGy):
-        """
-        Calculate the RGC map of an image frame.
-        :param imRaw: the frame to calculate the RGC map of
-        :param imRad: the RGC map of the frame (previously initialised as a 2D array the size of imRaw x magnification)
-        :param imInt: the interpolated image (previously initialised as a 2D array the size of imRaw x magnification)
-        :param imGx: the intensity gradients of the interpolated image in the horizontal direction (same size as imInt)
-        :param imGy: the intensity gradients of the interpolated image in the vertical direction (same size as imInt)
-        :return: the RGC of the image frame.
-        """
-
+    cdef void _single_frame_RGC_map(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imInt, float[:,:] imIntGx, float[:,:] imIntGy):
         cdef int w = imRaw.shape[1]
         cdef int h = imRaw.shape[0]
-        cdef int magnification = self.magnification
         cdef int yM, xM
 
-        #TODO: change interpolation technique
-        cdef Interpolator interpolator = Interpolator(imRaw)
-        imInt[:,:] = interpolator._magnify(self.magnification)
-
-        self._calculate_gradient(imInt, imGx, imGy) # calculate gradients of the interpolated image
-
         with nogil:
-            for yM in prange(magnification, h * magnification):
-                for xM in range(magnification, w * magnification):
+            for yM in prange(self.magnification, h * self.magnification):
+                for xM in range(self.magnification, w * self.magnification):
                     if self.doIntensityWeighting:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy) * imInt[yM, xM]
+                        imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy, imInt) * imInt[yM, xM] 
                     else:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, imGx, imGy)
+                        imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy, imInt)
 
 
-    cdef void _calculate_gradient(self, float[:,:] image, float[:,:] imGx, float[:,:] imGy): # Calculate gradients via Robert's cross
-        cdef int w = image.shape[1]
-        cdef int h = image.shape[0]
-        cdef int x0, y0, x1, y1
+    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imIntGx, float[:,:] imIntGy, float[:,:] imInt) nogil:
 
-        cdef int i, j
-        with nogil:
-            for j in prange(1, h):
-                y1 = j
-                y0 = j - 1
-                for i in range(1, w):
-                    x1 = i
-                    x0 = i - 1
-                    imGx[j,i] = image[y1, x1] - image[y1, x0]
-                    imGy[j,i] = image[y1, x1] - image[y0, x1]
-                    # as in REF: https://github.com/HenriquesLab/NanoJ-eSRRF/blob/785c71b3bd508c938f63bb780cba47b0f1a5b2a7/resources/liveSRRF.cl under calculateGradient_2point
-
-    @timeit2
-    def calculateRGC(self, int xM, int yM, np.ndarray imGx, np.ndarray imGy):
-        "Calculate RGC value for a subpixel"
-        return self._calculateRGC(xM, yM, imGx, imGy)
-
-    cdef float _calculateRGC(self, int xM, int yM, float[:,:] imGx, float[:,:] imGy) nogil:
-
-        cdef int w = imGx.shape[1]
-        cdef int h = imGx.shape[0]
+        cdef int w = imInt.shape[1]
+        cdef int h = imInt.shape[0]
 
         cdef float vx, vy, Gx, Gy
 
@@ -139,7 +118,7 @@ cdef class RadialGradientConvergence:
 
         cdef int i, j
 
-        for j in prange(_start, _end):
+        for j in range(_start, _end): 
             vy = (<int>(Gx_Gy_MAGNIFICATION * yc) + j) / Gx_Gy_MAGNIFICATION # position in continuous space
 
             if 0 < vy <= h - 1:
@@ -154,35 +133,25 @@ cdef class RadialGradientConvergence:
                         distance = sqrt(dx * dx + dy * dy)
 
                         if distance != 0 and distance <= self.tSO:
-                            Gx = _interpolate(imGx, vx * self.magnification, vy * self.magnification) # get interpolated value (in continuous space) via Catmull-Rom interpolation
-                            Gy = _interpolate(imGy, vx * self.magnification, vy * self.magnification)
+
+                            Gx = imIntGx[<int>((vy)*self.magnification*Gx_Gy_MAGNIFICATION), <int>((vx)*self.magnification*Gx_Gy_MAGNIFICATION)]
+                            Gy = imIntGy[<int>((vy)*self.magnification*Gx_Gy_MAGNIFICATION), <int>((vx)*self.magnification*Gx_Gy_MAGNIFICATION)]
+
+                            #distanceWeight = self._calculateDW(distance)
                             distanceWeight = _c_calculate_dw(distance, self.tSS)
-                            # distanceWeight = self._calculateDW(distance)
                             distanceWeightSum += distanceWeight
                             GdotR = Gx*dx + Gy*dy
 
                             if GdotR < 0: # if the vector is pointing inwards
-                                # Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
                                 Dk = _c_calculate_dk(Gx, Gy, dx, dy, distance)
+                                # Dk = self._calculateDk(Gx, Gy, dx, dy, distance)
                                 RGC += Dk * distanceWeight
 
         RGC /= distanceWeightSum
 
-        if RGC >= 0:
+        if RGC >= 0 and self.sensitivity > 1:
             RGC = RGC ** self.sensitivity
-        else:
+        elif RGC < 0:
             RGC = 0
 
         return RGC
-
-
-    cdef float _calculateDW(self, float distance) nogil: # distance weight
-        return (distance * exp((-distance * distance) / self.tSS)) ** 4
-
-
-    cdef float _calculateDk(self, float Gx, float Gy, float dx, float dy, float distance) nogil:
-        Dk = fabs(Gy * dx - Gx * dy) / sqrt(Gx * Gx + Gy * Gy) # GMag = sqrt(Gx*Gx + Gy*Gy)
-        if isnan(Dk):
-            Dk = distance
-        Dk = 1 - Dk / distance # if 1: vector pointing exactly to the centre
-        return Dk
