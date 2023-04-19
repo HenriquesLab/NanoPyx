@@ -62,29 +62,29 @@ class RadialGradientConvergence(LiquidEngine):
         crsm = CRShiftAndMagnify()
         cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
 
-        cdef float [:,:,:] imGx = np.zeros_like(image) 
-        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float [:,:,:] gradient_col = np.zeros_like(image) 
+        cdef float [:,:,:] gradient_row = np.zeros_like(image)
 
         cdef int n
         with nogil: 
             for n in prange(nFrames):
-                _c_gradient_roberts_cross(&image[n,0,0], &imGx[n,0,0], &imGy[n,0,0], image.shape[1], image.shape[2])
+                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
 
-        cdef float [:,:,:] imIntGx = crsm.run(imGx, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
-        cdef float [:,:,:] imIntGy = crsm.run(imGy, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
     
-        cdef float [:,:,:] imRad = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
+        cdef float [:,:,:] rgc_map = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
 
-        cdef int f, yM, xM
+        cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for yM in range(rowsM): 
-                        for xM in range(colsM):
+                    for rM in range(rowsM): 
+                        for cM in range(colsM):
                             if _doIntensityWeighting:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, yM, xM] 
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
                             else:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
-        return imRad
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+        return rgc_map
         # tag-end
 
     # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(rowsM)", "prange(rowsM)")
@@ -108,29 +108,29 @@ class RadialGradientConvergence(LiquidEngine):
         crsm = CRShiftAndMagnify()
         cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
 
-        cdef float [:,:,:] imGx = np.zeros_like(image) 
-        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float [:,:,:] gradient_col = np.zeros_like(image) 
+        cdef float [:,:,:] gradient_row = np.zeros_like(image)
 
         cdef int n
         with nogil: 
             for n in prange(nFrames):
-                _c_gradient_roberts_cross(&image[n,0,0], &imGx[n,0,0], &imGy[n,0,0], image.shape[1], image.shape[2])
+                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
 
-        cdef float [:,:,:] imIntGx = crsm.run(imGx, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
-        cdef float [:,:,:] imIntGy = crsm.run(imGy, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
     
-        cdef float [:,:,:] imRad = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
+        cdef float [:,:,:] rgc_map = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
 
-        cdef int f, yM, xM
+        cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for yM in prange(rowsM): 
-                        for xM in range(colsM):
+                    for rM in prange(rowsM): 
+                        for cM in range(colsM):
                             if _doIntensityWeighting:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, yM, xM] 
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
                             else:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
-        return imRad
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+        return rgc_map
         # tag-end
 
     # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(rowsM)", 'prange(rowsM, schedule="static")')
@@ -154,29 +154,29 @@ class RadialGradientConvergence(LiquidEngine):
         crsm = CRShiftAndMagnify()
         cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
 
-        cdef float [:,:,:] imGx = np.zeros_like(image) 
-        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float [:,:,:] gradient_col = np.zeros_like(image) 
+        cdef float [:,:,:] gradient_row = np.zeros_like(image)
 
         cdef int n
         with nogil: 
             for n in prange(nFrames):
-                _c_gradient_roberts_cross(&image[n,0,0], &imGx[n,0,0], &imGy[n,0,0], image.shape[1], image.shape[2])
+                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
 
-        cdef float [:,:,:] imIntGx = crsm.run(imGx, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
-        cdef float [:,:,:] imIntGy = crsm.run(imGy, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
     
-        cdef float [:,:,:] imRad = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
+        cdef float [:,:,:] rgc_map = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
 
-        cdef int f, yM, xM
+        cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for yM in prange(rowsM, schedule="static"): 
-                        for xM in range(colsM):
+                    for rM in prange(rowsM, schedule="static"): 
+                        for cM in range(colsM):
                             if _doIntensityWeighting:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, yM, xM] 
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
                             else:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
-        return imRad
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+        return rgc_map
         # tag-end
 
     # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(rowsM)", 'prange(rowsM, schedule="dynamic")')
@@ -200,29 +200,29 @@ class RadialGradientConvergence(LiquidEngine):
         crsm = CRShiftAndMagnify()
         cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
 
-        cdef float [:,:,:] imGx = np.zeros_like(image) 
-        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float [:,:,:] gradient_col = np.zeros_like(image) 
+        cdef float [:,:,:] gradient_row = np.zeros_like(image)
 
         cdef int n
         with nogil: 
             for n in prange(nFrames):
-                _c_gradient_roberts_cross(&image[n,0,0], &imGx[n,0,0], &imGy[n,0,0], image.shape[1], image.shape[2])
+                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
 
-        cdef float [:,:,:] imIntGx = crsm.run(imGx, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
-        cdef float [:,:,:] imIntGy = crsm.run(imGy, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
     
-        cdef float [:,:,:] imRad = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
+        cdef float [:,:,:] rgc_map = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
 
-        cdef int f, yM, xM
+        cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for yM in prange(rowsM, schedule="dynamic"): 
-                        for xM in range(colsM):
+                    for rM in prange(rowsM, schedule="dynamic"): 
+                        for cM in range(colsM):
                             if _doIntensityWeighting:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, yM, xM] 
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
                             else:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
-        return imRad
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+        return rgc_map
         # tag-end
 
     # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(rowsM)", 'prange(rowsM, schedule="guided")')
@@ -246,29 +246,29 @@ class RadialGradientConvergence(LiquidEngine):
         crsm = CRShiftAndMagnify()
         cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
 
-        cdef float [:,:,:] imGx = np.zeros_like(image) 
-        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float [:,:,:] gradient_col = np.zeros_like(image) 
+        cdef float [:,:,:] gradient_row = np.zeros_like(image)
 
         cdef int n
         with nogil: 
             for n in prange(nFrames):
-                _c_gradient_roberts_cross(&image[n,0,0], &imGx[n,0,0], &imGy[n,0,0], image.shape[1], image.shape[2])
+                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
 
-        cdef float [:,:,:] imIntGx = crsm.run(imGx, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
-        cdef float [:,:,:] imIntGy = crsm.run(imGy, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
+        cdef float [:,:,:] gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION)
     
-        cdef float [:,:,:] imRad = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
+        cdef float [:,:,:] rgc_map = np.zeros((image.shape[0], image.shape[1]*magnification, image.shape[2]*magnification), dtype=np.float32)
 
-        cdef int f, yM, xM
+        cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for yM in prange(rowsM, schedule="guided"): 
-                        for xM in range(colsM):
+                    for rM in prange(rowsM, schedule="guided"): 
+                        for cM in range(colsM):
                             if _doIntensityWeighting:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, yM, xM] 
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
                             else:
-                                imRad[f, yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[f,0,0], &imIntGy[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
-        return imRad
+                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], &image_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+        return rgc_map
         # tag-end
 
     
