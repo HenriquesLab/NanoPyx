@@ -92,9 +92,10 @@ cdef class RadialGradientConvergence:
             for yM in prange(self.magnification, h * self.magnification):
                 for xM in range(self.magnification, w * self.magnification):
                     if self.doIntensityWeighting:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy, imInt) * imInt[yM, xM] 
+                        imRad[yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[0,0], &imIntGy[0,0], &imInt[0,0], w * self.magnification, h * self.magnification, self.magnification, Gx_Gy_MAGNIFICATION,  self.fwhm, self.tSO, self.tSS, self.sensitivity) * imInt[yM, xM] 
+                        #imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy, imInt) * imInt[yM, xM] 
                     else:
-                        imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy, imInt)
+                        imRad[yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[0,0], &imIntGy[0,0], &imInt[0,0], w * self.magnification, h * self.magnification, self.magnification, Gx_Gy_MAGNIFICATION,  self.fwhm, self.tSO, self.tSS, self.sensitivity)
 
 
     cdef float _calculateRGC(self, int xM, int yM, float[:,:] imIntGx, float[:,:] imIntGy, float[:,:] imInt) nogil:

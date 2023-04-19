@@ -1,6 +1,7 @@
 cdef extern from "_c_sr_radial_gradient_convergence.h":
     double _c_calculate_dw(double distance, double tSS) nogil
     double _c_calculate_dk(double Gx, double Gy, double dx, double dy, double distance) nogil
+    float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, float* imInt, int w, int h, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) nogil
 
 cdef extern from "_c_gradients.h":
     void _c_gradient_roberts_cross(float* pixels, float* GxArray, float* GyArray, int w, int h) nogil
