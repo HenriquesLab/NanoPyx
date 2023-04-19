@@ -10,6 +10,7 @@ from nanopyx.liquid._le_interpolation_lanczos import ShiftScaleRotate as LZShift
 from nanopyx.liquid._le_interpolation_nearest_neighbor import ShiftAndMagnify as NNShiftAndMagnify
 from nanopyx.liquid._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScaleRotate
 from nanopyx.liquid._le_mandelbrot_benchmark import MandelbrotBenchmark
+from nanopyx.liquid._le_radial_gradient_convergence import RadialGradientConvergence as RGC
 
 # flake8: noqa: E501
 
@@ -350,3 +351,14 @@ def test_interpolation_lanzcos_ShiftScaleRotate(plt):
 
 
 # tag-end
+
+def test_rgc(downloader):
+
+    dataset = downloader.get_ZipTiffIterator(
+        "SMLMS2013_HDTubulinAlexa647", as_ndarray=True)
+    #rgc = RadialGradientConvergence(sensitivity=2)
+
+    small_dataset = dataset[:10,:20,:20]
+
+    liquid_rgc = RGC()
+    imRad = liquid_rgc.run(small_dataset)
