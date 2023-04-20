@@ -36,11 +36,17 @@ class RadialGradientConvergence(LiquidEngine):
     def __init__(self):
         super().__init__()
     
-    def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, run_type = 2): # TODO: add the benchmark and change the run type 
 
+    def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, run_type = None): 
         image = check_image(image)
         return self._run(image, magnification, radius, sensitivity, doIntensityWeighting, run_type=run_type)
     
+
+    def benchmark(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True):
+        image = check_image(image)
+        return super().benchmark(image, magnification, radius, sensitivity, doIntensityWeighting)
+    
+
     # tag-start: _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True):
 
