@@ -13,6 +13,7 @@ import numpy as np
 cimport numpy as np
 
 from .interpolation_catmull_rom cimport _interpolate
+from ..utils.timeit import timeit2
 
 from cython.parallel import prange
 
@@ -51,6 +52,7 @@ cdef class Radiality:
         #     free(self.yRingCoordinates)
         pass
 
+    # @timeit2
     def calculate(self, image_stack: np.ndarray):
         """
         Calculate Radiality, as defined on the original version of SRRF - REF: https://www.nature.com/articles/ncomms12471
@@ -139,10 +141,10 @@ cdef class Radiality:
                     CGH = DivDFactor
 
                 if self.doIntensityWeighting:
-                    imRad[j,i] = CGH
+                    imRad[j,i] = CGH * imIW[j,i]
 
                 else:
-                    imRad[j,i] = CGH * imIW[j,i]
+                    imRad[j,i] = CGH
 
 
     cdef float _calculateDk(self, float x, float y, float xc, float yc, float vGx, float vGy, float vGx2Gy2) nogil:

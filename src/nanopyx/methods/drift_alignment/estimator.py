@@ -19,7 +19,7 @@ class DriftEstimator(object):
         self.drift_x = None
         self.drift_y = None
 
-    @timeit
+    # @timeit
     def estimate(self, image_array, **kwargs):
         self.set_estimator_params(**kwargs)
 
