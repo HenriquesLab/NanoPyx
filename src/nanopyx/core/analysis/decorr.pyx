@@ -66,7 +66,7 @@ cdef class DecorrAnalysis:
         self.resolution = 0
         self.units = units
 
-    @timeit2
+    # @timeit2
     def run_analysis(self,  img: np.ndarray):
         """
         Method used to run the analysis. Starting parameters are defined on class instance initialization.
