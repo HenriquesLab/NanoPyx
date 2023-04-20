@@ -32,7 +32,13 @@ Currently it implements the following approaches:
 - A reimplementation of the NanoJ image registration, SRRF and Super Resolution metrics
 - More to come soon™
 
-if you found this work usful, please cite: https://doi.org/10.5281/zenodo.7699280
+if you found this work useful, please cite: https://doi.org/10.5281/zenodo.7699280
+
+## Napari plugin
+
+NanoPyx is also available as a napari plugin, which can be installed via pip:
+
+```pip install "napari-nanopyx @git+https://github.com/HenriquesLab/napari-NanoPyx.git"```
 
 ## Codeless jupyter notebooks available:
 
