@@ -33,7 +33,7 @@ class DriftCorrector(object):
         transformation_matrix = EuclideanTransform(rotation=0, translation=(drift_y, drift_x))
         return warp(self.image_arr[slice_idx], transformation_matrix.inverse, order=3, preserve_range=True)
 
-    @timeit
+    # @timeit
     def apply_correction(self, image_array):
         """
         Main method of DriftCorrector class.

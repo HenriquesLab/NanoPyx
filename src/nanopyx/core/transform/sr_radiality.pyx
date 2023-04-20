@@ -52,7 +52,7 @@ cdef class Radiality:
         #     free(self.yRingCoordinates)
         pass
 
-    @timeit2
+    # @timeit2
     def calculate(self, image_stack: np.ndarray):
         """
         Calculate Radiality, as defined on the original version of SRRF - REF: https://www.nature.com/articles/ncomms12471
