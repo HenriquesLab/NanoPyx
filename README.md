@@ -29,8 +29,18 @@ NanoPyx focuses on performance, by heavily exploiting cython aided multiprocessi
 
 Currently it implements the following approaches:
 
-- A reimplementation of the NanoJ drift correction and channel registration methods
+- A reimplementation of the NanoJ image registration, SRRF and Super Resolution metrics
 - More to come soon™
+
+## Codeless jupyter notebooks available:
+
+| Method | Last test | Notebook Link | Colab Link |
+| --- | --- | --- | --- |
+| Channel Registration | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) |
+| Drift Correction | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) |
+| Example Notebook with Example Dataset, SRRF and SR metrics | 20/04/23 ✅ working (BMS) | [Open In Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) |
+| SR metrics | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) |
+| SRRF and SR metrics | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) |
 
 ## Installation
 
