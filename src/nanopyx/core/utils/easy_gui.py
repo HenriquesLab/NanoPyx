@@ -231,7 +231,6 @@ def view_image_stack(image, cmap="viridis"):
     fig.canvas.header_visible = False
     fig.canvas.footer_visible = False
 
-    @cache
     def show_slice(**kwargs):
         tmp_1 = rescale_intensity(image)
         for k, value in kwargs.items():
@@ -268,8 +267,7 @@ def view_curtain_stack(image_1: np.ndarray, image_2: np.ndarray, cmap: str = "vi
     fig, ax = plt.subplots()
     fig.canvas.header_visible = False
     fig.canvas.footer_visible = False
-
-    @cache
+    
     def show_slice(**kwargs):
         tmp_1 = rescale_intensity(image_1)
         tmp_2 = rescale_intensity(image_2)
