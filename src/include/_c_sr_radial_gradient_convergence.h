@@ -3,17 +3,10 @@
 
 #include <math.h>
 
-double _c_calculate_dw(double distance, double tSS) {
-  return pow((distance * exp((-distance * distance) / tSS)), 4);
-}
+double _c_calculate_dw(double distance, double tSS);
 
-double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance) {
-  float Dk = fabs(Gy * dx - Gx * dy) / sqrt(Gx * Gx + Gy * Gy);
-  if (isnan(Dk)) {
-    Dk = distance;
-  }
-  Dk = 1 - Dk / distance;
-  return Dk;
-}
+double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance);
+
+float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, float* imInt, int w, int h, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity);
 
 #endif
