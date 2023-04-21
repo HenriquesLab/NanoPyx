@@ -1,6 +1,6 @@
 #include <math.h>
-#include "_c_interpolation_catmull_rom.h"
-#include "_c_sr_radiality.h"
+#include <_c_interpolation_catmull_rom.h>
+#include <_c_sr_radiality.h>
 
 float _c_calculate_radiality_per_subpixel(int i, int j, float* imGx, float* imGy, float* xRingCoordinates, float* yRingCoordinates, int magnification, float ringRadius, int nRingCoordinates, int radialityPositivityConstraint, int h, int w) {
     int sampleIter;
