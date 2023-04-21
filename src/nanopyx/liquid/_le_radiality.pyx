@@ -38,9 +38,13 @@ class Radiality(LiquidEngine):
         super().__init__()
     
     @timeit2
-    def run(self, image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = 1): 
+    def run(self, image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
         image = check_image(image)
         return self._run(image, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting, run_type=run_type)
+    
+    def benchmark(self, image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True): 
+        image = check_image(image)
+        return super().benchmark(image, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting)
     
      # tag-start: _le_radiality.Radiality._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
@@ -125,3 +129,125 @@ class Radiality(LiquidEngine):
 
         return imRad
         # tag-end
+
+
+        #TODO: fix tag2tag, it couldnt replace by a prange(start,end,schedule)
+    def _run_threaded_static(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+
+        cdef int _magnification = magnification
+        cdef int _border = border
+        cdef float _ringRadius = ringRadius * magnification
+        cdef int _doIntensityWeighting = doIntensityWeighting
+        cdef int _radialityPositivityConstraint = radialityPositivityConstraint
+        cdef int nRingCoordinates = 12
+        cdef float angleStep = (pi * 2.) / nRingCoordinates
+        cdef float[12] xRingCoordinates, yRingCoordinates
+
+        with nogil:
+            for angleIter in range(nRingCoordinates):
+                xRingCoordinates[angleIter] = cos(angleStep * angleIter) * _ringRadius
+                yRingCoordinates[angleIter] = sin(angleStep * angleIter) * _ringRadius
+        
+        cdef int nFrames = image.shape[0]
+        cdef int h = image.shape[1]
+        cdef int w = image.shape[2]
+
+        crsm = CRShiftAndMagnify()
+        cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
+        
+        cdef float [:,:,:] imGx = np.zeros_like(image) 
+        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float [:,:,:] imRad = np.zeros((nFrames, h*magnification, w*magnification), dtype=np.float32)
+
+        cdef int f, j, i
+        with nogil:
+            for f in range(nFrames):
+                _c_gradient_radiality(&image[f,0,0], &imGx[f,0,0], &imGy[f,0,0], h, w)
+                for j in prange((1 + _border) * _magnification, (h - 1 - _border) * _magnification, schedule = "static"):
+                    for i in range((1 + _border) * _magnification, (w - 1 - _border) * _magnification):
+                        if _doIntensityWeighting:
+                            imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w) * image_interp[f, j, i]
+                        else:
+                            imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
+
+        return imRad
+
+    def _run_threaded_dynamic(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+
+        cdef int _magnification = magnification
+        cdef int _border = border
+        cdef float _ringRadius = ringRadius * magnification
+        cdef int _doIntensityWeighting = doIntensityWeighting
+        cdef int _radialityPositivityConstraint = radialityPositivityConstraint
+        cdef int nRingCoordinates = 12
+        cdef float angleStep = (pi * 2.) / nRingCoordinates
+        cdef float[12] xRingCoordinates, yRingCoordinates
+
+        with nogil:
+            for angleIter in range(nRingCoordinates):
+                xRingCoordinates[angleIter] = cos(angleStep * angleIter) * _ringRadius
+                yRingCoordinates[angleIter] = sin(angleStep * angleIter) * _ringRadius
+        
+        cdef int nFrames = image.shape[0]
+        cdef int h = image.shape[1]
+        cdef int w = image.shape[2]
+
+        crsm = CRShiftAndMagnify()
+        cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
+        
+        cdef float [:,:,:] imGx = np.zeros_like(image) 
+        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float [:,:,:] imRad = np.zeros((nFrames, h*magnification, w*magnification), dtype=np.float32)
+
+        cdef int f, j, i
+        with nogil:
+            for f in range(nFrames):
+                 _c_gradient_radiality(&image[f,0,0], &imGx[f,0,0], &imGy[f,0,0], h, w)
+                 for j in prange((1 + _border) * _magnification, (h - 1 - _border) * _magnification, schedule = "dynamic"):
+                    for i in range((1 + _border) * _magnification, (w - 1 - _border) * _magnification):
+                        if _doIntensityWeighting:
+                            imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w) * image_interp[f, j, i]
+                        else:
+                            imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
+
+        return imRad
+
+    def _run_threaded_guided(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+
+        cdef int _magnification = magnification
+        cdef int _border = border
+        cdef float _ringRadius = ringRadius * magnification
+        cdef int _doIntensityWeighting = doIntensityWeighting
+        cdef int _radialityPositivityConstraint = radialityPositivityConstraint
+        cdef int nRingCoordinates = 12
+        cdef float angleStep = (pi * 2.) / nRingCoordinates
+        cdef float[12] xRingCoordinates, yRingCoordinates
+
+        with nogil:
+            for angleIter in range(nRingCoordinates):
+                xRingCoordinates[angleIter] = cos(angleStep * angleIter) * _ringRadius
+                yRingCoordinates[angleIter] = sin(angleStep * angleIter) * _ringRadius
+        
+        cdef int nFrames = image.shape[0]
+        cdef int h = image.shape[1]
+        cdef int w = image.shape[2]
+
+        crsm = CRShiftAndMagnify()
+        cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
+        
+        cdef float [:,:,:] imGx = np.zeros_like(image) 
+        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float [:,:,:] imRad = np.zeros((nFrames, h*magnification, w*magnification), dtype=np.float32)
+
+        cdef int f, j, i
+        with nogil:
+            for f in range(nFrames):
+                 _c_gradient_radiality(&image[f,0,0], &imGx[f,0,0], &imGy[f,0,0], h, w)
+                 for j in prange((1 + _border) * _magnification, (h - 1 - _border) * _magnification, schedule = "guided"):
+                    for i in range((1 + _border) * _magnification, (w - 1 - _border) * _magnification):
+                        if _doIntensityWeighting:
+                            imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w) * image_interp[f, j, i]
+                        else:
+                            imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
+
+        return imRad
