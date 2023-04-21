@@ -11,6 +11,7 @@ from nanopyx.liquid._le_interpolation_nearest_neighbor import ShiftAndMagnify as
 from nanopyx.liquid._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScaleRotate
 from nanopyx.liquid._le_mandelbrot_benchmark import MandelbrotBenchmark
 from nanopyx.liquid._le_radial_gradient_convergence import RadialGradientConvergence as RGC
+from nanopyx.liquid._le_radiality import Radiality
 
 # flake8: noqa: E501
 
@@ -356,9 +357,17 @@ def test_rgc(downloader):
 
     dataset = downloader.get_ZipTiffIterator(
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True)
-    #rgc = RadialGradientConvergence(sensitivity=2)
-
     small_dataset = dataset[:10,:20,:20]
 
     liquid_rgc = RGC()
+    imRad = liquid_rgc.run(small_dataset)
+
+
+def test_radiality(downloader):
+
+    dataset = downloader.get_ZipTiffIterator(
+        "SMLMS2013_HDTubulinAlexa647", as_ndarray=True)
+    small_dataset = dataset[:10,:20,:20]
+
+    liquid_rgc = Radiality()
     imRad = liquid_rgc.run(small_dataset)
