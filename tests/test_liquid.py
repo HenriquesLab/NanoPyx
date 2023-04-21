@@ -369,5 +369,5 @@ def test_radiality(downloader):
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True)
     small_dataset = dataset[:10,:20,:20]
 
-    liquid_rgc = Radiality()
-    imRad = liquid_rgc.run(small_dataset)
+    liquid_rad = Radiality()
+    imRad = liquid_rad.run(small_dataset)
