@@ -1,6 +1,14 @@
 #include <math.h>
 #include <_c_interpolation_catmull_rom.h>
-#include <_c_sr_radiality.h>
+
+float _c_calculate_dk(float x, float y, float xc, float yc, float vGx, float vGy, float GMag, float ringRadius){
+    float Dk = 0;
+    if (GMag != 0) {
+        Dk = 1 - (fabs(vGy * (xc - x) - vGx * (yc - y)) / GMag) / ringRadius;
+        Dk = Dk * Dk;
+    } 
+    return Dk;
+}
 
 float _c_calculate_radiality_per_subpixel(int i, int j, float* imGx, float* imGy, float* xRingCoordinates, float* yRingCoordinates, int magnification, float ringRadius, int nRingCoordinates, int radialityPositivityConstraint, int h, int w) {
     int sampleIter;
@@ -38,13 +46,4 @@ float _c_calculate_radiality_per_subpixel(int i, int j, float* imGx, float* imGy
     }
 
     return CGH;
-}
-
-float _c_calculate_dk(float x, float y, float xc, float yc, float vGx, float vGy, float GMag, float ringRadius){
-    float Dk = 0;
-    if (GMag != 0) {
-        Dk = 1 - (fabs(vGy * (xc - x) - vGx * (yc - y)) / GMag) / ringRadius;
-        Dk = Dk * Dk;
-    } 
-    return Dk;
 }
