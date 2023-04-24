@@ -20,28 +20,6 @@ class LiquidEngine:
     Base class for parts of the NanoPyx Liquid Engine
     """
 
-    # gives an unique id to each instance of the class
-    RUN_TYPE_OPENCL: int = 0
-    RUN_TYPE_UNTHREADED: int = 1
-    RUN_TYPE_THREADED: int = 2
-    RUN_TYPE_THREADED_STATIC: int = 3
-    RUN_TYPE_THREADED_DYNAMIC: int = 4
-    RUN_TYPE_THREADED_GUIDED: int = 5
-    RUN_TYPE_PYTHON: int = 6
-    RUN_TYPE_NJIT: int = 7
-
-    # designations are stored in the config files, to associate runtime statistics
-    RUN_TYPE_DESIGNATION = {
-        RUN_TYPE_OPENCL: "OpenCL",
-        RUN_TYPE_UNTHREADED: "Unthreaded",
-        RUN_TYPE_THREADED: "Threaded",
-        RUN_TYPE_THREADED_STATIC: "Threaded_static",
-        RUN_TYPE_THREADED_DYNAMIC: "Threaded_dynamic",
-        RUN_TYPE_THREADED_GUIDED: "Threaded_guided",
-        RUN_TYPE_PYTHON: "Python",
-        RUN_TYPE_NJIT: "Numba",
-    }
-
     # the following variables are used to identify if each type of run is available
     _has_opencl: bool = False
     _has_unthreaded: bool = False
@@ -55,9 +33,34 @@ class LiquidEngine:
     _random_testing: bool = True  # used to sometimes try different run types when using the run(...) method
     _show_info: bool = False  # print what's going on
 
-    _default_fastest: int = RUN_TYPE_OPENCL  # the default run type to use when using the run(...) method
-    _last_run_type: int = None  # the last run type used
+    _engine_parts: dict = {}  # the parts of the Liquid Engine
+    _default_fastest: str = None  # the default engine part to use when using the run(...) method
+    _last_engine_part_designation: str = None  # the last engine part used
     _last_run_time: float = None  # the time the last run took
+
+    def __initialize_parts__(self):
+        if self._has_opencl and opencl_works():
+            self._engine_parts["OpenCL"] = self._run_opencl
+        if self._has_unthreaded:
+            self._engine_parts["Unthreaded"] = self._run_unthreaded
+        if self._has_threaded:
+            self._engine_parts["Threaded"] = self._run_threaded
+        if self._has_threaded_static:
+            self._engine_parts["Threaded_static"] = self._run_threaded_static
+        if self._has_threaded_dynamic:
+            self._engine_parts["Threaded_dynamic"] = self._run_threaded_dynamic
+        if self._has_threaded_guided:
+            self._engine_parts["Threaded_guided"] = self._run_threaded_guided
+        if self._has_python:
+            self._engine_parts["Python"] = self._run_python
+        if self._has_njit and njit_works():
+            self._engine_parts["Numba"] = self._run_njit
+
+        # set default fastest run type
+        if "OpenCL" in self._engine_parts:
+            self._default_fastest = "OpenCL"
+        else:
+            self._default_fastest = "Threaded"
 
     def __init__(self, clear_config=False):
         """
@@ -72,15 +75,8 @@ class LiquidEngine:
 
         :param clear_config: whether to clear the config file
         """
-        # Check if OpenCL is available
-        if not opencl_works():
-            self._has_opencl = False
-            if self._default_fastest == self.RUN_TYPE_OPENCL:
-                self._default_fastest = self.RUN_TYPE_THREADED
-
-        # Check if Numba is available
-        if not njit_works():
-            self._has_njit = False
+        # Initialize the parts of the Liquid Engine
+        self.__initialize_parts__()
 
         # Load the config file
         # e.g.: ~/.nanopyx/liquid/_le_interpolation_nearest_neighbor.cpython-310-darwin/ShiftAndMagnify.yml
@@ -102,9 +98,9 @@ class LiquidEngine:
             self._cfg = {}
 
         # Initialize missing dictionaries in cfg
-        for run_type_designation in self.RUN_TYPE_DESIGNATION.values():
-            if run_type_designation not in self._cfg:
-                self._cfg[run_type_designation] = {}
+        for engine_part_designation in self._engine_parts:
+            if engine_part_designation not in self._cfg:
+                self._cfg[engine_part_designation] = {}
 
     def is_opencl_enabled(self):
         """
@@ -165,56 +161,39 @@ class LiquidEngine:
         :param args: args for the run method
         :param kwargs: kwargs for the run method
         :return:  a list of tuples containing the run time, run type name and return value
-        :rtype: [[run_time, run_type_name, return_value], ...]
+        :rtype: [[run_time, engine_part_designation, return_value], ...]
         """
         # Create some lists to store runtimes and return values of run types
         run_times = {}
         returns = {}
-        run_types = []
 
         # Create a list of run types to benchmark
-        if self._has_opencl:
-            run_types.append(self.RUN_TYPE_OPENCL)
-        if self._has_threaded:
-            run_types.append(self.RUN_TYPE_THREADED)
-        if self._has_threaded_static:
-            run_types.append(self.RUN_TYPE_THREADED_STATIC)
-        if self._has_threaded_dynamic:
-            run_types.append(self.RUN_TYPE_THREADED_DYNAMIC)
-        if self._has_threaded_guided:
-            run_types.append(self.RUN_TYPE_THREADED_GUIDED)
-        if self._has_unthreaded:
-            run_types.append(self.RUN_TYPE_UNTHREADED)
-        if self._has_python:
-            run_types.append(self.RUN_TYPE_PYTHON)
-        if self._has_njit:
-            run_types.append(self.RUN_TYPE_NJIT)
+        if "Numba" in self._engine_parts:
             # Trigger compilation
             try:
-                self._run_njit()
+                self._engine_parts["Numba"]()
             except TypeError:
                 print("Consider adding default arguments to njit implementation to trigger early compilation")
 
         # Run each run type and record the run time and return value
-        for run_type in run_types:
-            designation = self.RUN_TYPE_DESIGNATION[run_type]
-            r = self._run(*args, run_type=run_type, **kwargs)
-            run_times[run_type] = self._last_run_time
-            returns[run_type] = r
-            mean, std, n = self.get_mean_std_run_time(run_type, *args, **kwargs)
+        for engine_part_designation in self._engine_parts:
+            r = self._run(*args, engine_part_designation=engine_part_designation, **kwargs)
+            run_times[engine_part_designation] = self._last_run_time
+            returns[engine_part_designation] = r
+            mean, std, n = self.get_mean_std_run_time(engine_part_designation, *args, **kwargs)
             self._print(
-                f"{designation} run time: {format_time(self._last_run_time)}; "
+                f"{engine_part_designation} run time: {format_time(self._last_run_time)}; "
                 + f"mean: {format_time(mean)}; std: {format_time(std)}; runs: {n}"
             )
 
         # Sort run_times by value
         speed_sort = []
-        for run_type in sorted(run_times, key=run_times.get, reverse=False):
+        for engine_part_designation in sorted(run_times, key=run_times.get, reverse=False):
             speed_sort.append(
                 (
-                    run_times[run_type],
-                    self.RUN_TYPE_DESIGNATION[run_type],
-                    returns[run_type],
+                    run_times[engine_part_designation],
+                    engine_part_designation,
+                    returns[engine_part_designation],
                 )
             )
 
@@ -232,11 +211,11 @@ class LiquidEngine:
                 print(f"{speed_sort[i][1]} is {speed_sort[j][0]/speed_sort[i][0]:.2f} faster than {speed_sort[j][1]}")
 
         self._print(f"Run-times log: {self.get_run_times_log()}")
-        print(f"Recorded fastest: {self.RUN_TYPE_DESIGNATION[self._get_fastest_run_type(*args, **kwargs)]}")
+        print(f"Recorded fastest: {self._get_fastest_run(*args, **kwargs)}")
 
         return speed_sort
 
-    def get_mean_std_run_time(self, run_type: int, *args, **kwargs):
+    def get_mean_std_run_time(self, engine_part_designation: str, *args, **kwargs):
         """
         Get the mean and standard deviation of the run time for the given run type
         :param run_type: the run type
@@ -247,11 +226,9 @@ class LiquidEngine:
 
         # Get the call args
         call_args = self._get_args_repr(*args, **kwargs)
-        # Get the run type designation
-        run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
 
         # Check if the run type has been run
-        r = self._cfg[run_type_designation]
+        r = self._cfg[engine_part_designation]
         # If not, return None
         if call_args not in r:
             return None, None, None
@@ -283,10 +260,10 @@ class LiquidEngine:
         """
         self._show_info = show_info
 
-    def _store_run_time(self, run_type, delta, *args, **kwargs):
+    def _store_run_time(self, engine_part_designation, delta, *args, **kwargs):
         """
         Store the run time in the config file
-        :param run_type: the type of run
+        :param engine_part_designation: designation of the engine part
         :param delta: the time it took to run
         :param args: args for the run method
         :param kwargs: kwargs for the run method
@@ -294,11 +271,9 @@ class LiquidEngine:
         """
         self._last_run_time = delta  # Store the last run time
         call_args = self._get_args_repr(*args, **kwargs)  # Get the call args
-        # Get the run type designation
-        run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
 
         # Check if the run type has been run
-        r = self._cfg[run_type_designation]
+        r = self._cfg[engine_part_designation]
         if call_args not in r:
             r[call_args] = [0, 0, 0]
 
@@ -314,13 +289,13 @@ class LiquidEngine:
         self._print(
             f"Storing run time: {delta} (m={c[0]/c[2]:.2f},n={c[2]})",
             call_args,
-            run_type_designation,
+            engine_part_designation,
         )
 
         with open(self._config_file, "w") as f:
             yaml.dump(self._cfg, f)
 
-    def _get_fastest_run_type(self, *args, **kwargs) -> int:
+    def _get_fastest_run(self, *args, **kwargs) -> int:
         """
         Retrieves the fastest run type for the given args and kwargs
 
@@ -329,8 +304,8 @@ class LiquidEngine:
         2. If the args and kwargs are not in the config, it will find the most similar args and kwargs
         3. It will also use the runtime of the function to determine the fastest run type
 
-        :return: the fastest run type
-        :rtype: int (see RUN_TYPE_DESIGNATION)
+        :return: the fastest engine part designation
+        :rtype: str
         """
 
         fastest = self._default_fastest
@@ -339,19 +314,18 @@ class LiquidEngine:
         call_args = self._get_args_repr(*args, **kwargs)
         # print(call_args)
 
-        for run_type in self.RUN_TYPE_DESIGNATION:
-            run_type_designation = self.RUN_TYPE_DESIGNATION[run_type]
+        for engine_part_designation in self._engine_parts:
 
-            if run_type_designation not in self._cfg:
-                self._cfg[run_type_designation] = {}
+            if engine_part_designation not in self._cfg:
+                self._cfg[engine_part_designation] = {}
                 continue
 
-            if call_args not in self._cfg[run_type_designation] and len(self._cfg[run_type_designation]) > 0:
+            if call_args not in self._cfg[engine_part_designation] and len(self._cfg[engine_part_designation]) > 0:
                 # find the most similar call_args by score
                 score_current = self._get_args_score(call_args)
                 delta_best = 1e99
                 similar_call_args: str = None
-                for _call_args in self._cfg[run_type_designation]:
+                for _call_args in self._cfg[engine_part_designation]:
                     score = self._get_args_score(_call_args)
                     delta = abs(score - score_current)
                     if delta < delta_best:
@@ -361,26 +335,26 @@ class LiquidEngine:
                     call_args = similar_call_args
                 else:
                     # find the most similar call_args by string similarity
-                    similar_args = difflib.get_close_matches(call_args, self._cfg[run_type_designation].keys())
+                    similar_args = difflib.get_close_matches(call_args, self._cfg[engine_part_designation].keys())
                     if len(similar_args) > 0:
                         call_args = similar_args[0]
 
-            if call_args in self._cfg[run_type_designation]:
-                run_info = self._cfg[run_type_designation][call_args]
+            if call_args in self._cfg[engine_part_designation]:
+                run_info = self._cfg[engine_part_designation][call_args]
                 runtime_sum = run_info[0]
                 runtime_count = run_info[2]
                 speed = runtime_count / runtime_sum
-                speed_and_type.append((speed, run_type))
-                self._print(f"{run_type_designation} run time: {speed:.2f} runs/s")
+                speed_and_type.append((speed, engine_part_designation))
+                self._print(f"{engine_part_designation} run time: {speed:.2f} runs/s")
 
         if len(speed_and_type) == 0:
             return fastest
 
         elif self._random_testing:
             # randomly choose a run type based on a squared speed weight
-            run_type = [x[1] for x in speed_and_type]
+            engine_part_designation = [x[1] for x in speed_and_type]
             weights = [x[0] ** 2 for x in speed_and_type]
-            return random.choices(run_type, weights=weights, k=1)[0]
+            return random.choices(engine_part_designation, weights=weights, k=1)[0]
 
         else:
             # just return the fastest
@@ -504,7 +478,7 @@ class LiquidEngine:
     # _run methods #
     ################
 
-    def _run(self, *args, run_type=None, **kwargs):
+    def _run(self, *args, engine_part_designation: str = None, **kwargs):
         """
         Runs the function with the given args and kwargs
 
@@ -519,42 +493,26 @@ class LiquidEngine:
         4. It will return the result
 
         :param args: args for the function
-        :param run_type: the run type to use, if None use the fastest run type
+        :param engine_part_designation: designation for the engine part to use, if None use the fastest part
         :param kwargs: kwargs for the function
         :return: the result of the function
         """
 
-        if run_type is None:
-            run_type = self._get_fastest_run_type(*args, **kwargs)
-            self._print(f"Using run type: {self.RUN_TYPE_DESIGNATION[run_type]}")
+        if engine_part_designation is None:
+            engine_part_designation = self._get_fastest_run(*args, **kwargs)
+            self._print(f"Using run type: {engine_part_designation}")
 
         t_start = time.time()
-        if run_type == self.RUN_TYPE_OPENCL and self._has_opencl:
-            r = self._run_opencl(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_UNTHREADED and self._has_unthreaded:
-            r = self._run_unthreaded(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED and self._has_threaded:
-            r = self._run_threaded(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_STATIC and self._has_threaded_static:
-            r = self._run_threaded_static(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_DYNAMIC and self._has_threaded_dynamic:
-            r = self._run_threaded_dynamic(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_THREADED_GUIDED and self._has_threaded_guided:
-            r = self._run_threaded_guided(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_PYTHON and self._has_python:
-            r = self._run_python(*args, **kwargs)
-        elif run_type == self.RUN_TYPE_NJIT and self._has_njit:
-            r = self._run_njit(*args, **kwargs)
-        else:
-            raise NotImplementedError("No run method defined")
+        r = self._engine_parts[engine_part_designation](*args, **kwargs)
+        t_end = time.time()
 
         self._store_run_time(
-            run_type,
-            time.time() - t_start,
+            engine_part_designation,
+            t_end - t_start,
             *args,
             **kwargs,
         )
-        self._last_run_type = run_type
+        self._last_engine_part_designation = engine_part_designation
         return r
 
     def _run_opencl(*args, **kwargs):
