@@ -29,11 +29,10 @@ It is a successor to [NanoJ](https://github.com/HenriquesLab/NanoJ-Core), which 
 NanoPyx focuses on performance, by heavily exploiting cython aided multiprocessing and simplicity. It implements methods for the bioimage analysis field, with a special emphasis on those developed by the [Henriques Laboratory](https://henriqueslab.github.io/).
 
 Currently it implements the following approaches:
-
 - A reimplementation of the NanoJ image registration, SRRF and Super Resolution metrics
 - More to come soon™
 
-if you found this work useful, please cite: https://doi.org/10.5281/zenodo.7699280
+if you found this work useful, please cite: [![DOI](https://zenodo.org/badge/505388398.svg)](https://zenodo.org/badge/latestdoi/505388398)
 
 ## Napari plugin
 
