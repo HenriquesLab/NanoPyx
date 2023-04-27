@@ -15,6 +15,7 @@ Implementations of drift alignment and channel registration should be working, r
 [![Contributors](https://img.shields.io/github/contributors-anon/HenriquesLab/NanoPyx)](https://github.com/HenriquesLab/NanoPyx/graphs/contributors)
 [![GitHub stars](https://img.shields.io/github/stars/HenriquesLab/NanoPyx?style=social)](https://github.com/HenriquesLab/NanoPyx/)
 [![GitHub forks](https://img.shields.io/github/forks/HenriquesLab/NanoPyx?style=social)](https://github.com/HenriquesLab/NanoPyx/)
+[![DOI](https://zenodo.org/badge/505388398.svg)](https://zenodo.org/badge/latestdoi/505388398)
 
 Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging
 
@@ -29,8 +30,26 @@ NanoPyx focuses on performance, by heavily exploiting cython aided multiprocessi
 
 Currently it implements the following approaches:
 
-- A reimplementation of the NanoJ drift correction and channel registration methods
+- A reimplementation of the NanoJ image registration, SRRF and Super Resolution metrics
 - More to come soon™
+
+if you found this work useful, please cite: https://doi.org/10.5281/zenodo.7699280
+
+## Napari plugin
+
+NanoPyx is also available as a napari plugin, which can be installed via pip:
+
+```pip install "napari-nanopyx @git+https://github.com/HenriquesLab/napari-NanoPyx.git"```
+
+## Codeless jupyter notebooks available:
+
+| Method | Last test | Notebook Link | Colab Link |
+| --- | --- | --- | --- |
+| Channel Registration | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) |
+| Drift Correction | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) |
+| Image fidelity and resolution metrics | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) |
+| SRRF | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) |
+| Example Notebook with Example Dataset | 20/04/23 ✅ working (BMS) | [Open In Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) |
 
 ## Installation
 

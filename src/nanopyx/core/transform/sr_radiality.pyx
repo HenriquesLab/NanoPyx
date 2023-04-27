@@ -141,10 +141,10 @@ cdef class Radiality:
                     CGH = DivDFactor
 
                 if self.doIntensityWeighting:
-                    imRad[j,i] = CGH
+                    imRad[j,i] = CGH * imIW[j,i]
 
                 else:
-                    imRad[j,i] = CGH * imIW[j,i]
+                    imRad[j,i] = CGH
 
 
     cdef float _calculateDk(self, float x, float y, float xc, float yc, float vGx, float vGy, float vGx2Gy2) nogil:
