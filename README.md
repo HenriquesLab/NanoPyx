@@ -1,9 +1,5 @@
+![Logo](https://user-images.githubusercontent.com/7071808/235145866-602e9f03-5ad1-47c1-8790-a7ce3b678e89.svg)
 # Under Development, currently in alpha stage
-
-Implementations of drift alignment and channel registration should be working, remaining features are under development and/or broken (for now)
-
-# NanoPyx
-
 [![PyPI](https://img.shields.io/pypi/v/nanopyx.svg?color=green)](https://pypi.org/project/nanopyx)
 [![Python Version](https://img.shields.io/pypi/pyversions/nanopyx.svg?color=green)](https://python.org)
 [![Downloads](https://img.shields.io/pypi/dm/nanopyx)](https://pypi.org/project/nanopyx)
@@ -42,13 +38,13 @@ NanoPyx is also available as a napari plugin, which can be installed via pip:
 
 ## Codeless jupyter notebooks available:
 
-| Method | Last test | Notebook Link | Colab Link |
-| --- | --- | --- | --- |
-| Channel Registration | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) |
-| Drift Correction | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) |
-| Image fidelity and resolution metrics | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) |
-| SRRF | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) |
-| Example Notebook with Example Dataset | 20/04/23 ✅ working (BMS) | [Open In Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) |
+| Category | Method | Last test | Notebook Link | Colab Link |
+| --- | --- | --- | --- | --- |
+| Registration | Channel Registration | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) |
+| Registration | Drift Correction | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) |
+| Quality Control | Image fidelity and resolution metrics | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) |
+| Super-resolution | SRRF | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) |
+| Tutorial | Example Notebook with Example Dataset | 20/04/23 ✅ working (BMS) | [Open In Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) |
 
 ## Installation
 
