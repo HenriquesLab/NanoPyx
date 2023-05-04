@@ -1,7 +1,7 @@
 from .estimator_table import DriftEstimatorTable
 from ...core.utils.timeit import timeit
 from ...core.transform import translation
-from ...core.transform.image_shift import cv2_shift
+from ...core.transform.image_shift import catmull_rom_shift
 
 import numpy as np
 from skimage.transform import EuclideanTransform, warp
@@ -30,8 +30,7 @@ class DriftCorrector(object):
         """
         drift_x = self.estimator_table.drift_table[slice_idx][1]
         drift_y = self.estimator_table.drift_table[slice_idx][2]
-        transformation_matrix = EuclideanTransform(rotation=0, translation=(drift_y, drift_x))
-        return warp(self.image_arr[slice_idx], transformation_matrix.inverse, order=3, preserve_range=True)
+        return catmull_rom_shift(self.image_arr[slice_idx], drift_x, drift_y)
 
     # @timeit
     def apply_correction(self, image_array):
