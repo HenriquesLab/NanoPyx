@@ -122,8 +122,8 @@ class DriftEstimator(object):
         elif method == "Max":
             shift_y, shift_x = np.unravel_index(slice_ccm.argmax(), slice_ccm.shape)
 
-        shift_x = radius_x - shift_x - 0.5
-        shift_y = radius_y - shift_y - 0.5
+        shift_x = round(radius_x - shift_x - 0.5, 3)
+        shift_y = round(radius_y - shift_y - 0.5, 3)
 
         return (shift_x, shift_y)
 

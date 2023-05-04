@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
 
-from ..transform.interpolation_catmull_rom import interpolate
+from ..transform.interpolation_bicubic import interpolate
 
 class GetMaxOptimizer(object):
     """
