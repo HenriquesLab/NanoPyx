@@ -125,8 +125,6 @@ class DriftEstimator(object):
         shift_x = radius_x - shift_x - 0.5
         shift_y = radius_y - shift_y - 0.5
 
-        print(slice_index, shift_x, shift_y)
-
         return (shift_x, shift_y)
 
     def get_shifts_from_ccm(self):
