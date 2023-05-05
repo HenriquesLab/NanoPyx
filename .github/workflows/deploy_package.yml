@@ -19,14 +19,14 @@ jobs:
     runs-on: [py310, linux]
     steps:
       - name: Download wheels
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@v1.8
         with:
           latest: true
           fileName: "*.whl"
           out-file-path: "dist/"
 
       - name: Download sdist
-        uses: robinraju/release-downloader@v1.7
+        uses: robinraju/release-downloader@v1.8
         with:
           latest: true
           tarBall: true
