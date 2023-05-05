@@ -3,7 +3,7 @@ nickname: cell3
 description: | 
     Single molecule localization microscopy reconstruction of COS-7 cells labelled against beta-tubulin with AlexaFluor647
     Acquired and post-processed by Inês Cunha at Instituto Gulbenkian de Ciência, 2023
-data_dims: "t,y,x"
+data_dims: "t,height,width"
 data_shape: 1, 1190, 1180
 data_dtype: uint32
 reference: ""
