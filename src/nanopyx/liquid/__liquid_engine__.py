@@ -39,7 +39,7 @@ class LiquidEngine:
 
     def __initialize_run_types__(self):
         self._run_types = {}
-        if self._has_opencl and opencl_works:
+        if self._has_opencl and opencl_works():
             self._run_types["OpenCL"] = self._run_opencl
         if self._has_threaded:
             self._run_types["Threaded"] = self._run_threaded
@@ -468,7 +468,7 @@ class LiquidEngine:
     # _run methods #
     ################
 
-    def _run(self, *args, run_type: str=None, **kwargs):
+    def _run(self, *args, run_type:str=None, **kwargs):
         """
         Runs the function with the given args and kwargs
 
@@ -487,6 +487,8 @@ class LiquidEngine:
         :param kwargs: kwargs for the function
         :return: the result of the function
         """
+
+        print(run_type)
 
         if run_type is None:
             run_type = self._get_fastest_run_type(*args, **kwargs)

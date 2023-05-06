@@ -4,7 +4,7 @@
 [![Python Version](https://img.shields.io/pypi/pyversions/nanopyx.svg?color=green)](https://python.org)
 [![Downloads](https://img.shields.io/pypi/dm/nanopyx)](https://pypi.org/project/nanopyx)
 [![Docs](https://img.shields.io/badge/documentation-link-blueviolet)](https://henriqueslab.github.io/NanoPyx)
-[![License](https://img.shields.io/github/license/HenriquesLab/NanoPyx?color=Green)](https://github.com/HenriquesLab/NanoPyx/branch/main/LICENSE.txt)
+[![License](https://img.shields.io/github/license/HenriquesLab/NanoPyx?color=Green)](https://github.com/HenriquesLab/NanoPyx/blob/main/LICENSE.txt)
 [![Tests](https://github.com/HenriquesLab/NanoPyx/actions/workflows/nanopyx_oncall_mechanic.yml/badge.svg)](https://github.com/HenriquesLab/NanoPyx/actions/workflows/nanopyx_oncall_mechanic.yml)
 [![Build status](https://ci.appveyor.com/api/projects/status/oc7pk3t2h04r60j4?svg=true)](https://ci.appveyor.com/project/paxcalpt/nanopyx)
 [![Codecov](https://codecov.io/gh/HenriquesLab/NanoPyx/branch/main/graph/badge.svg)](https://codecov.io/gh/HenriquesLab/NanoPyx)
@@ -23,18 +23,13 @@ NanoPyx is a library specialized in the analysis of light microscopy and super-r
 It is a successor to [NanoJ](https://github.com/HenriquesLab/NanoJ-Core), which is a Java library for the analysis of super-resolution microscopy data.
 
 NanoPyx focuses on performance, by heavily exploiting cython aided multiprocessing and simplicity. It implements methods for the bioimage analysis field, with a special emphasis on those developed by the [Henriques Laboratory](https://henriqueslab.github.io/).
+It will be distributed as a Python Library and also as [Codeless Jupyter Notebooks](https://github.com/HenriquesLab/NanoPyx#codeless-jupyter-notebooks-available), that can be run locally or on Google Colab, and as a [napari plugin](https://github.com/HenriquesLab/NanoPyx#napari-plugin).
 
 Currently it implements the following approaches:
 - A reimplementation of the NanoJ image registration, SRRF and Super Resolution metrics
 - More to come soon™
 
 if you found this work useful, please cite: [![DOI](https://zenodo.org/badge/505388398.svg)](https://zenodo.org/badge/latestdoi/505388398)
-
-## Napari plugin
-
-NanoPyx is also available as a napari plugin, which can be installed via pip:
-
-```pip install "napari-nanopyx @git+https://github.com/HenriquesLab/napari-NanoPyx.git"```
 
 ## Codeless jupyter notebooks available:
 
@@ -45,6 +40,12 @@ NanoPyx is also available as a napari plugin, which can be installed via pip:
 | Quality Control | Image fidelity and resolution metrics | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) |
 | Super-resolution | SRRF | 20/04/23 ✅ working (BMS) | [Open in Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) |
 | Tutorial | Example Notebook with Example Dataset | 20/04/23 ✅ working (BMS) | [Open In Github](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) |
+
+## napari plugin
+
+NanoPyx is also available as a napari plugin, which can be installed via pip:
+
+```pip install "napari-nanopyx @git+https://github.com/HenriquesLab/napari-NanoPyx.git"```
 
 ## Installation
 

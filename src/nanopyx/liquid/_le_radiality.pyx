@@ -11,6 +11,9 @@ from .__interpolation_tools__ import check_image
 from nanopyx.liquid import CRShiftAndMagnify
 from nanopyx.core.utils.timeit import timeit2
 
+cdef extern from "_c_interpolation_catmull_rom.h":
+    pass
+
 cdef extern from "_c_sr_radiality.h":
     float _c_calculate_radiality_per_subpixel(int i, int j, float* imGx, float* imGy, float* xRingCoordinates, float* yRingCoordinates, int magnification, float ringRadius, int nRingCoordinates, int radialityPositivityConstraint, int h, int w) nogil
 
