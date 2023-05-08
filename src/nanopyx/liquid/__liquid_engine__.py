@@ -487,9 +487,7 @@ class LiquidEngine:
         :param kwargs: kwargs for the function
         :return: the result of the function
         """
-
-        print(run_type)
-
+        
         if run_type is None:
             run_type = self._get_fastest_run_type(*args, **kwargs)
             self._print(f"Using run type: {run_type}")
