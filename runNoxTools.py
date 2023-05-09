@@ -81,7 +81,7 @@ def main(mode=None):
         "Run nox with test source": "NPX_PYTEST_ARGS='-n=auto' nox --session test_source",
         "Run nox with build wheels": "nox --session clear_wheelhouse build_wheel build_sdist",
         "Run nox with test wheels": "nox --session test_wheel",
-        "Run nox with build and test wheels": "nox --session build_wheel build_sdist tests_on_wheels",
+        "Run nox with build and test wheels": "nox --session clear_wheelhouse build_wheel build_sdist test_wheel",
         "Run nox with generate docs": "nox --session generate_docs",
         "Run nox with lint": "nox --session lint",
         # "Run nox with all sessions": "pipx run nox",
