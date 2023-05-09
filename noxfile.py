@@ -19,7 +19,7 @@ else:
 
 
 # Set nox options
-nox.options.reuse_existing_virtualenvs = True
+nox.options.reuse_existing_virtualenvs = False
 
 # Some platform specific actions
 if PLATFORM == "macos":
