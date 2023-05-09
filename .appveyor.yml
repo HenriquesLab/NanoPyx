@@ -26,12 +26,12 @@ only_commits:
 
 environment:
   matrix:
-    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-      APPVEYOR_SAVE_CACHE_ON_ERROR: true
-      OS_NAME: win
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
       OS_NAME: linux
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      APPVEYOR_SAVE_CACHE_ON_ERROR: true
+      OS_NAME: win
     - APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
       APPVEYOR_SAVE_CACHE_ON_ERROR: true
       OS_NAME: darwin
