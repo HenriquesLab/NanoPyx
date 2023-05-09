@@ -35,7 +35,7 @@ jobs:
         uses: wntrblm/nox@2023.04.22
         with:
           python-versions: "3.9, 3.10, 3.11"
-      - name: Run Nox - build_wheel build_sdist
+      - name: Run Nox - clear_wheelhouse build_wheel build_sdist
         run: |
           pipx run nox --sessions clear_wheelhouse build_wheel build_sdist
         env:

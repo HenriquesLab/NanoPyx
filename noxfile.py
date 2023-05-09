@@ -32,10 +32,10 @@ def build_wheel(session: nox.Session) -> None:
     """
     Build a wheel
     """
-    if PLATFORM == "macos":  # build libomp from source, better ARM compatibility
-        path = Path(os.path.dirname(__file__)) / "build_tools" / "libs_build"
-        if not path:  # did we already build libomp?
-            session.run("bash", "build_tools/build_libomp.sh")
+    # if PLATFORM == "macos":  # build libomp from source, better ARM compatibility
+    #     path = Path(os.path.dirname(__file__)) / "build_tools" / "libs_build"
+    #     if not path:  # did we already build libomp?
+    #         session.run("bash", "build_tools/build_libomp.sh")
 
     session.install("build")
     temp_path = session.create_tmp()
