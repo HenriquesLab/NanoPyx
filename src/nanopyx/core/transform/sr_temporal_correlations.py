@@ -4,7 +4,7 @@ import numpy as np
 def calculate_SRRF_temporal_correlations(im: np.array, order: int = 1, do_integrate_lag_times: bool = 0): #these are for SRRF
 
     im = np.array(im, dtype='float32')
-    assert im.ndim == 3
+    assert im.ndim == 3 and order <= 4
     
     if order == 0: #TODO: check order number in NanoJ
         out_array = np.amax(im, axis=0)
