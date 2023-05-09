@@ -3,6 +3,7 @@ import os.path
 import platform
 import subprocess
 import sys
+from pathlib import Path
 
 from Cython.Build import cythonize
 from Cython.Compiler import Options
@@ -22,17 +23,9 @@ EXTRA_COMPILE_ARGS = [
 ]
 EXTRA_LING_ARGS = []
 
-BUILD_TOOLS_PATH = os.path.join("build_tools", "libs_build")
-BUILD_TOOLS_PATH_EXISTS = os.path.exists(BUILD_TOOLS_PATH)
-if BUILD_TOOLS_PATH_EXISTS:
-    INCLUDE_DIRS += [os.path.join(BUILD_TOOLS_PATH, "include")]
-    LIBRARY_DIRS += [os.path.join(BUILD_TOOLS_PATH, "lib")]
-
 
 def run_command(command: str) -> str:
-    result = subprocess.run(
-        command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    result = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     return result.stdout.decode("utf-8").strip()
 
 
@@ -50,9 +43,7 @@ def is_xcode_installed() -> bool:
 
 def is_homebrew_installed() -> bool:
     try:
-        result = subprocess.run(
-            ["which", "brew"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-        )
+        result = subprocess.run(["which", "brew"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return result.returncode == 0
     except Exception:
         return False
@@ -139,50 +130,40 @@ elif sys.platform == "darwin":
 
     # Lets check if homebrew is installed
     use_openmp_support = True
-    print(
-        "Checking for openmp support, to run code... ─=≡Σ((( つ◕ل͜◕)つ... blazing fast!!! "
-    )
+    print("Checking for openmp support, to run code... ─=≡Σ((( つ◕ل͜◕)つ... blazing fast!!! ")
+
+    BUILD_TOOLS_PATH = (
+        Path(os.path.dirname(__file__)) / "build_tools" / "libs_build"
+    )  # where we compile OpenMP from source
+
     if is_xcode_installed():
         print("\t - xcode instalation detected...")
-        if is_homebrew_installed():
+
+        if BUILD_TOOLS_PATH.exists():
+            print("\t - OpenMP compiled from source detected...")
+            INCLUDE_DIRS += [os.path.join(BUILD_TOOLS_PATH, "include")]
+            LIBRARY_DIRS += [os.path.join(BUILD_TOOLS_PATH, "lib")]
+
+        elif is_homebrew_installed():
             print("\t - brew instalation detected...")
             brew_list = run_command("brew list").split()
-            packages = ["llvm", "libomp"]  # , "open-mpi"]  # "gcc"
-            for package in packages:
-                if package in brew_list:
-                    print(f"\t - {package} instalation detected...")
-                else:
-                    print(
-                        f"\t - {package} instalation not detected: consider running 'brew install {' '.join(packages)}'"
-                    )
-                    use_openmp_support = False
-                    break
+            packages = ["llvm", "libomp"]
+            if "llvm" in brew_list and "libomp" in brew_list:
+                print("\t - llvm and libomp instalation detected...")
+                libomp_path = run_command("brew --prefix libomp").split()[0]
+                INCLUDE_DIRS += [os.path.join(libomp_path, "include")]
+                LIBRARY_DIRS += [os.path.join(libomp_path, "lib")]
+            else:
+                print(f"\t - {packages} instalation not detected: consider running 'brew install {' '.join(packages)}'")
+                use_openmp_support = False
         else:
-            print(
-                "\t - brew instalation not detected, consider installing from https://brew.sh/"
-            )
+            print("\t - brew instalation not detected, consider installing from https://brew.sh/")
             use_openmp_support = False
     else:
-        print(
-            "\t - xcode instalation not detected, consider installing from the App Store"
-        )
+        print("\t - xcode instalation not detected, consider installing from the App Store")
         use_openmp_support = False
 
     if use_openmp_support:
-        # some helpful info here REF: https://mac.r-project.org/openmp/
-        if not BUILD_TOOLS_PATH_EXISTS:
-            libomp_path = run_command("brew --prefix libomp").split()[0]
-            INCLUDE_DIRS += [
-                libomp_path + "/include",
-                # "/usr/local/opt/llvm/include", - if uncommented breaks cross-compilation
-            ]
-            LIBRARY_DIRS += [
-                libomp_path + "/lib",
-                # "/usr/local/opt/llvm/lib", - if uncommented breaks cross-compilation
-            ]
-        # include, library = get_mpicc_path()
-        # INCLUDE_DIRS += include
-        # LIBRARY_DIRS += library
         EXTRA_COMPILE_ARGS += ["-Xclang", "-fopenmp"]  # , "-lmpi"]
         EXTRA_LING_ARGS += ["-lomp"]  # ["-fopenmp", "-lmpi"]
 
@@ -190,7 +171,6 @@ elif sys.platform == "darwin":
     # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-mcpu=apple-m1", "-Xpreprocessor", "-fopenmp"]
     # EXTRA_COMPILE_ARGS = ["-O3", "-ffast-math", "-march=native", "-Xpreprocessor", "-fopenmp"]
     # EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
-
 
 elif sys.platform.startswith("linux"):
     INCLUDE_DIRS += ["/usr/local/include", "/usr/include"]
@@ -226,11 +206,7 @@ def collect_extensions():
         for (dir, dirs, files) in os.walk(path)
         for file in files
         if file.endswith(".pyx")
-        or (
-            file.endswith(".py")
-            and "# nanopyx-cythonize: True\n"
-            in open(os.path.join(dir, file)).read()
-        )
+        or (file.endswith(".py") and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read())
     ]
 
     cython_extensions = []
@@ -248,17 +224,13 @@ def collect_extensions():
         )
         if os.path.exists(pxd_file):
             with open(pxd_file, "r") as f:
-                extra_c_files_candadates = (
-                    search_for_c_files_referrenced_in_pyx_text(f.read())
-                )
+                extra_c_files_candadates = search_for_c_files_referrenced_in_pyx_text(f.read())
             sources += extra_c_files_candadates
             extra_c_files += extra_c_files_candadates
 
         # Now search in the pyx file
         with open(file, "r") as f:
-            extra_c_files_candadates = (
-                search_for_c_files_referrenced_in_pyx_text(f.read())
-            )
+            extra_c_files_candadates = search_for_c_files_referrenced_in_pyx_text(f.read())
             sources += extra_c_files_candadates
             extra_c_files += extra_c_files_candadates
 
@@ -268,9 +240,7 @@ def collect_extensions():
 
         # Remove files that don't exist
         sources = [file for file in sources if os.path.exists(file)]
-        extra_c_files = [
-            file for file in extra_c_files if os.path.exists(file)
-        ]
+        extra_c_files = [file for file in extra_c_files if os.path.exists(file)]
 
         # Make sure we have all the include paths
         for path in extra_c_files:
@@ -283,9 +253,7 @@ def collect_extensions():
     print(f"Found following .pyx files to build:\n {'; '.join(cython_files)}")
     print(f"Found the extra c files to build:\n {'; '.join(extra_c_files)}")
 
-    collected_extensions = cythonize(
-        cython_extensions, annotate=True, language_level="3"
-    )
+    collected_extensions = cythonize(cython_extensions, annotate=True, language_level="3")
 
     return collected_extensions
 

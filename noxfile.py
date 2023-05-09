@@ -6,7 +6,7 @@ from pathlib import Path
 import nox
 
 DIR = Path(__file__).parent.resolve()
-PYTHON_ALL_VERSIONS = ["3.8", "3.9", "3.10", "3.11"]
+PYTHON_ALL_VERSIONS = ["3.9", "3.10", "3.11"]
 PYTHON_DEFAULT_VERSION = "3.10"
 
 # Platform logic
@@ -32,14 +32,17 @@ def build_wheel(session: nox.Session) -> None:
     """
     Build a wheel
     """
+    if PLATFORM == "macos":  # build libomp from source, better ARM compatibility
+        path = Path(os.path.dirname(__file__)) / "build_tools" / "libs_build"
+        if not path:  # did we already build libomp?
+            session.run("bash", "build_tools/build_libomp.sh")
+
     session.install("build")
     temp_path = session.create_tmp()
     # session.run("python", "-m", "build", "--wheel", "-o", temp_path)
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
     # get the produced wheel name
-    wheel_name = [
-        name for name in os.listdir(temp_path) if name.endswith(".whl")
-    ][0]
+    wheel_name = [name for name in os.listdir(temp_path) if name.endswith(".whl")][0]
 
     if PLATFORM == "unix" and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
         session.install("auditwheel")
@@ -52,7 +55,7 @@ def build_wheel(session: nox.Session) -> None:
         )
 
     elif PLATFORM == "macos":
-        session.install("delocate")
+        session.install("delocate==0.10.4")
         session.run(
             "delocate-wheel",
             "-v",
@@ -60,6 +63,7 @@ def build_wheel(session: nox.Session) -> None:
             "-w",
             DIR / "wheelhouse",
         )
+        pass
 
     else:
         os.makedirs(DIR / "wheelhouse", exist_ok=True)
@@ -100,16 +104,12 @@ def tests_on_wheels(session):
     python_version_str = f"cp{session.python.replace('.', '')}"
     # find the latest wheel
     wheel_names = [
-        wheel
-        for wheel in os.listdir("wheelhouse")
-        if wheel.endswith(".whl") and python_version_str in wheel
+        wheel for wheel in os.listdir("wheelhouse") if wheel.endswith(".whl") and python_version_str in wheel
     ]
     wheel_names.sort()
     wheel_name = wheel_names[-1]
 
-    session.run(
-        "pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]"
-    )
+    session.run("pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]")
     with session.chdir(".nox"):
         extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
         if extra_args != "":
