@@ -8,13 +8,13 @@ shallow_clone: false
 branches:
   # whitelist
   only:
-    - main
+    - \d+\.\d+\.\d+$/ # build only tags that match the pattern v1.2.3
+    #- main
 
 # Do not build on tags (GitHub, Bitbucket, GitLab, Gitea)
 skip_tags: false
 # Start builds on tags only (GitHub, BitBucket, GitLab, Gitea)
 skip_non_tags: true
-
 
 only_commits:
   files:
@@ -104,11 +104,11 @@ notifications:
 
 deploy:
   # skip_tags: true
-  #on:
-  #  branch: main # release from main branch only
-  #  APPVEYOR_REPO_TAG: false # deploy on tag push only
+  on:
+    #  branch: main # release from main branch only
+    APPVEYOR_REPO_TAG: true # deploy on tag push only
   provider: GitHub
-  # tag: $(APPVEYOR_REPO_TAG_NAME)
+  tag: $(APPVEYOR_REPO_TAG_NAME)
   repository: "HenriquesLab/NanoPyx"
   release: Latest builds by AppVeyor
   description: "Note: these builds are generally untested"
