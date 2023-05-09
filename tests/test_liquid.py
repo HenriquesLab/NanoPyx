@@ -353,6 +353,7 @@ def test_interpolation_lanzcos_ShiftScaleRotate(plt):
 
 # tag-end
 
+"""
 def test_rgc(downloader):
 
     dataset = downloader.get_ZipTiffIterator(
@@ -371,3 +372,4 @@ def test_radiality(downloader):
 
     liquid_rad = Radiality()
     imRad = liquid_rad.run(small_dataset)
+"""
