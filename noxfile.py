@@ -81,8 +81,16 @@ def build_sdist(session: nox.Session) -> None:
     session.run("python", "-m", "build", "--sdist", "-o", "wheelhouse")
 
 
+@nox.session(python=PYTHON_DEFAULT_VERSION)
+def clear_wheelhouse(session: nox.Session) -> None:
+    """
+    Clear the wheelhouse
+    """
+    shutil.rmtree(DIR / "wheelhouse", ignore_errors=True)
+
+
 @nox.session(python=PYTHON_ALL_VERSIONS)
-def tests_on_source(session):
+def test_source(session):
     """
     Run the test suite by directly calling pip install -e .[test] and then pytest
     """
@@ -97,7 +105,7 @@ def tests_on_source(session):
 
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
-def tests_on_wheels(session):
+def test_wheel(session):
     """
     Run the test suite by installing the wheel, changing directory and then calling pytest
     """

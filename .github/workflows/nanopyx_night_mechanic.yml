@@ -34,10 +34,10 @@ jobs:
       - name: Install Python's for Nox
         uses: wntrblm/nox@2023.04.22
         with:
-          python-versions: "3.8, 3.9, 3.10, 3.11"
+          python-versions: "3.9, 3.10, 3.11"
       - name: Run Nox - build_wheel build_sdist
         run: |
-          pipx run nox --sessions build_wheel build_sdist
+          pipx run nox --sessions clear_wheelhouse build_wheel build_sdist
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
       - name: Save wheels to cache
@@ -79,10 +79,10 @@ jobs:
       - name: Install Python's for Nox
         uses: wntrblm/nox@2023.04.22
         with:
-          python-versions: "3.8, 3.9, 3.10, 3.11"
-      - name: Run Nox - tests_on_wheels
+          python-versions: "3.9, 3.10, 3.11"
+      - name: Run Nox - test_wheel
         run: |
-          pipx run nox --sessions tests_on_wheels
+          pipx run nox --sessions test_wheel
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
 
