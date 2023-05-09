@@ -4,11 +4,11 @@ version: "{build}"
 
 shallow_clone: false
 
-# # branches to build
-# branches:
-#   # whitelist
-#   only:
-#     - main
+# branches to build
+branches:
+  # whitelist
+  only:
+    - main
 
 # Do not build on tags (GitHub, Bitbucket, GitLab, Gitea)
 skip_tags: false
