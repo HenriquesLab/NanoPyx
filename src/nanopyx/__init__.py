@@ -4,7 +4,7 @@
 
 import os
 
-from . import _version, core, data, methods  # noqa: F401
+from . import _version, core, data, methods, liquid  # noqa: F401
 
 __version__ = _version.get_versions()["version"]
 
