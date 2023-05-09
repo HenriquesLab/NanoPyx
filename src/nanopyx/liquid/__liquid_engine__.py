@@ -1,5 +1,5 @@
 import os
-import time
+import timeit
 import difflib
 from pathlib import Path
 import inspect
@@ -496,11 +496,11 @@ class LiquidEngine:
             run_type = self._get_fastest_run_type(*args, **kwargs)
             self._print(f"Using run type: {run_type}")
 
-        t_start = time.time()
+        t_start = timeit.default_timer()
         r = self._run_types[run_type](*args, **kwargs)
         self._store_run_time(
             run_type,
-            time.time() - t_start,
+            timeit.default_timer() - t_start,
             *args,
             **kwargs,
         )
