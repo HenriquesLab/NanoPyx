@@ -8,9 +8,13 @@ import random
 import numpy as np
 import yaml
 
-from .. import __config_folder__
 from .__njit__ import njit_works
 from .__opencl__ import opencl_works, cl_dp
+
+__home_folder__ = os.path.expanduser("~")
+__config_folder__ = os.path.join(__home_folder__, ".nanopyx")
+if not os.path.exists(__config_folder__):
+    os.makedirs(__config_folder__)
 
 # flake8: noqa: E501
 
