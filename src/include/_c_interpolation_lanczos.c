@@ -1,7 +1,4 @@
-#define TAPS 4
-#define HALF_TAPS 2
-
-#include <math.h>
+#include <_c_interpolation_lanczos.h>
 
 // Lanczos function used in Lanczos interpolation
 double _c_lanczos_kernel(double v) {

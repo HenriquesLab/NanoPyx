@@ -9,6 +9,9 @@
 // #define PI 3.14159265358979323846
 #endif
 
+#define TAPS 4
+#define HALF_TAPS 2
+
 double _c_lanczos_kernel(double v);
 float _c_interpolate(float *image, float r, float c, int rows, int cols);
 
