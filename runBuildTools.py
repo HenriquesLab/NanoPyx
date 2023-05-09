@@ -29,9 +29,7 @@ def get_version():
     return versioneer.get_version()
 
 
-def find_files(
-    root_dir: str, extension: str, partner_extension: str = None
-) -> list:
+def find_files(root_dir: str, extension: str, partner_extension: str = None) -> list:
     """
     Find all files with a given extension in a directory
     :param root_dir: root directory to search
@@ -47,9 +45,7 @@ def find_files(
                 if file.endswith(extension):
                     target_files.append(os.path.join(root, file))
             else:
-                if file.endswith(extension) and os.path.exists(
-                    os.path.join(root, file_name + partner_extension)
-                ):
+                if file.endswith(extension) and os.path.exists(os.path.join(root, file_name + partner_extension)):
                     target_files.append(os.path.join(root, file))
 
         # auto remove empty directories
@@ -72,14 +68,9 @@ def change_cython_profiler_flag(base_path: str, flag: bool):
         with open(pyx_file, "r") as f:
             lines = f.read().splitlines()
             for i, line in enumerate(lines):
-                if (
-                    line.startswith("# cython:")
-                    and f"profile={not flag}" in line
-                ):
+                if line.startswith("# cython:") and f"profile={not flag}" in line:
                     print(f"Changing profile flag to {flag}: {pyx_file}")
-                    lines[i] = line.replace(
-                        f"profile={not flag}", f"profile={flag}"
-                    )
+                    lines[i] = line.replace(f"profile={not flag}", f"profile={flag}")
                     break
         with open(pyx_file, "w") as f:
             f.write("\n".join(lines))
@@ -121,6 +112,7 @@ def update_gitignore():
         "*.pyd",
         "wheelhouse",
         ".nox",
+        "build_tools/libs_build",
     ]
     for ignore in ignores:
         if ignore not in gitignore_lines:
@@ -159,9 +151,7 @@ def extract_requirements_from_pyproject():
         end = txt.find("]\n", start) + 1
         requirements += eval(txt[start:end])
     requirements = [line for line in requirements if "nanopyx" not in line]
-    with open(
-        os.path.join(".docker", "gha_runners", "requirements.txt"), "w"
-    ) as f:
+    with open(os.path.join(".docker", "gha_runners", "requirements.txt"), "w") as f:
         f.write("\n".join(requirements))
 
 
@@ -191,9 +181,7 @@ def main(mode=None):
         "Auto-generate pxd files via pyx2pxd": f"{python_call} src/scripts/pyx2pxd.py",
         "Auto-copy c to cl files via c2cl": f"{python_call} src/scripts/c2cl.py",
         "Auto-generate code with tag2tag": f"{python_call} src/scripts/tag2tag.py",
-        "Clean files": f"{remove_call} {files2clean}"
-        if len(files2clean) > 0
-        else "echo 'No files to clean'",
+        "Clean files": f"{remove_call} {files2clean}" if len(files2clean) > 0 else "echo 'No files to clean'",
         "Run pytest": "pytest -n=auto --nbmake --nbmake-timeout=600",
         "Run nox with all sessions": "pipx run nox",
         "Run nox with build and test wheels": "pipx run nox --session build_wheel build_sdist tests_on_wheels",
@@ -234,9 +222,7 @@ def main(mode=None):
         for i, option in enumerate(options.keys()):
             cmd = options[option]
             if type(cmd) == str:
-                print(
-                    f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}"
-                )
+                print(f"{i+1}) {option}: [CMD]> {cmd if len(cmd)< 100 else cmd[:100]+'...'}")
             elif isfunction(cmd):
                 print(f"{i+1}) {option}: [FUNCTION]> {repr(cmd)}")
 
