@@ -1,5 +1,5 @@
 ![Logo](https://user-images.githubusercontent.com/7071808/235145866-602e9f03-5ad1-47c1-8790-a7ce3b678e89.svg)
-# Under Development, currently in alpha stage
+# Under Development, currently in beta stage
 [![PyPI](https://img.shields.io/pypi/v/nanopyx.svg?color=green)](https://pypi.org/project/nanopyx)
 [![Python Version](https://img.shields.io/pypi/pyversions/nanopyx.svg?color=green)](https://python.org)
 [![Downloads](https://img.shields.io/pypi/dm/nanopyx)](https://pypi.org/project/nanopyx)
