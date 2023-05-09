@@ -1,6 +1,6 @@
 # REF: https://www.appveyor.com/docs/getting-started-with-appveyor-for-linux/
 
-version: "{build}"
+version: "{build}-{branch}"
 
 shallow_clone: false
 
@@ -8,8 +8,8 @@ shallow_clone: false
 branches:
   # whitelist
   only:
+    - main
     - \d+\.\d+\.\d+$/ # build only tags that match the pattern v1.2.3
-    #- main
 
 # Do not build on tags (GitHub, Bitbucket, GitLab, Gitea)
 skip_tags: false
