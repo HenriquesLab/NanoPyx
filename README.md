@@ -45,7 +45,7 @@ if you found this work useful, please cite: [![DOI](https://zenodo.org/badge/505
 
 NanoPyx is also available as a napari plugin, which can be installed via pip:
 
-```pip install "napari-nanopyx @git+https://github.com/HenriquesLab/napari-NanoPyx.git"```
+```pip install napari-nanopyx```
 
 ## Installation
 
