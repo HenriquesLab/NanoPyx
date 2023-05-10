@@ -138,6 +138,18 @@ def test_testpypi(session):
         else:
             session.run("pytest", DIR.joinpath("tests"))
 
+@nox.session(python=PYTHON_ALL_VERSIONS)
+def test_pypi(session):
+    session.run("pip", "install", "-U", "nanopyx[all]")
+    with session.chdir(".nox"):
+        extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
+        if extra_args != "":
+            extra_args = extra_args.split(" ")
+            session.run("pytest", DIR.joinpath("tests"), *extra_args)
+        else:
+            session.run("pytest", DIR.joinpath("tests"))
+
+
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
 def generate_docs(session: nox.Session) -> None:
