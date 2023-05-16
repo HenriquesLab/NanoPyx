@@ -6,11 +6,13 @@ import inspect
 import random
 from itertools import combinations
 
+from functools import partial
+
 import numpy as np
 import yaml
 
 from .__njit__ import njit_works
-from .__opencl__ import opencl_works, cl_dp
+from .__opencl__ import opencl_works, devices
 
 __home_folder__ = os.path.expanduser("~")
 __config_folder__ = os.path.join(__home_folder__, ".nanopyx")
@@ -53,7 +55,8 @@ class LiquidEngine:
     def __initialize_run_types__(self):
         self._run_types = {}
         if self._has_opencl and opencl_works():
-            self._run_types["OpenCL"] = self._run_opencl
+            for d in devices:
+                self._run_types[f"OpenCL_{d['device'].name}"] = partial(self._run_opencl, device=d)
         if self._has_threaded:
             self._run_types["Threaded"] = self._run_threaded
         if self._has_unthreaded:
@@ -369,7 +372,7 @@ class LiquidEngine:
             # just return the fastest
             return sorted(speed_and_type, key=lambda x: x[0], reverse=True)[0][1]
 
-    def _get_cl_code(self, file_name):
+    def _get_cl_code(self, file_name, cl_dp):
         """
         Retrieves the OpenCL code from the corresponding .cl file
         """
