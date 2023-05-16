@@ -17,7 +17,7 @@ import warnings
 import platform
 
 from .__njit__ import njit_works
-from .__opencl__ import cl, cl_array, cl_ctx, cl_queue, opencl_works, print_opencl_info
+from .__opencl__ import cl, cl_array, opencl_works, print_opencl_info, devices
 from ._le_interpolation_bicubic import ShiftAndMagnify as BCShiftAndMagnify
 from ._le_interpolation_bicubic import ShiftScaleRotate as BCShiftScaleRotate
 from ._le_interpolation_catmull_rom import ShiftAndMagnify as CRShiftAndMagnify
