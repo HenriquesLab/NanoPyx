@@ -10,7 +10,7 @@ from libc.math cimport cos, sin
 
 from .__interpolation_tools__ import check_image, value2array
 from .__liquid_engine__ import LiquidEngine
-from .__opencl__ import cl, cl_array, cl_ctx, cl_queue
+from .__opencl__ import cl, cl_array
 
 
 cdef extern from "_c_interpolation_catmull_rom.h":
@@ -105,13 +105,18 @@ class ShiftAndMagnify(LiquidEngine):
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_opencl; replace("nearest_neighbor", "catmull_rom")
     @LiquidEngine._logger(logger)
-    def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col, dict device) -> np.ndarray:
+
+        # QUEUE AND CONTEXT
+        cl_ctx = cl.Context([device['device']])
+        cl_queue = cl.CommandQueue(cl_ctx)
+
         # Swap row and columns because opencl is strange and stores the
         # array in a buffer in fortran ordering despite the original
         # numpy array being in C order.
         image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
 
-        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
+        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl", device['DP'])
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = <int>(image.shape[1] * magnification_row)
@@ -359,14 +364,18 @@ class ShiftScaleRotate(LiquidEngine):
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_opencl; replace("nearest_neighbor", "catmull_rom")
     @LiquidEngine._logger(logger)
-    def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+    def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, dict device) -> np.ndarray:
+
+        # QUEUE AND CONTEXT
+        cl_ctx = cl.Context([device['device']])
+        cl_queue = cl.CommandQueue(cl_ctx)
 
         # Swap row and columns because opencl is strange and stores the
         # array in a buffer in fortran ordering despite the original
         # numpy array being in C order.
         image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
 
-        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl")
+        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl", device['DP'])
 
         cdef int nFrames = image.shape[0]
         cdef int rowsM = image.shape[1]
