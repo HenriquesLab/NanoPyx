@@ -138,6 +138,7 @@ def test_testpypi(session):
         else:
             session.run("pytest", DIR.joinpath("tests"))
 
+
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def test_pypi(session):
     session.run("pip", "install", "-U", "nanopyx[all]")
@@ -148,7 +149,6 @@ def test_pypi(session):
             session.run("pytest", DIR.joinpath("tests"), *extra_args)
         else:
             session.run("pytest", DIR.joinpath("tests"))
-
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
