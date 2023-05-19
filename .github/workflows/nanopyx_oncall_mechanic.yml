@@ -66,6 +66,7 @@ jobs:
           fetch-depth: 0
       - name: Run Nox Quick-Tests
         run: |
+          reboot
           export PATH=/usr/local/bin:/usr/local/sbin:$PATH
           python3 -m pip install --upgrade pip
           python3 -m pip install --upgrade pipx
