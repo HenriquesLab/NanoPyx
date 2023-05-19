@@ -66,9 +66,9 @@ jobs:
           fetch-depth: 0
       - name: Run Nox Quick-Tests
         run: |
-          export PATH=/usr/local/bin:/usr/local/sbin:$PATH
-          python3 -m pip install --upgrade pip
-          python3 -m pip install --upgrade nox
-          python3 -m nox --sessions test_source-3.9
+          zsh
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade nox
+          python -m nox --sessions test_source-3.9
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
