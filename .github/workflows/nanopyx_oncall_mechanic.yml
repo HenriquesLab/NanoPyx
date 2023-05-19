@@ -29,8 +29,8 @@ on:
           - debug
 
 jobs:
-  oncall_mechanic:
-    runs-on: [self-hosted, deepthought]
+  oncall_mechanic_ubuntu:
+    runs-on: [self-hosted, linux]
     steps:
       - name: Setup Ubuntu dependencies
         run: |
@@ -57,3 +57,22 @@ jobs:
           flags: pytests # optional
           fail_ci_if_error: false # optional (default = false)
           verbose: true # optional (default = false)
+  oncall_mechanic_macosx:
+    runs-on: [self-hosted, macos]
+    steps:
+      - name: Setup MacOSX dependencies
+        run: |
+          brew install llvm libomp
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Run Nox Quick-Tests
+        run: |
+          pipx run nox --sessions test_source-3.10
+        env:
+          LOG_LEVEL: ${{ github.event.inputs.logLevel }}

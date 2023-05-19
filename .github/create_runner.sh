@@ -2,7 +2,9 @@
 export RUNNER_ALLOW_RUNASROOT="1"
 apt update
 RUN DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-apt install -y curl systemctl build-essential lsb-release python3.11-full python3.10-full python3.10-venv python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb libavcodec libpython3.10-dev libpython3.11-dev
+apt install -y curl systemctl build-essential lsb-release python3.11-full python3.10-full python3.10-venv python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb libpython3.10-dev libpython3.11-dev 
+apt install -y apt-get update && apt-get install -y systemd libpam-systemd systemd-ui
+apt install -y libavcodec
 python -m pip install --upgrade pip
 python -m pip install --upgrade pipx
 mkdir actions-runner && cd actions-runner
