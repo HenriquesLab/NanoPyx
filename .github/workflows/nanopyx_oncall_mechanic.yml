@@ -44,10 +44,10 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v2
         with:
-          python-version: "3.10"
+          python-version: "3.9"
       - name: Run Nox Quick-Tests
         run: |
-          pipx run nox --sessions test_source-3.10
+          pipx run nox --sessions test_source-3.9
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
       - name: Upload Coverage
@@ -67,6 +67,6 @@ jobs:
       - name: Run Nox Quick-Tests
         run: |
           pip3 install pipx
-          python3 -m pipx run nox --sessions test_source-3.10
+          python3 -m pipx run nox --sessions test_source-3.9
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
