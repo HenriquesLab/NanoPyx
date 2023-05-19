@@ -66,7 +66,8 @@ jobs:
           fetch-depth: 0
       - name: Run Nox Quick-Tests
         run: |
-          zsh
+          pyenv install 3.9.0
+          pyenv local 3.9.0
           python -m pip install --upgrade pip
           python -m pip install --upgrade nox
           python -m nox --sessions test_source-3.9
