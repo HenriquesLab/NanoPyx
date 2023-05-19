@@ -60,9 +60,6 @@ jobs:
   oncall_mechanic_macosx:
     runs-on: [self-hosted, macos]
     steps:
-      - name: Setup MacOSX dependencies
-        run: |
-          brew install llvm libomp
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -73,6 +70,7 @@ jobs:
           python-version: "3.10"
       - name: Run Nox Quick-Tests
         run: |
-          pipx run nox --sessions test_source-3.10
+          pip3 install pipx
+          pipx3 run nox --sessions test_source-3.10
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
