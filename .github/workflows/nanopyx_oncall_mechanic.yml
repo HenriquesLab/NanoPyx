@@ -67,6 +67,6 @@ jobs:
       - name: Run Nox Quick-Tests
         run: |
           pip3 install pipx
-          pipx3 run nox --sessions test_source-3.10
+          pipx run nox --sessions test_source-3.10
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
