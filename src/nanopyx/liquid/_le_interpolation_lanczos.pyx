@@ -30,6 +30,7 @@ class ShiftAndMagnify(LiquidEngine):
     _has_unthreaded = True
     _has_python = False
     _has_njit = False
+    _designation = "ShiftMagnify_LZ"
 
     def __init__(self):
         super().__init__()
@@ -263,6 +264,7 @@ class ShiftScaleRotate(LiquidEngine):
     _has_unthreaded = True
     _has_python = False
     _has_njit = False
+    _designation = "ShiftScaleRotate_LZ"
 
     def __init__(self):
         super().__init__()

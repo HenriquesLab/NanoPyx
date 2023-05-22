@@ -28,6 +28,7 @@ class MandelbrotBenchmark(LiquidEngine):
     _has_unthreaded = True
     _has_python = True
     _has_njit = True
+    _designation = "Mandelbrot_Benchmark"
 
     def __init__(self):
         super().__init__()

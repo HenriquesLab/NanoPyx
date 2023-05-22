@@ -36,6 +36,7 @@ class Radiality(LiquidEngine):
     _has_unthreaded = True
     _has_python = False
     _has_njit = False
+    _designation = "Radiality"
 
     def __init__(self):
         super().__init__()
