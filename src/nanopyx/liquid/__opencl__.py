@@ -57,41 +57,30 @@ def print_opencl_info():
     """
     # REF: https://github.com/benshope/PyOpenCL-Tutorial
 
-    print("\n" + "=" * 60 + "\nOpenCL Platforms and Devices")
+    msg = "\n" + "=" * 60 + "\nOpenCL Platforms and Devices \n"
     # Print each platform on this computer
     for platform in cl.get_platforms():
-        print("=" * 60)
-        print("Platform - Name:  " + platform.name)
-        print("Platform - Vendor:  " + platform.vendor)
-        print("Platform - Version:  " + platform.version)
-        print("Platform - Profile:  " + platform.profile)
+        msg += "=" * 60 + "\n"
+        msg += "Platform - Name:  " + platform.name  + "\n"
+        msg += "Platform - Vendor:  " + platform.vendor + "\n"
+        msg += "Platform - Version:  " + platform.version + "\n"
+        msg += "Platform - Profile:  " + platform.profile + "\n"
         # Print each device per-platform
         for device in platform.get_devices():
-            print("\t" + "-" * 56)
-            print("\tDevice - Name: " + device.name)
-            print("\tDevice - Type: " + cl.device_type.to_string(device.type))
-            print(
-                f"\tDevice - Max Clock Speed:  {device.max_clock_frequency} Mhz"
-            )
+            msg += "\t" + "-" * 56 + "\n"
+            msg += "\tDevice - Name: " + device.name + "\n"
+            msg += "\tDevice - Type: " + cl.device_type.to_string(device.type) + "\n"
+            msg += f"\tDevice - Max Clock Speed:  {device.max_clock_frequency} Mhz" + "\n"
 
-            print(f"\tDevice - Compute Units:  {device.max_compute_units}")
-            print(
-                f"\tDevice - Local Memory:  {device.local_mem_size / 1024.0:.0f} KB"
-            )
-            print(
-                f"\tDevice - Constant Memory:  {device.max_constant_buffer_size / 1024.0:.0f} KB"
-            )
-            print(
-                f"\tDevice - Global Memory: {device.global_mem_size / 1073741824.0:.0f} GB"
-            )
-            print(
-                f"\tDevice - Max Buffer/Image Size: {device.max_mem_alloc_size / 1048576.0:.0f} MB"
-            )
-            print(
-                f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}"
-            )
-    print("\n")
+            msg += f"\tDevice - Compute Units:  {device.max_compute_units}" + "\n"
+            msg += f"\tDevice - Local Memory:  {device.local_mem_size / 1024.0:.0f} KB" + "\n"
+            msg += f"\tDevice - Constant Memory:  {device.max_constant_buffer_size / 1024.0:.0f} KB" + "\n"
+            msg += f"\tDevice - Global Memory: {device.global_mem_size / 1073741824.0:.0f} GB" + "\n"
+            msg += f"\tDevice - Max Buffer/Image Size: {device.max_mem_alloc_size / 1048576.0:.0f} MB" + "\n"
+            msg += f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}" + "\n"
 
+    return msg
+            
 
 def opencl_works():
     """
