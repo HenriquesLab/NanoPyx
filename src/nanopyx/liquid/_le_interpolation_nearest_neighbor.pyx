@@ -20,6 +20,18 @@ from ._le_interpolation_nearest_neighbor_ import \
 from ._le_interpolation_nearest_neighbor_ import \
     shift_scale_rotate as _py_shift_magnify_rotate
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+fh = logging.FileHandler(f'{__name__}.log')
+fh.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(process)d - %(processName)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+
+logger.addHandler(fh)
+
 
 cdef extern from "_c_interpolation_nearest_neighbor.h":
     float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
@@ -89,6 +101,7 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_opencl
+    @LiquidEngine._logger(logger)
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         # Swap row and columns because opencl is strange and stores the
         # array in a buffer in fortran ordering despite the original
@@ -130,6 +143,7 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded
+    @LiquidEngine._logger(logger)
     def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -156,6 +170,7 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(colsM)", "prange(colsM)")
+    @LiquidEngine._logger(logger)
     def _run_threaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -182,6 +197,7 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(colsM)", 'prange(colsM, schedule="static")')
+    @LiquidEngine._logger(logger)
     def _run_threaded_static(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -208,6 +224,7 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(colsM)", 'prange(colsM, schedule="dynamic")')
+    @LiquidEngine._logger(logger)
     def _run_threaded_dynamic(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -234,6 +251,7 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(colsM)", 'prange(colsM, schedule="guided")')
+    @LiquidEngine._logger(logger)
     def _run_threaded_guided(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -260,12 +278,14 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_python
+    @LiquidEngine._logger(logger)
     def _run_python(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
         image_out = _py_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
         return image_out
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_njit
+    @LiquidEngine._logger(logger)
     def _run_njit(
         self,
         image=np.zeros((1,10,10),dtype=np.float32),
@@ -346,6 +366,7 @@ class ShiftScaleRotate(LiquidEngine):
 
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_opencl
+    @LiquidEngine._logger(logger)
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
 
         # Swap row and columns because opencl is strange and stores the
@@ -389,6 +410,7 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded
+    @LiquidEngine._logger(logger)
     def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -425,6 +447,7 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(cols)", "prange(cols)")
+    @LiquidEngine._logger(logger)
     def _run_threaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -461,6 +484,7 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(cols)", "prange(cols, schedule='static')")
+    @LiquidEngine._logger(logger)
     def _run_threaded_static(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -497,6 +521,7 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(cols)", "prange(cols, schedule='dynamic')")
+    @LiquidEngine._logger(logger)
     def _run_threaded_dynamic(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -533,6 +558,7 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(cols)", "prange(cols, schedule='guided')")
+    @LiquidEngine._logger(logger)
     def _run_threaded_guided(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -569,6 +595,7 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_python
+    @LiquidEngine._logger(logger)
     def _run_python(self, image, shift_row, shift_col, scale_row, scale_col, angle) -> np.ndarray:
         image_out = _py_shift_magnify_rotate(image, shift_row, shift_col, scale_row, scale_col, angle)
         return image_out
@@ -576,6 +603,7 @@ class ShiftScaleRotate(LiquidEngine):
 
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_njit
+    @LiquidEngine._logger(logger)
     def _run_njit(
         self,
         image=np.zeros((1,10,10),dtype=np.float32),
@@ -646,6 +674,7 @@ class PolarTransform(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_opencl
+    @LiquidEngine._logger(logger)
     def _run_opencl(self, float[:,:,:] image, int nrow, int ncol, str scale):
         
         # Swap row and columns because opencl is strange and stores the
@@ -687,6 +716,7 @@ class PolarTransform(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded
+    @LiquidEngine._logger(logger)
     def _run_unthreaded(self, float[:,:,:] image, int nrow, int ncol, str scale):
         
         cdef int nFrames = image.shape[0]
@@ -724,6 +754,7 @@ class PolarTransform(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(ncol)", "prange(ncol)")
+    @LiquidEngine._logger(logger)
     def _run_threaded(self, float[:,:,:] image, int nrow, int ncol, str scale):
         
         cdef int nFrames = image.shape[0]
@@ -761,6 +792,7 @@ class PolarTransform(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(ncol)", 'prange(ncol, schedule="static")')  
+    @LiquidEngine._logger(logger)
     def _run_threaded_static(self, float[:,:,:] image, int nrow, int ncol, str scale):
         
         cdef int nFrames = image.shape[0]
@@ -798,6 +830,7 @@ class PolarTransform(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(ncol)", 'prange(ncol, schedule="dynamic")')
+    @LiquidEngine._logger(logger)
     def _run_threaded_dynamic(self, float[:,:,:] image, int nrow, int ncol, str scale):
         
         cdef int nFrames = image.shape[0]
@@ -835,6 +868,7 @@ class PolarTransform(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.PolarTransform._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(ncol)", 'prange(ncol, schedule="guided")')
+    @LiquidEngine._logger(logger)
     def _run_threaded_guided(self, float[:,:,:] image, int nrow, int ncol, str scale):
         
         cdef int nFrames = image.shape[0]
@@ -872,11 +906,13 @@ class PolarTransform(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_python
+    @LiquidEngine._logger(logger)
     def _run_python(self, image, nrow, ncol, scale):
         return 0
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_njit
+    @LiquidEngine._logger(logger)
     def _run_njit(self, image, nrow, ncol, scale):
         return 0
     # tag-end
