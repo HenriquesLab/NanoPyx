@@ -64,7 +64,7 @@ if current_process().name == 'MainProcess':
     if opencl_works:
         gpu_msg = print_opencl_info()
     else:
-        gpu_msg = "\n" + "=" * 60 + "\NO PYOPENCL SUPPORT\n"
+        gpu_msg = "\n" + "=" * 60 + "\n NO PYOPENCL SUPPORT\n"
         gpu_msg += "=" * 60 + "\n"
 
     # PYTHON INFO
