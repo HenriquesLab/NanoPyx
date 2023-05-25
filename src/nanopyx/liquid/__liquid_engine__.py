@@ -16,6 +16,11 @@ __config_folder__ = os.path.join(__home_folder__, ".nanopyx")
 if not os.path.exists(__config_folder__):
     os.makedirs(__config_folder__)
 
+# This is necessary so the decorated function keeps its name and docstring
+# see : https://docs.python.org/3.5/library/functools.html#functools.wraps
+# and : https://stackoverflow.com/a/42581103 
+from functools import wraps
+
 # flake8: noqa: E501
 
 
@@ -40,6 +45,9 @@ class LiquidEngine:
 
     _last_run_type: str = None  # the last run type used
     _last_run_time: float = None  # the time the last run took
+
+    _designation = "BaseClass"
+
 
     def __initialize_run_types__(self):
         self._run_types = {}
@@ -563,6 +571,24 @@ class LiquidEngine:
         """
         pass
 
+    @staticmethod
+    def _logger(logger_object):
+        def _real_logger(function):
+            @wraps(function)
+            def wrapper(*args,**kwargs):
+
+                logger_object.info(f'Running {function.__qualname__}')
+                t_start = timeit.default_timer()
+                result = function(*args,**kwargs)
+                t_end = timeit.default_timer() - t_start   
+                logger_object.info(f'Ran {function.__qualname__} in {t_end:.4f} seconds')
+
+                return result
+            return wrapper
+        return _real_logger
+
+            
+        
 
 def format_time(t: float):
     """
