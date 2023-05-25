@@ -264,6 +264,8 @@ cdef class FIRECalculator:
         else:
             self.fire_number = 0
 
+        return self.fire_number
+
     def calculate_fire_number(self, img_1, img_2):
         return self._calculate_fire_number(img_1.astype(np.float32), img_2.astype(np.float32))
     
