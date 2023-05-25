@@ -14,6 +14,7 @@ Cython, Numba, etc.).
 
 import os
 import warnings
+import platform
 
 from .__njit__ import njit_works
 from .__opencl__ import cl, cl_array, cl_ctx, cl_queue, opencl_works, print_opencl_info
@@ -26,3 +27,52 @@ from ._le_interpolation_lanczos import ShiftScaleRotate as LZShiftScaleRotate
 from ._le_interpolation_nearest_neighbor import ShiftAndMagnify as NNShiftAndMagnify
 from ._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScaleRotate
 from ._le_mandelbrot_benchmark import MandelbrotBenchmark
+
+from multiprocessing import current_process
+
+if current_process().name == 'MainProcess':
+        
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    fh = logging.FileHandler(f'{__name__}.log')
+    fh.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
+    logger.addHandler(fh)
+
+    # OS INFO
+    os_msg = "\n" + "=" * 60 + "\nOS INFORMATION\n"
+    os_msg += "=" * 60 + "\n"
+    os_msg += "OS:  " + platform.platform()  + "\n"
+    os_msg += "Architecture: " + platform.machine() + "\n"
+        
+    # CPU INFO
+    # TODO this can be done with shell commands on a platform dependent manner or external libraries
+    cpu_msg = "\n" + "=" * 60 + "\nCPU INFORMATION\n"
+    cpu_msg += "=" * 60 + "\n"
+    cpu_msg += "CPU:  " + platform.processor()  + "\n"
+
+
+    # RAM INFO
+    # TODO this can be done with shell commands on a platform dependent manner or external libraries
+    ram_msg = "\n" + "=" * 60 + "\nRAM INFORMATION\n"
+    ram_msg += "=" * 60 + "\n"
+    ram_msg += "RAM:  " + "TBD"  + "\n"
+
+    # GPU INFO
+    gpu_msg = print_opencl_info()
+
+    # PYTHON INFO
+    py_msg = "\n" + "=" * 60 + "\nPYTHON INFORMATION\n"
+    py_msg += "=" * 60 + "\n"
+    py_msg += "Version:  " + platform.python_version()  + "\n"
+    py_msg += "Implementation:  " + platform.python_implementation()  + "\n"
+    py_msg += "Compiler:  " + platform.python_compiler()  + "\n"
+
+
+    logger.info(os_msg)
+    logger.info(cpu_msg)
+    logger.info(ram_msg)
+    logger.info(gpu_msg)
+    logger.info(py_msg)
