@@ -258,6 +258,7 @@ cdef class FIRECalculator:
         self._get_smoothed_curve()
         self._calculate_threshold_curve()
         self._get_intersections()
+        print(self.intersections[0, 0])
 
         if self.intersections.shape[0] > 0:
             self.fire_number = 1 / self.intersections[0, 0]
@@ -275,7 +276,7 @@ cdef class FIRECalculator:
         """
         fig, ax= plt.subplots(dpi=150)
         ax.plot(np.array(self.frc_curve[:, 0]), np.array(self.frc_curve[:, 1]))
-        ax.axhline(1/7, color='r', linestyle='-')
+        ax.axhline(y=1.0/7.0, color='r', linestyle='-')
         ax.set_xlabel(f'Spatial frequency [1/{self.units}]')
         ax.set_ylabel('FRC')
         ax.set_title(f"FRC resolution: {np.round(self.fire_number, 1)} {self.units}")
