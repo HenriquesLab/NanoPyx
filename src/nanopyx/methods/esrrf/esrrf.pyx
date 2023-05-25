@@ -61,5 +61,15 @@ cdef class eSRRF:
 
                 pbar.update(1)
 
-        return np.asarray(data_esrrf), np.asarray(data_intensity), np.asarray(img)
+        return np.asarray(data_esrrf), np.asarray(data_intensity)
 
+
+    # for now not doing any frame per timepoint analysis - taking the entire stack for the parameter sweep
+    def run_parameter_sweep(self, img: np.array, sensitivity_array: np.array, radius_array: np.array, doErrorMapping: bool = True, doFRCMapping: bool = True, temporal_correlation: str = "AVG"):
+        
+        ps = ParameterSweep(doErrorMapping, doFRCMapping)
+        QnR = ps.run(img, sensitivity_array, radius_array, temporal_correlation)
+        best_sensitivity, best_radius = np.unravel_index(np.argmax(QnR), QnR.shape)
+
+        print("The best sensitivity found is", sensitivity_array[best_sensitivity], "and the best radius is", radius_array[best_radius])
+        return QnR
