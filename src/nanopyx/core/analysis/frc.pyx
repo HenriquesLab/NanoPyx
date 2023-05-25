@@ -115,7 +115,11 @@ cdef class FIRECalculator:
         return values
 
     cdef _get_smoothed_curve(self):
-        cdef float[:] smoothed_values = savgol_filter(self.frc_curve[:, 1], window_length=<int>(0.0707*self.frc_curve.shape[0]), polyorder=3)
+        cdef int window_l = <int>(0.0707*self.frc_curve.shape[0])
+        cdef int poly_order = 3
+        if poly_order >= window_l:
+            window_l = poly_order + 1
+        cdef float[:] smoothed_values = savgol_filter(self.frc_curve[:, 1], window_length=window_l, polyorder=poly_order)
         self.frc_curve[:, 1] = smoothed_values
 
     cdef _calculate_threshold_curve(self):
