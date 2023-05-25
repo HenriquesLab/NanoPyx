@@ -61,7 +61,7 @@ if current_process().name == 'MainProcess':
     ram_msg += "RAM:  " + "TBD"  + "\n"
 
     # GPU INFO
-    if opencl_works:
+    if opencl_works():
         gpu_msg = print_opencl_info()
     else:
         gpu_msg = "\n" + "=" * 60 + "\n NO PYOPENCL SUPPORT\n"
