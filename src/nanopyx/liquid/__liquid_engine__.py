@@ -4,6 +4,7 @@ import difflib
 from pathlib import Path
 import inspect
 import random
+from itertools import combinations
 
 import numpy as np
 import yaml
@@ -187,6 +188,12 @@ class LiquidEngine:
                 f"{run_type} run time: {format_time(self._last_run_time)}; "
                 + f"mean: {format_time(mean)}; std: {format_time(std)}; runs: {n}"
             )
+
+        # Check if all outputs are similar to each other
+        for pair in combinations(self._run_types,r=2):
+            if not self._test(returns[pair[0]], returns[pair[1]]):
+                # TODO add logic
+                print(f"{pair[0]}=/={pair[1]}")
 
         # Sort run_times by value
         speed_sort = []
@@ -475,6 +482,22 @@ class LiquidEngine:
         """
         if self._show_info:
             print(*args, **kwargs)
+
+    def _test(self, return_run_type_1:np.array, return_run_type_2:np.array):
+        """
+        Tests the return values of two different run types
+        Provides a default implementation but can be overriden by any child class
+        :param return_run_type_1: return value of one of the gears
+        :param return_run_type_2: return value of one of the other gears
+        :return: boolean if both return values are similar
+        """
+        try:
+            np.testing.assert_allclose(return_run_type_1, return_run_type_2,
+                                       rtol=1e-5, atol=1e-3, equal_nan=False)
+            return True
+        except AssertionError:
+            return False
+
 
     ################
     # _run methods #
