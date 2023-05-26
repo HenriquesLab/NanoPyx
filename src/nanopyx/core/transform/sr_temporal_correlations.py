@@ -21,7 +21,24 @@ def calculate_SRRF_temporal_correlations(im: np.array, order: int = 1, do_integr
     return out_array
 
 
-# def calculate_eSRRF_temporal_correlations()
+def calculate_eSRRF_temporal_correlations(im: np.array, correlation: str):
+
+    im = np.array(im, dtype='float32')
+
+    if correlation == "AVG":
+        out_array = np.mean(im, axis=0)
+
+    elif correlation == "VAR":
+        out_array = np.var(im, axis=0)
+
+    elif correlation == "TAC2":
+        out_array = calculate_tac2(im)
+
+    else:
+        raise ValueError(f"Type of correlation must be AVG, VAR or TAC2")
+    
+    return out_array
+
 
     
 def calculate_pairwise_product_sum(rad_array):
