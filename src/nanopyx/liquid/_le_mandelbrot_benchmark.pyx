@@ -7,7 +7,7 @@ cimport numpy as np
 from cython.parallel import prange
 
 from .__liquid_engine__ import LiquidEngine
-from .__opencl__ import cl, cl_array, cl_ctx, cl_queue
+from .__opencl__ import cl, cl_array
 from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 from ._le_mandelbrot_benchmark_ import njit_mandelbrot as _njit_mandelbrot
 
@@ -48,8 +48,13 @@ class MandelbrotBenchmark(LiquidEngine):
     def benchmark(self, int size, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1):
         return super().benchmark(size, r_start, r_end, c_start, c_end)
 
-    def _run_opencl(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
-        code = self._get_cl_code("_le_mandelbrot_benchmark_.cl")
+    def _run_opencl(self, int size, float r_start, float r_end, float c_start, float c_end, dict device) -> np.ndarray:
+
+        # QUEUE AND CONTEXT
+        cl_ctx = cl.Context([device['device']])
+        cl_queue = cl.CommandQueue(cl_ctx)
+
+        code = self._get_cl_code("_le_mandelbrot_benchmark_.cl", device['DP'])
 
         # Create array for mandelbrot set
         im_mandelbrot = cl_array.zeros(cl_queue, (size, size), dtype=np.int32)
