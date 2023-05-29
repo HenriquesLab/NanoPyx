@@ -26,6 +26,7 @@ class Simulator:
         for met in self.method_objects:
             gear = self.rng.choice(len(ALL_GEARS),1,p=met.probability_vector)[0]
             states.append(ALL_GEARS[gear])
+            met.penalty(self.current_iter,gear)
 
         self.history[self.current_iter,:] = states
         self.current_iter += 1
@@ -34,6 +35,18 @@ class Simulator:
 
         while self.current_iter<self.max_iter:
             self.next_iter()
+
+    def print_methods(self):
+
+        print("#######################")
+        float_formatter = "{:.2f}".format
+        np.set_printoptions(formatter={'float_kind':float_formatter})
+        for met in self.method_objects:
+            
+            print(f"{met.name} : {met.probability_vector}")
+
+        print("#######################")
+        
 
 
 if __name__ == "__main__":
@@ -51,6 +64,9 @@ if __name__ == "__main__":
     method_3.assign_times_to_gears([10,10,10,10,10,11,10,10,25],[1,1,1,1,1,1,1,1,10])
 
     sim = Simulator(method_1,method_2,method_3)
+
+    sim.print_methods()
     sim.run_iter()
+    sim.print_methods()
 
     
