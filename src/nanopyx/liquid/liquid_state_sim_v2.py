@@ -65,7 +65,8 @@ class SimMethod:
         std = self.std_times[gear_number]
         
         
-        penalty = self.penalty_function1(time,avg,std)
+        #penalty = self.penalty_function1(time,avg,std)
+        penalty = self.penalty_function2(time,avg,std)
 
         self.probability_vector[gear_number] = self.probability_vector[gear_number] * penalty
         # renormalize 
@@ -95,6 +96,16 @@ class SimMethod:
             penalty = 1
         
         return max(penalty,0.001)
+
+    @staticmethod
+    def penalty_function2(sample,avg,std):
+
+        dist = (sample-avg)/std
+        
+        if np.abs(dist)<3:
+            return 1
+        else:
+            return 1/(1+np.exp(0.5*dist)) + 0.5
 
 
 
