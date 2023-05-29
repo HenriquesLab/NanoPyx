@@ -4,12 +4,15 @@ import difflib
 from pathlib import Path
 import inspect
 import random
+from itertools import combinations
+
+from functools import partial
 
 import numpy as np
 import yaml
 
 from .__njit__ import njit_works
-from .__opencl__ import opencl_works, cl_dp
+from .__opencl__ import opencl_works, devices
 
 __home_folder__ = os.path.expanduser("~")
 __config_folder__ = os.path.join(__home_folder__, ".nanopyx")
@@ -52,7 +55,8 @@ class LiquidEngine:
     def __initialize_run_types__(self):
         self._run_types = {}
         if self._has_opencl and opencl_works():
-            self._run_types["OpenCL"] = self._run_opencl
+            for d in devices:
+                self._run_types[f"OpenCL_{d['device'].name}"] = partial(self._run_opencl, device=d)
         if self._has_threaded:
             self._run_types["Threaded"] = self._run_threaded
         if self._has_unthreaded:
@@ -187,6 +191,12 @@ class LiquidEngine:
                 f"{run_type} run time: {format_time(self._last_run_time)}; "
                 + f"mean: {format_time(mean)}; std: {format_time(std)}; runs: {n}"
             )
+
+        # Check if all outputs are similar to each other
+        for pair in combinations(self._run_types,r=2):
+            if not self._test(returns[pair[0]], returns[pair[1]]):
+                # TODO add logic
+                print(f"{pair[0]}=/={pair[1]}")
 
         # Sort run_times by value
         speed_sort = []
@@ -362,7 +372,7 @@ class LiquidEngine:
             # just return the fastest
             return sorted(speed_and_type, key=lambda x: x[0], reverse=True)[0][1]
 
-    def _get_cl_code(self, file_name):
+    def _get_cl_code(self, file_name, cl_dp):
         """
         Retrieves the OpenCL code from the corresponding .cl file
         """
@@ -475,6 +485,22 @@ class LiquidEngine:
         """
         if self._show_info:
             print(*args, **kwargs)
+
+    def _test(self, return_run_type_1:np.array, return_run_type_2:np.array):
+        """
+        Tests the return values of two different run types
+        Provides a default implementation but can be overriden by any child class
+        :param return_run_type_1: return value of one of the gears
+        :param return_run_type_2: return value of one of the other gears
+        :return: boolean if both return values are similar
+        """
+        try:
+            np.testing.assert_allclose(return_run_type_1, return_run_type_2,
+                                       rtol=1e-5, atol=1e-3, equal_nan=False)
+            return True
+        except AssertionError:
+            return False
+
 
     ################
     # _run methods #

@@ -6,49 +6,26 @@ os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
 try:
     import pyopencl as cl
     import pyopencl.array as cl_array
-
-    fastest_device = None
-    fastest_device_speed = 0
-    cl_ctx = None
-    cl_queue = None
-
+    
+    devices = []
     for platform in cl.get_platforms():
-        for device in platform.get_devices():
+        for dev in platform.get_devices():
             # check if the device is a GPU
-            if "GPU" not in cl.device_type.to_string(device.type):
+            if "GPU" not in cl.device_type.to_string(dev.type):
                 continue
 
-            speed = (
-                device.max_clock_frequency
-                * device.max_compute_units
-                * device.global_mem_size
-            )
-            # If no fastest device has been found, set it to the current device
-            if fastest_device is None:
-                fastest_device = device
-                fastest_device_speed = speed
+            if 'cl_khr_fp64' in dev.extensions.strip().split(' '):
+                cl_dp = True
+            else:
+                cl_dp = False
 
-            # Check if the current device is faster than the fastest device
-            elif speed > fastest_device_speed:
-                fastest_device = device
-                fastest_device_speed = speed
+            devices.append({'device':dev, 'DP':cl_dp})
 
-    print("Selecting OpenCL device: " + fastest_device.name)
-
-    if 'cl_khr_fp64' in fastest_device.extensions.strip().split(' '):
-        cl_dp = True
-    else:
-        cl_dp = False
-
-    cl_ctx = cl.Context([fastest_device])
-    cl_queue = cl.CommandQueue(cl_ctx)
 
 except (ImportError, OSError, Exception):
     cl = None
     cl_array = None
-    cl_ctx = None
-    cl_queue = None
-    cl_dp = False
+    devices = None
 
 
 def print_opencl_info():
