@@ -48,7 +48,6 @@ class SimMethod:
         # Inversely proportional to the square
         probabilities = (1/self.avg_times**2)/np.sum(1/self.avg_times**2)
 
-
         assert np.allclose(np.sum(self.probability_vector),1)
 
         self.probability_vector = probabilities
@@ -67,7 +66,6 @@ class SimMethod:
 
         if time>avg+std or time<avg-std:
 
-            # PENALTY PRO PORTO     
             # How far from the average value?
             dist = (time-avg)/avg
             # dist is positive if it takes MORE TIME
