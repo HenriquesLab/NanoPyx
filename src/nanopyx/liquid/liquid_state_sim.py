@@ -1,29 +1,4 @@
-
-import numpy as np
-
-class SimMethod:
-    """
-    Class used to simulate a liquid engine gear
-    """
-
-    def __init__(self, name, mean_time, stddev_time) -> None:
-        
-        self.name = name
-        self.mean_time = mean_time
-        self.stddev_time = stddev_time
-
-        self.rng = np.random.default_rng()
-
-    def generate_time(self,mu=None,sigma=None):
-        
-        if not mu:
-            mu = self.mean_time
-        if not sigma:
-            sigma = self.stddev_time
-
-        return  self.rng.normal(mu,sigma)
-
-        
+import numpy as np        
 
 if __name__ == "__main__":
 
