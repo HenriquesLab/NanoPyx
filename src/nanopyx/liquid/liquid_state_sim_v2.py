@@ -10,9 +10,10 @@ class SimMethod:
     Class used to simulate a liquid engine method with several gears
     """
 
-    def __init__(self, name) -> None:
+    def __init__(self, name, sample_n=1000) -> None:
         
         self.name = name
+        self.sample_n = sample_n
 
         self.rng = np.random.default_rng()
 
@@ -28,9 +29,9 @@ class SimMethod:
         self.avg_times = np.ones(len(ALL_GEARS))
         self.std_times = np.ones(len(ALL_GEARS))
 
-        self.time_samples = np.zeros((100,len(ALL_GEARS)))
+        self.time_samples = np.zeros((self.sample_n,len(ALL_GEARS)))
         for n in range(len(ALL_GEARS)):
-            self.time_samples[:,n] = self.rng.normal(self.avg_times[n], self.std_times[n], 100) 
+            self.time_samples[:,n] = self.rng.normal(self.avg_times[n], self.std_times[n], self.sample_n) 
         
 
     def assign_times_to_gears(self,avg_times,std_times):
@@ -52,13 +53,36 @@ class SimMethod:
 
         self.probability_vector = probabilities
 
-        self.time_samples = np.zeros((100,len(ALL_GEARS)))
+        self.time_samples = np.zeros((self.sample_n,len(ALL_GEARS)))
         for n in range(len(ALL_GEARS)):
-            self.time_samples[:,n] = self.rng.normal(self.avg_times[n], self.std_times[n], 100) 
+            self.time_samples[:,n] = self.rng.normal(self.avg_times[n], self.std_times[n], self.sample_n) 
 
-        print(self.probability_vector)
+    def penalty(self,n_iter,gear_number):
+
+        # sample time 
+        time = self.time_samples[n_iter, gear_number]
         
-    
+        avg = self.avg_times[gear_number]
+        std = self.std_times[gear_number]
+
+        if time>avg+std or time<avg-std:
+
+            # PENALTY PRO PORTO     
+            # How far from the average value?
+            dist = (time-avg)/avg
+            # dist is positive if it takes MORE TIME
+            # dist is negative if it takes LESS TIME
+
+            penalty = 1-dist 
+
+            self.probability_vector[gear_number] = self.probability_vector[gear_number] * penalty
+
+            # renormalize 
+            self.probability_vector = self.probability_vector / np.sum(self.probability_vector)
+
+            assert np.allclose(np.sum(self.probability_vector), 1)
+
+
 if __name__ == "__main__":
 
     """
