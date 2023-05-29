@@ -1,8 +1,8 @@
 from .estimator_table import DriftEstimatorTable
 from ...core.utils.timeit import timeit
 from ...core.transform import translation
-from ...core.transform.image_shift import cv2_shift
 
+import cv2
 import numpy as np
 from skimage.transform import EuclideanTransform, warp
 
@@ -34,7 +34,7 @@ class DriftCorrector(object):
         if drift_x == 0 and drift_y == 0:
             return self.image_arr[slice_idx]
         else:
-            return np.array(cv2_shift(self.image_arr[slice_idx], drift_x, drift_y))
+            return cv2.warpAffine(self.image_arr[slice_idx], np.float32([[1, 0, drift_x], [0, 1, drift_y]]), self.image_arr[slice_idx].shape[:2][::-1])
 
     # @timeit
     def apply_correction(self, image_array):

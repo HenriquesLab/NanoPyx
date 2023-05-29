@@ -3,7 +3,6 @@ from .estimator import DriftEstimator
 from ...core.utils.timeit import timeit
 
 
-@timeit
 def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_path=None, roi=None, **kwargs):
     """
     Function use to estimate the drift in a microscopy image.
@@ -24,7 +23,6 @@ def estimate_drift_alignment(image_array, save_as_npy=True, save_drift_table_pat
         pass
 
 
-@timeit
 def apply_drift_alignment(image_array, path=None, drift_table=None):
     """
     Function used to correct the drift in a microscopy image given a previously calculated drift table.
@@ -40,4 +38,4 @@ def apply_drift_alignment(image_array, path=None, drift_table=None):
         corrector.estimator_table = drift_table
     corrected_img = corrector.apply_correction(image_array)
     return corrected_img
-    
+
