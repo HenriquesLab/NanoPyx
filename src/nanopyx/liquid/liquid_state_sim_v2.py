@@ -10,7 +10,7 @@ class SimMethod:
     Class used to simulate a liquid engine method with several gears
     """
 
-    def __init__(self, name, sample_n=1000) -> None:
+    def __init__(self, name, sample_n=10000) -> None:
         
         self.name = name
         self.sample_n = sample_n
@@ -46,7 +46,7 @@ class SimMethod:
         #probabilities = (1/self.avg_times)/np.sum(1/self.avg_times)
 
         # Inversely proportional to the square
-        probabilities = (1/self.avg_times**2)/np.sum(1/self.avg_times**2)
+        probabilities = (1/(self.avg_times**2))/np.sum(1/(self.avg_times**2))
 
         assert np.allclose(np.sum(self.probability_vector),1)
 
@@ -63,22 +63,39 @@ class SimMethod:
         
         avg = self.avg_times[gear_number]
         std = self.std_times[gear_number]
+        
+        
+        penalty = self.penalty_function1(time,avg,std)
 
-        if time>avg+std or time<avg-std:
+        self.probability_vector[gear_number] = self.probability_vector[gear_number] * penalty
+        # renormalize 
+        self.probability_vector = self.probability_vector / np.sum(self.probability_vector)
+
+        assert np.allclose(np.sum(self.probability_vector), 1)
+
+
+    @staticmethod
+    def penalty_function1(sample,avg,std):
+        
+        if sample>avg+3*std or sample<avg-3*std:
 
             # How far from the average value?
-            dist = (time-avg)/avg
-            # dist is positive if it takes MORE TIME
-            # dist is negative if it takes LESS TIME
+            dist = (sample-avg)/avg
 
+            # dist is positive if it takes MORE TIME. penalty_factor should be LOWER for higer dists
+            # Example: avg=10, sample=15, dist = 0.5 => penalty = 0.5
+            #          avg=10, sample=20, dist = 1.0 => penalty = 0.0
+            
+            # dist is negative if it takes LESS TIME. penalty_factor should be HIGHER for higher dists
+            # Example: avg=20, sample=15, dist = -0.25 => penalty = 1.25
+            #          avg=20, sample=10, dist = -0.50 => penalty = 1.5
+            
             penalty = 1-dist 
+        else:
+            penalty = 1
+        
+        return max(penalty,0.001)
 
-            self.probability_vector[gear_number] = self.probability_vector[gear_number] * penalty
-
-            # renormalize 
-            self.probability_vector = self.probability_vector / np.sum(self.probability_vector)
-
-            assert np.allclose(np.sum(self.probability_vector), 1)
 
 
 if __name__ == "__main__":
