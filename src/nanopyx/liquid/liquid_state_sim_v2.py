@@ -1,6 +1,6 @@
 import numpy as np
 
-ALL_GEARS = ['START', 'OPENCL_1', 'OPENCL_2',
+ALL_GEARS = ['OPENCL_1', 'OPENCL_2',
             'CYTHON_THREADED','CYTHON_THREADED_DYNAMIC', 
             'CYTHON_THREADED_GUIDED', 'CYTHON_THREADED_STATIC',
             'CYTHON_UNTHREADED', 'NUMBA', 'PYTHON']
@@ -10,57 +10,51 @@ class SimMethod:
     Class used to simulate a liquid engine method with several gears
     """
 
-    def __init__(self) -> None:
+    def __init__(self, name) -> None:
+        
+        self.name = name
 
         self.rng = np.random.default_rng()
 
-        # (0,0) = probability to change from start to start whilst running method one
-        # (0,1) = probability to change from start to opencl_1 whilst running method two
-        # (row, col) = probability to change from state row to state col whilst running method n_method
-        # This means that ALL rows should sum to 1
-        self.probability_matrix = np.zeros((len(ALL_GEARS), len(ALL_GEARS)))
+        self.probability_vector = np.ones(len(ALL_GEARS))
         
-        # Initialize all VALID transitions with uniform probablity values 
+        # Initialize transitions with uniform probablity values 
         # This is kinda equivalent so far to having all gears running with the same avg time
         # In practice maybe best to initialize based upon time of previous benchmarks
-        self.probability_matrix[:,:] = 1/(len(states)-1)
-        # START is the initial state but we NEVER go back to it
-        self.probability_matrix[:,0] = 0
+        self.probability_vector *= 1/(len(ALL_GEARS))
 
-        assert np.allclose(np.sum(self.probability_matrix, axis=1),np.ones(len(states)))
+        assert np.allclose(np.sum(self.probability_vector),1)
 
-        self.avg_times = np.ones(len(ALL_GEARS)-1)
-        self.std_times = np.zeros(len(ALL_GEARS)-1)
+        self.avg_times = np.ones(len(ALL_GEARS))
+        self.std_times = np.ones(len(ALL_GEARS))
+
+        self.time_samples = np.zeros((100,len(ALL_GEARS)))
+        for n in range(len(ALL_GEARS)):
+            self.time_samples[:,n] = self.rng.normal(self.avg_times[n], self.std_times[n], 100) 
+        
 
     def assign_times_to_gears(self,avg_times,std_times):
 
         self.avg_times = np.array(avg_times)
         self.std_times = np.array(std_times)
 
-        # The transition probability depends ONLY on the destination not on the origin
-        # In practice this means that for each transition
+        # The transition probability depends ONLY on the destination
+        # Start with a simple inversely proportional example
         probabilities = (1/self.avg_times)/np.sum(1/self.avg_times)
 
         assert np.sum(probabilities)==1
 
-        self.probability_matrix[:,:] = probabilities
-        self.
+        self.probability_vector = probabilities
 
+        self.time_samples = np.zeros((100,len(ALL_GEARS)))
+        for n in range(len(ALL_GEARS)):
+            self.time_samples[:,n] = self.rng.normal(self.avg_times[n], self.std_times[n], 100) 
         
+    
+if __name__ == "__main__":
 
-
-
-        
-
-        
-
-
-
-    def generate_time(self,mu=None,sigma=None):
-        
-        if not mu:
-            mu = self.mean_time
-        if not sigma:
-            sigma = self.stddev_time
-
-        return  self.rng.normal(mu,sigma)
+    method_1 = SimMethod('1')
+    method_2 = SimMethod('2')
+    method_3 = SimMethod('3')
+    method_4 = SimMethod('4')
+    method_5 = SimMethod('5')
