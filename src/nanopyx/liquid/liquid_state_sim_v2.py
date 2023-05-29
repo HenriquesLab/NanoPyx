@@ -23,6 +23,7 @@ class SimMethod:
         # This is kinda equivalent so far to having all gears running with the same avg time
         # In practice maybe best to initialize based upon time of previous benchmarks
         self.probability_vector *= 1/(len(ALL_GEARS))
+        self.ORIGINAL_probability_vector = self.probability_vector
 
         assert np.allclose(np.sum(self.probability_vector),1)
 
@@ -51,6 +52,7 @@ class SimMethod:
         assert np.allclose(np.sum(self.probability_vector),1)
 
         self.probability_vector = probabilities
+        self.ORIGINAL_probability_vector = self.probability_vector
 
         self.time_samples = np.zeros((self.sample_n,len(ALL_GEARS)))
         for n in range(len(ALL_GEARS)):
@@ -64,8 +66,6 @@ class SimMethod:
         avg = self.avg_times[gear_number]
         std = self.std_times[gear_number]
         
-        
-        #penalty = self.penalty_function1(time,avg,std)
         penalty = self.penalty_function2(time,avg,std)
 
         self.probability_vector[gear_number] = self.probability_vector[gear_number] * penalty
@@ -106,7 +106,6 @@ class SimMethod:
             return 1
         else:
             return 1/(1+np.exp(0.5*dist)) + 0.5
-
 
 
 if __name__ == "__main__":
