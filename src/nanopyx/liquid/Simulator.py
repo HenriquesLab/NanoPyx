@@ -39,9 +39,11 @@ class Simulator:
         self.times[self.current_iter] = time
         self.current_iter += 1
 
-    def run_iter(self):
+    def run_iter(self, until_iter=-1):
 
         while self.current_iter<self.max_iter:
+            if self.current_iter == until_iter:
+                break
             self.next_iter()
 
     def print_methods(self):
@@ -53,9 +55,13 @@ class Simulator:
             
             print(f"{met.name} : {met.probability_vector}")
 
-        print(f"AVERAGE TIME = {np.average(self.times)}")
+        print(f"AVERAGE TIME = {np.average(self.times[:self.current_iter])}")
         print("#######################")
         
+    def add_anomaly(self,iter_start,iter_end,gear,newavg,newstd):
+
+        for met in self.method_objects:
+            met.time_samples[iter_start:iter_end,gear] = self.rng.normal(newavg, newstd, iter_end-iter_start) 
 
 
 if __name__ == "__main__":
@@ -74,9 +80,17 @@ if __name__ == "__main__":
 
     print("NO PENALTY")
     sim = Simulator(method_1,method_2,method_3,penalty=False)
+    sim.add_anomaly(50,100,0,1000,10)
+
     sim.print_methods()
-    sim.run_iter()
+    sim.run_iter(100)
+
     sim.print_methods()
+    sim.run_iter(200)
+
+    sim.print_methods()
+
+    print("#"*50)
     
     # This one prefers gpus
     method_1 = SimMethod('1')
@@ -92,6 +106,12 @@ if __name__ == "__main__":
 
     print("PENALTY")
     sim = Simulator(method_1,method_2,method_3,penalty=True)
+    sim.add_anomaly(50,100,0,1000,10)
+
     sim.print_methods()
-    sim.run_iter()
+    sim.run_iter(100)
+
+    sim.print_methods()
+    sim.run_iter(200)
+
     sim.print_methods()
