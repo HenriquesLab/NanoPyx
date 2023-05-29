@@ -39,8 +39,14 @@ class SimMethod:
         self.std_times = np.array(std_times)
 
         # The transition probability depends ONLY on the destination
-        # Start with a simple inversely proportional example
-        probabilities = (1/self.avg_times)/np.sum(1/self.avg_times)
+        # How do the probabilties depend on the avg/std time?
+
+        # Inversely proportional
+        #probabilities = (1/self.avg_times)/np.sum(1/self.avg_times)
+
+        # Inversely proportional to the square
+        probabilities = (1/self.avg_times**2)/np.sum(1/self.avg_times**2)
+
 
         assert np.allclose(np.sum(self.probability_vector),1)
 
@@ -49,6 +55,8 @@ class SimMethod:
         self.time_samples = np.zeros((100,len(ALL_GEARS)))
         for n in range(len(ALL_GEARS)):
             self.time_samples[:,n] = self.rng.normal(self.avg_times[n], self.std_times[n], 100) 
+
+        print(self.probability_vector)
         
     
 if __name__ == "__main__":
