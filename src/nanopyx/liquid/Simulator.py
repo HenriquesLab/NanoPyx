@@ -69,6 +69,29 @@ class Method:
 
         return gear_chosen, self.observed_data[gear_chosen][-1]
 
+    def run_anomalous(self, affected_gear, new_avg, new_std):
+
+        gear_chosen = self.rng.choice(ALL_GEARS,p=[self.probabilities[g] for g in ALL_GEARS])
+
+        if gear_chosen == affected_gear:
+            self.observed_data[gear_chosen].append(self.rng.normal(new_avg, new_std,1)[0])
+        else:
+            self.observed_data[gear_chosen].append(self.sample_real_time(gear_chosen))
+
+        self.observed_avg_times[gear_chosen] = np.average(self.observed_data[gear_chosen])      
+        self.observed_std_times[gear_chosen] = np.std(self.observed_data[gear_chosen])
+
+        probabilities = {g:(1/self.observed_avg_times[g])**2 for g in ALL_GEARS}
+        sum_of_prob = np.sum([probabilities[g] for g in ALL_GEARS])
+        self.probabilities = {g:probabilities[g]/sum_of_prob for g in ALL_GEARS}
+        assert np.allclose(np.sum([self.probabilities[g] for g in ALL_GEARS]),1)
+
+        self.time2run.append(self.observed_data[gear_chosen][-1])
+        self.gear_history.append(gear_chosen)
+
+        return gear_chosen, self.observed_data[gear_chosen][-1]
+
+
 class Simulator:
     """
     This class should encapsulate:
@@ -101,7 +124,7 @@ class Simulator:
 
     def print_stats(self):
 
-        print(f"Ran the entire workflow a total of {len(self.total_time)}")
+        print(f"Ran the entire workflow a total of {len(self.total_time)} times")
         print(f"The average time to run all methods was {np.average(self.total_time):.2f} std_dev {np.std(self.total_time):.2f}")
         for met in self.method_objects:
             gear_used, counts = np.unique(met.gear_history, return_counts=True)
@@ -114,7 +137,6 @@ class Simulator:
 
     def run_simulations(self, iter_n=100):
 
-        
         for iter in range(iter_n):
             time = []
             gears = []
@@ -126,6 +148,25 @@ class Simulator:
             self.time.append(time)
             self.total_time.append(np.sum(time))
 
+    def run_anomalous_simulations(self, iter_n=1000, ano_start=300, ano_end=600, affected_gear=ALL_GEARS[0], new_avg=100, new_std=10):
+
+        for iter in range(iter_n):
+
+            time = []
+            gears = []
+            for method in self.method_objects:
+                
+                if ano_start<iter<ano_end:
+                    g,t = method.run_anomalous(affected_gear, new_avg, new_std)
+                else: 
+                    g,t = method.run()
+                
+                time.append(t)
+                gears.append(g)
+
+            self.gears.append(gears)
+            self.time.append(time)
+            self.total_time.append(np.sum(time))
 
 if __name__ == "__main__":
     
