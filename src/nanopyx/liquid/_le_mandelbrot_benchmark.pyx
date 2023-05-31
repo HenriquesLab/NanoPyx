@@ -30,8 +30,8 @@ class MandelbrotBenchmark(LiquidEngine):
     _has_njit = True
     _designation = "Mandelbrot_Benchmark"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, testing=False):
+        super().__init__(testing=testing)
 
     def run(self, int size=1000, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1) -> np.ndarray:
         """

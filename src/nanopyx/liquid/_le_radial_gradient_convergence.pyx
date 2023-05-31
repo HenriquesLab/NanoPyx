@@ -34,8 +34,8 @@ class RadialGradientConvergence(LiquidEngine):
     _has_njit = False
     _designation = "RGC"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self,testing=False):
+        super().__init__(testing=testing)
     
 
     def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, run_type = None): 
