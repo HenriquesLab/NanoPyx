@@ -258,7 +258,6 @@ cdef class FIRECalculator:
         self._get_smoothed_curve()
         self._calculate_threshold_curve()
         self._get_intersections()
-        print(self.intersections[0, 0])
 
         if self.intersections.shape[0] > 0:
             self.fire_number = 1 / self.intersections[0, 0]
