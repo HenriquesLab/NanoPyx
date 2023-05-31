@@ -11,6 +11,8 @@ from functools import partial
 import numpy as np
 import yaml
 
+from multiprocessing import current_process
+
 from .__njit__ import njit_works
 from .__opencl__ import opencl_works, devices
 
@@ -26,6 +28,17 @@ from functools import wraps
 
 # flake8: noqa: E501
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+fh = logging.FileHandler(f'{__name__}.log')
+fh.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(process)d - %(processName)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+
+logger.addHandler(fh)
 
 class LiquidEngine:
     """
@@ -179,13 +192,18 @@ class LiquidEngine:
         """
         # Create some lists to store runtimes and return values of run types
         run_times = {}
-        returns = {}
+        # returns = {}
 
         # Run each run type and record the run time and return value
         for run_type in self._run_types:
+
             r = self._run(*args, run_type=run_type, **kwargs)
+            
+            if r is None:
+                continue
+
             run_times[run_type] = self._last_run_time
-            returns[run_type] = r
+            #returns[run_type] = r
             mean, std, n = self.get_mean_std_run_time(run_type, *args, **kwargs)
             self._print(
                 f"{run_type} run time: {format_time(self._last_run_time)}; "
@@ -193,10 +211,11 @@ class LiquidEngine:
             )
 
         # Check if all outputs are similar to each other
-        for pair in combinations(self._run_types,r=2):
-            if not self._test(returns[pair[0]], returns[pair[1]]):
-                # TODO add logic
-                print(f"{pair[0]}=/={pair[1]}")
+        
+        #for pair in combinations(returns.keys(),r=2):
+        #    if not self._test(returns[pair[0]], returns[pair[1]]):
+        #        # TODO add logic
+        #        self._print(f"{pair[0]}=/={pair[1]}")
 
         # Sort run_times by value
         speed_sort = []
@@ -205,7 +224,7 @@ class LiquidEngine:
                 (
                     run_times[run_type],
                     run_type,
-                    returns[run_type],
+                    #returns[run_type],
                 )
             )
 
@@ -530,16 +549,34 @@ class LiquidEngine:
             run_type = self._get_fastest_run_type(*args, **kwargs)
             self._print(f"Using run type: {run_type}")
 
-        t_start = timeit.default_timer()
-        r = self._run_types[run_type](*args, **kwargs)
-        self._store_run_time(
+
+        logger.info(f'{self._designation} Using run type {run_type} in {current_process().name} with args {self._get_args_repr(*args, **kwargs)}')
+                    
+        try:
+            t_start = timeit.default_timer()
+            r = self._run_types[run_type](*args, **kwargs)
+            t2run = timeit.default_timer() - t_start
+            logger.info(f'{current_process().name} finished running {run_type} in {t2run:.4f} seconds')
+
+            self._store_run_time(
             run_type,
-            timeit.default_timer() - t_start,
+            t2run,
             *args,
             **kwargs,
-        )
+            )
+
+        except Exception as e:
+            print(f"{run_type} failed!")
+            print(e)
+            logger.info(f'{current_process().name} could not run {run_type}. Python Exception: {e}')
+            r = None
+            t2run = None
+
+
         self._last_run_type = run_type
         return r
+
+
 
     def _run_opencl(*args, **kwargs):
         """
@@ -596,23 +633,6 @@ class LiquidEngine:
         Should be overridden by the any class that inherits from this class
         """
         pass
-
-    @staticmethod
-    def _logger(logger_object):
-        def _real_logger(function):
-            @wraps(function)
-            def wrapper(*args,**kwargs):
-
-                logger_object.info(f'Running {function.__qualname__}')
-                t_start = timeit.default_timer()
-                result = function(*args,**kwargs)
-                t_end = timeit.default_timer() - t_start   
-                logger_object.info(f'Ran {function.__qualname__} in {t_end:.4f} seconds')
-
-                return result
-            return wrapper
-        return _real_logger
-
             
         
 
