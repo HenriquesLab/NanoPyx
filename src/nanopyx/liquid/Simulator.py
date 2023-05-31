@@ -9,12 +9,14 @@ ALL_GEARS = ['OPENCL_1', 'OPENCL_2',
 
 class Method:
 
-    def __init__(self, name, real_avg_times, real_std_times) -> None:
+    def __init__(self, name, real_avg_times, real_std_times, exp=False) -> None:
         
         self.name = name
 
         self.real_avg_times = real_avg_times
         self.real_std_times = real_std_times
+
+        self.exp = exp
         
         self.rng = np.random.default_rng()
 
@@ -23,6 +25,7 @@ class Method:
         self.observed_data = {g:[] for g in ALL_GEARS}
         self.observed_avg_times = {g:None for g in ALL_GEARS}
         self.observed_std_times = {g:None for g in ALL_GEARS}
+        self.observed_exp_avg_times = {g:None for g in ALL_GEARS}
         # Equal probabilities
         self.probabilities = {g:1/len(ALL_GEARS) for g in ALL_GEARS}
 
@@ -42,10 +45,18 @@ class Method:
             for g in ALL_GEARS:
                 self.observed_data[g].append(self.sample_real_time(g))
 
-        self.observed_avg_times = {g:np.average(self.observed_data[g]) for g in ALL_GEARS}        
+        self.observed_avg_times = {g:np.average(self.observed_data[g]) for g in ALL_GEARS}
         self.observed_std_times = {g:np.std(self.observed_data[g]) for g in ALL_GEARS}
 
-        probabilities = {g:(1/self.observed_avg_times[g])**2 for g in ALL_GEARS}
+        lengths = {g:len(self.observed_data[g]) for g in ALL_GEARS}
+        exp_weights = {g:[np.exp(-i) for i in range(lengths[g])][::-1] for g in ALL_GEARS}
+        self.observed_exp_avg_times = {g:np.average(self.observed_data[g], weights=exp_weights[g]) for g in ALL_GEARS}     
+        
+        if self.exp:
+            probabilities = {g:(1/self.observed_exp_avg_times[g])**2 for g in ALL_GEARS}
+        else:
+            probabilities = {g:(1/self.observed_avg_times[g])**2 for g in ALL_GEARS}
+
         sum_of_prob = np.sum([probabilities[g] for g in ALL_GEARS])
         self.probabilities = {g:probabilities[g]/sum_of_prob for g in ALL_GEARS}
         assert np.allclose(np.sum([self.probabilities[g] for g in ALL_GEARS]),1)
@@ -59,9 +70,16 @@ class Method:
         self.observed_avg_times[gear_chosen] = np.average(self.observed_data[gear_chosen])      
         self.observed_std_times[gear_chosen] = np.std(self.observed_data[gear_chosen])
 
-        probabilities = {g:(1/self.observed_avg_times[g])**2 for g in ALL_GEARS}
+        self.observed_exp_avg_times[gear_chosen] = np.average(self.observed_data[gear_chosen], weights=[np.exp(-i) for i in range(len(self.observed_data[gear_chosen]))][::-1])
+
+        if self.exp:
+            probabilities = {g:(1/self.observed_exp_avg_times[g])**2 for g in ALL_GEARS}
+        else:
+            probabilities = {g:(1/self.observed_avg_times[g])**2 for g in ALL_GEARS}
+        
         sum_of_prob = np.sum([probabilities[g] for g in ALL_GEARS])
         self.probabilities = {g:probabilities[g]/sum_of_prob for g in ALL_GEARS}
+
         assert np.allclose(np.sum([self.probabilities[g] for g in ALL_GEARS]),1)
 
         self.time2run.append(self.observed_data[gear_chosen][-1])
@@ -81,9 +99,16 @@ class Method:
         self.observed_avg_times[gear_chosen] = np.average(self.observed_data[gear_chosen])      
         self.observed_std_times[gear_chosen] = np.std(self.observed_data[gear_chosen])
 
-        probabilities = {g:(1/self.observed_avg_times[g])**2 for g in ALL_GEARS}
+        self.observed_exp_avg_times[gear_chosen] = np.average(self.observed_data[gear_chosen], weights=[np.exp(-i) for i in range(len(self.observed_data[gear_chosen]))][::-1])
+
+        if self.exp:
+            probabilities = {g:(1/self.observed_exp_avg_times[g])**2 for g in ALL_GEARS}
+        else:
+            probabilities = {g:(1/self.observed_avg_times[g])**2 for g in ALL_GEARS}
+
         sum_of_prob = np.sum([probabilities[g] for g in ALL_GEARS])
         self.probabilities = {g:probabilities[g]/sum_of_prob for g in ALL_GEARS}
+
         assert np.allclose(np.sum([self.probabilities[g] for g in ALL_GEARS]),1)
 
         self.time2run.append(self.observed_data[gear_chosen][-1])
