@@ -32,8 +32,8 @@ class ShiftAndMagnify(LiquidEngine):
     _has_njit = False
     _designation = "ShiftMagnify_BC"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, testing=False):
+        super().__init__(testing=False)
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Bicubic")
     def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
@@ -271,8 +271,8 @@ class ShiftScaleRotate(LiquidEngine):
     _has_njit = False
     _designation = "ShiftMagnify_BC"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, testing=False):
+        super().__init__(testing=False)
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run; replace("Nearest-Neighbor", "Bicubic")
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:
