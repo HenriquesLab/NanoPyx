@@ -305,7 +305,7 @@ class ShiftScaleRotate(LiquidEngine):
     _designation = "ShiftScaleRotate_NN"
 
     def __init__(self, testing=False):
-        super().__init__(testing=False)
+        super().__init__(testing=testing)
         
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:

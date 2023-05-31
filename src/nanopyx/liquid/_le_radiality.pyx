@@ -38,8 +38,8 @@ class Radiality(LiquidEngine):
     _has_njit = False
     _designation = "Radiality"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, testing=False):
+        super().__init__(testing=testing)
     
     @timeit2
     def run(self, image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
