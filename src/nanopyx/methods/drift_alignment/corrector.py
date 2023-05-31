@@ -34,7 +34,7 @@ class DriftCorrector(object):
         if drift_x == 0 and drift_y == 0:
             return self.image_arr[slice_idx]
         else:
-            return cv2.warpAffine(self.image_arr[slice_idx], np.float32([[1, 0, drift_x], [0, 1, drift_y]]), self.image_arr[slice_idx].shape[:2][::-1])
+            return cv2.warpAffine(self.image_arr[slice_idx].astype(np.float32), np.float32([[1, 0, drift_x], [0, 1, drift_y]]), self.image_arr[slice_idx].shape[:2][::-1]).astype(self.image_arr.dtype)
 
     # @timeit
     def apply_correction(self, image_array):
@@ -46,7 +46,7 @@ class DriftCorrector(object):
         """
         if self.estimator_table.drift_table is not None:
             self.image_arr = image_array
-            corrected_image = [self._translate_slice(i) for i in range(0, image_array.shape[0])]
+            corrected_image = [self._translate_slice(i).astype(np.float32) for i in range(0, image_array.shape[0])]
             return np.array(corrected_image)
             # return np.array(translation.translate_array(image_array.astype(np.float32),
             #                                             np.array(self.estimator_table.drift_table).astype(np.float32)))
