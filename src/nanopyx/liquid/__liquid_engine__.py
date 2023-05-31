@@ -21,11 +21,6 @@ __config_folder__ = os.path.join(__home_folder__, ".nanopyx")
 if not os.path.exists(__config_folder__):
     os.makedirs(__config_folder__)
 
-# This is necessary so the decorated function keeps its name and docstring
-# see : https://docs.python.org/3.5/library/functools.html#functools.wraps
-# and : https://stackoverflow.com/a/42581103 
-from functools import wraps
-
 # flake8: noqa: E501
 
 import logging
@@ -90,7 +85,7 @@ class LiquidEngine:
             except TypeError:
                 print("Consider adding default arguments to njit implementation to trigger early compilation")
 
-    def __init__(self, clear_config=False):
+    def __init__(self, clear_config=False, testing=False):
         """
         Initialize the Liquid Engine
 
@@ -128,6 +123,8 @@ class LiquidEngine:
         for run_type_designation in self._run_types.keys():
             if run_type_designation not in self._cfg:
                 self._cfg[run_type_designation] = {}
+
+        self.testing = testing
 
     def is_opencl_enabled(self):
         """
@@ -192,7 +189,7 @@ class LiquidEngine:
         """
         # Create some lists to store runtimes and return values of run types
         run_times = {}
-        # returns = {}
+        returns = {}
 
         # Run each run type and record the run time and return value
         for run_type in self._run_types:
@@ -203,7 +200,12 @@ class LiquidEngine:
                 continue
 
             run_times[run_type] = self._last_run_time
-            #returns[run_type] = r
+            
+            if self.testing:
+                returns[run_type] = r
+            else:
+                returns[run_type] = None
+
             mean, std, n = self.get_mean_std_run_time(run_type, *args, **kwargs)
             self._print(
                 f"{run_type} run time: {format_time(self._last_run_time)}; "
@@ -211,11 +213,11 @@ class LiquidEngine:
             )
 
         # Check if all outputs are similar to each other
-        
-        #for pair in combinations(returns.keys(),r=2):
-        #    if not self._test(returns[pair[0]], returns[pair[1]]):
-        #        # TODO add logic
-        #        self._print(f"{pair[0]}=/={pair[1]}")
+        if self.testing:
+            for pair in combinations(returns.keys(),r=2):
+                if not self._test(returns[pair[0]], returns[pair[1]]):
+                    # TODO add logic
+                    self._print(f"{pair[0]}=/={pair[1]}")
 
         # Sort run_times by value
         speed_sort = []
@@ -224,7 +226,7 @@ class LiquidEngine:
                 (
                     run_times[run_type],
                     run_type,
-                    #returns[run_type],
+                    returns[run_type],
                 )
             )
 
