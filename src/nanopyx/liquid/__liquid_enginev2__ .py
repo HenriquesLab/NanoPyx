@@ -32,9 +32,6 @@ class LiquidEngine:
     Base class for parts of the Nanopyx Liquid engine
     """
 
-    # CLASS VARIABLES (aka present in every instance of the class)
-    # (...)
-
 
     def __init__(self, clear_benchmarks:bool=False, testing:bool=False, dynamic_runtypes=True,
                  opencl_:bool = False, unthreaded_:bool = False,
@@ -122,10 +119,12 @@ class LiquidEngine:
         # Testing mode boolean
         self.testing = testing
 
+        # Are run_types probabilistic?
+        self.dynamic_runtypes = dynamic_runtypes    
+
         # Storage attributes to help benchmarking
         self._last_runtype = None
         self._last_runtime = None
-
 
     def _run(self, *args, run_type:str=None, **kwargs):
         """
@@ -362,6 +361,8 @@ class LiquidEngine:
                     continue
 
                 print(f"{speed_sort[i][1]} is {speed_sort[j][0]/speed_sort[i][0]:.2f} faster than {speed_sort[j][1]}")
+
+        self._dump_run_times()
 
         return speed_sort
 
