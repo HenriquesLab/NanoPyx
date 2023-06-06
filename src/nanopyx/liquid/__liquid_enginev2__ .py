@@ -1,6 +1,7 @@
 import os
 import yaml
 import timeit
+import datetime
 from functools import partial
 
 import random
@@ -53,9 +54,9 @@ class LiquidEngine:
             BENCHMARK DICT 
                 |- RUN_TYPE #1
                 |      |- ARGS_REPR #1
-                |      |      |- [sum, sum_squared, n_succ, n_fails, arg_norm]
+                |      |      |- [sum, sum_squared, n_succ, arg_norm, [fail timestamps]]
                 |      |- ARGS_REPR #2  
-                |      |      |- [sum, sum_squared, n_succ, n_fails, arg_norm]
+                |      |      |- [sum, sum_squared, n_succ, arg_norm, [fail timestamps]]
                 |      (...)
                 |- RUN_TYPE #2 
                 (...)
@@ -210,7 +211,8 @@ class LiquidEngine:
             runtime_sum = run_info[0]
             #runtime_sqsum = run_info[1]
             runtime_count = run_info[2]
-            #runtime_fails = run_info[3]
+            #runtime_norm = run_info[3]
+            #runtime_fails = run_info[4]
             runtime_avgspeed = runtime_sum / runtime_count
             speed[run_type] = runtime_avgspeed
 
@@ -240,15 +242,16 @@ class LiquidEngine:
         # Check if the run type has been run, and if not create empty info
         run_type_benchs = self._benchmarks[run_type]
         if call_args not in run_type_benchs:
-            # [sum, sum_squared, n_succ, n_fails, arg_norm]
-            run_type_benchs[call_args] = [0, 0, 0, 0, norm]
+            # [sum, sum_squared, n_succ, arg_norm, []]
+            run_type_benchs[call_args] = [0, 0, 0, norm, []]
 
         # Get the run info
         c = run_type_benchs[call_args]
 
         # if run failed, t2run is None
         if t2run is None:
-            c[3] += 1
+            ct = datetime.datetime.now()
+            c[4].append(ct)
         else:
             # add the time it took to run, later used for average
             c[0] = c[0] + t2run
@@ -258,19 +261,22 @@ class LiquidEngine:
             c[2] += 1
 
         # Check if the norm if consistent
-        assert c[4] == norm
+        assert c[3] == norm
 
         self._last_runtype = run_type
         self._last_runtime = t2run
 
+        self._dump_run_times()
+
     def _dump_run_times(self,):
+        """We might need to wrap this into a multiprocessing.Queue"""
         with open(self._benchmark_filepath, "w") as f:
             yaml.dump(self._benchmarks, f)
 
     def _get_args_repr_norm(*args, **kwargs):
         """
         Get a string representation of the args and kwargs and corresponding 'norm'
-        The idea is that similar args have closer 'norms'
+        The idea is that similar args have closer 'norms'. Fuzzy logic
 
         The code does the following:
         1. It converts any args that are floats or ints to "number()" strings, and any args that are tensors to "shape()" strings
@@ -361,8 +367,6 @@ class LiquidEngine:
                     continue
 
                 print(f"{speed_sort[i][1]} is {speed_sort[j][0]/speed_sort[i][0]:.2f} faster than {speed_sort[j][1]}")
-
-        self._dump_run_times()
 
         return speed_sort
 
