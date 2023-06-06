@@ -14,6 +14,17 @@ __benchmark_folder__ = os.path.join(__home_folder__, ".nanopyx")
 if not os.path.exists(__benchmark_folder__):
     os.makedirs(__benchmark_folder__)
 
+import logging
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+fh = logging.FileHandler(f'{__name__}.log')
+fh.setLevel(logging.DEBUG)
+
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(process)d - %(processName)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+
+logger.addHandler(fh)
 
 class LiquidEngine:
 
@@ -250,11 +261,12 @@ class LiquidEngine:
         # Check if the norm if consistent
         assert c[4] == norm
 
-        with open(self._benchmark_filepath, "w") as f:
-            yaml.dump(self._benchmarks, f)
-
         self._last_runtype = run_type
         self._last_runtime = t2run
+
+    def _dump_run_times(self,):
+        with open(self._benchmark_filepath, "w") as f:
+            yaml.dump(self._benchmarks, f)
 
     def _get_args_repr_norm(*args, **kwargs):
         """
@@ -352,7 +364,6 @@ class LiquidEngine:
                 print(f"{speed_sort[i][1]} is {speed_sort[j][0]/speed_sort[i][0]:.2f} faster than {speed_sort[j][1]}")
 
         return speed_sort
-
 
     def _get_cl_code(self, file_name, cl_dp):
         """
