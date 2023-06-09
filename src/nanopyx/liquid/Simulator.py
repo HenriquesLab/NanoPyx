@@ -61,9 +61,12 @@ class Method:
         self.probabilities = {g:probabilities[g]/sum_of_prob for g in ALL_GEARS}
         assert np.allclose(np.sum([self.probabilities[g] for g in ALL_GEARS]),1)
 
-    def run(self):
-
-        gear_chosen = self.rng.choice(ALL_GEARS,p=[self.probabilities[g] for g in ALL_GEARS])
+    def run(self, solid=False):
+        
+        if solid:
+            gear_chosen = ALL_GEARS[np.argmin(self.real_avg_times)]
+        else:
+            gear_chosen = self.rng.choice(ALL_GEARS,p=[self.probabilities[g] for g in ALL_GEARS])
 
         self.observed_data[gear_chosen].append(self.sample_real_time(gear_chosen))
 
@@ -87,9 +90,12 @@ class Method:
 
         return gear_chosen, self.observed_data[gear_chosen][-1]
 
-    def run_anomalous(self, affected_gear, new_avg, new_std):
+    def run_anomalous(self, affected_gear, new_avg, new_std, solid=False):
 
-        gear_chosen = self.rng.choice(ALL_GEARS,p=[self.probabilities[g] for g in ALL_GEARS])
+        if solid:
+            gear_chosen = ALL_GEARS[np.argmin(self.real_avg_times)]
+        else:
+            gear_chosen = self.rng.choice(ALL_GEARS,p=[self.probabilities[g] for g in ALL_GEARS])
 
         if gear_chosen == affected_gear:
             self.observed_data[gear_chosen].append(self.rng.normal(new_avg, new_std,1)[0])
@@ -115,6 +121,7 @@ class Method:
         self.gear_history.append(gear_chosen)
 
         return gear_chosen, self.observed_data[gear_chosen][-1]
+    
 
 
 class Simulator:
@@ -160,20 +167,20 @@ class Simulator:
         for met in self.method_objects:
             met.run_benchmark(n_times)
 
-    def run_simulations(self, iter_n=100):
+    def run_simulations(self, iter_n=100, solid=False):
 
         for iter in range(iter_n):
             time = []
             gears = []
             for method in self.method_objects:
-                g,t = method.run()
+                g,t = method.run(solid=solid)
                 time.append(t)
                 gears.append(g)
             self.gears.append(gears)
             self.time.append(time)
             self.total_time.append(np.sum(time))
 
-    def run_anomalous_simulations(self, iter_n=1000, ano_start=300, ano_end=600, affected_gear=ALL_GEARS[0], new_avg=100, new_std=10):
+    def run_anomalous_simulations(self, iter_n=1000, ano_start=300, ano_end=600, affected_gear=ALL_GEARS[0], new_avg=100, new_std=10, solid=False):
 
         for iter in range(iter_n):
 
@@ -182,9 +189,9 @@ class Simulator:
             for method in self.method_objects:
                 
                 if ano_start<iter<ano_end:
-                    g,t = method.run_anomalous(affected_gear, new_avg, new_std)
+                    g,t = method.run_anomalous(affected_gear, new_avg, new_std, solid=solid)
                 else: 
-                    g,t = method.run()
+                    g,t = method.run(solid=solid)
                 
                 time.append(t)
                 gears.append(g)
