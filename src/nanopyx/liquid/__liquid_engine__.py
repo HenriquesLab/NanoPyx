@@ -279,7 +279,7 @@ class LiquidEngine:
         with open(self._benchmark_filepath, "w") as f:
             yaml.dump(self._benchmarks, f)
 
-    def _get_args_repr_norm(*args, **kwargs):
+    def _get_args_repr_norm(self,*args, **kwargs):
         """
         Get a string representation of the args and kwargs and corresponding 'norm'
         The idea is that similar args have closer 'norms'. Fuzzy logic
