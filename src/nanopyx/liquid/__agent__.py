@@ -1,21 +1,11 @@
-
+import os
 import platform
-
-from dataclasses import dataclass
+import yaml
 
 import numpy as np
 
 from .__njit__ import njit_works
 from .__opencl__ import opencl_works, devices
-
-@dataclass
-class Run:
-    method: str = ''
-    implementation: str = ''
-    parameters: dict = {}
-    result: dict = {}
-    finished: bool = False
-    time2run: float = 0.0
 
 
 class Agent_:
@@ -34,7 +24,7 @@ class Agent_:
 
         Agent responsabilities:
             1. Store the current state of the machine (e.g. OS, CPU, RAM, GPU, Python version etc.);
-            2. Store the current state of ALL LE objects (e.g. anything that is currently running, anything that is scheduled to run,
+            2. Store the current state of ALL initialized LE objects (e.g. anything that is currently running, anything that is scheduled to run,
               runs previously executed in the current session etc.);
             3. Whenever a LE object wants to run, it must query the Agent on what is the best implementation for it;
             4. Handle all necessary I/O operations related to benchmarks;
@@ -57,6 +47,4 @@ class Agent_:
         self._current_runs = []
         self._scheduled_runs = []
         self._finished_runs = []
-
-
 

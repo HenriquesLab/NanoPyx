@@ -9,6 +9,11 @@ import numpy as np
 from .__njit__ import njit_works
 from .__opencl__ import opencl_works, devices
 
+__home_folder__ = os.path.expanduser("~")
+__benchmark_folder__ = os.path.join(__home_folder__, ".nanopyx")
+if not os.path.exists(__benchmark_folder__):
+    os.makedirs(__benchmark_folder__)
+
 class LiquidEngine_:
 
     """
@@ -27,10 +32,9 @@ class LiquidEngine_:
 
         Engine responsabilities:
         1. Store implemented run types;
+        2. Store previous benchmarks;
         2. Benchmark all available run types;
         3. Run the method using a selected run type;
-
-        Communication betwen a specific LE and the agent is done through Run dataclasses
         """
 
          # Start by checking available run types
@@ -59,6 +63,27 @@ class LiquidEngine_:
                 print("Consider adding default arguments to the njit implementation to trigger early compilation")
 
         self.testing = testing
+
+        # benchmarks file path
+        # e.g.: ~/.nanopyx/liquid/_le_interpolation_nearest_neighbor.cpython-310-darwin/ShiftAndMagnify.yml
+        base_path = os.path.join(__benchmark_folder__,"liquid",
+                                 os.path.split(os.path.splitext(inspect.getfile(self.__class__))[0])[1])
+        os.makedirs(base_path, exist_ok=True)
+        self._benchmark_filepath = os.path.join(base_path,self.__class__.__name__+".yml")
+
+        # Load config file if it exists, otherwise create an empty config
+        if not clear_benchmarks and os.path.exists(self._benchmark_filepath):
+            with open(self._benchmark_filepath) as f:
+                self._benchmarks = yaml.load(f, Loader=yaml.FullLoader)
+        else:
+            self._benchmarks = {}
+
+        # check if the cfg dictionary has a key for every run type
+        for run_type_designation in self._run_types.keys():
+            if run_type_designation not in self._benchmarks:
+                self._benchmarks[run_type_designation] = {}
+
+        
 
     def _run(self, *args, run_type:str, **kwargs):
         """
