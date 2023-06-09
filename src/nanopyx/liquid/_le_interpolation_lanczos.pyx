@@ -22,18 +22,11 @@ class ShiftAndMagnify(LiquidEngine):
     Shift and Magnify using the NanoPyx Liquid Engine
     """
 
-    _has_opencl = True
-    _has_threaded = True
-    _has_threaded_static = True
-    _has_threaded_dynamic = True
-    _has_threaded_guided = True
-    _has_unthreaded = True
-    _has_python = False
-    _has_njit = False
-    _designation = "ShiftMagnify_LZ"
-
-    def __init__(self,testing=False):
-        super().__init__(testing=testing)
+    def __init__(self, clear_benchmarks=False, testing=False, dynamic_runtypes=True):
+        self._designation = "ShiftMagnify_LZ"
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, dynamic_runtypes=dynamic_runtypes,
+                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
+                        threaded_dynamic_=True, threaded_guided_=True)
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Lanczos")
     def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
@@ -261,18 +254,11 @@ class ShiftScaleRotate(LiquidEngine):
     Shift, Scale and Rotate (affine transform) using the NanoPyx Liquid Engine
     """
 
-    _has_opencl = True
-    _has_threaded = True
-    _has_threaded_static = True
-    _has_threaded_dynamic = True
-    _has_threaded_guided = True
-    _has_unthreaded = True
-    _has_python = False
-    _has_njit = False
-    _designation = "ShiftScaleRotate_LZ"
-
-    def __init__(self,testing=False):
-        super().__init__(testing=testing)
+    def __init__(self, clear_benchmarks=False, testing=False, dynamic_runtypes=True):
+        self._designation = "ShiftScaleRotate_LZ"
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, dynamic_runtypes=dynamic_runtypes,
+                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
+                        threaded_dynamic_=True, threaded_guided_=True)
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run; replace("Nearest-Neighbor", "Lanczos")
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:
