@@ -1,27 +1,21 @@
 import os
-import timeit
-import difflib
-from pathlib import Path
-import inspect
-import random
-from itertools import combinations
-
-from functools import partial
-
-import numpy as np
 import yaml
+import timeit
+import datetime
+import inspect
+from functools import partial
+from pathlib import Path
 
-from multiprocessing import current_process
+import random
+import numpy as np
 
 from .__njit__ import njit_works
 from .__opencl__ import opencl_works, devices
 
 __home_folder__ = os.path.expanduser("~")
-__config_folder__ = os.path.join(__home_folder__, ".nanopyx")
-if not os.path.exists(__config_folder__):
-    os.makedirs(__config_folder__)
-
-# flake8: noqa: E501
+__benchmark_folder__ = os.path.join(__home_folder__, ".nanopyx")
+if not os.path.exists(__benchmark_folder__):
+    os.makedirs(__benchmark_folder__)
 
 import logging
 logger = logging.getLogger(__name__)
@@ -36,157 +30,307 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 class LiquidEngine:
+
     """
-    Base class for parts of the NanoPyx Liquid Engine
+    Base class for parts of the Nanopyx Liquid engine
     """
 
-    # the following variables are used to identify if each type of run is available
-    _has_opencl: bool = False
-    _has_unthreaded: bool = False
-    _has_threaded: bool = False
-    _has_threaded_static: bool = False
-    _has_threaded_dynamic: bool = False
-    _has_threaded_guided: bool = False
-    _has_python: bool = False
-    _has_njit: bool = False
-    _run_types: dict = {}
 
-    _random_testing: bool = True  # used to sometimes try different run types when using the run(...) method
-    _show_info: bool = False  # print what's going on
-
-    _last_run_type: str = None  # the last run type used
-    _last_run_time: float = None  # the time the last run took
-
-    _designation = "BaseClass"
-
-
-    def __initialize_run_types__(self):
-        self._run_types = {}
-        if self._has_opencl and opencl_works():
-            for d in devices:
-                self._run_types[f"OpenCL_{d['device'].name}"] = partial(self._run_opencl, device=d)
-        if self._has_threaded:
-            self._run_types["Threaded"] = self._run_threaded
-        if self._has_unthreaded:
-            self._run_types["Unthreaded"] = self._run_unthreaded
-        if self._has_threaded_static:
-            self._run_types["Threaded_static"] = self._run_threaded_static
-        if self._has_threaded_dynamic:
-            self._run_types["Threaded_dynamic"] = self._run_threaded_dynamic
-        if self._has_threaded_guided:
-            self._run_types["Threaded_guided"] = self._run_threaded_guided
-        if self._has_python:
-            self._run_types["Python"] = self._run_python
-        if self._has_njit and njit_works():
-            self._run_types["Numba"] = self._run_njit
-            # Trigger compilation
-            try:
-                self._run_njit()
-            except TypeError:
-                print("Consider adding default arguments to njit implementation to trigger early compilation")
-
-    def __init__(self, clear_config=False, testing=False):
+    def __init__(self, clear_benchmarks:bool=False, testing:bool=False, dynamic_runtypes=True,
+                 opencl_:bool = False, unthreaded_:bool = False,
+                 threaded_:bool = False, threaded_static_:bool = False,
+                 threaded_dynamic_:bool = False, threaded_guided_:bool = False,
+                 python_:bool=False, njit_:bool=False) -> None:
         """
         Initialize the Liquid Engine
 
-        The code does the following:
-        1. Checks whether OpenCL is available (by running a simple OpenCL kernel)
-        2. Checks whether Numba is available (by running the njit decorator)
-        3. Creates a path to store the config file (e.g. ~/.nanopyx/liquid/_le_interpolation_nearest_neighbor.cpython-310-darwin/ShiftAndMagnify.yml)
-        4. Loads the config file (if it exists)
-        5. Creates empty dictionaries for each run type (e.g. 'Threaded', 'OpenCL', 'Numba')
+        1. Checks available implementations:
+            Checks whether OpenCL is available 
+            Checks whether Numba is available 
+        2. Builds an dictionary with strings as keys that point to the corresponding method
+            Implementations that are NOT available do not appear in this dictionary
+        3. Creates a path to store the benchmark .yml file in the home folder
+            (e.g. ~/.nanopyx/liquid/_le_interpolation_nearest_neighbor.cpython-310-darwin/ShiftAndMagnify.yml)
+        4. Loads the benchmark file (if it exists) as a dictionary and checks pre existing benchmarks
+            The benchmark file is read as dict of dicts. 
+            BENCHMARK DICT 
+                |- RUN_TYPE #1
+                |      |- ARGS_REPR #1
+                |      |      |- [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+                |      |- ARGS_REPR #2  
+                |      |      |- [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+                |      (...)
+                |- RUN_TYPE #2 
+                (...)
+            If necessary, creates empty dictionaries in the benchmark parent dict for each run type (e.g. 'Threaded', 'OpenCL', 'Numba')
+            These per runtype dictionaries are going to be populated by the benchmarks
 
-        :param clear_config: whether to clear the config file
+        :param clear_benchmark: whether to clear the config file of previous data.
+        :param testing: whether to run in testing mode. testing mode keeps track of results of each method
+        during a benchmark. this has a BIG memory footprint which can lead to unexpected crashes when using big datasets
+        :param dynamic_runtypes: whether the runtype is randomly based on average time taken in the past or if the runtype
+        is simply chosen as the lowest time taken in the past
         """
-        self.__initialize_run_types__()
+        
+        # Start by checking available run types
+        self._run_types = {}
+        if opencl_ and opencl_works():
+            for d in devices:
+                self._run_types[f"OpenCL_{d['device'].name}"] = partial(self._run_opencl, device=d)
+        if threaded_:
+            self._run_types["Threaded"] = self._run_threaded
+        if unthreaded_:
+            self._run_types["Unthreaded"] = self._run_unthreaded
+        if threaded_static_:
+            self._run_types["Threaded_static"] = self._run_threaded_static
+        if threaded_dynamic_:
+            self._run_types["Threaded_dynamic"] = self._run_threaded_dynamic
+        if threaded_guided_:
+            self._run_types["Threaded_guided"] = self._run_threaded_guided
+        if python_:
+            self._run_types["Python"] = self._run_python
+        if njit_ and njit_works():
+            self._run_types["Numba"] = self._run_njit
+            # Try to trigger early compilation
+            try:
+                self._run_njit()
+            except TypeError:
+                print("Consider adding default arguments to the njit implementation to trigger early compilation")
 
-        # Load the config file
+        
+        # benchmarks file path
         # e.g.: ~/.nanopyx/liquid/_le_interpolation_nearest_neighbor.cpython-310-darwin/ShiftAndMagnify.yml
         base_path = os.path.join(
-            __config_folder__,
+            __benchmark_folder__,
             "liquid",
-            os.path.split(os.path.splitext(inspect.getfile(self.__class__))[0])[1],
-        )
+            os.path.split(os.path.splitext(inspect.getfile(self.__class__))[0])[1])
         os.makedirs(base_path, exist_ok=True)
-
-        # set path to config file
-        self._config_file = os.path.join(base_path, self.__class__.__name__ + ".yml")
+        self._benchmark_filepath = os.path.join(base_path,self.__class__.__name__+".yml")
 
         # Load config file if it exists, otherwise create an empty config
-        if not clear_config and os.path.exists(self._config_file):
-            with open(self._config_file) as f:
-                self._cfg = yaml.load(f, Loader=yaml.FullLoader)
+        if not clear_benchmarks and os.path.exists(self._benchmark_filepath):
+            with open(self._benchmark_filepath) as f:
+                self._benchmarks = yaml.load(f, Loader=yaml.FullLoader)
         else:
-            self._cfg = {}
+            self._benchmarks = {}
 
-        # Initialize missing dictionaries in cfg
+        # check if the cfg dictionary has a key for every run type
         for run_type_designation in self._run_types.keys():
-            if run_type_designation not in self._cfg:
-                self._cfg[run_type_designation] = {}
+            if run_type_designation not in self._benchmarks:
+                self._benchmarks[run_type_designation] = {}
 
+        # Testing mode boolean
         self.testing = testing
 
-    def is_opencl_enabled(self):
-        """
-        Returns whether OpenCL is enabled
-        :return: whether OpenCL is enabled
-        :rtype: bool
-        """
-        return self._has_opencl
+        # Are run_types probabilistic?
+        self.dynamic_runtypes = dynamic_runtypes    
 
-    def is_njit_enabled(self):
-        """
-        Returns whether Numba is enabled
-        :return: whether Numba is enabled
-        :rtype: bool
-        """
-        return self._has_njit
+        # Storage attributes to help benchmarking
+        self._last_runtype = None
+        self._last_runtime = None
 
-    def set_opencl_enabled(self, enabled: bool = True):
-        """
-        Sets whether OpenCL is enabled
-        :param enabled: whether OpenCL is enabled
-        """
-        self._has_opencl = enabled
-
-    def set_opencl_disabled_if_no_double_support(self):
-        """
-        Sets whether OpenCL is enabled
-        :param enabled: whether OpenCL is enabled
-        """
-        if not cl_dp:
-            self._has_opencl = False
-
-    def set_njit_enabled(self, enabled: bool = True):
-        """
-        Sets whether Numba is enabled
-        :param enabled: whether Numba is enabled
-        """
-        self._has_njit = enabled
-
-    def run(self, *args, **kwds):
+    def _run(self, *args, run_type:str=None, **kwargs):
         """
         Runs the function with the given args and kwargs
-        Should be overridden by the any class that inherits from this class
-        """
-        return self._run(*args, **kwds)
 
-    def benchmark(self, *args, **kwargs):
+        The code above does the following:
+        1. Check the specified run_type
+            - if None, tries to run the fastest recorded one
+            - if str checks if the run type exists otherwise raise a NotImplementedError
+        2. It will run the _run_{run_type} function
+            - it will also store the run time
+            - it will also store the last run type
+        4. It will return the result
+
+        :param args: args for the function
+        :param run_type: the run type to use, if None use the fastest run type
+        :param kwargs: kwargs for the function
+        :return: the result of the function
         """
-        Benchmark the different run types
+        
+        if run_type is None:
+            run_type = self._get_fastest_run_type(*args, **kwargs)
+
+        if run_type not in self._benchmarks:
+            print(f"Unexpected run type {run_type}")
+            raise NotImplementedError
+        
+        # try to run
+        try:
+            t_start = timeit.default_timer()
+            result = self._run_types[run_type](*args, **kwargs)
+            t2run = timeit.default_timer()-t_start
+        except Exception as e:
+            print(f"Unexpected error while trying to run {run_type}")
+            print(e)
+            print("Please try again with another run type")
+            result = None
+            t2run = None
+
+        self._store_run_time(run_type, t2run, *args, **kwargs)
+
+        return result
+    
+    def _get_fastest_run_type(self, *args, **kwargs):
+        """
+        Retrieves the fastest run type for the given args and kwargs
+
+        1. Get the fastest run type for the specific args and kwargs
+        2. If the args and kwargs are not in the benchmarked yet, it will find the most similar args and kwargs
+        3. Return the run time with the lowest avg time
+
+        :return: the fastest run type
+        :rtype: str (run type designation)
+        """
+
+        # Default fastest can be changed in the future
+        default_fastest = list(self._run_types.keys())[0]
+
+        # str representation of the arguments and their corresponding 'norm'
+        repr_args, repr_norm = self._get_args_repr_norm(*args, **kwargs)
+
+        # dictionary to hold speeds
+        speed = {}
+
+        # Check every run_type for similar args
+        for run_type in self._run_types:
+
+            if repr_args not in self._benchmarks[run_type]:
+                # Never seen these arguments
+                # Find closest match
+                #[sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+                similar_args = None
+                best_args_similarity = np.inf
+                for call_args in self._benchmarks[run_type]:
+                    args_similarity = np.abs(self._benchmarks[run_type][call_args][2]-repr_norm)
+                    if args_similarity<best_args_similarity:
+                        best_args_similarity = args_similarity
+                        similar_args = call_args
+                run_info = self._benchmarks[run_type][similar_args]
+            else:
+                # I have seen these arguments
+                run_info = self._benchmarks[run_type][repr_args]
+
+            # [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+            runtime_sum = run_info[0]
+            #runtime_sqsum = run_info[1]
+            #runtime_norm = run_info[2]
+            runtime_count = len(run_info[3])
+            #runtime_fails = len(run_info[4])
+
+            runtime_avgspeed = runtime_sum / runtime_count
+            speed[run_type] = runtime_avgspeed
+
+        # empty dict?
+        if not speed: 
+            return default_fastest
+        # dict not empty with dynamic runtypes
+        elif speed and self.dynamic_runtypes: 
+            weights = [(1/speed[k])**2 for k in speed]
+            return random.choices(list(speed.keys()), weights=weights, k=1)[0]
+        # dict not empty but without dynamic runtypes
+        else:
+            return sorted(speed, key=speed.get, reverse=True)
+            
+    def _store_run_time(self, run_type, t2run, *args, **kwargs):
+        """
+        Store the run time in the config file
+        :param run_type: the type of run
+        :param t2run: the time it took to run
+        :param args: args for the run method
+        :param kwargs: kwargs for the run method
+        :return: None
+        """
+
+        call_args, norm = self._get_args_repr_norm(*args, **kwargs)  # Get the call args
+
+        # Check if the run type has been run, and if not create empty info
+        run_type_benchs = self._benchmarks[run_type]
+        if call_args not in run_type_benchs:
+            # [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+            run_type_benchs[call_args] = [0, 0, norm, [], []]
+
+        # Get the run info
+        c = run_type_benchs[call_args]
+        # timestamp
+        ct = datetime.datetime.now()
+
+        # if run failed, t2run is None
+        if t2run is None:
+            c[4].append(ct)
+        else:
+            # add the time it took to run, later used for average
+            c[0] = c[0] + t2run
+            # add the time it took to run squared, later used for standard deviation
+            c[1] = c[1] + t2run * t2run
+            # increment the number of times it was run
+            c[3].append(ct)
+
+        # Check if the norm if consistent
+        assert c[2] == norm
+
+        self._last_runtype = run_type
+        self._last_runtime = t2run
+
+        self._dump_run_times()
+
+    def _dump_run_times(self,):
+        """We might need to wrap this into a multiprocessing.Queue if we find it blocking"""
+        with open(self._benchmark_filepath, "w") as f:
+            yaml.dump(self._benchmarks, f)
+
+    def _get_args_repr_norm(*args, **kwargs):
+        """
+        Get a string representation of the args and kwargs and corresponding 'norm'
+        The idea is that similar args have closer 'norms'. Fuzzy logic
 
         The code does the following:
-        1. Create a list of run types to benchmark
-        2. Run each run type and record the run time and return value
-        3. Sort the run times from fastest to slowest
+        1. It converts any args that are floats or ints to "number()" strings, and any args that are tensors to "shape()" strings
+        2. It converts any kwargs that are floats or ints to "number()" strings, and any kwargs that are tensors to "shape()" strings
+        3. The 'norm' is given by the product of all the floats or ints and all the shape sizes. 
+
+        :return: the string representation of the args and kwargs
+        :rtype: str
+        """
+        _norm = 1
+        _args = []
+        for arg in args:
+            if type(arg) in (float, int):
+                _args.append(f"number({arg})")
+                _norm *= arg
+            elif hasattr(arg, "shape"):
+                _args.append(f"shape{arg.shape}")
+                _norm *= arg.size
+            else:
+                _args.append(arg)
+
+        _kwargs = {}
+        for k, v in kwargs.items():
+            if type(v) in (float, int):
+                _kwargs[k] = f"number({v})"
+                _norm *= arg
+            if hasattr(v, "shape"):
+                _kwargs[k] = f"shape{arg.shape}"
+                _norm *= arg.size
+            else:
+                _kwargs[k] = v
+
+        return repr((_args, _kwargs)), _norm
+
+    def benchmark(self,*args, **kwargs):
+        """
+        1. Run each available run type and record the run time and return value
+        2. Sort the run times from fastest to slowest
+        3. Store the benchmark results in the benchmark yaml file
         4. Compare each run type against each other, sorted by speed
         5. Print the results
 
         :param args: args for the run method
         :param kwargs: kwargs for the run method
-        :return:  a list of tuples containing the run time, run type name and return value
+        :return:  a list of tuples containing the run time, run type name and optionally the return values
         :rtype: [[run_time, run_type_name, return_value], ...]
         """
+
         # Create some lists to store runtimes and return values of run types
         run_times = {}
         returns = {}
@@ -195,30 +339,17 @@ class LiquidEngine:
         for run_type in self._run_types:
 
             r = self._run(*args, run_type=run_type, **kwargs)
-            
-            if r is None:
-                continue
 
-            run_times[run_type] = self._last_run_time
+            if r is None:
+                run_times[run_type] = np.inf
+            else:
+                run_times[run_type] = self._last_runtime
             
             if self.testing:
                 returns[run_type] = r
             else:
                 returns[run_type] = None
-
-            mean, std, n = self.get_mean_std_run_time(run_type, *args, **kwargs)
-            self._print(
-                f"{run_type} run time: {format_time(self._last_run_time)}; "
-                + f"mean: {format_time(mean)}; std: {format_time(std)}; runs: {n}"
-            )
-
-        # Check if all outputs are similar to each other
-        if self.testing:
-            for pair in combinations(returns.keys(),r=2):
-                if not self._test(returns[pair[0]], returns[pair[1]]):
-                    # TODO add logic
-                    self._print(f"{pair[0]}=/={pair[1]}")
-
+        
         # Sort run_times by value
         speed_sort = []
         for run_type in sorted(run_times, key=run_times.get, reverse=False):
@@ -243,155 +374,7 @@ class LiquidEngine:
 
                 print(f"{speed_sort[i][1]} is {speed_sort[j][0]/speed_sort[i][0]:.2f} faster than {speed_sort[j][1]}")
 
-        self._print(f"Run-times log: {self.get_run_times_log()}")
-        print(f"Recorded fastest: {self._get_fastest_run_type(*args, **kwargs)}")
-
         return speed_sort
-
-    def get_mean_std_run_time(self, run_type: str, *args, **kwargs):
-        """
-        Get the mean and standard deviation of the run time for the given run type
-        :param run_type: the run type
-        :param args: args for the run method
-        :param kwargs: kwargs for the run method
-        :return: the mean, standard deviation of the run time and the number of runs
-        """
-
-        # Get the call args
-        call_args = self._get_args_repr(*args, **kwargs)
-
-        # Check if the run type has been run
-        r = self._cfg[run_type]
-        # If not, return None
-        if call_args not in r:
-            return None, None, None
-
-        # Get the run times
-        c = r[call_args]
-        sum = c[0]  # Sum of run times
-        sum_sq = c[1]  # Sum of squared run times (for std)
-        n = c[2]  # Number of runs
-        mean = sum / n
-        if (n - 1) > 0:
-            std = np.sqrt((sum_sq - n * mean**2) / (n - 1))
-        else:
-            std = 0
-        return mean, std, n
-
-    def get_run_times_log(self):
-        """
-        Get the run times log
-        :return: the run times log
-        """
-        return self._cfg
-
-    def set_show_info(self, show_info: bool):
-        """
-        Set whether to show info
-        :param show_info: whether to show info
-        :return: None
-        """
-        self._show_info = show_info
-
-    def _store_run_time(self, run_type, delta, *args, **kwargs):
-        """
-        Store the run time in the config file
-        :param run_type: the type of run
-        :param delta: the time it took to run
-        :param args: args for the run method
-        :param kwargs: kwargs for the run method
-        :return: None
-        """
-        self._last_run_time = delta  # Store the last run time
-        call_args = self._get_args_repr(*args, **kwargs)  # Get the call args
-
-        # Check if the run type has been run
-        r = self._cfg[run_type]
-        if call_args not in r:
-            r[call_args] = [0, 0, 0]
-
-        # Get the run times
-        c = r[call_args]
-        # add the time it took to run, later used for average
-        c[0] = c[0] + delta
-        # add the time it took to run squared, later used for standard deviation
-        c[1] = c[1] + delta * delta
-        # increment the number of times it was run
-        c[2] += 1
-
-        self._print(
-            f"Storing run time: {delta} (m={c[0]/c[2]:.2f},n={c[2]})",
-            call_args,
-            run_type,
-        )
-
-        with open(self._config_file, "w") as f:
-            yaml.dump(self._cfg, f)
-
-    def _get_fastest_run_type(self, *args, **kwargs) -> str:
-        """
-        Retrieves the fastest run type for the given args and kwargs
-
-        The code does the following:
-        1. Get the fastest run type based on the args and kwargs
-        2. If the args and kwargs are not in the config, it will find the most similar args and kwargs
-        3. It will also use the runtime of the function to determine the fastest run type
-
-        :return: the fastest run type
-        :rtype: str (run type designation)
-        """
-
-        fastest = list(self._run_types.keys())[0]
-        speed_and_type = []
-
-        call_args = self._get_args_repr(*args, **kwargs)
-        # print(call_args)
-
-        for run_type in self._run_types:
-
-            if run_type not in self._cfg:
-                self._cfg[run_type] = {}
-                continue
-
-            if call_args not in self._cfg[run_type] and len(self._cfg[run_type]) > 0:
-                # find the most similar call_args by score
-                score_current = self._get_args_score(call_args)
-                delta_best = 1e99
-                similar_call_args: str = None
-                for _call_args in self._cfg[run_type]:
-                    score = self._get_args_score(_call_args)
-                    delta = abs(score - score_current)
-                    if delta < delta_best:
-                        delta_best = delta
-                        similar_call_args = _call_args
-                if similar_call_args is not None:
-                    call_args = similar_call_args
-                else:
-                    # find the most similar call_args by string similarity
-                    similar_args = difflib.get_close_matches(call_args, self._cfg[run_type].keys())
-                    if len(similar_args) > 0:
-                        call_args = similar_args[0]
-
-            if call_args in self._cfg[run_type]:
-                run_info = self._cfg[run_type][call_args]
-                runtime_sum = run_info[0]
-                runtime_count = run_info[2]
-                speed = runtime_count / runtime_sum
-                speed_and_type.append((speed, run_type))
-                self._print(f"{run_type} run time: {speed:.2f} runs/s")
-
-        if len(speed_and_type) == 0:
-            return fastest
-
-        elif self._random_testing:
-            # randomly choose a run type based on a squared speed weight
-            run_type = [x[1] for x in speed_and_type]
-            weights = [x[0] ** 2 for x in speed_and_type]
-            return random.choices(run_type, weights=weights, k=1)[0]
-
-        else:
-            # just return the fastest
-            return sorted(speed_and_type, key=lambda x: x[0], reverse=True)[0][1]
 
     def _get_cl_code(self, file_name, cl_dp):
         """
@@ -410,175 +393,17 @@ class LiquidEngine:
 
         return kernel_str
 
-    def _get_args_repr(self, *args, **kwargs) -> str:
-        """
-        Get a string representation of the args and kwargs
+    #####################################################
+    #                   RUN METHODS                     #
+    # THESE SHOULD ALWAYS BE OVERRIDEN BY CHILD CLASSES #
+    #####################################################
 
-        The code does the following:
-        1. It uses the "repr" function to get a string representation of the args and kwargs
-        2.  It converts any args that are floats or ints to "number()" strings, and any args that are tensors to "shape()" strings
-        3.  It converts any kwargs that are floats or ints to "number()" strings, and any kwargs that are tensors to "shape()" strings
-
-        :return: the string representation of the args and kwargs
-        :rtype: str
-        """
-        # print("Args: ", args)
-        # print("Kwargs: ", kwargs)
-        _args = []
-        for arg in args:
-            if type(arg) in (float, int):
-                _args.append(f"number({arg})")
-            elif hasattr(arg, "shape"):
-                _args.append(f"shape{arg.shape}")
-            else:
-                _args.append(arg)
-        _kwargs = {}
-        for k, v in kwargs.items():
-            if type(v) in (float, int):
-                _kwargs[k] = f"number({v})"
-            if hasattr(v, "shape"):
-                _kwargs[k] = f"shape{arg.shape}"
-            else:
-                _kwargs[k] = v
-        return repr((_args, _kwargs))
-
-    def _get_args_shapes_numbers(self, txt: str):
-        """
-        Get the shapes and numbers from the string representation of the args and kwargs
-
-        The code does the following:
-        1. Finds all shape values in the text
-        2. Finds all number values in the text
-        3. Converts the found values to float
-
-        :param txt: the string representation of the args and kwargs
-        :return: a tuple of the shapes and numbers
-        """
-        shapes = []
-        numbers = []
-
-        # example (['shape(3, 64, 32)', 'shape(3,)', 'shape(3,)', 'number(4.0)', 'number(4.0)'], {})
-
-        # find shape values
-        _txt = txt
-        marker = 0
-        while 1:
-            start = _txt.find("shape(", marker)
-            end = _txt.find(")", start)
-            if start == -1 or end == -1:
-                break
-            elements = _txt[start + 6 : end].split(",")
-            for element in elements:
-                if element.strip() != "":
-                    shapes.append(float(element))
-            marker = end
-
-        # find number values
-        _txt = txt
-        marker = 0
-        while 1:
-            start = _txt.find("number(", marker)
-            end = _txt.find(")", start)
-            if start == -1 or end == -1:
-                break
-            numbers.append(float(_txt[start + 7 : end]))
-            marker = end
-
-        return shapes, numbers
-
-    def _get_args_score(self, txt: str) -> float:
-        """
-        Get the score for the given args and kwargs
-        :param txt: the string representation of the args and kwargs
-        :return: the score
-        """
-        shapes, numbers = self._get_args_shapes_numbers(txt)
-        score = 1
-        if len(shapes) > 0:
-            score = score * np.prod(shapes)
-        if len(numbers) > 0:
-            score = score * np.prod(numbers)
-        return score
-
-    def _print(self, *args, **kwargs):
-        """
-        Prints the args and kwargs
-        """
-        if self._show_info:
-            print(*args, **kwargs)
-
-    def _test(self, return_run_type_1:np.array, return_run_type_2:np.array):
-        """
-        Tests the return values of two different run types
-        Provides a default implementation but can be overriden by any child class
-        :param return_run_type_1: return value of one of the gears
-        :param return_run_type_2: return value of one of the other gears
-        :return: boolean if both return values are similar
-        """
-        try:
-            np.testing.assert_allclose(return_run_type_1, return_run_type_2,
-                                       rtol=1e-5, atol=1e-3, equal_nan=False)
-            return True
-        except AssertionError:
-            return False
-
-
-    ################
-    # _run methods #
-    ################
-
-    def _run(self, *args, run_type:str=None, **kwargs):
+    def run(self, *args, **kwargs):
         """
         Runs the function with the given args and kwargs
-
-        The code above does the following:
-        1. Check if you have the specified run_type
-            - if you do not, it will raise a NotImplementedError
-        2. Check if you have the _run_XXX function
-            - if you do not, it will raise a NotImplementedError
-        3. It will run the _run_XXX function
-            - it will also store the run time
-            - it will also store the last run type
-        4. It will return the result
-
-        :param args: args for the function
-        :param run_type: the run type to use, if None use the fastest run type
-        :param kwargs: kwargs for the function
-        :return: the result of the function
+        Should be overridden by the any class that inherits from this class
         """
-        
-        if run_type is None:
-            run_type = self._get_fastest_run_type(*args, **kwargs)
-            self._print(f"Using run type: {run_type}")
-
-
-        logger.info(f'{self._designation} Using run type {run_type} in {current_process().name} with args {self._get_args_repr(*args, **kwargs)}')
-                    
-        try:
-            t_start = timeit.default_timer()
-            r = self._run_types[run_type](*args, **kwargs)
-            t2run = timeit.default_timer() - t_start
-            logger.info(f'{current_process().name} finished running {run_type} in {t2run:.4f} seconds')
-
-            self._store_run_time(
-            run_type,
-            t2run,
-            *args,
-            **kwargs,
-            )
-
-        except Exception as e:
-            print(f"{run_type} failed!")
-            print(e)
-            logger.info(f'{current_process().name} could not run {run_type}. Python Exception: {e}')
-            r = None
-            t2run = None
-
-
-        self._last_run_type = run_type
-        return r
-
-
+        return self._run(*args, **kwargs)
 
     def _run_opencl(*args, **kwargs):
         """
@@ -636,17 +461,3 @@ class LiquidEngine:
         """
         pass
             
-        
-
-def format_time(t: float):
-    """
-    Formats a time in seconds to a human readable string
-    :param t: the time in seconds
-    :return: a human readable string
-    """
-    if t < 1e-6:
-        return f"{t * 1e9:.2f}ns"
-    elif t < 1:
-        return f"{t * 1000:.2f}ms"
-    else:
-        return f"{t:.2f}s"
