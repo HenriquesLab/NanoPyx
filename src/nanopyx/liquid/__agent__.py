@@ -27,9 +27,6 @@ class Agent_:
             2. Store the current state of ALL initialized LE objects (e.g. anything that is currently running, anything that is scheduled to run,
               runs previously executed in the current session etc.);
             3. Whenever a LE object wants to run, it must query the Agent on what is the best implementation for it;
-            4. Handle all necessary I/O operations related to benchmarks;
-
-        Communication betwen a specific LE and the agent is done through Run dataclasses
         """
 
         ### MACHINE INFO ###
