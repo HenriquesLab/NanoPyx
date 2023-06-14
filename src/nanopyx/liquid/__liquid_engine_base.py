@@ -32,9 +32,21 @@ class LiquidEngine_:
 
         Engine responsabilities:
         1. Store implemented run types;
-        2. Store previous benchmarks;
-        2. Benchmark all available run types;
-        3. Run the method using a selected run type;
+        2. Handle previous benchmarks and I/O;
+        2. When queried, benchmark all available run types;
+        3. Run a specific method using a selected run type;
+
+        Benchmark files have the following format:
+        The benchmark file is read as dict of dicts. 
+            BENCHMARK DICT FOR A SPECIFIC METHOD
+                |- RUN_TYPE #1
+                |      |- ARGS_REPR #1
+                |      |      |- [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+                |      |- ARGS_REPR #2  
+                |      |      |- [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+                |      (...)
+                |- RUN_TYPE #2 
+                (...)
         """
 
          # Start by checking available run types
@@ -83,7 +95,6 @@ class LiquidEngine_:
             if run_type_designation not in self._benchmarks:
                 self._benchmarks[run_type_designation] = {}
 
-        
 
     def _run(self, *args, run_type:str, **kwargs):
         """
