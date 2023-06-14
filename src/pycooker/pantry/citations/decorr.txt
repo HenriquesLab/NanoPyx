@@ -1,0 +1,1 @@
+**DecorrAnalysis**: Descloux A, Grußmayer KS, Radenovic A. Parameter-free image resolution estimation based on decorrelation analysis. Nat Methods. 2019 Sep;16(9):918-924. doi: 10.1038/s41592-019-0515-7. Epub 2019 Aug 26. PMID: 31451766.  

@@ -2,16 +2,17 @@ import os
 import nbformat
 
 
-def swap_tags(data, tags):    
+def swap_tags(data, tags):
     split_tags = tags.split(";")
-    
+
     if len(split_tags[0].split(",")) > 1:
         for tags in split_tags:
             original = tags.split(",")[0]
             new = tags.split(",")[1]
             data = data.replace(original, new)
-    
+
     return data
+
 
 def check_tag2tag(cell_line):
     if len(cell_line.split("$tag2tag: ")) > 1:
@@ -22,6 +23,8 @@ def check_tag2tag(cell_line):
 def get_include(tag, ingredient_path):
     with open(os.path.join(ingredient_path, tag)) as f:
         tmp = f.read()
+        if not tmp.endswith("\n"):
+            return tmp + "\n"
         return tmp
 
 
@@ -50,7 +53,6 @@ def parse_recipe(recipe, notebook, ingredient_path, output_path):
             else:
                 if check_tag2tag(cell_line):
                     tags_split = cell_line.split(" $tag2tag: ")
-                    print(tags_split)
                     line_to_add = swap_tags(tags_split[0], tags_split[1])
                     cell += line_to_add + "\n"
                 else:
@@ -63,6 +65,8 @@ def parse_recipe(recipe, notebook, ingredient_path, output_path):
             new_cell = nbformat.v4.new_code_cell(cell)
             new_cell["metadata"]["cellView"] = "form"
             notebook["cells"].append(new_cell)
+        else:
+            print("ERROR: Unknown cell type: " + cell_type)
 
     nbformat.write(notebook, os.path.join(output_path, notebook_name+".ipynb"))
 

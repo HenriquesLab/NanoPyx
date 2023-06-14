@@ -1,0 +1,6 @@
+# SRRF Parameters:
+
+- **Ring Radius:** Radius of the ring used to calculate the radiality (in pixels).
+- **Magnification:** Desired magnification for the generated radiality image.
+- **SRRF order:** Flag for types of SRRF temporal correlations. Order = -1: pairwise product sum; Order = 0: maximum intensity projection; Order = 1: mean; Order = 2,3 or 4: autocorrelation function of order 2, 3 or 4.
+- **Frames-per-timepoint:** How many frames of the original image stack are used to calculated a single SRRF frame. For example, given an input image with 500 frames, if using 100 frames per timepoint, SRRF will generate an image stack with 5 super-resolved frames.  

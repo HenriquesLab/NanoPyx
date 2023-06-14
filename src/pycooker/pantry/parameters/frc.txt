@@ -1,0 +1,5 @@
+# FRC Parameters:
+
+- **Pixel Size:** Pixel size of the image. Used to calculte resolution values.
+- **Units:** Pixel size units.
+- **First/Second Frame:** As FRC is calculated between two frames of the same image stack, these parameters determines which two frames are used for the calculation.

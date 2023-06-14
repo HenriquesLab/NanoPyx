@@ -1,0 +1,1 @@
+**Error Map**: Culley, S., Albrecht, D., Jacobs, C. et al. Quantitative mapping and minimization of super-resolution optical imaging artifacts. Nat Methods 15, 263–266 (2018). https://doi.org/10.1038/nmeth.4605

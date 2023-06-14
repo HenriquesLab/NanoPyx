@@ -1,0 +1,5 @@
+# Image Decorrelation Analysis Parameters:
+
+- **Pixel Size:** Pixel size of the image. Used to calculate resolution values.
+- **Units:** Pixel size units.
+- **Radius Min/Max:** Resolution calculation by Decorrelation Analysis is performed in the frequency space. These parameters define the range of radii to be used in the calculation.  
