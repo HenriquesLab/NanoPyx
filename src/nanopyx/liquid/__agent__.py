@@ -36,7 +36,7 @@ class Agent_:
         self.py_info = {'Version':platform.python_version(),'Implementation':platform.python_implementation(),'Compiler':platform.python_compiler()}
 
         self.numba_info = {'Numba':njit_works()}
-        self.pyopencl_info = {'PyOpenCL':opencl_works(),'Devices':devices()}
+        self.pyopencl_info = {'PyOpenCL':opencl_works(),'Devices':devices}
         self.cuda_info = {'CUDA':'TBD'}
         ### MACHINE INFO ###
 
