@@ -135,7 +135,7 @@ reportUndefinedVariable = false
 reportMissingImports = false
 
 [tool.pytest.ini_options]
-addopts = "--cov=nanopyx --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/"
+addopts = "--cov=nanopyx --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef"
 timeout = 600
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
@@ -148,7 +148,7 @@ filterwarnings = [
     "ignore:.*The 'u' format is deprecated.*:DeprecationWarning:pywintypes",
     "ignore:.*Deprecated NumPy.*:DeprecationWarning:.*",
 ]
-testpaths = ["tests", "src"]
+testpaths = ["tests", "src/nanopyx"]
 
 
 [tool.cibuildwheel]
