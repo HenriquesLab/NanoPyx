@@ -1,5 +1,7 @@
 import os
 import timeit
+import yaml
+import datetime
 from functools import partial
 from pathlib import Path
 
@@ -94,6 +96,9 @@ class LiquidEngine_:
         for run_type_designation in self._run_types.keys():
             if run_type_designation not in self._benchmarks:
                 self._benchmarks[run_type_designation] = {}
+        
+        # helper attribute for benchmarking function
+        self._last_time = None
 
 
     def _run(self, *args, run_type:str, **kwargs):
@@ -126,9 +131,13 @@ class LiquidEngine_:
             print(e)
             print("Please try again with another run type")
             result = None
-            t2run = None
+            t2run = np.inf
 
-        return result, t2run
+        self._last_time = t2run
+        arg_repr, arg_score = self._get_args_repr_score(*args, **kwargs)
+        self._store_results(arg_repr, arg_score, run_type, t2run)
+
+        return result
     
 
     def benchmark(self,*args, **kwargs):
@@ -150,14 +159,11 @@ class LiquidEngine_:
         # Run each run type and record the run time and return value
         for run_type in self._run_types:
 
-            r, t = self._run(*args, run_type=run_type, **kwargs)
+            r = self._run(*args, run_type=run_type, **kwargs)
 
-            if r is None:
-                run_times[run_type] = np.inf
-            else:
-                run_times[run_type] = t
+            run_times[run_type] = self._last_time
             
-            if self.testing:
+            if self.testing: # Store return values if testing
                 returns[run_type] = r
             else:
                 returns[run_type] = None
@@ -205,8 +211,46 @@ class LiquidEngine_:
 
         return kernel_str
     
+
+    def _store_results(self, arg_repr, arg_score, run_type, t2run):
+        """
+        Stores the results of a run
+        """
+
+        # Check if the run type has been run, and if not create empty info
+        run_type_benchs = self._benchmarks[run_type]
+        if arg_repr not in run_type_benchs:
+            # [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+            run_type_benchs[arg_repr] = [0, 0, arg_score, [], []]
+
+        # Get the run info
+        c = run_type_benchs[arg_repr]
+        # timestamp
+        ct = datetime.datetime.now()
+
+        # if run failed, t2run is np.inf
+        if np.isinf(t2run):
+            c[4].append(ct)
+        else:
+            # add the time it took to run, later used for average
+            c[0] = c[0] + t2run
+            # add the time it took to run squared, later used for standard deviation
+            c[1] = c[1] + t2run * t2run
+            # increment the number of times it was run
+            c[3].append(ct)
+
+        # Check if the norm if consistent
+        assert c[2] == arg_score, "Inconsistent arg score"
+
+        self._dump_run_times()
+
+    def _dump_run_times(self,):
+        """We might need to wrap this into a multiprocessing.Queue if we find it blocking"""
+        with open(self._benchmark_filepath, "w") as f:
+            yaml.dump(self._benchmarks, f)
     
-     #####################################################
+    
+    #####################################################
     #                   RUN METHODS                     #
     # THESE SHOULD ALWAYS BE OVERRIDEN BY CHILD CLASSES #
     #####################################################
