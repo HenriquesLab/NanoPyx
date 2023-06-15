@@ -49,8 +49,7 @@ class Workflow:
             for idx, arg in enumerate(args):
                 if isinstance(arg, str):
                     if "RETURN_VALUE" in arg:
-                        args[idx] = self.returns[arg.split("_RETURN_VALUE")[0]] # interpolations return a 3d array even when input is 2d?
-
+                        args[idx] = self.returns[arg.split("_RETURN_VALUE")[0]] 
             for key in kwargs:
                 if isinstance(kwargs[key], str):
                     if "RETURN_VALUE" in kwargs[key]:
