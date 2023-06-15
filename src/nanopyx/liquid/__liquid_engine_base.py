@@ -49,7 +49,7 @@ class LiquidEngine_:
                 (...)
         """
 
-         # Start by checking available run types
+        # Start by checking available run types
         self._run_types = {}
         if opencl_ and opencl_works():
             for d in devices:
@@ -90,7 +90,7 @@ class LiquidEngine_:
         else:
             self._benchmarks = {}
 
-        # check if the cfg dictionary has a key for every run type
+        # check if the cfg dictionary has a key for every available run type
         for run_type_designation in self._run_types.keys():
             if run_type_designation not in self._benchmarks:
                 self._benchmarks[run_type_designation] = {}
