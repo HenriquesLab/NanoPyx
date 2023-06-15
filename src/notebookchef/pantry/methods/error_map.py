@@ -22,7 +22,7 @@ def run_error(b):
     plt.imshow(errormap)
     plt.axis("off")
     plt.show()
-    
+
 gui_error.add_button("run", description="Calculate")
 gui_error["run"].on_click(run_error)
 gui_error.show()
