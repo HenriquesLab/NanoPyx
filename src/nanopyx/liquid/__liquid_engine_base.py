@@ -100,7 +100,6 @@ class LiquidEngine_:
         # helper attribute for benchmarking function
         self._last_time = None
 
-
     def _run(self, *args, run_type:str, **kwargs):
         """
         Runs the function with the given args and kwargs
@@ -139,7 +138,6 @@ class LiquidEngine_:
 
         return result
     
-
     def benchmark(self,*args, **kwargs):
         """
         1. Run each available run type and record the run time and return value
