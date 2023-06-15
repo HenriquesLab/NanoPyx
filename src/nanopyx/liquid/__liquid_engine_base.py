@@ -210,7 +210,6 @@ class LiquidEngine_:
             kernel_str = kernel_str.replace("double", "float")
 
         return kernel_str
-    
 
     def _store_results(self, arg_repr, arg_score, run_type, t2run):
         """
@@ -249,7 +248,44 @@ class LiquidEngine_:
         with open(self._benchmark_filepath, "w") as f:
             yaml.dump(self._benchmarks, f)
     
-    
+    def _get_args_repr_score(self, *args, **kwargs):
+        """
+        Get a string representation of the args and kwargs and corresponding 'score' / 'norm'
+        The idea is that similar args have closer 'score'. Fuzzy logic
+
+        The code does the following:
+        1. It converts any args that are floats or ints to "number()" strings, and any args that are tensors to "shape()" strings
+        2. It converts any kwargs that are floats or ints to "number()" strings, and any kwargs that are tensors to "shape()" strings
+        3. The 'score' is given by the product of all the floats or ints and all the shape sizes. 
+
+        :return: the string representation of the args and kwargs
+        :rtype: str
+        """
+        _norm = 1
+        _args = []
+        for arg in args:
+            if type(arg) in (float, int):
+                _args.append(f"number({arg})")
+                _norm *= arg
+            elif hasattr(arg, "shape"):
+                _args.append(f"shape{arg.shape}")
+                _norm *= arg.size
+            else:
+                _args.append(arg)
+
+        _kwargs = {}
+        for k, v in kwargs.items():
+            if type(v) in (float, int):
+                _kwargs[k] = f"number({v})"
+                _norm *= arg
+            if hasattr(v, "shape"):
+                _kwargs[k] = f"shape{arg.shape}"
+                _norm *= arg.size
+            else:
+                _kwargs[k] = v
+
+        return repr((_args, _kwargs)), _norm
+
     #####################################################
     #                   RUN METHODS                     #
     # THESE SHOULD ALWAYS BE OVERRIDEN BY CHILD CLASSES #
