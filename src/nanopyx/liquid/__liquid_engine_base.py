@@ -43,9 +43,9 @@ class LiquidEngine_:
             BENCHMARK DICT FOR A SPECIFIC METHOD
                 |- RUN_TYPE #1
                 |      |- ARGS_REPR #1
-                |      |      |- [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+                |      |      |- [score, t2run#1, t2run#2, t2run#3, ...] last are newer. nan means fail
                 |      |- ARGS_REPR #2  
-                |      |      |- [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
+                |      |      |- [score, t2run#1, t2run#2, t2run#3, ...] last are newer. nan means fail
                 |      (...)
                 |- RUN_TYPE #2 
                 (...)
@@ -217,27 +217,18 @@ class LiquidEngine_:
         # Check if the run type has been run, and if not create empty info
         run_type_benchs = self._benchmarks[run_type]
         if arg_repr not in run_type_benchs:
-            # [sum, sum_squared, arg_norm, [success timestamps], [fail timestamps]]
-            run_type_benchs[arg_repr] = [0, 0, arg_score, [], []]
+            run_type_benchs[arg_repr] = [arg_score]
 
         # Get the run info
         c = run_type_benchs[arg_repr]
-        # timestamp
-        ct = datetime.datetime.now()
+
+        assert c[0] == arg_score, "arg_score mismatch"
 
         # if run failed, t2run is np.inf
         if np.isinf(t2run):
-            c[4].append(ct)
+            c.append(np.nan)
         else:
-            # add the time it took to run, later used for average
-            c[0] = c[0] + t2run
-            # add the time it took to run squared, later used for standard deviation
-            c[1] = c[1] + t2run * t2run
-            # increment the number of times it was run
-            c[3].append(ct)
-
-        # Check if the norm if consistent
-        assert c[2] == arg_score, "Inconsistent arg score"
+            c.append(t2run)
 
         self._dump_run_times()
 
