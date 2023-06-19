@@ -27,6 +27,7 @@ from ._le_interpolation_lanczos import ShiftScaleRotate as LZShiftScaleRotate
 from ._le_interpolation_nearest_neighbor import ShiftAndMagnify as NNShiftAndMagnify
 from ._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScaleRotate
 from ._le_mandelbrot_benchmark import MandelbrotBenchmark
+from ._le_radiality import Radiality
 
 from multiprocessing import current_process
 
