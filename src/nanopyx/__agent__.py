@@ -68,8 +68,9 @@ class Agent_:
                         best_score = score
                         best_repr_args = repr_args_
                 # What happens if there are no benchmarks for this runtype?
-                # Make it slow 
+                # Make it slow TODO
                 if best_repr_args is None:
+                    print(f"run_type {run_type} has no benchmarks for the given args and kwargs.")
                     run_info = np.inf 
                 else:
                     run_info = fn._benchmarks[run_type][best_repr_args][1:]
