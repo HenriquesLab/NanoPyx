@@ -1,4 +1,8 @@
 import platform
+import random
+
+import numpy as np
+
 
 from .__njit__ import njit_works
 from .__opencl__ import opencl_works, devices
@@ -75,17 +79,23 @@ class Agent_:
             avg_speed[run_type] = np.nanmean(run_info)
             std_speed[run_type] = np.nanstd(run_info)
 
-        # Get the keys of dict speed ordered by their values from lowest to highest
-        return sorted(avg_speed, key=speed.get)    
+        return avg_speed, std_speed
     
 
-    def get_run_type(self, fn, args, kwargs):
+    def get_run_type(self, fn, args, kwargs, mode='fastest'):
         """
         Returns the best run_type for the given args and kwargs
         """
 
         # Start easy
 
-        run_types = self._get_ordered_run_types(fn, args, kwargs)
-        
-        return run_types[0]
+        avg, std = self._get_ordered_run_types(fn, args, kwargs)
+
+        sorted_fastest = sorted(avg, key=avg.get)
+
+        # no match case in python >=3.9 so elifs it is
+        if mode == 'fastest':
+            return sorted_fastest[0]
+        elif mode == 'dynamic':
+            weights = [(1/avg[k])**2 for k in speed]
+            return random.choices(list(speed.keys()), weights=weights, k=1)[0]
