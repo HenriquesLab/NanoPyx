@@ -36,16 +36,16 @@ class Radiality(LiquidEngine):
 
     
     @timeit2
-    def run(self, image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
+    def run(self, image, image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
         image = check_image(image)
-        return self._run(image, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting, run_type=run_type)
+        return self._run(image, image_interp, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting, run_type=run_type)
     
-    def benchmark(self, image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True): 
+    def benchmark(self, image, image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True): 
         image = check_image(image)
-        return super().benchmark(image, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting)
+        return super().benchmark(image, image_interp, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting)
     
      # tag-start: _le_radiality.Radiality._run_unthreaded
-    def _run_unthreaded(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+    def _run_unthreaded(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
 
         cdef int _magnification = magnification
         cdef int _border = border
@@ -65,8 +65,8 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        crsm = CRShiftAndMagnify()
-        cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
+        #crsm = CRShiftAndMagnify()
+        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
@@ -87,7 +87,7 @@ class Radiality(LiquidEngine):
         # tag-end
 
     # tag-copy:  _le_radiality.Radiality._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range((1 + _border) * _magnification, (h - 1 - _border) * _magnification)", "prange((1 + _border) * _magnification, (h - 1 - _border) * _magnification)")
-    def _run_threaded(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+    def _run_threaded(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
 
         cdef int _magnification = magnification
         cdef int _border = border
@@ -107,8 +107,8 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        crsm = CRShiftAndMagnify()
-        cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
+        #crsm = CRShiftAndMagnify()
+        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
@@ -130,7 +130,7 @@ class Radiality(LiquidEngine):
 
 
         #TODO: fix tag2tag, it couldnt replace by a prange(start,end,schedule)
-    def _run_threaded_static(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+    def _run_threaded_static(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
 
         cdef int _magnification = magnification
         cdef int _border = border
@@ -150,8 +150,8 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        crsm = CRShiftAndMagnify()
-        cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
+        #crsm = CRShiftAndMagnify()
+        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
@@ -170,7 +170,7 @@ class Radiality(LiquidEngine):
 
         return imRad
 
-    def _run_threaded_dynamic(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+    def _run_threaded_dynamic(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
 
         cdef int _magnification = magnification
         cdef int _border = border
@@ -190,8 +190,8 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        crsm = CRShiftAndMagnify()
-        cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
+        #crsm = CRShiftAndMagnify()
+        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
@@ -210,7 +210,7 @@ class Radiality(LiquidEngine):
 
         return imRad
 
-    def _run_threaded_guided(self, float[:,:,:] image, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+    def _run_threaded_guided(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
 
         cdef int _magnification = magnification
         cdef int _border = border
@@ -230,8 +230,8 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        crsm = CRShiftAndMagnify()
-        cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
+        #crsm = CRShiftAndMagnify()
+        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
