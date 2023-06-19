@@ -1,4 +1,4 @@
-from .. import Agent
+from ..__agent__ import Agent
 
 class Workflow:
     
@@ -15,7 +15,7 @@ class Workflow:
         self._return_values = []
 
         for arg in args:
-            if isinstance(arg, tuple) and len(item) == 3:
+            if isinstance(arg, tuple) and len(arg) == 3:
                 self._methods.append((arg[0](), arg[1], arg[2])) # Note the parenthesis! We want to instantiate the class here!
             else:
                 raise TypeError("Each arg must be a tuple of 3 items (fn, args, kwargs)")
@@ -27,18 +27,26 @@ class Workflow:
 
         for method in self._methods:
             fn, args, kwargs = method
+
             # in the list args, substitute 'PREV_RETURN_VALUE' with the return value of the previous method
-            args = [arg if arg != 'PREV_RETURN_VALUE' else self._return_values[-1] for arg in args]
+            sane_args = []
+            for arg in args:
+                if isinstance(arg, str) and arg == 'PREV_RETURN_VALUE':
+                    sane_args.append(self._return_values[-1])
+                else:
+                    sane_args.append(arg)
+
             # in the dict kwargs, substitute 'PREV_RETURN_VALUE' with the return value of the previous method
-            kwargs = {key: value if value != 'PREV_RETURN_VALUE' else self._return_values[-1] for key, value in kwargs.items()}
-            
+            for key, value in kwargs.items():
+                if isinstance(value, str) and value == 'PREV_RETURN_VALUE':
+                    kwargs[key] = self._return_values[-1]
+
             # Get run type from the Agent
-            run_type = Agent.get_run_type(fn, args, kwargs)
+            run_type = Agent.get_run_type(fn, sane_args, kwargs)
             kwargs['run_type'] = run_type
 
             # TODO maybe we need to warn the agent its running and when it finishes
-
-            return_value = fn().run(*args, **kwargs)
+            return_value = fn.run(*sane_args, **kwargs)
             self._return_values.append(return_value)
 
         return self._return_values[-1]
