@@ -4,9 +4,8 @@ import random
 import numpy as np
 
 
-from .__njit__ import njit_works
-from .__opencl__ import opencl_works, devices
-
+from .liquid.__njit__ import njit_works
+from .liquid.__opencl__ import opencl_works, devices
 
 class Agent_:
 
@@ -50,8 +49,7 @@ class Agent_:
         """
 
         # str representation of the arguments and their corresponding 'norm'
-        repr_args, repr_norm = fn._get_args_repr_norm(*args, **kwargs)
-
+        repr_args, repr_norm = fn._get_args_repr_score(*args, **kwargs)
         # dictionary to hold speeds
         avg_speed = {}
         std_speed = {}
@@ -65,13 +63,13 @@ class Agent_:
                 best_score = np.inf
                 best_repr_args = None
                 for repr_args_ in fn._benchmarks[run_type]:
-                    score = np.abs(fn.benchmarks[run_type][repr_args_][0] - repr_norm)
+                    score = np.abs(fn._benchmarks[run_type][repr_args_][0] - repr_norm)
                     if score < best_score:
                         best_score = score
                         best_repr_args = repr_args_
                 # What happens if there are no benchmarks for this runtype?
                 # Make it slow 
-                if repr_args is None:
+                if best_repr_args is None:
                     run_info = np.inf 
                 else:
                     run_info = fn._benchmarks[run_type][best_repr_args][1:]
@@ -82,7 +80,7 @@ class Agent_:
         return avg_speed, std_speed
     
 
-    def get_run_type(self, fn, args, kwargs, mode='fastest'):
+    def get_run_type(self, fn, args, kwargs, mode='dynamic'):
         """
         Returns the best run_type for the given args and kwargs
         """
@@ -97,5 +95,11 @@ class Agent_:
         if mode == 'fastest':
             return sorted_fastest[0]
         elif mode == 'dynamic':
-            weights = [(1/avg[k])**2 for k in speed]
-            return random.choices(list(speed.keys()), weights=weights, k=1)[0]
+            weights = [(1/avg[k])**2 for k in avg]
+            if sum(weights) == 0:
+                weights = [1 for k in avg]
+            return random.choices(list(avg.keys()), weights=weights, k=1)[0]
+        else:
+            return sorted_fastest[0]
+
+Agent = Agent_()
