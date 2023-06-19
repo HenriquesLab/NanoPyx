@@ -14,6 +14,4 @@ __config_folder__ = os.path.join(__home_folder__, ".nanopyx")
 if not os.path.exists(__config_folder__):
     os.makedirs(__config_folder__)
 
-from .liquid.__agent__ import Agent_  # noqa: E402
-
-Agent = Agent_()
+from .__agent__ import Agent  # noqa: E402
