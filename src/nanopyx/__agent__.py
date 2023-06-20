@@ -2,7 +2,9 @@ import platform
 import random
 
 import numpy as np
+from hmmlearn import hmm
 from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import LabelEncoder
 
 from .liquid.__njit__ import njit_works
 from .liquid.__opencl__ import opencl_works, devices
@@ -84,9 +86,12 @@ class Agent_:
     
     def _calculate_prob_of_delay(self, runtimes_history, avg, std):
         delays = runtimes_history > avg+2*std
-        model = LogisticRegression()
-        model.fit([[state] for state in delays[:-1]], delays[1:])
-        return model.predict_proba([[True]])[0][model.classes_.tolist().index(True)]
+        label_encoder = LabelEncoder()
+        integer_delays = label_encoder.fit_transform(delays)
+        delay_state_index = label_encoder.transform(True)[0]
+        model = hmm.CategoricalHMM(n_components=2)
+        model.fit(np.array(integer_delays).reshape(-1, 1))
+        return model.predict_proba([[True]])[:, delay_state_index]
 
     def _check_delay(self, run_type, runtime, runtimes_history):
         avg = np.nanmean(runtimes_history)
