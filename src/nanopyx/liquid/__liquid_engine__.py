@@ -28,7 +28,7 @@ class LiquidEngine:
                  opencl_:bool = False, unthreaded_:bool = False,
                  threaded_:bool = False, threaded_static_:bool = False,
                  threaded_dynamic_:bool = False, threaded_guided_:bool = False,
-                 python_:bool=False, njit_:bool=False, clear_benchmarks:bool=False, dynamic_runtypes:bool=True) -> None:
+                 python_:bool=False, njit_:bool=False, clear_benchmarks:bool=False) -> None:
         """
         Initialize the Liquid Engine
         The Liquid Engine base class is inherited by children classes that implement specific methods

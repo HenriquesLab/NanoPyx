@@ -30,9 +30,9 @@ class ShiftAndMagnify(LiquidEngine):
     Shift and Magnify using the NanoPyx Liquid Engine
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False, dynamic_runtypes=True):
+    def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "ShiftMagnify_NN"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, dynamic_runtypes=dynamic_runtypes,
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, python_=True, njit_=True)
 
@@ -288,9 +288,9 @@ class ShiftScaleRotate(LiquidEngine):
     Shift, Scale and Rotate (affine transform) using the NanoPyx Liquid Engine
     """
     
-    def __init__(self, clear_benchmarks=False, testing=False, dynamic_runtypes=True):
+    def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "ShiftScaleRotate_NN"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, dynamic_runtypes=dynamic_runtypes,
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, python_=True, njit_=True)
                         

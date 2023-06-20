@@ -28,9 +28,9 @@ class Radiality(LiquidEngine):
     Radial gradient convergence using the NanoPyx Liquid Engine
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False, dynamic_runtypes=True):
+    def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "Radiality"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, dynamic_runtypes=dynamic_runtypes,
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
                         unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True)
 
