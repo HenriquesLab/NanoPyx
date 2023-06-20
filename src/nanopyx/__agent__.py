@@ -38,7 +38,6 @@ class Agent_:
         self.cuda_info = {'CUDA':'TBD'}
         ### MACHINE INFO ###
 
-
         self._current_runs = []
         self._scheduled_runs = []
         self._finished_runs = []
