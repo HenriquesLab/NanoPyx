@@ -2,7 +2,7 @@ import platform
 import random
 
 import numpy as np
-
+from sklearn.linear_model import LogisticRegression
 
 from .liquid.__njit__ import njit_works
 from .liquid.__opencl__ import opencl_works, devices
@@ -25,6 +25,7 @@ class Agent_:
             2. Store the current state of ALL initialized LE objects (e.g. anything that is currently running, anything that is scheduled to run,
                 runs previously executed in the current session etc.);
             3. Whenever a LE object wants to run, it must query the Agent on what is the best implementation for it;
+            4. Tests whether there was an unexpected delay and adjust following paths based on it;
         """
 
         ### MACHINE INFO ###
@@ -41,6 +42,8 @@ class Agent_:
         self._current_runs = []
         self._scheduled_runs = []
         self._finished_runs = []
+        
+        self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
 
     def _get_ordered_run_types(self, fn, args, kwargs):
         """
@@ -79,6 +82,27 @@ class Agent_:
 
         return avg_speed, std_speed
     
+    def _calculate_prob_of_delay(self, runtimes_history, avg, std):
+        delays = runtimes_history > avg+2*std
+        model = LogisticRegression()
+        model.fit([[state] for state in delays[:-1]], delays[1:])
+        return model.predict_proba([[True]])[0][model.classes_.tolist().index(True)]
+
+    def _check_delay(self, run_type, runtime, runtimes_history):
+        avg = np.nanmean(runtimes_history)
+        std = np.nanstd(runtimes_history)
+        if runtime > avg + 2*std:
+            self._store_delay(run_type,
+                              delay_factor=runtime/avg,
+                              prob=self._calculate_prob_of_delay(runtimes_history, avg, std))
+    
+    def _store_delay(self, run_type, delay_factor=1, prob=0):
+        self.delayed_runtypes[run_type] = (delay_factor, prob)  # TODO change to average values of same delay
+        
+    def _adjust_times(self, device_times):
+        for runtype in self.delayed_runtypes.keys():
+            delay_factor, delay_prob = self.delayed_runtypes[runtype]
+            device_times[runtype] = device_times[runtype] * (1 - delay_prob) + device_times[runtype] * delay_factor * delay_prob
 
     def get_run_type(self, fn, args, kwargs, mode='dynamic'):
         """
@@ -88,6 +112,9 @@ class Agent_:
         # Start easy
 
         avg, std = self._get_ordered_run_types(fn, args, kwargs)
+        
+        if len(self.delayed_runtypes.keys()) > 0:
+            self._adjust_times(avg)
 
         sorted_fastest = sorted(avg, key=avg.get)
 
