@@ -47,6 +47,12 @@ class Agent_:
         
         self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
 
+    def _gaussian_weighted_std(self, run_info):
+        return np.nanstd(run_info)
+
+    def _gaussian_weighted_average(self, run_info):
+        return np.nanmean(run_info)
+
     def _get_ordered_run_types(self, fn, args, kwargs):
         """
         Retrieves an ordered list of run_types for the given args and kwargs
@@ -79,19 +85,16 @@ class Agent_:
                 else:
                     run_info = fn._benchmarks[run_type][best_repr_args][1:]
             
-            avg_speed[run_type] = np.nanmean(run_info)
-            std_speed[run_type] = np.nanstd(run_info)
+            avg_speed[run_type] = self._gaussian_weighted_average(run_info)
+            std_speed[run_type] = self._gaussian_weighted_std(run_info)
 
         return avg_speed, std_speed
     
     def _calculate_prob_of_delay(self, runtimes_history, avg, std):
         delays = runtimes_history > avg+2*std
-        label_encoder = LabelEncoder()
-        integer_delays = label_encoder.fit_transform(delays)
-        delay_state_index = label_encoder.transform(True)[0]
-        model = hmm.CategoricalHMM(n_components=2)
-        model.fit(np.array(integer_delays).reshape(-1, 1))
-        return model.predict_proba([[True]])[:, delay_state_index]
+        model = LogisticRegression()
+        model.fit([[state] for state in delays[:-1]], delays[1:])
+        return model.predict_proba([[True]])[0][model.classes_.tolist().index([True])]
 
     def _check_delay(self, run_type, runtime, runtimes_history):
         avg = np.nanmean(runtimes_history)
