@@ -142,6 +142,7 @@ class Agent_:
         avg = np.nanmean(runtimes_history) # standard average as opposed to weighted as a weighted average would throw false negatives if delays happen consecutively
         std = np.nanstd(runtimes_history)
         if runtime > avg + 2*std:
+            runtimes_history.append(runtime)
             delay_factor = runtime / avg
             delay_prob = self._calculate_prob_of_delay(runtimes_history, avg, std)
             self.delayed_runtypes[run_type] = (delay_factor, delay_prob)
