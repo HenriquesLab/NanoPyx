@@ -38,10 +38,12 @@ class Radiality(LiquidEngine):
     @timeit2
     def run(self, image, image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
         image = check_image(image)
+        image_interp = check_image(image_interp)
         return self._run(image, image_interp, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting, run_type=run_type)
     
     def benchmark(self, image, image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True): 
         image = check_image(image)
+        image_interp = check_image(image_interp)
         return super().benchmark(image, image_interp, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting)
     
      # tag-start: _le_radiality.Radiality._run_unthreaded
@@ -65,8 +67,6 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        #crsm = CRShiftAndMagnify()
-        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
@@ -106,9 +106,6 @@ class Radiality(LiquidEngine):
         cdef int nFrames = image.shape[0]
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
-
-        #crsm = CRShiftAndMagnify()
-        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
@@ -149,9 +146,6 @@ class Radiality(LiquidEngine):
         cdef int nFrames = image.shape[0]
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
-
-        #crsm = CRShiftAndMagnify()
-        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
@@ -190,9 +184,6 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        #crsm = CRShiftAndMagnify()
-        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
-        
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
         cdef float [:,:,:] imRad = np.zeros((nFrames, h*magnification, w*magnification), dtype=np.float32)
@@ -229,9 +220,6 @@ class Radiality(LiquidEngine):
         cdef int nFrames = image.shape[0]
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
-
-        #crsm = CRShiftAndMagnify()
-        #cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification)
         
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
