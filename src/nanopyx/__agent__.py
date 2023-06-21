@@ -62,7 +62,7 @@ class Agent_:
         :rtype: Tuple[float, float]
         """
         a, b = -3, 0  # Gaussian distribution truncation limits
-        mu, sigma = 0, 1  # Mean and standard deviation
+        mu, sigma = 0, 1  # Mean and standard deviation TODO: update sigma to reflect choice of either timestamps vs run_info
         
         data = np.array(run_info)
         data = data[data.shape[0]-n_points:]
@@ -135,7 +135,7 @@ class Agent_:
             1. Calculates a probability that this delay is maintained
             2. Stores the delay factor and the probability
         """
-        avg = np.nanmean(runtimes_history)
+        avg = np.nanmean(runtimes_history) # standard average as opposed to weighted as a weighted average would throw false negatives if delays happen consecutively
         std = np.nanstd(runtimes_history)
         if runtime > avg + 2*std:
             delay_factor = runtime / avg
