@@ -5,7 +5,7 @@ import numpy as np
 from hmmlearn import hmm
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
-from scipy.stats import truncnorm
+from scipy.stats import norm
 
 from .liquid.__njit__ import njit_works
 from .liquid.__opencl__ import opencl_works, devices
@@ -48,7 +48,7 @@ class Agent_:
         
         self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
 
-    def _gaussian_weighted_average_std(self, run_info, n_points=200):
+    def _gaussian_weighted_average_std(self, run_info, n_points=200, sigma=20):
         """
         Calculates the weighted average and standard deviation of the last n_points from the run_info array.
         
@@ -61,15 +61,19 @@ class Agent_:
         :return: A tuple containing the weighted average and standard deviation of the last n_points.
         :rtype: Tuple[float, float]
         """
-        a, b = -3, 0  # Gaussian distribution truncation limits
-        mu, sigma = 0, 1  # Mean and standard deviation TODO: update sigma to reflect choice of either timestamps vs run_info
+        # TODO: update sigma to reflect choice of either timestamps vs n_points
         
         data = np.array(run_info)
-        data = data[data.shape[0]-n_points:]
+        # remove nan values TODO: give a penalty to nan aka crash instead of ignoring
+        data = data[np.isfinite(data)]
+        if data.shape[0] < n_points:
+            n_points = data.shape[0]
+        lower_limit = data.shape[0] - n_points
+        data = data[lower_limit:]
         
         # create trucnated normal distribution
-        rv = truncnorm(a=(a-mu)/sigma, b=(b-mu)/sigma, loc=mu, scale=sigma)
-        weights = rv.rvs(size=n_points)  # generate sample points from the distribution -> to be used as average weights
+        x = np.linspace(0, n_points+1, 200)
+        weights = norm(x, loc=mu, scale=sigma)
         weights = np.abs(weights)  # take absolute value
         weights /= np.sum(weights)  # normalize to sum 1
         
