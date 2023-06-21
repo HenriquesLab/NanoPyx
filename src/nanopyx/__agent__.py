@@ -67,7 +67,7 @@ class Agent_:
         data = np.array(run_info)
         data = data[data.shape[0]-n_points:]
         
-        # create trucnated normal distirbution
+        # create trucnated normal distribution
         rv = truncnorm(a=(a-mu)/sigma, b=(b-mu)/sigma, loc=mu, scale=sigma)
         weights = rv.rvs(size=n_points)  # generate sample points from the distribution -> to be used as average weights
         weights = np.abs(weights)  # take absolute value
