@@ -5,6 +5,7 @@ import numpy as np
 from hmmlearn import hmm
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
+from scipy.stats import truncnorm
 
 from .liquid.__njit__ import njit_works
 from .liquid.__opencl__ import opencl_works, devices
@@ -47,11 +48,37 @@ class Agent_:
         
         self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
 
-    def _gaussian_weighted_std(self, run_info):
-        return np.nanstd(run_info)
-
-    def _gaussian_weighted_average(self, run_info):
-        return np.nanmean(run_info)
+    def _gaussian_weighted_average_std(self, run_info, n_points=200):
+        """
+        Calculates the weighted average and standard deviation of the last n_points from the run_info array.
+        
+        :param run_info: The array of data to calculate the weighted average and standard deviation.
+        :type run_info: numpy.ndarray
+        
+        :param n_points: The number of points to use in the calculation. Defaults to 200.
+        :type n_points: int
+        
+        :return: A tuple containing the weighted average and standard deviation of the last n_points.
+        :rtype: Tuple[float, float]
+        """
+        a, b = -3, 0  # Gaussian distribution truncation limits
+        mu, sigma = 0, 1  # Mean and standard deviation
+        
+        data = np.array(run_info)
+        data = data[data.shape[0]-n_points:]
+        
+        # create trucnated normal distirbution
+        rv = truncnorm(a=(a-mu)/sigma, b=(b-mu)/sigma, loc=mu, scale=sigma)
+        weights = rv.rvs(size=n_points)  # generate sample points from the distribution -> to be used as average weights
+        weights = np.abs(weights)  # take absolute value
+        weights /= np.sum(weights)  # normalize to sum 1
+        
+        # calculate weighted average
+        weighted_average = np.sum(data * weights)
+        weighted_std = np.sqrt(np.sum(weights * (data - weighted_average)**2))
+        
+        # return weighted_average, weighted_std # TODO test and uncomment
+        return np.nanmean(run_info), np.nanstd(run_info)
 
     def _get_ordered_run_types(self, fn, args, kwargs):
         """
@@ -85,8 +112,7 @@ class Agent_:
                 else:
                     run_info = fn._benchmarks[run_type][best_repr_args][1:]
             
-            avg_speed[run_type] = self._gaussian_weighted_average(run_info)
-            std_speed[run_type] = self._gaussian_weighted_std(run_info)
+            avg_speed[run_type], std_speed[run_type] = self._gaussian_weighted_average_std(run_info)
 
         return avg_speed, std_speed
     
