@@ -49,7 +49,7 @@ class Workflow:
             return_value = fn.run(*sane_args, **kwargs)
             self._return_values.append(return_value)
 
-            Agent._inform(fn, sane_args, kwargs, run_type)
+            Agent._inform(fn)
 
         return self._return_values[-1]
     
