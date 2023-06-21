@@ -128,7 +128,7 @@ class Agent_:
 
         return device_times
 
-    def get_run_type(self, fn, args, kwargs, mode='dynamic'):
+    def get_run_type(self, fn, args, kwargs, mode='fastest'):
         """
         Returns the best run_type for the given args and kwargs
         """
@@ -156,13 +156,17 @@ class Agent_:
         else:
             return sorted_fastest[0]   
 
-    def _inform(self, fn, args, kwargs, run_type):
+    def _inform(self, fn):
         """
         Informs the Agent that a LE object finished running
         """
 
-        repr_args, repr_norm = fn._get_args_repr_score(*args, **kwargs)
+        repr_args = fn._last_args
+        run_type = fn._last_runtype
+        
         historical_data = fn._benchmarks[run_type][repr_args][1:]
+        
+        assert historical_data[-1] == fn._last_time, "Historical data is not consistent with the last runtime"
 
         self._check_delay(run_type, historical_data[-1], historical_data[:-1])
 
