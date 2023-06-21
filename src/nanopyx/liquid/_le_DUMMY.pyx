@@ -3,8 +3,9 @@
 import numpy as np
 cimport numpy as np
 
+from time import sleep
+
 from libc.math cimport cos, sin
-from libc.stdlib cimport usleep
 
 from .__liquid_engine__ import LiquidEngine
 from .__opencl__ import cl, cl_array
@@ -33,61 +34,61 @@ class DUMMY(LiquidEngine):
 
     def _run_opencl(self, dict device):
         # 5 seconds
-        msec = 5000000
-        if delay=="OpenCL":
-            usleep(msec*delay_amount)
+        msec = 5
+        if self._delay=="OpenCL":
+            sleep(msec*self._delay_amount)
         else:
-            usleep(msec)
+            sleep(msec)
 
         return None
 
     def _run_unthreaded(self,):
         # 20 seconds
-        msec = 20000000
-        if delay=="Unthreaded":
-            usleep(msec*delay_amount)
+        msec = 20
+        if self._delay=="Unthreaded":
+            sleep(msec*self._delay_amount)
         else:
-            usleep(msec)
+            sleep(msec)
 
         return None
 
     def _run_threaded(self,):
         # 10 seconds
-        msec = 10000000
-        if delay=="Threaded":
-            usleep(msec*delay_amount)
+        msec = 10
+        if self._delay=="Threaded":
+            sleep(msec*self._delay_amount)
         else:
-            usleep(msec)
+            sleep(msec)
 
         return None
 
     def _run_threaded_static(self,):
         # 10 seconds
-        msec = 10000000
-        if delay=="Threaded_static":
-            usleep(msec*delay_amount)
+        msec = 10
+        if self._delay=="Threaded_static":
+            sleep(msec*self._delay_amount)
         else:
-            usleep(msec)
+            sleep(msec)
 
         return None
 
     def _run_threaded_dynamic(self,):
         # 10 seconds
-        msec = 10000000
-        if delay=="Threaded_dynamic":
-            usleep(msec*delay_amount)
+        msec = 10
+        if self._delay=="Threaded_dynamic":
+            sleep(msec*self._delay_amount)
         else:
-            usleep(msec)
+            sleep(msec)
 
         return None
 
     def _run_threaded_guided(self,):
         # 10 seconds
-        msec = 10000000
-        if delay=="Threaded_guided":
-            usleep(msec*delay_amount)
+        msec = 10
+        if self._delay=="Threaded_guided":
+            sleep(msec*self._delay_amount)
         else:
-            usleep(msec)
+            sleep(msec)
 
         return None
   
