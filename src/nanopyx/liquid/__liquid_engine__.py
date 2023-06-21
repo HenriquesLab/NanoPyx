@@ -99,6 +99,8 @@ class LiquidEngine:
                 self._benchmarks[run_type_designation] = {}
         
         # helper attribute for benchmarking function
+        self._last_args = None
+        self._last_runtype = None
         self._last_time = None
 
     def _run(self, *args, run_type:str, **kwargs):
@@ -133,9 +135,12 @@ class LiquidEngine:
             result = None
             t2run = np.inf
 
-        self._last_time = t2run
         arg_repr, arg_score = self._get_args_repr_score(*args, **kwargs)
         self._store_results(arg_repr, arg_score, run_type, t2run)
+
+        self._last_time = t2run
+        self._last_args = arg_repr
+        self._last_runtype = run_type
 
         return result
     
