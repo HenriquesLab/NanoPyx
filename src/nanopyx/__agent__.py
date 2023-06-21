@@ -139,22 +139,28 @@ class Agent_:
             1. Calculates a probability that this delay is maintained
             2. Stores the delay factor and the probability
         """
+        threaded_runtypes = ["Threaded", "Threaded_static", "Threaded_dynamic", "Threaded_guided"]
         avg = np.nanmean(runtimes_history) # standard average as opposed to weighted as a weighted average would throw false negatives if delays happen consecutively
         std = np.nanstd(runtimes_history)
         if runtime > avg + 2*std:
             delay_factor = runtime / avg
             delay_prob = self._calculate_prob_of_delay(runtimes_history, avg, std)
-            self.delayed_runtypes[run_type] = (delay_factor, delay_prob)
+            if "Threaded" in run_type:
+                for threaded_run_type in threaded_runtypes:
+                    self.delayed_runtypes[threaded_run_type] = (delay_factor, delay_prob)
+            else:
+                self.delayed_runtypes[run_type] = (delay_factor, delay_prob)
     
     def _adjust_times(self, device_times):
         """
         Adjusts the historic avg time of a run_type if it was delayed in previous runs
         """
         for runtype in self.delayed_runtypes.keys():
-            delay_factor, delay_prob = self.delayed_runtypes[runtype]
-            # Weighted avg by the probability the run_type is still delayed
-            # expected_time * P(~delay) + delayed_tiem * P(delay)
-            device_times[runtype] = device_times[runtype] * (1 - delay_prob) + device_times[runtype] * delay_factor * delay_prob
+            if runtype in device_times.keys():
+                delay_factor, delay_prob = self.delayed_runtypes[runtype]
+                # Weighted avg by the probability the run_type is still delayed
+                # expected_time * P(~delay) + delayed_tiem * P(delay)
+                device_times[runtype] = device_times[runtype] * (1 - delay_prob) + device_times[runtype] * delay_factor * delay_prob
 
         return device_times
 
