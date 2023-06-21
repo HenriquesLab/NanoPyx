@@ -19,103 +19,113 @@ on:
           - debug
 
 jobs:
-  build_wheels:
-    runs-on: [self-hosted, deepthought]
-    steps:
-      - name: Setup Ubuntu dependencies
-        run: |
-          DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
-          python3 -m pip install --upgrade pipx
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install Python's for Nox
-        uses: wntrblm/nox@2023.04.22
-        with:
-          python-versions: "3.9, 3.10, 3.11"
-      - name: Run Nox - clear_wheelhouse build_wheel build_sdist
-        run: |
-          pipx run nox --sessions clear_wheelhouse build_wheel build_sdist
-        env:
-          LOG_LEVEL: ${{ github.event.inputs.logLevel }}
-      - name: Save wheels to cache
-        id: cache-wheels-save
-        uses: actions/cache@v3
-        with:
-          path: wheelhouse
-          key: ${{ runner.os }}-wheelhouse
-          restore-keys: |
-            ${{ runner.os }}-wheelhouse
-      - name: Archive Wheels
-        uses: actions/upload-artifact@v3
-        with:
-          name: wheelhouse
-          path: wheelhouse/*.whl
-          retention-days: 15
+  # build_wheels:
+  #   runs-on: [self-hosted, deepthought]
+  #   steps:
+  #     - name: Setup Ubuntu dependencies
+  #       run: |
+  #         DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
+  #         apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
+  #         python3 -m pip install --upgrade pipx
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Install Python's for Nox
+  #       uses: wntrblm/nox@2023.04.22
+  #       with:
+  #         python-versions: "3.9, 3.10, 3.11"
+  #     - name: Run Nox - clear_wheelhouse build_wheel build_sdist
+  #       run: |
+  #         pipx run nox --sessions clear_wheelhouse build_wheel build_sdist
+  #       env:
+  #         LOG_LEVEL: ${{ github.event.inputs.logLevel }}
+  #     - name: Save wheels to cache
+  #       id: cache-wheels-save
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: wheelhouse
+  #         key: ${{ runner.os }}-wheelhouse
+  #         restore-keys: |
+  #           ${{ runner.os }}-wheelhouse
+  #     - name: Archive Wheels
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: wheelhouse
+  #         path: wheelhouse/*.whl
+  #         retention-days: 15
 
-  test_wheels:
-    needs: build_wheels
-    runs-on: [self-hosted, deepthought]
-    steps:
-      - name: Setup Ubuntu dependencies
-        run: |
-          DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
-          python3 -m pip install --upgrade pipx
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Restore cached wheels
-        id: cache-wheels-restore
-        uses: actions/cache/restore@v3
-        with:
-          path: wheelhouse
-          key: ${{ runner.os }}-wheelhouse
-          restore-keys: |
-            ${{ runner.os }}-wheelhouse
-      - name: Install Python's for Nox
-        uses: wntrblm/nox@2023.04.22
-        with:
-          python-versions: "3.9, 3.10, 3.11"
-      - name: Run Nox - test_wheel
-        run: |
-          pipx run nox --sessions test_wheel
-        env:
-          LOG_LEVEL: ${{ github.event.inputs.logLevel }}
+  # test_wheels:
+  #   needs: build_wheels
+  #   runs-on: [self-hosted, deepthought]
+  #   steps:
+  #     - name: Setup Ubuntu dependencies
+  #       run: |
+  #         DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
+  #         apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
+  #         python3 -m pip install --upgrade pipx
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Restore cached wheels
+  #       id: cache-wheels-restore
+  #       uses: actions/cache/restore@v3
+  #       with:
+  #         path: wheelhouse
+  #         key: ${{ runner.os }}-wheelhouse
+  #         restore-keys: |
+  #           ${{ runner.os }}-wheelhouse
+  #     - name: Install Python's for Nox
+  #       uses: wntrblm/nox@2023.04.22
+  #       with:
+  #         python-versions: "3.9, 3.10, 3.11"
+  #     - name: Run Nox - test_wheel
+  #       run: |
+  #         pipx run nox --sessions test_wheel
+  #       env:
+  #         LOG_LEVEL: ${{ github.event.inputs.logLevel }}
 
-  test_pypi:
-    runs-on: [self-hosted, deepthought]
+  # test_pypi:
+  #   runs-on: [self-hosted, deepthought]
+  #   steps:
+  #     - name: Setup Ubuntu dependencies
+  #       run: |
+  #         DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
+  #         apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
+  #         python3 -m pip install --upgrade pipx
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Install Python's for Nox
+  #       uses: wntrblm/nox@2023.04.22
+  #       with:
+  #         python-versions: "3.9, 3.10, 3.11"
+  #     - name: Run Nox - test_pypi
+  #       run: |
+  #         pipx run nox --sessions test_pypi
+  #       env:
+  #         LOG_LEVEL: ${{ github.event.inputs.logLevel }}
+
+  test_on_windows:
+    runs-on: [self-hosted, windows]
     steps:
-      - name: Setup Ubuntu dependencies
-        run: |
-          DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
-          python3 -m pip install --upgrade pipx
       - name: Checkout
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Install Python's for Nox
-        uses: wntrblm/nox@2023.04.22
-        with:
-          python-versions: "3.9, 3.10, 3.11"
-      - name: Run Nox - test_pypi
+      - name: Run Nox Quick-Tests
         run: |
-          pipx run nox --sessions test_pypi
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade nox
+          python -m nox --sessions test_source-3.10 clear_wheelhouse build_wheel build_sdist test_wheel
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
 
   build_doc:
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, windows]
     steps:
-      - name: Setup Ubuntu dependencies
-        run: |
-          DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full
-          python3 -m pip install --upgrade pipx
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -135,7 +145,7 @@ jobs:
     needs: build_doc
     # only run if main branch
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, windows]
     permissions:
       pages: write
       id-token: write
@@ -146,55 +156,50 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v2
 
-  generate_movie:
-    runs-on: [self-hosted, linux]
-    steps:
-      - name: Setup Ubuntu dependencies
-        run: |
-          DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full
-          python3 -m pip install --upgrade pipx
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Install Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-      - name: Generate movie
-        run: |
-          xvfb-run gource --output-custom-log repo-activity.log
-          python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
-          xvfb-run gource --highlight-dirs --highlight-users repo-activity.log -1280x720 --max-user-speed 100 --seconds-per-day 0.1 --auto-skip-seconds 1 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
-      - name: Archive generated movie
-        uses: actions/upload-artifact@v3
-        with:
-          name: gource-movie
-          path: gource.mp4
-          retention-days: 3
+  # generate_movie:
+  #   runs-on: [self-hosted, windows]
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+  #       with:
+  #         fetch-depth: 0
+  #     - name: Install Python
+  #       uses: actions/setup-python@v4
+  #       with:
+  #         python-version: "3.10"
+  #     - name: Generate movie
+  #       run: |
+  #         xvfb-run gource --output-custom-log repo-activity.log
+  #         python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
+  #         xvfb-run gource --highlight-dirs --highlight-users repo-activity.log -1280x720 --max-user-speed 100 --seconds-per-day 0.1 --auto-skip-seconds 1 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
+  #     - name: Archive generated movie
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: gource-movie
+  #         path: gource.mp4
+  #         retention-days: 3
 
-  cleanup_cache:
-    needs: [build_wheels, test_wheels]
-    runs-on: [self-hosted, linux]
-    steps:
-      - name: Cleanup
-        run: |
-          gh extension install actions/gh-actions-cache
+  # cleanup_cache:
+  #   needs: [build_wheels, test_wheels]
+  #   runs-on: [self-hosted, linux]
+  #   steps:
+  #     - name: Cleanup
+  #       run: |
+  #         gh extension install actions/gh-actions-cache
 
-          REPO=${{ github.repository }}
-          BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
+  #         REPO=${{ github.repository }}
+  #         BRANCH="refs/pull/${{ github.event.pull_request.number }}/merge"
 
-          echo "Fetching list of cache key"
-          cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1 )
+  #         echo "Fetching list of cache key"
+  #         cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1 )
 
-          ## Setting this to not fail the workflow while deleting cache keys.
-          set +e
-          echo "Deleting caches..."
-          for cacheKey in $cacheKeysForPR
-          do
-              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
-          done
-          echo "Done"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         ## Setting this to not fail the workflow while deleting cache keys.
+  #         set +e
+  #         echo "Deleting caches..."
+  #         for cacheKey in $cacheKeysForPR
+  #         do
+  #             gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm
+  #         done
+  #         echo "Done"
+  #       env:
+  #         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
