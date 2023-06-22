@@ -33,18 +33,20 @@ class DUMMY(LiquidEngine):
         return super().benchmark()
 
     def _run_opencl(self, dict device):
-        # 5 seconds
-        msec = 5
+        # 2 seconds
+        msec = 2
         if self._delay=="OpenCL":
-            sleep(msec*self._delay_amount)
+            t2run = np.random.normal(msec*self._delay_amount, 0.1*msec*self._delay_amount)
+            sleep(t2run)
         else:
-            sleep(msec)
+            t2run = np.random.normal(msec, 0.1*msec)
+            sleep(t2run)
 
         return None
 
     def _run_unthreaded(self,):
-        # 20 seconds
-        msec = 20
+        # 10 seconds
+        msec = 10
         if self._delay=="Unthreaded":
             sleep(msec*self._delay_amount)
         else:
@@ -53,42 +55,49 @@ class DUMMY(LiquidEngine):
         return None
 
     def _run_threaded(self,):
-        # 10 seconds
-        msec = 10
+        # 5 seconds
+        msec = 5
         if self._delay=="Threaded":
-            sleep(msec*self._delay_amount)
+            t2run = np.random.normal(msec*self._delay_amount, 0.1*msec*self._delay_amount)
+            sleep(t2run)
         else:
-            sleep(msec)
+            t2run = np.random.normal(msec, 0.1*msec)
+            sleep(t2run)
 
         return None
 
     def _run_threaded_static(self,):
-        # 10 seconds
-        msec = 10
+        # 5 seconds
+        msec = 5
         if self._delay=="Threaded_static":
-            sleep(msec*self._delay_amount)
+            t2run = np.random.normal(msec*self._delay_amount, 0.1*msec*self._delay_amount)
+            sleep(t2run)
         else:
-            sleep(msec)
+            t2run = np.random.normal(msec, 0.1*msec)
+            sleep(t2run)
 
         return None
 
     def _run_threaded_dynamic(self,):
-        # 10 seconds
-        msec = 10
+        # 5 seconds
+        msec = 5
         if self._delay=="Threaded_dynamic":
-            sleep(msec*self._delay_amount)
+            t2run = np.random.normal(msec*self._delay_amount, 0.1*msec*self._delay_amount)
+            sleep(t2run)
         else:
-            sleep(msec)
+            t2run = np.random.normal(msec, 0.1*msec)
+            sleep(t2run)
 
         return None
 
     def _run_threaded_guided(self,):
-        # 10 seconds
-        msec = 10
+        # 5 seconds
+        msec = 5
         if self._delay=="Threaded_guided":
-            sleep(msec*self._delay_amount)
+            t2run = np.random.normal(msec*self._delay_amount, 0.1*msec*self._delay_amount)
+            sleep(t2run)
         else:
-            sleep(msec)
+            t2run = np.random.normal(msec, 0.1*msec)
+            sleep(t2run)
 
         return None
-  
