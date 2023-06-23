@@ -73,7 +73,7 @@ class Agent_:
         
         # create trucnated normal distribution
         x = np.linspace(0, n_points+1, 200)
-        weights = norm(x, loc=mu, scale=sigma)
+        weights = norm(x, loc=n_points, scale=sigma)
         weights = np.abs(weights)  # take absolute value
         weights /= np.sum(weights)  # normalize to sum 1
         
