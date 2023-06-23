@@ -206,6 +206,8 @@ class Agent_:
         
         assert historical_data[-1] == fn._last_time, "Historical data is not consistent with the last runtime"
 
+        print(f"Agent: {run_type} ran in {fn._last_time} seconds")
+
         self._check_delay(run_type, historical_data[-1], historical_data[:-1])
 
 Agent = Agent_()
