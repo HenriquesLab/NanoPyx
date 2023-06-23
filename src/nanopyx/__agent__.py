@@ -82,8 +82,8 @@ class Agent_:
         weighted_average = np.sum(data * weights)
         weighted_std = np.sqrt(np.sum(weights * (data - weighted_average)**2))
         
-        # return weighted_average, weighted_std # TODO test and uncomment
-        return np.nanmean(run_info), np.nanstd(run_info)
+        return weighted_average, weighted_std # TODO test and uncomment
+        #return np.nanmean(run_info), np.nanstd(run_info)
 
     def _get_ordered_run_types(self, fn, args, kwargs):
         """
@@ -131,7 +131,7 @@ class Agent_:
         model = LogisticRegression()
         model.fit([[state] for state in delays[:-1]], delays[1:])
         
-        return model.predict_proba([[True]])[0][model.classes_.tolist().index([True])]
+        return model.predict_proba([[True]])[:,model.classes_.tolist().index(True)]
 
     def _check_delay(self, run_type, runtime, runtimes_history):
         """
@@ -147,6 +147,7 @@ class Agent_:
             runtimes_history.append(runtime)
             delay_factor = runtime / avg
             delay_prob = self._calculate_prob_of_delay(runtimes_history, avg, std)
+            print(f"Run type {run_type} was delayed in the previous run. Delay factor: {delay_factor}, Delay probability: {delay_prob}")
             if "Threaded" in run_type:
                 for threaded_run_type in threaded_runtypes:
                     self.delayed_runtypes[threaded_run_type] = (delay_factor, delay_prob)
