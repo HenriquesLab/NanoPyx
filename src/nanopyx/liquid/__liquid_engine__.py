@@ -220,6 +220,13 @@ class LiquidEngine:
         Stores the results of a run
         """
 
+        # Re-read the benchmark file in case it has been updated
+        try:
+            with open(self._benchmark_filepath) as f:
+                self._benchmarks = yaml.load(f, Loader=yaml.FullLoader)
+        except FileNotFoundError:
+            self._benchmarks = self._benchmarks
+
         # Check if the run type has been run, and if not create empty info
         run_type_benchs = self._benchmarks[run_type]
         if arg_repr not in run_type_benchs:
