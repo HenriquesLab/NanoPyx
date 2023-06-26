@@ -16,7 +16,7 @@ class Workflow:
 
         for arg in args:
             if isinstance(arg, tuple) and len(arg) == 3:
-                self._methods.append((arg[0](), arg[1], arg[2])) # Note the parenthesis! We want to instantiate the class here!
+                self._methods.append((arg[0], arg[1], arg[2]))
             else:
                 raise TypeError("Each arg must be a tuple of 3 items (fn, args, kwargs)")
 
