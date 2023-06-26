@@ -167,7 +167,7 @@ class Agent_:
 
         return device_times
 
-    def get_run_type(self, fn, args, kwargs, mode='fastest'):
+    def get_run_type(self, fn, args, kwargs, mode='dynamic'):
         """
         Returns the best run_type for the given args and kwargs
         """
