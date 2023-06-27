@@ -80,7 +80,7 @@ jobs:
           fetch-depth: 0
       - name: setup python folder
         run:
-          export AGENT_TOOLSDIRECTORY=/Users/ocb/actions-runner/hostedtoolcache
+          export RUNNER_TOOL_CACHE=/Users/ocb/actions-runner/hostedtoolcache
       - uses: actions/setup-python@v4
         with:
           python-version: |
