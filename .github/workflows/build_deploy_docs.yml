@@ -1,0 +1,48 @@
+name: build-deploy-docs
+
+on:
+  release:
+    types: [published]
+
+  # creates a button
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: "Log level"
+        required: true
+        default: "warning"
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+
+jobs:
+  build_doc:
+    runs-on: [self-hosted, ubuntu]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+      - name: Run Nox - generate_docs
+        run: |
+          pipx run nox --sessions generate_docs
+      - uses: actions/upload-pages-artifact@v1
+        with:
+          path: docs/
+
+  deploy_doc:
+    needs: build_doc
+    # only run if main branch
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, windows]
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v2
