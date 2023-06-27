@@ -92,7 +92,7 @@ def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float1
 def generate_channel_misalignment():
     """
     Generates an image with shape (3, 300, 300) with 1 object centered on each 3x3 block of the image.
-    Slices corresponding to channel 2 and 3 are shifted relative to channel 1.
+    Slices corresponding to channel 2 and 3 are shifted relative to channel 1 (template).
     :return: numpy array of shape (3, 300, 300) corresponding to a random image with misalignment between channels.
     """
 
