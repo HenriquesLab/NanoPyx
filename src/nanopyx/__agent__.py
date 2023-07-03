@@ -71,7 +71,7 @@ class Agent_:
         lower_limit = data.shape[0] - n_points
         data = data[lower_limit:]
         
-        # create trucnated normal distribution
+        # create truncated normal distribution
         x = np.linspace(0, len(data)-1, len(data))
         mu = x[-1]
         weights = norm.pdf(x,mu,sigma)
@@ -162,7 +162,7 @@ class Agent_:
             if runtype in device_times.keys():
                 delay_factor, delay_prob = self.delayed_runtypes[runtype]
                 # Weighted avg by the probability the run_type is still delayed
-                # expected_time * P(~delay) + delayed_tiem * P(delay)
+                # expected_time * P(~delay) + delayed_time * P(delay)
                 device_times[runtype] = device_times[runtype] * (1 - delay_prob) + device_times[runtype] * delay_factor * delay_prob
 
         return device_times
