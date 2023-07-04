@@ -6,10 +6,15 @@ import random
 
 from sklearn.linear_model import LogisticRegression
 
+"""
 ALL_GEARS = ['OPENCL_1', 'OPENCL_2',
             'CYTHON_THREADED','CYTHON_THREADED_DYNAMIC', 
             'CYTHON_THREADED_GUIDED', 'CYTHON_THREADED_STATIC',
             'CYTHON_UNTHREADED', 'NUMBA', 'PYTHON']
+"""
+
+ALL_GEARS = ['OPENCL', 'CYTHON_THREADED', 'CYTHON_UNTHREADED', 'PYTHON']
+
 
 class Method:
 
