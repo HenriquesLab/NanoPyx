@@ -245,11 +245,8 @@ class Radiality(LiquidEngine):
 
         code = self._get_cl_code("_le_radiality.cl", device['DP'])
 
-        cdef int _magnification = magnification
-        cdef int _border = border
         cdef float _ringRadius = ringRadius * magnification
-        cdef int _doIntensityWeighting = doIntensityWeighting
-        cdef int _radialityPositivityConstraint = radialityPositivityConstraint
+        
         cdef int nRingCoordinates = 12
         cdef float angleStep = (pi * 2.) / nRingCoordinates
         cdef float[12] xRingCoordinates, yRingCoordinates
@@ -301,7 +298,7 @@ class Radiality(LiquidEngine):
             xRingCoordinates_in.data,
             yRingCoordinates_in.data,
             np.int32(magnification),
-            np.float32(ringRadius),
+            np.float32(_ringRadius),
             np.int32(nRingCoordinates),
             np.int32(radialityPositivityConstraint),
             np.int32(border),
