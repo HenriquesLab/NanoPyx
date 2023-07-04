@@ -111,21 +111,19 @@ __kernel void radiality(__global float *image_in, __global float *imageinterp_in
     int row = get_global_id(1);
     int col = get_global_id(2);
 
-    // Sizes of the array
-    int nFrames = get_global_size(0);
-    int nRows = get_global_size(1);
-    int nCols = get_global_size(2);
-
+    // Number of rows and columns in the output image
+    int nRows = h * magnification;
+    int nCols = w * magnification;
+    
     int nPixels_in = h * w;
     int nPixels_out = nRows * nCols;
 
     // Grid size
     row = (1 + border) * magnification + row;
     col = (1 + border) * magnification + col;
-  
-    image_out[f * nPixels_out + row * nCols + col] = 
-    _c_calculate_radiality_per_subpixel(col, row, &gradient_X[f*nPixels_in], &gradient_Y[f*nPixels_in], xRingCoordinates, yRingCoordinates, magnification, ringRadius, nRingCoordinates, radialityPositivityConstraint, h, w) 
-    * imageinterp_in[f * nPixels_out + row * nCols + col];
+
+    image_out[f * nPixels_out + row * nCols + col] = _c_calculate_radiality_per_subpixel(col, row, &gradient_X[f*nPixels_in], &gradient_Y[f*nPixels_in], xRingCoordinates, yRingCoordinates, magnification, ringRadius, nRingCoordinates, radialityPositivityConstraint, h, w);
+    //* imageinterp_in[f * nPixels_out + row * nCols + col];
 
 }
 
