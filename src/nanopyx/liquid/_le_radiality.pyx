@@ -32,7 +32,7 @@ class Radiality(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "Radiality"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
-                        unthreaded_=True, threaded_=True, threaded_static_=True, 
+                        unthreaded_=False, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
 
     
@@ -243,12 +243,6 @@ class Radiality(LiquidEngine):
         cl_ctx = cl.Context([device['device']])
         cl_queue = cl.CommandQueue(cl_ctx)
 
-        # Swap row and columns because opencl is strange and stores the
-        # array in a buffer in fortran ordering despite the original
-        # numpy array being in C order.
-        #image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
-        #image_interp = np.ascontiguousarray(np.swapaxes(image_interp, 1, 2), dtype=np.float32)
-
         code = self._get_cl_code("_le_radiality.cl", device['DP'])
 
         cdef int _magnification = magnification
@@ -272,7 +266,6 @@ class Radiality(LiquidEngine):
 
         cdef float [:,:,:] imGx = np.zeros_like(image) 
         cdef float [:,:,:] imGy = np.zeros_like(image)
-
         cdef float[:,:,:] image_MV = image
         with nogil:
             for f in range(nFrames):
