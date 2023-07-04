@@ -284,8 +284,8 @@ class Radiality(LiquidEngine):
         lowest_row = (1 + border) * magnification 
         highest_row = (h - 1 - border) * magnification
 
-        lowest_col = (1 + _border) * _magnification
-        highest_col = (w - 1 - _border) * _magnification
+        lowest_col = (1 + border) * magnification
+        highest_col = (w - 1 - border) * magnification
 
         prg = cl.Program(cl_ctx, code).build()  
  
