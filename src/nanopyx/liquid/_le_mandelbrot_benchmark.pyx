@@ -20,18 +20,11 @@ class MandelbrotBenchmark(LiquidEngine):
     Mandelbrot Benchmark using the NanoPyx Liquid Engine
     """
 
-    _has_opencl = True
-    _has_threaded = True
-    _has_threaded_static = True
-    _has_threaded_dynamic = True
-    _has_threaded_guided = True
-    _has_unthreaded = True
-    _has_python = True
-    _has_njit = True
-    _designation = "Mandelbrot_Benchmark"
-
-    def __init__(self, testing=False):
-        super().__init__(testing=testing)
+    def __init__(self, clear_benchmarks=False, testing=False):
+        self._designation = "Mandelbrot_Benchmark"
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
+                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
+                        threaded_dynamic_=True, threaded_guided_=True, python_=True, njit_=True)
 
     def run(self, int size=1000, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1) -> np.ndarray:
         """

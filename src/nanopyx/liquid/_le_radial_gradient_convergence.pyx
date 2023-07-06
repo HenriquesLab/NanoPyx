@@ -24,19 +24,13 @@ class RadialGradientConvergence(LiquidEngine):
     Radial gradient convergence using the NanoPyx Liquid Engine
     """
 
-    _has_opencl = False
-    _has_threaded = True
-    _has_threaded_static = True
-    _has_threaded_dynamic = True
-    _has_threaded_guided = True
-    _has_unthreaded = True
-    _has_python = False
-    _has_njit = False
-    _designation = "RGC"
+    def __init__(self, clear_benchmarks=False, testing=False):
+        self._designation = "RGC"
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
+                        unthreaded_=True, threaded_=True, threaded_static_=True, 
+                        threaded_dynamic_=True, threaded_guided_=True)
 
-    def __init__(self,testing=False):
-        super().__init__(testing=testing)
-    
+
 
     def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, run_type = None): 
         image = check_image(image)
