@@ -2,9 +2,7 @@ import platform
 import random
 
 import numpy as np
-from hmmlearn import hmm
 from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import LabelEncoder
 from scipy.stats import norm
 
 from .liquid.__njit__ import njit_works
