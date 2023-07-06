@@ -4,6 +4,8 @@ import numpy as np
 from scipy.stats import norm
 import random
 
+import copy
+
 from sklearn.linear_model import LogisticRegression
 
 """
@@ -68,8 +70,8 @@ class Method:
             weights /= np.sum(weights)  # normalize to sum 1
             exp_weights[g] = weights
 
-        self.observed_exp_avg_times = {g:np.sum(data * weights) for g in ALL_GEARS}
-        self.observed_exp_std_times = {g:np.sqrt(np.sum(weights * (data - self.observed_exp_avg_times[g])**2)) for g in ALL_GEARS}    
+        self.observed_exp_avg_times = {g:np.sum(self.observed_data[g] * exp_weights[g]) for g in ALL_GEARS}
+        self.observed_exp_std_times = {g:np.sqrt(np.sum(exp_weights[g] * (self.observed_data[g] - self.observed_exp_avg_times[g])**2)) for g in ALL_GEARS}    
         
         if self.exp:
             probabilities = {g:(1/self.observed_exp_avg_times[g])**2 for g in ALL_GEARS}
@@ -154,15 +156,22 @@ class Method:
     def run_with_agent(self, agent):
         
         # choose gear
-        avg, std = self.observed_exp_avg_times, self.observed_exp_std_times
+        avg = copy.deepcopy(self.observed_exp_avg_times)
+        std = copy.deepcopy(self.observed_exp_std_times)
         gear_chosen = agent.get_runtype(avg, std)
+
+        self.probabilities = {g: agent.probabilities[g] for g in ALL_GEARS}
 
         # run
         self.observed_data[gear_chosen].append(self.sample_real_time(gear_chosen))
 
-        # Store 
-        # create truncated normal distribution
-        data = self.observed_data[gear_chosen]
+        data = np.array(self.observed_data[gear_chosen])
+        n_points = 200
+        if data.shape[0] < n_points:
+            n_points = data.shape[0]
+        lower_limit = data.shape[0] - n_points
+        data = data[lower_limit:]
+
         x = np.linspace(0, len(data)-1, len(data))
         mu = x[-1]
         sigma = 20
@@ -183,8 +192,11 @@ class Method:
     def run_anomalous_with_agent(self, agent, affected_gear, new_avg, new_std):
 
         # choose gear
-        avg, std = self.observed_exp_avg_times, self.observed_exp_std_times
+        avg = copy.deepcopy(self.observed_exp_avg_times)
+        std = copy.deepcopy(self.observed_exp_std_times)
         gear_chosen = agent.get_runtype(avg, std)
+
+        self.probabilities = {g: agent.probabilities[g] for g in ALL_GEARS}
 
         # run
         if gear_chosen == affected_gear:
@@ -192,9 +204,13 @@ class Method:
         else:
             self.observed_data[gear_chosen].append(self.sample_real_time(gear_chosen))
         
-        # Store 
-        # create truncated normal distribution
-        data = self.observed_data[gear_chosen]
+        data = np.array(self.observed_data[gear_chosen])
+        n_points = 200
+        if data.shape[0] < n_points:
+            n_points = data.shape[0]
+        lower_limit = data.shape[0] - n_points
+        data = data[lower_limit:]
+
         x = np.linspace(0, len(data)-1, len(data))
         mu = x[-1]
         sigma = 20
@@ -312,7 +328,7 @@ class Simulator:
             for method in self.method_objects:
                 
                 if ano_start<iter<ano_end:
-                    g,t = method.run_anomalous_with_agent(self.agent,affected_gear, new_avg, new_std)
+                    g,t = method.run_anomalous_with_agent(self.agent, affected_gear, new_avg, new_std)
                 else: 
                     g,t = method.run_with_agent(self.agent)
                 
@@ -327,9 +343,10 @@ class FakeAgent:
     def __init__(self) -> None:
         
         self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
+        self.probabilities = {}
                 
     def get_runtype(self,avg,std):
-
+        
         if len(self.delayed_runtypes.keys()) > 0:
             for runtype in self.delayed_runtypes.keys():
                 if runtype in avg.keys():
@@ -338,15 +355,24 @@ class FakeAgent:
                     # expected_time * P(~delay) + delayed_time * P(delay)
                     avg[runtype] = avg[runtype] * (1 - delay_prob) + avg[runtype] * delay_factor * delay_prob
 
+
         weights = [(1/avg[k])**2 for k in avg]
         if sum(weights) == 0:
-            weights = [1 for k in avg]
+            weights = [1 for k in avg] 
+        s = sum(weights)
+        weights = [w/s for w in weights]
+        
+        assert np.allclose(sum(weights), 1)
+
+        for g in ALL_GEARS:
+            self.probabilities[g] = weights[ALL_GEARS.index(g)]
+        
         return random.choices(list(avg.keys()), weights=weights, k=1)[0]
         
 
     def check_delay(self, run_type, time2run, previous_times):
 
-        threaded_runtypes = ['CYTHON_THREADED','CYTHON_THREADED_DYNAMIC', 'CYTHON_THREADED_GUIDED', 'CYTHON_THREADED_STATIC']
+        threaded_runtypes = ['CYTHON_THREADED']
         
         avg = np.nanmean(previous_times) # standard average as opposed to weighted as a weighted average would throw false negatives if delays happen consecutively
         std = np.nanstd(previous_times)
@@ -370,8 +396,7 @@ class FakeAgent:
 
         model = LogisticRegression()
         model.fit([[state] for state in delays[:-1]], delays[1:])
-        
-        return model.predict_proba([[True]])[:,model.classes_.tolist().index(True)]
+        return model.predict_proba([[True]])[:,model.classes_.tolist().index(True)][0]
 
 if __name__ == "__main__":
     
