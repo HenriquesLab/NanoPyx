@@ -52,6 +52,7 @@ dependencies = [
     "pandas>=1.5.3",
     "pyopencl>=2022.3.1",
     "scikit-learn>=1.1.0",
+    "matplotlib>=3.5",
 ]
 dynamic = ["version"]
 
@@ -77,7 +78,6 @@ test = [
 ]
 jupyter = [
     "nbformat>=4.2.0",
-    "matplotlib>=3.5",
     "seaborn>=0.12.1",
     "stackview>=0.5.1",
     # "plotly>=5.11.0",
