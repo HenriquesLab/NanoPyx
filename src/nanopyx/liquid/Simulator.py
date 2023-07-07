@@ -355,8 +355,8 @@ class FakeAgent:
                     # expected_time * P(~delay) + delayed_time * P(delay)
                     avg[runtype] = avg[runtype] * (1 - delay_prob) + avg[runtype] * delay_factor * delay_prob
 
-
-        weights = [(1/avg[k])**2 for k in avg]
+        order = 1.8
+        weights = [(1/avg[k])**order for k in avg]
         if sum(weights) == 0:
             weights = [1 for k in avg] 
         s = sum(weights)
