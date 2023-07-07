@@ -174,7 +174,7 @@ class Method:
 
         x = np.linspace(0, len(data)-1, len(data))
         mu = x[-1]
-        sigma = 20
+        sigma = 4
         weights = norm.pdf(x,mu,sigma)
         weights = np.abs(weights)  # take absolute value
         weights /= np.sum(weights)  # normalize to sum 1
@@ -213,7 +213,7 @@ class Method:
 
         x = np.linspace(0, len(data)-1, len(data))
         mu = x[-1]
-        sigma = 20
+        sigma = 4
         weights = norm.pdf(x,mu,sigma)
         weights = np.abs(weights)  # take absolute value
         weights /= np.sum(weights)  # normalize to sum 1
