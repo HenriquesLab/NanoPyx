@@ -4,6 +4,7 @@ import yaml
 import datetime
 import inspect
 from functools import partial
+from itertools import combinations
 from pathlib import Path
 
 import numpy as np
@@ -187,16 +188,26 @@ class LiquidEngine:
         print(f"Slowest run type: {speed_sort[-1][1]}")
 
         # Compare each run type against each other, sorted by speed
-        for i in range(len(speed_sort)):
-            if i not in run_times or run_times[i] is None:
-                continue
-            for j in range(i + 1, len(speed_sort)):
-                if j not in run_times or run_times[j] is None:
-                    continue
-
-                print(f"{speed_sort[i][1]} is {speed_sort[j][0]/speed_sort[i][0]:.2f} faster than {speed_sort[j][1]}")
+        for pair in combinations(speed_sort,2):
+            
+            print(f"{pair[0][1]} is {pair[1][0]/pair[0][0]:.2f} faster than {pair[1][1]}")
+            if self.testing:
+                if self._compare_runs(pair[0][2],pair[1][2]):
+                    print(f"{pair[0][1]} and {pair[1][1]} have similar outputs!")
+                else:
+                    print(f"WARNING: outputs of {pair[0][1]} and {pair[1][1]} don't match!")
 
         return speed_sort
+    
+    def _compare_runs(self, output_1, output_2):
+        
+        mse = np.average((output_1 - output_2)**2)
+        
+        if mse < 0.1:
+            return True
+        else:
+            return False
+
 
     def _get_cl_code(self, file_name, cl_dp):
         """
