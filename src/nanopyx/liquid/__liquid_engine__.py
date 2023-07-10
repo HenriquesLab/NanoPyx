@@ -190,7 +190,7 @@ class LiquidEngine:
         # Compare each run type against each other, sorted by speed
         for pair in combinations(speed_sort,2):
             
-            print(f"{pair[0][1]} is {pair[1][0]/pair[0][0]:.2f} faster than {pair[1][1]}")
+            print(f"{pair[0][1]} is {pair[1][0]/pair[0][0]:.2f}x faster than {pair[1][1]}")
             if self.testing:
                 if self._compare_runs(pair[0][2],pair[1][2]):
                     print(f"{pair[0][1]} and {pair[1][1]} have similar outputs!")
