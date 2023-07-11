@@ -89,9 +89,9 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     int nPixels_out = nRows * nCols;
 
     if (doIntensityWeighting == 1) {
-        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f*nPixels_out*2], &imIntGy[f*nPixels_out*2], &imInt[f*nPixels_out + row * nCols + col], w, h, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity) * imInt[f * nPixels_out + row * nCols + col];
+        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_out * 2], &imIntGy[f * nPixels_out * 2], &imInt[f*nPixels_out + row * nCols + col], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity) * imInt[f * nPixels_out + row * nCols + col];
     }
     else {
-        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f*nPixels_out*2], &imIntGy[f*nPixels_out*2], &imInt[f*nPixels_out + row * nCols + col], w, h, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity);
+        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f*nPixels_out*2], &imIntGy[f*nPixels_out*2], &imInt[f*nPixels_out + row * nCols + col], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity);
     }
        }
