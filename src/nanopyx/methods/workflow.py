@@ -31,15 +31,22 @@ class Workflow:
             # in the list args, substitute 'PREV_RETURN_VALUE' with the return value of the previous method
             sane_args = []
             for arg in args:
-                if isinstance(arg, str) and arg == 'PREV_RETURN_VALUE':
-                    sane_args.append(self._return_values[-1])
+                if isinstance(arg, str) and 'PREV_RETURN_VALUE' in arg:
+                    digit = int(''.join([i for i in arg if i.isdigit()]))
+                    return_value = self._return_values[digit]
+                    if isinstance(return_value, tuple):
+                        sane_args.append(*return_value)
+                    else:
+                        sane_args.append(return_value)
                 else:
                     sane_args.append(arg)
 
             # in the dict kwargs, substitute 'PREV_RETURN_VALUE' with the return value of the previous method
             for key, value in kwargs.items():
-                if isinstance(value, str) and value == 'PREV_RETURN_VALUE':
-                    kwargs[key] = self._return_values[-1]
+                if isinstance(value, str) and 'PREV_RETURN_VALUE' in value:
+                    digit = int(''.join([i for i in arg if i.isdigit()]))
+                    return_value = self._return_values[digit]
+                    kwargs[key] = self._return_values[digit]
 
             # Get run type from the Agent
             run_type = Agent.get_run_type(fn, sane_args, kwargs)
