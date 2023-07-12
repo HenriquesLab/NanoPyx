@@ -29,6 +29,7 @@ from ._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScale
 from ._le_mandelbrot_benchmark import MandelbrotBenchmark
 from ._le_radiality import Radiality
 from ._le_radial_gradient_convergence import RadialGradientConvergence
+from ._le_roberts_cross_gradients import GradientRobertsCross
 from ._le_DUMMY import DUMMY
 
 from multiprocessing import current_process
