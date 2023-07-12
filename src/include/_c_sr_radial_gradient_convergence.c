@@ -13,7 +13,7 @@ double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance) {
   return Dk;
 }
 
-float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, float* imInt, int w, int h, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) {
+float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) {
 
     float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk;
 
@@ -30,19 +30,19 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, float* im
         vy = (int)(Gx_Gy_MAGNIFICATION * yc) + j;
         vy /= Gx_Gy_MAGNIFICATION;
 
-        if (0 < vy && vy <= h - 1) {
+        if (0 < vy && vy <= rowsM - 1) {
             for (int i = _start; i < _end; i++) {
                 vx = (int)(Gx_Gy_MAGNIFICATION * xc) + i;
                 vx /= Gx_Gy_MAGNIFICATION;
 
-                if (0 < vx && vx <= w - 1) {
+                if (0 < vx && vx <= colsM - 1) {
                     dx = vx - xc;
                     dy = vy - yc;
                     distance = sqrt(dx * dx + dy * dy);
 
                     if (distance != 0 && distance <= tSO) {
-                        Gx = imIntGx[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * w * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
-                        Gy = imIntGy[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * w * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gx = imIntGx[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gy = imIntGy[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
 
                         distanceWeight = _c_calculate_dw(distance, tSS);
                         distanceWeightSum += distanceWeight;

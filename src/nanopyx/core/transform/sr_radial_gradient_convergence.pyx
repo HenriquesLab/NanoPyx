@@ -71,8 +71,8 @@ cdef class RadialGradientConvergence:
                 _c_gradient_roberts_cross(&imRaw[n,0,0], &imGx[n,0,0], &imGy[n,0,0], imRaw.shape[1], imRaw.shape[2])
         
         # Interpolate the Gradients
-        cdef float [:,:,:] imIntGx = crsm.run(imGx, 0, 0, self.magnification*Gx_Gy_MAGNIFICATION, self.magnification*Gx_Gy_MAGNIFICATION, run_type="Threaded")
-        cdef float [:,:,:] imIntGy = crsm.run(imGy, 0, 0, self.magnification*Gx_Gy_MAGNIFICATION, self.magnification*Gx_Gy_MAGNIFICATION, run_type="Threaded")
+        cdef float [:,:,:] imIntGx = crsm.run(imGx, 0, 0, self.magnification*Gx_Gy_MAGNIFICATION, self.magnification*Gx_Gy_MAGNIFICATION, run_type="Threaded_guided")
+        cdef float [:,:,:] imIntGy = crsm.run(imGy, 0, 0, self.magnification*Gx_Gy_MAGNIFICATION, self.magnification*Gx_Gy_MAGNIFICATION, run_type="Threaded_guided")
     
         cdef float [:,:,:] imRad = np.zeros((im.shape[0], im.shape[1]*self.magnification, im.shape[2]*self.magnification), dtype=np.float32)
 
@@ -92,10 +92,10 @@ cdef class RadialGradientConvergence:
             for yM in prange(self.magnification*2, h * self.magnification - self.magnification*2):
                 for xM in range(self.magnification*2, w * self.magnification - self.magnification*2):
                     if self.doIntensityWeighting:
-                        imRad[yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[0,0], &imIntGy[0,0], &imInt[0,0], w * self.magnification, h * self.magnification, self.magnification, Gx_Gy_MAGNIFICATION,  self.fwhm, self.tSO, self.tSS, self.sensitivity) * imInt[yM, xM] 
+                        imRad[yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[0,0], &imIntGy[0,0],  w * self.magnification, h * self.magnification, self.magnification, Gx_Gy_MAGNIFICATION,  self.fwhm, self.tSO, self.tSS, self.sensitivity) * imInt[yM, xM] 
                         #imRad[yM, xM] = self._calculateRGC(xM, yM, imIntGx, imIntGy, imInt) * imInt[yM, xM] 
                     else:
-                        imRad[yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[0,0], &imIntGy[0,0], &imInt[0,0], w * self.magnification, h * self.magnification, self.magnification, Gx_Gy_MAGNIFICATION,  self.fwhm, self.tSO, self.tSS, self.sensitivity)
+                        imRad[yM, xM] = _c_calculate_rgc(xM, yM, &imIntGx[0,0], &imIntGy[0,0], w * self.magnification, h * self.magnification, self.magnification, Gx_Gy_MAGNIFICATION,  self.fwhm, self.tSO, self.tSS, self.sensitivity)
 
 
     cdef float _calculateRGC(self, int xM, int yM, float[:,:] imIntGx, float[:,:] imIntGy, float[:,:] imInt) nogil:
