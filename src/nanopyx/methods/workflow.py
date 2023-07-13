@@ -32,21 +32,19 @@ class Workflow:
             sane_args = []
             for arg in args:
                 if isinstance(arg, str) and 'PREV_RETURN_VALUE' in arg:
-                    digit = int(''.join([i for i in arg if i.isdigit()]))
-                    return_value = self._return_values[digit]
-                    if isinstance(return_value, tuple):
-                        sane_args.append(*return_value)
-                    else:
-                        sane_args.append(return_value)
+                    indices = [int(i) for i in arg.split('_') if i.isdigit()]
+                    return_value = self._return_values[indices[0]][indices[1]]
+                    sane_args.append(return_value)
                 else:
                     sane_args.append(arg)
 
             # in the dict kwargs, substitute 'PREV_RETURN_VALUE' with the return value of the previous method
             for key, value in kwargs.items():
                 if isinstance(value, str) and 'PREV_RETURN_VALUE' in value:
-                    digit = int(''.join([i for i in arg if i.isdigit()]))
-                    return_value = self._return_values[digit]
-                    kwargs[key] = self._return_values[digit]
+                    indices = [int(i) for i in value.split('_') if i.isdigit()]
+                    return_value = self._return_values[indices[0]][indices[1]]
+                    kwargs[key] = return_value
+
 
             # Get run type from the Agent
             run_type = Agent.get_run_type(fn, sane_args, kwargs)
@@ -54,7 +52,11 @@ class Workflow:
 
             # TODO maybe we need to warn the agent its running and when it finishes
             return_value = fn.run(*sane_args, **kwargs)
-            self._return_values.append(return_value)
+
+            if isinstance(return_value, tuple):
+                self._return_values.append((return_value,))
+            else:
+                self._return_values.append(return_value)
 
             Agent._inform(fn)
 
