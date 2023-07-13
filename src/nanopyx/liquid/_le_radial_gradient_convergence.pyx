@@ -190,7 +190,7 @@ class RadialGradientConvergence(LiquidEngine):
         # tag-end
 
     
-    # def _run_opencl(self, image, magnification, radius, sensitivity, doIntensityWeighting, dict device):
+    # def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, dict device):
 
     #     cl_ctx = cl.Context([device['device']])
     #     cl_queue = cl.CommandQueue(cl_ctx)
@@ -206,29 +206,11 @@ class RadialGradientConvergence(LiquidEngine):
     #     cdef float _sensitivity = sensitivity
     #     cdef int _doIntensityWeighting = doIntensityWeighting
 
-    #     cdef int nFrames = image.shape[0]
-    #     cdef int rows = image.shape[1]
-    #     cdef int cols = image.shape[2]
-    #     cdef int rowsM = <int>(rows * magnification)
-    #     cdef int colsM = <int>(cols * magnification)
-
-    #     crsm = CRShiftAndMagnify()
-    #     cdef float [:,:,:] image_interp = crsm.run(image, 0, 0, magnification, magnification, run_type="Threaded_guided")
-
-    #     cdef float [:,:,:] gradient_col = np.zeros_like(image) 
-    #     cdef float [:,:,:] gradient_row = np.zeros_like(image)
-    #     cdef float[:,:,:] image_MV = image
-
-    #     cdef int n
-    #     with nogil: 
-    #         for n in prange(nFrames):
-    #             _c_gradient_roberts_cross(&image_MV[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], rows, cols)
-
-    #     cdef float [:,:,:] grad_col_int = crsm.run(gradient_col, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION, run_type="Threaded_guided")
-    #     cdef float [:,:,:] grad_row_int = crsm.run(gradient_row, 0, 0, magnification*Gx_Gy_MAGNIFICATION, magnification*Gx_Gy_MAGNIFICATION, run_type="Threaded_guided")
-
-    #     grad_col_int_in = cl_array.to_device(cl_queue, np.asarray(grad_col_int, dtype=np.float32))
-    #     grad_row_int_in = cl_array.to_device(cl_queue, np.asarray(grad_row_int, dtype=np.float32))
+    #     cdef int nFrames = gradient_col_interp.shape[0]
+    #     cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
+    #     cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+    #     grad_col_int_in = cl_array.to_device(cl_queue, np.asarray(gradient_col_interp, dtype=np.float32))
+    #     grad_row_int_in = cl_array.to_device(cl_queue, np.asarray(gradient_row_interp, dtype=np.float32))
     #     image_interp_in = cl_array.to_device(cl_queue, np.asarray(image_interp, dtype=np.float32))
     #     rgc_map_out = cl_array.zeros(cl_queue, (nFrames, rowsM, colsM), dtype=np.float32)
 
@@ -255,8 +237,7 @@ class RadialGradientConvergence(LiquidEngine):
     #     cl_queue.finish()        
         
     #     return np.asarray(rgc_map_out.get(),dtype=np.float32)
-                
-
+        
 
 
 

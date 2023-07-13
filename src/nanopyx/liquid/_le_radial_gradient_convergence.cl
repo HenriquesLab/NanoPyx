@@ -1,4 +1,4 @@
-float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* imIntGy, __global float* imInt, int w, int h, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity);
+float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity);
 double _c_calculate_dw(double distance, double tSS);
 double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance);
 
@@ -20,7 +20,8 @@ double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance) {
 }
 
 // calculate radial gradient convergence for a single subpixel
-float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* imIntGy, __global float* imInt, int w, int h, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) {
+
+float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) {
 
     float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk;
 
@@ -37,19 +38,19 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
         vy = (int)(Gx_Gy_MAGNIFICATION * yc) + j;
         vy /= Gx_Gy_MAGNIFICATION;
 
-        if (0 < vy && vy <= h - 1) {
+        if (0 < vy && vy <= rowsM - 1) {
             for (int i = _start; i < _end; i++) {
                 vx = (int)(Gx_Gy_MAGNIFICATION * xc) + i;
                 vx /= Gx_Gy_MAGNIFICATION;
 
-                if (0 < vx && vx <= w - 1) {
+                if (0 < vx && vx <= colsM - 1) {
                     dx = vx - xc;
                     dy = vy - yc;
                     distance = sqrt(dx * dx + dy * dy);
 
                     if (distance != 0 && distance <= tSO) {
-                        Gx = imIntGx[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * w * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
-                        Gy = imIntGy[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * w * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gx = imIntGx[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gy = imIntGy[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
 
                         distanceWeight = _c_calculate_dw(distance, tSS);
                         distanceWeightSum += distanceWeight;
@@ -76,6 +77,7 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     return RGC;
 }
 
+
  __kernel void calculate_rgc(__global float* imIntGx, __global float* imIntGy, __global float* imInt, __global float* image_out, int w, int h, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity, int doIntensityWeighting) {
 
     // Index of the current pixel
@@ -89,9 +91,9 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     int nPixels_out = nRows * nCols;
 
     if (doIntensityWeighting == 1) {
-        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_out * 2], &imIntGy[f * nPixels_out * 2], &imInt[f*nPixels_out + row * nCols + col], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity) * imInt[f * nPixels_out + row * nCols + col];
+        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_out * 2], &imIntGy[f * nPixels_out * 2], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity) * imInt[f * nPixels_out + row * nCols + col];
     }
     else {
-        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f*nPixels_out*2], &imIntGy[f*nPixels_out*2], &imInt[f*nPixels_out + row * nCols + col], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity);
+        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f*nPixels_out*2], &imIntGy[f*nPixels_out*2], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity);
     }
        }
