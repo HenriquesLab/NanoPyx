@@ -1,7 +1,6 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
-
 cimport numpy as np
 
 from cython.parallel import parallel, prange
@@ -10,14 +9,9 @@ from libc.math cimport sqrt, pow
 from .__opencl__ import cl, cl_array
 from .__liquid_engine__ import LiquidEngine
 from .__interpolation_tools__ import check_image
-from nanopyx.liquid import CRShiftAndMagnify
 
 cdef extern from "_c_sr_radial_gradient_convergence.h":
     float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) nogil
-
-cdef extern from "_c_gradients.h":
-    void _c_gradient_roberts_cross(float* pixels, float* GxArray, float* GyArray, int w, int h) nogil
-
 
 class RadialGradientConvergence(LiquidEngine):
     """
