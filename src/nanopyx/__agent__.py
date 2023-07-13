@@ -123,6 +123,7 @@ class Agent_:
         """
         Calculates the probability that the given run_type is still delayed using historical data
         """
+
         # Boolean array, True if delay, False if not
         delays = runtimes_history > avg+2*std
 
@@ -207,6 +208,7 @@ class Agent_:
 
         print(f"Agent: {run_type} ran in {fn._last_time} seconds")
 
-        self._check_delay(run_type, historical_data[-1], historical_data[:-1])
+        if len(historical_data) > 3:
+            self._check_delay(run_type, historical_data[-1], historical_data[:-1])
 
 Agent = Agent_()
