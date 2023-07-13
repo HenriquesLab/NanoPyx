@@ -28,14 +28,20 @@ class RadialGradientConvergence(LiquidEngine):
         self._designation = "RadialGradientConvergence"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
                         unthreaded_=False, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
+                        threaded_dynamic_=True, threaded_guided_=True, opencl_=False)
 
 
     def run(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, run_type = None): 
+        gradient_col_interp = check_image(gradient_col_interp)
+        gradient_row_interp = check_image(gradient_row_interp)
+        image_interp = check_image(image_interp)
         return self._run(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, run_type=run_type)
     
 
     def benchmark(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True):
+        gradient_col_interp = check_image(gradient_col_interp)
+        gradient_row_interp = check_image(gradient_row_interp)
+        image_interp = check_image(image_interp)
         return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting)
     
 
@@ -69,7 +75,7 @@ class RadialGradientConvergence(LiquidEngine):
         return rgc_map
         # tag-end
 
-    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(rowsM)", "prange(rowsM)")
+    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(_magnification*2, rowsM - _magnification*2)", "prange(_magnification*2, rowsM - _magnification*2)")
     def _run_threaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification, radius, sensitivity, doIntensityWeighting):
 
         cdef float sigma = radius / 2.355
@@ -90,7 +96,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for rM in range(_magnification*2, rowsM - _magnification*2): 
+                    for rM in prange(_magnification*2, rowsM - _magnification*2): 
                         for cM in range(_magnification*2, colsM - _magnification*2):
                             if _doIntensityWeighting:
                                 rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
@@ -99,7 +105,7 @@ class RadialGradientConvergence(LiquidEngine):
         return rgc_map
         # tag-end
 
-    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(rowsM)", 'prange(rowsM, schedule="static")')
+    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(_magnification*2, rowsM - _magnification*2)", 'prange(_magnification*2, rowsM - _magnification*2, schedule="static")')
     def _run_threaded_static(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification, radius, sensitivity, doIntensityWeighting):
 
         cdef float sigma = radius / 2.355
@@ -120,7 +126,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for rM in range(_magnification*2, rowsM - _magnification*2): 
+                    for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="static"): 
                         for cM in range(_magnification*2, colsM - _magnification*2):
                             if _doIntensityWeighting:
                                 rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
@@ -129,7 +135,7 @@ class RadialGradientConvergence(LiquidEngine):
         return rgc_map
         # tag-end
 
-    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(rowsM)", 'prange(rowsM, schedule="dynamic")')
+    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(_magnification*2, rowsM - _magnification*2)", 'prange(_magnification*2, rowsM - _magnification*2, schedule="dynamic")')
     def _run_threaded_dynamic(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification, radius, sensitivity, doIntensityWeighting):
 
         cdef float sigma = radius / 2.355
@@ -150,7 +156,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for rM in range(_magnification*2, rowsM - _magnification*2): 
+                    for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="dynamic"): 
                         for cM in range(_magnification*2, colsM - _magnification*2):
                             if _doIntensityWeighting:
                                 rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
@@ -159,7 +165,7 @@ class RadialGradientConvergence(LiquidEngine):
         return rgc_map
         # tag-end
 
-    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(rowsM)", 'prange(rowsM, schedule="guided")')
+    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(_magnification*2, rowsM - _magnification*2)", 'prange(_magnification*2, rowsM - _magnification*2, schedule="guided")')
     def _run_threaded_guided(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification, radius, sensitivity, doIntensityWeighting):
 
         cdef float sigma = radius / 2.355
@@ -180,7 +186,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for rM in range(_magnification*2, rowsM - _magnification*2): 
+                    for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="guided"): 
                         for cM in range(_magnification*2, colsM - _magnification*2):
                             if _doIntensityWeighting:
                                 rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
