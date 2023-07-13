@@ -54,9 +54,9 @@ class Workflow:
             return_value = fn.run(*sane_args, **kwargs)
 
             if isinstance(return_value, tuple):
-                self._return_values.append((return_value,))
-            else:
                 self._return_values.append(return_value)
+            else:
+                self._return_values.append((return_value,))
 
             Agent._inform(fn)
 
