@@ -145,7 +145,10 @@ class Agent_:
         if runtime > avg + 2*std:
             runtimes_history.append(runtime)
             delay_factor = runtime / avg
-            delay_prob = self._calculate_prob_of_delay(runtimes_history, avg, std)
+            try:
+                delay_prob = self._calculate_prob_of_delay(runtimes_history, avg, std)
+            except ValueError:
+                delay_prob = 0.01
             print(f"Run type {run_type} was delayed in the previous run. Delay factor: {delay_factor}, Delay probability: {delay_prob}")
             if "Threaded" in run_type:
                 for threaded_run_type in threaded_runtypes:
@@ -208,7 +211,7 @@ class Agent_:
 
         print(f"Agent: {run_type} ran in {fn._last_time} seconds")
 
-        if len(historical_data) > 3:
+        if len(historical_data) > 19:
             self._check_delay(run_type, historical_data[-1], historical_data[:-1])
 
 Agent = Agent_()
