@@ -47,6 +47,19 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
 
     assert np.max(image_pdf) <= 1.0 and np.min(image_pdf) >= 0.0
 
+    # Check for values where the PDF is non-zero (and only place particles at those locations)
+    valid_indices = np.nonzero(image_pdf > 0)
+    valid_indices = np.transpose(valid_indices)
+    n_valid_indices = valid_indices.shape[0]
+
+    if n_valid_indices == 0:
+        raise ValueError("No valid locations found in the image PDF")
+
+    np.random.shuffle(valid_indices)
+    selected_indices = valid_indices[:int(max_particles),:]
+
+    xp = selected_indices[:, 1]
+    yp = selected_indices[:, 0]
 
     cdef float[:,:] _image_pdf = image_pdf
 
