@@ -47,8 +47,8 @@ class Workflow:
 
 
             # Get run type from the Agent
-            #run_type = Agent.get_run_type(fn, sane_args, kwargs)
-            #kwargs['run_type'] = run_type
+            run_type = Agent.get_run_type(fn, sane_args, kwargs)
+            kwargs['run_type'] = run_type
 
             # TODO maybe we need to warn the agent its running and when it finishes
             return_value = fn.run(*sane_args, **kwargs)
