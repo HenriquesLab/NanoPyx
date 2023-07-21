@@ -304,13 +304,13 @@ class LiquidEngine:
         Returns the highest divisor of size_ that is still lower than max_
         """
         value = 1
-        for i in range(1,int(np.sqrt(size_)+1)):
-            if size_%i==0:
+        for i in range(1, int(np.sqrt(size_)+1)):
+            if size_ % i==0:
                 if i*i != size_:
                     div2 = size_/i
                     
                     if i < max_:
-                        value = max(value,i)
+                        value = max(value, i)
                     if div2 < max_:
                         value = max(value, div2)
         return int(value)
@@ -323,9 +323,9 @@ class LiquidEngine:
         max_wg_dims = device.max_work_item_sizes[0:3]
         max_glo_dims = device.max_work_group_size
 
-        three = self.get_highest_divisor(shape[2],max_wg_dims[2])
+        three = self.get_highest_divisor(shape[2], max_wg_dims[2])
         max_two = max_glo_dims/three
-        two = self.get_highest_divisor(shape[1],max_two)
+        two = self.get_highest_divisor(shape[1], max_two)
         one = 1
 
         return (one, two, three)
