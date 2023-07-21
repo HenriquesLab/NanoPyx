@@ -235,7 +235,7 @@ class RadialGradientConvergence(LiquidEngine):
         cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[0:max_slices,:,:])
 
         grad_row_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, gradient_row_interp[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, grad_row_int_in, grad_row_int_in[0:max_slices,:,:])
+        cl.enqueue_copy(cl_queue, grad_row_int_in, gradient_row_interp[0:max_slices,:,:])
 
         image_interp_in = cl.Buffer(cl_ctx, mf.READ_ONLY, image_interp[0:max_slices,:,:].nbytes)
         cl.enqueue_copy(cl_queue, image_interp_in, image_interp[0:max_slices,:,:])

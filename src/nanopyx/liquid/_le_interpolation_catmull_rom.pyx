@@ -113,8 +113,8 @@ class ShiftAndMagnify(LiquidEngine):
                 self.get_work_group(dc, (n_slices, image.shape[1]*magnification_row, image.shape[2]*magnification_col)), 
                 input_opencl, 
                 output_opencl, 
-                np.float32(shift_row), 
-                np.float32(shift_col), 
+                np.float32(shift_row[0]), 
+                np.float32(shift_col[0]), 
                 np.float32(magnification_row), 
                 np.float32(magnification_col))
 
