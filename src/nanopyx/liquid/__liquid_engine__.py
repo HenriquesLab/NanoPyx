@@ -323,9 +323,9 @@ class LiquidEngine:
         max_wg_dims = device.max_work_item_sizes[0:3]
         max_glo_dims = device.max_work_group_size
 
-        three = get_highest_divisor(shape[2],max_wg_dims[2])
+        three = self.get_highest_divisor(shape[2],max_wg_dims[2])
         max_two = max_glo_dims/three
-        two = get_highest_divisor(shape[1],max_two)
+        two = self.get_highest_divisor(shape[1],max_two)
         one = 1
 
         return (one, two, three)
