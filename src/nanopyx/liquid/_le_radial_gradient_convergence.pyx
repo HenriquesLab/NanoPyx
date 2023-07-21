@@ -220,7 +220,6 @@ class RadialGradientConvergence(LiquidEngine):
         highest_row = rows_interpolated - _magnification*2
         lowest_col = _magnification*2
         highest_col =  cols_interpolated - _magnification*2
-        global_work_space = (nFrames, highest_row - lowest_row, highest_col - lowest_col)
 
         # Output 
         rgc_map = np.zeros((nFrames, rows_interpolated, cols_interpolated), dtype=np.float32)
@@ -232,13 +231,13 @@ class RadialGradientConvergence(LiquidEngine):
         # Initial buffers
         mf = cl.mem_flags
         grad_col_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, gradient_col_interp[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[0:max_slices,:,:])
+        cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[0:max_slices,:,:]).wait()
 
         grad_row_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, gradient_row_interp[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, grad_row_int_in, gradient_row_interp[0:max_slices,:,:])
+        cl.enqueue_copy(cl_queue, grad_row_int_in, gradient_row_interp[0:max_slices,:,:]).wait()
 
         image_interp_in = cl.Buffer(cl_ctx, mf.READ_ONLY, image_interp[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, image_interp_in, image_interp[0:max_slices,:,:])
+        cl.enqueue_copy(cl_queue, image_interp_in, image_interp[0:max_slices,:,:]).wait()
 
         rgc_map_out = cl.Buffer(cl_ctx, mf.WRITE_ONLY, rgc_map[0:max_slices,:,:].nbytes)
 
@@ -255,8 +254,8 @@ class RadialGradientConvergence(LiquidEngine):
                 n_slices = nFrames - i
 
             knl(cl_queue, 
-                global_work_space, 
-                self.get_work_group(device['device'],global_work_space), 
+                (n_slices, highest_row - lowest_row, highest_col - lowest_col), 
+                self.get_work_group(device['device'],(n_slices, highest_row - lowest_row, highest_col - lowest_col)), 
                 grad_col_int_in,
                 grad_row_int_in,
                 image_interp_in,
@@ -269,16 +268,16 @@ class RadialGradientConvergence(LiquidEngine):
                 np.float32(tSO), 
                 np.float32(tSS), 
                 np.float32(_sensitivity), 
-                np.int32(_doIntensityWeighting) )
+                np.int32(_doIntensityWeighting)).wait()
             
             # Copy output
-            cl.enqueue_copy(cl_queue, rgc_map[i:i+n_slices,:,:], rgc_map_out)
+            cl.enqueue_copy(cl_queue, rgc_map[i:i+n_slices,:,:], rgc_map_out).wait()
 
             # Copy input
             if i<=nFrames-max_slices:
-                cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[i+n_slices:i+2*n_slices,:,:])
-                cl.enqueue_copy(cl_queue, grad_row_int_in, gradient_row_interp[i+n_slices:i+2*n_slices,:,:])
-                cl.enqueue_copy(cl_queue, image_interp_in, image_interp[i+n_slices:i+2*n_slices,:,:]) 
+                cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[i+n_slices:i+2*n_slices,:,:]).wait() 
+                cl.enqueue_copy(cl_queue, grad_row_int_in, gradient_row_interp[i+n_slices:i+2*n_slices,:,:]).wait() 
+                cl.enqueue_copy(cl_queue, image_interp_in, image_interp[i+n_slices:i+2*n_slices,:,:]).wait() 
 
             cl_queue.finish()
 
