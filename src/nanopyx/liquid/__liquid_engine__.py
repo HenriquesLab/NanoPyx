@@ -298,6 +298,39 @@ class LiquidEngine:
                 _kwargs[k] = v
 
         return repr((_args, _kwargs)), _norm
+    
+    def get_highest_divisor(self, size_, max_):
+        """
+        Returns the highest divisor of size_ that is still lower than max_
+        """
+        value = 1
+        for i in range(1,int(np.sqrt(size_)+1)):
+            if size_%i==0:
+                if i*i != size_:
+                    div2 = size_/i
+                    
+                    if i < max_:
+                        value = max(value,i)
+                    if div2 < max_:
+                        value = max(value, div2)
+        return int(value)
+    
+    def get_work_group(self, device, shape):
+        """
+        Calculates work group size for a given device and shape of global work space
+        """
+
+        max_wg_dims = device.max_work_item_sizes[0:3]
+        max_glo_dims = device.max_work_group_size
+
+        three = get_highest_divisor(shape[2],max_wg_dims[2])
+        max_two = max_glo_dims/three
+        two = get_highest_divisor(shape[1],max_two)
+        one = 1
+
+        return (one, two, three)
+
+
 
     #####################################################
     #                   RUN METHODS                     #
