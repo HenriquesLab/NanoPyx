@@ -9,6 +9,8 @@ try:
     
     devices = []
     for platform in cl.get_platforms():
+        if 'Microsoft' in platform.vendor:
+            continue
         for dev in platform.get_devices():
             # check if the device is a GPU
             if "GPU" not in cl.device_type.to_string(dev.type):
