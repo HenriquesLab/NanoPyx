@@ -226,7 +226,7 @@ class RadialGradientConvergence(LiquidEngine):
 
         # Calculating max slices
         size_per_slice = gradient_col_interp[0,:,:].nbytes + gradient_row_interp[0,:,:].nbytes + image_interp[0,:,:].nbytes + rgc_map[0,:,:].nbytes
-        max_slices = int((device['device'].global_mem_size // (size_per_slice))/3)   # TODO 3 is a magic number 
+        max_slices = int((device['device'].global_mem_size // (size_per_slice))/4)   # TODO 3 is a magic number 
 
         # Initial buffers
         mf = cl.mem_flags
