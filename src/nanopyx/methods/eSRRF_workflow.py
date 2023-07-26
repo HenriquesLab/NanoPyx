@@ -45,6 +45,6 @@ def eSRRF_3(image, magnification: int = 5, radius: float = 1.5, sensitivity: flo
       eSRRF analysis of an image
       """
 
-      _eSRRF = Workflow((eSRRF_ST(), (image,), {"run_type": run_type}))
+      _eSRRF = Workflow((eSRRF_ST(), (image,), {'magnification': magnification, 'radius': radius, 'sensitivity': sensitivity, 'doIntensityWeighting': doIntensityWeighting, 'run_type':'OpenCL_Apple M1 Pro'}))
 
       return _eSRRF
