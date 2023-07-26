@@ -48,6 +48,7 @@ class eSRRF(LiquidEngine):
         mf = cl.mem_flags
 
         input_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices, :, :].nbytes)
+        cl.enqueue_copy(cl_queue, input_cl, image[0:max_slices,:,:]).wait()
         output_cl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, np.empty(output_shape, dtype=np.float32).nbytes)
         magnified_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, np.empty((max_slices, output_shape[1], output_shape[2]), dtype=np.float32).nbytes)
         col_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, np.empty((max_slices, image.shape[1], image.shape[2]), dtype=np.float32).nbytes)
