@@ -21,7 +21,7 @@ class RadialGradientConvergence(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "RadialGradientConvergence"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
-                        unthreaded_=False, threaded_=True, threaded_static_=True, 
+                        unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
 
 
@@ -37,7 +37,7 @@ class RadialGradientConvergence(LiquidEngine):
         gradient_row_interp = check_image(gradient_row_interp)
         image_interp = check_image(image_interp)
         return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting)
-    
+
 
     # tag-start: _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification, radius, sensitivity, doIntensityWeighting):
@@ -66,6 +66,7 @@ class RadialGradientConvergence(LiquidEngine):
                                 rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
                             else:
                                 rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+
         return rgc_map
         # tag-end
 

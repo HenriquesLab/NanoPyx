@@ -9,6 +9,9 @@ from libc.math cimport cos, sin
 from .__interpolation_tools__ import check_image, value2array
 from .__liquid_engine__ import LiquidEngine
 from .__opencl__ import cl, cl_array
+from ._le_interpolation_catmull_rom import ShiftAndMagnify
+from ._le_roberts_cross_gradients import GradientRobertsCross
+from ._le_radial_gradient_convergence import RadialGradientConvergence
 
 
 class eSRRF(LiquidEngine):
@@ -19,8 +22,8 @@ class eSRRF(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "eSRRF_ST"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                        opencl_=True, unthreaded_=False, threaded_=False, threaded_static_=False, 
-                        threaded_dynamic_=False, threaded_guided_=False)
+                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
+                        threaded_dynamic_=True, threaded_guided_=True)
 
     def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
         image = check_image(image)
@@ -138,3 +141,73 @@ class eSRRF(LiquidEngine):
 
 
         return output_image
+
+    def _run_threaded(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+        runtype = "Threaded"
+        crsm = ShiftAndMagnify()
+        rbc = GradientRobertsCross()
+        rgc = RadialGradientConvergence()
+        
+        magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
+        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+
+        return radial_gradients
+
+    def _run_threaded_dynamic(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+        runtype = "Threaded_dynamic"
+        crsm = ShiftAndMagnify()
+        rbc = GradientRobertsCross()
+        rgc = RadialGradientConvergence()
+        
+        magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
+        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+
+        return radial_gradients
+
+    def _run_threaded_static(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+        runtype = "Threaded_static"
+        crsm = ShiftAndMagnify()
+        rbc = GradientRobertsCross()
+        rgc = RadialGradientConvergence()
+        
+        magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
+        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+
+        return radial_gradients
+
+    def _run_threaded_guided(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+        runtype = "Threaded_guided"
+        crsm = ShiftAndMagnify()
+        rbc = GradientRobertsCross()
+        rgc = RadialGradientConvergence()
+        
+        magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
+        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+
+        return radial_gradients
+
+    def _run_unthreaded(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+        runtype = "Unthreaded"
+        crsm = ShiftAndMagnify()
+        rbc = GradientRobertsCross()
+        rgc = RadialGradientConvergence()
+        
+        magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
+        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
+        #radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+
+        #return radial_gradients

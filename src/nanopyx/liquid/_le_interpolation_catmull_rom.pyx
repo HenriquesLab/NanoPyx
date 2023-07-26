@@ -95,7 +95,8 @@ class ShiftAndMagnify(LiquidEngine):
 
         mf = cl.mem_flags
         input_opencl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait() 
+        cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
+        print(dc.global_mem_size, max_slices, image[0:max_slices,:,:].nbytes, image_out[0:max_slices,:,:].nbytes) 
         output_opencl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, image_out[0:max_slices,:,:].nbytes)
 
         code = self._get_cl_code("_le_interpolation_catmull_rom_.cl", device['DP'])
@@ -124,6 +125,8 @@ class ShiftAndMagnify(LiquidEngine):
 
             cl_queue.finish()
 
+        input_opencl.release()
+        output_opencl.release()
         # Swap rows and columns back
         return np.ascontiguousarray(np.swapaxes(image_out, 1, 2), dtype=np.float32)
     # tag-end

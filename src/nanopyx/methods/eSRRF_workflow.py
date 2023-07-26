@@ -39,11 +39,12 @@ def eSRRF_2(image, magnification: int = 5, radius: float = 1.5, sensitivity: flo
 
       return _eSRRF
 
-def eSRRF_3(image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
+def eSRRF_3(image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True,
+          run_type="Threaded"):
       """
       eSRRF analysis of an image
       """
 
-      _eSRRF = Workflow((eSRRF_ST(), (image,), {"run_type": "OpenCL_NVIDIA GeForce RTX 4090"}))
+      _eSRRF = Workflow((eSRRF_ST(), (image,), {"run_type": run_type}))
 
       return _eSRRF
