@@ -31,7 +31,7 @@ from ._le_radiality import Radiality
 from ._le_radial_gradient_convergence import RadialGradientConvergence
 from ._le_roberts_cross_gradients import GradientRobertsCross
 from ._le_esrrf import eSRRF as eSRRF_ST
-from .__le_convolution import Convolution as Convolution2D
+from ._le_convolution import Convolution as Convolution2D
 from ._le_DUMMY import DUMMY
 
 from multiprocessing import current_process
