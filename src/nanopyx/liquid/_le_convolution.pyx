@@ -202,17 +202,20 @@ class Convolution(LiquidEngine):
 
     def _run_opencl(self, image, kernel, device):
 
+        print(image.shape)
+        
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)
 
-        image_out = np.zeros(image.shape, dtype=np.float32)
         nRows_kernel = kernel.shape[0]
         nCols_kernel = kernel.shape[1]
 
         center_r = (nRows_kernel-1) // 2
         center_c = (nCols_kernel-1) // 2
+
+        image_out = np.zeros((image.shape[0], image.shape[1]), dtype=np.float32)
 
         mf = cl.mem_flags
 
