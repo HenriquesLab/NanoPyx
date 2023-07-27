@@ -14,7 +14,7 @@ conv2d(__global float *image_in, __global float *image_out, __global float *kern
 
   for (int kr = 0; kr<nRows_kernel; kr++) {
     for (int kc = 0; kc<nCols_kernel; kc++) {
-      local_row = min(max(kr-center_r,0),nRows-1);
+      local_row = min(max(r+(kr-center_r),0),nRows-1);
       local_col = min(max(c+(kc-center_c),0),nCols-1);
       acc = acc+ kernel_array[kr*nCols_kernel+kc] * image_in[local_row*nCols+local_col];
       }
