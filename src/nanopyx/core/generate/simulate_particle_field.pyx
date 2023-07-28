@@ -203,7 +203,7 @@ def get_closest_distance(float[:,:] particle_field):
     return closest_distance
 
 
-def render_particle_histogram(float[:,:] particle_field, int h, int w):
+def render_particle_histogram(float[:,:] particle_field, int h, int w, double amplitude, double sigma_x, double sigma_y):
     """
     Render a particle field as an image
     :param particle_field: 2D array of floats, the particle field with shape (n_particles, 2) where the last dimension is the x and y coordinates of the particle
@@ -226,7 +226,8 @@ def render_particle_histogram(float[:,:] particle_field, int h, int w):
             x = int(xp[i])
             y = int(yp[i])
             if 0 <= x < w or 0 <= y < h:
-                _image_particle_field[y, x] += 1
+                # _image_particle_field[y, x] += 1
+                _image_particle_field = _render_erf_gaussian(_image_particle_field, x, y, amplitude, sigma_x, sigma_y)
 
     return image_particle_field
 

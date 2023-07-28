@@ -73,7 +73,7 @@ def render_gaussians(float[:,:] image, double[:] x, double[:] y, double[:] ampli
             _render_erf_gaussian(image, x[p], y[p], amplitude[p], sigma_x[p], sigma_y[p])
 
 
-cdef void _render_erf_gaussian(float[:,:] image, double xp, double yp, double amplitude, double sigma_x, double sigma_y) nogil:
+cdef float[:,:] _render_erf_gaussian(float[:,:] image, double xp, double yp, double amplitude, double sigma_x, double sigma_y) nogil:
     """
     Render a gaussian particle on an image using the error function (erf) to calculate the integral of the gaussian
     :param image: the image to render the particles on
@@ -108,3 +108,9 @@ cdef void _render_erf_gaussian(float[:,:] image, double xp, double yp, double am
         for i in range(x_start, x_end):
             Ex = 0.5 * (erf((i + 0.5 - xp) / sx2) - erf((i - 0.5 - xp) / sx2))
             image[j,i] += amplitude * Ex * Ey
+            
+    return image
+
+def render_erf_gaussian(image, xp, yp, amplitude, sigma_x, sigma_y):
+    image = np.asarray(image, dtype=np.float32)
+    return _render_erf_gaussian(image, xp, yp, amplitude, sigma_x, sigma_y)
