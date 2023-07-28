@@ -12,7 +12,6 @@ frames = [1000]
 dims = [100]
 runtypes = ["Threaded", "OpenCL_NVIDIA GeForce RTX 4090"]
 
-im = imread("im.tif")
 
 # for f in frames:
 #     for dim in dims:
@@ -33,9 +32,6 @@ im = imread("im.tif")
                         
 #                         with open("eSRRF.csv", "a") as fl:
 #                             fl.writelines(bench)
-
-#img = np.random.random((1000,500,500)).astype(np.float32)
-img = im
 
 # @timeit2
 # def run(img):
@@ -59,13 +55,19 @@ img = im
 
 @timeit2
 def run3(img):
-    out = eSRRF_3(img).run()
-    return np.mean(out[0], axis=0)
+    out = eSRRF_3(img, sensitivity=2).run()
+    return out
 
+
+"""im = imread("essrf_4_ines/stack.tif")
+im = im.astype(np.float32)
+for i in range(0,10000,500):
+    start_slice = i
+    end_slice = i+500
+    sliced_img = im[start_slice:end_slice,:,:]
+    reconstructed = run3(sliced_img)[0]
+    print(sliced_img.shape, reconstructed.shape)
+    imwrite(f"essrf_4_ines/slice_{start_slice}_{end_slice}.tif",reconstructed)"""
+
+im = np.random.random((2,500,500)).astype(np.float32)
 run3(im)
-
-# plt.imshow(run3(img))
-# plt.show()
-
-# for i in range(10):
-#     run3(img)
