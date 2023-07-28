@@ -18,8 +18,8 @@ class ChannelRegistrationEstimator(object):
         corrector = ChannelRegistrationCorrector()
         return corrector.align_channels(img_stack, translation_masks=self.translation_masks)
 
-    def calculate_translation(self, channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity, method="subpixel"):
-        translation_mask = calculate_translation_mask(channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity, method=method)
+    def calculate_translation(self, channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity, algorithm="field", method="subpixel"):
+        translation_mask = calculate_translation_mask(channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity, algorithm=algorithm, method=method)
         return translation_mask
 
     def save_translation_mask(self, path=None):
@@ -37,7 +37,7 @@ class ChannelRegistrationEstimator(object):
     def estimate(self, img_stack: array, ref_channel: int, max_shift: float,
                  blocks_per_axis: int, min_similarity: float, method: str="subpixel",
                  save_translation_masks: bool=True, translation_mask_save_path: str=None,
-                 save_ccms: bool=False, ccms_save_path: str=None,
+                 save_ccms: bool=False, ccms_save_path: str=None, algorithm: str="field",
                  apply: bool=False):
 
         channels_to_align = list(range(img_stack.shape[0]))
@@ -51,7 +51,7 @@ class ChannelRegistrationEstimator(object):
         self.ccms = []
 
         for channel in channels_to_align:
-            translation_mask, ccm = self.calculate_translation(img_stack[channel], img_stack[ref_channel], max_shift, blocks_per_axis, min_similarity, method=method)
+            translation_mask, ccm = self.calculate_translation(img_stack[channel], img_stack[ref_channel], max_shift, blocks_per_axis, min_similarity, algorithm=algorithm, method=method)
             self.translation_masks[channel] = translation_mask
             self.ccms.append(ccm)
 
