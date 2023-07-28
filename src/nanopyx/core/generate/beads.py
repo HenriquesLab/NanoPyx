@@ -114,7 +114,7 @@ def generate_channel_misalignment():
         for y_i in range(n_blocks):
             ref_channel[y_i*block_h:y_i*block_h+block_h, x_i*block_w:x_i*block_w+block_w] += block_img
 
-    misalignments = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1)]
+    misalignments = [(-3, -3), (-3, 0), (-3, 3), (0, -3), (0, 0), (0, 3), (3, -3), (3, 0), (3, 3)]
 
     for mis in misalignments:
         block_img = np.zeros((int(h/n_blocks), int(w/n_blocks)))
