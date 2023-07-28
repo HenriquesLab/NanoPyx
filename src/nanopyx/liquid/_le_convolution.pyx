@@ -1,6 +1,8 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
+import time
+
 
 cimport numpy as np
 
@@ -209,27 +211,21 @@ class Convolution(LiquidEngine):
         dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)
 
-        nRows_kernel = kernel.shape[0]
-        nCols_kernel = kernel.shape[1]
-        center_r = (nRows_kernel-1) // 2
-        center_c = (nCols_kernel-1) // 2
-
         image_out = np.zeros((image.shape[0], image.shape[1]), dtype=np.float32)
-
         mf = cl.mem_flags
+
         input_image = cl.image_from_array(cl_ctx, image, mode='r')
         input_kernel = cl.image_from_array(cl_ctx, kernel, mode='r')
         output_opencl = cl.image_from_array(cl_ctx, image_out, mode='w')
-
         cl_queue.finish()
-
+        
         code = self._get_cl_code("_le_convolution.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.conv2d
 
         knl(cl_queue,
-            (image.shape[0], image.shape[1]), 
-            None, 
+            (1,image.shape[0], image.shape[1]), 
+            self.get_work_group(device['device'],(1,image.shape[0], image.shape[1])),
             input_image, 
             output_opencl, 
             input_kernel).wait() 

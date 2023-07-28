@@ -1,17 +1,12 @@
-__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP_TO_EDGE | CLK_FILTER_NEAREST;
 
 __kernel void
 conv2d(__read_only image2d_t image_in, __write_only image2d_t image_out, __read_only image2d_t kernel_array) {
 
-
   const int2 image_size = get_image_dim(image_in);
   const int2 kernel_size = get_image_dim(kernel_array);
-  int2 image_coords = (int2)(get_global_id(0), get_global_id(1));
+  int2 image_coords = (int2)(get_global_id(1), get_global_id(2));
   int2 kernel_center = (kernel_size-1)/2;
-  
-  float4 pixel = read_imagef(image_in,sampler,image_coords);
-  //printf("COORDS = %d, %d \n",image_coords.x, image_coords.y);
-  //printf("PIXEL = %2.2v4hlf\n", pixel); 
 
   float acc = 0;
   int2 local_coords;
