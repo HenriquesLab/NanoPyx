@@ -1,25 +1,32 @@
+__constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
+
 __kernel void
-conv2d(__global float *image_in, __global float *image_out, __global float *kernel_array,
-      int nRows_kernel, int nCols_kernel, int center_r, int center_c) {
+conv2d(__read_only image2d_t image_in, __write_only image2d_t image_out, __read_only image2d_t kernel_array) {
 
-  int r = get_global_id(0);
-  int c = get_global_id(1);
 
-  int nRows = get_global_size(0);
-  int nCols = get_global_size(1);
+  const int2 image_size = get_image_dim(image_in);
+  const int2 kernel_size = get_image_dim(kernel_array);
+  int2 image_coords = (int2)(get_global_id(0), get_global_id(1));
+  int2 kernel_center = (kernel_size-1)/2;
+  
+  float4 pixel = read_imagef(image_in,sampler,image_coords);
+  //printf("COORDS = %d, %d \n",image_coords.x, image_coords.y);
+  //printf("PIXEL = %2.2v4hlf\n", pixel); 
 
   float acc = 0;
+  int2 local_coords;
+  int2 kernel_coords;
 
-  int local_row, local_col;
+  for (int kr = 0; kr<kernel_size.x; kr++) {
+    for (int kc = 0; kc<kernel_size.y; kc++) {
 
-  for (int kr = 0; kr<nRows_kernel; kr++) {
-    for (int kc = 0; kc<nCols_kernel; kc++) {
-      local_row = min(max(r+(kr-center_r),0),nRows-1);
-      local_col = min(max(c+(kc-center_c),0),nCols-1);
-      acc = acc+ kernel_array[kr*nCols_kernel+kc] * image_in[local_row*nCols+local_col];
+      kernel_coords = (int2)(kr,kc);
+      local_coords = image_coords + (kernel_coords-kernel_center);
+
+      acc = acc + read_imagef(kernel_array,sampler,kernel_coords).x * read_imagef(image_in,sampler,local_coords).x;
       }
     }
 
-  image_out[r*nCols+c] = acc;
+  write_imagef(image_out,image_coords,acc);
 }
 

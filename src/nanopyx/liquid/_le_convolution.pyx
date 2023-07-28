@@ -201,8 +201,6 @@ class Convolution(LiquidEngine):
 
 
     def _run_opencl(self, image, kernel, device):
-
-        print(image.shape)
         
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
@@ -211,21 +209,17 @@ class Convolution(LiquidEngine):
 
         nRows_kernel = kernel.shape[0]
         nCols_kernel = kernel.shape[1]
-
         center_r = (nRows_kernel-1) // 2
         center_c = (nCols_kernel-1) // 2
 
         image_out = np.zeros((image.shape[0], image.shape[1]), dtype=np.float32)
 
         mf = cl.mem_flags
+        input_image = cl.image_from_array(cl_ctx, image, mode='r')
+        input_kernel = cl.image_from_array(cl_ctx, kernel, mode='r')
+        output_opencl = cl.image_from_array(cl_ctx, image_out, mode='w')
 
-        input_image = cl.Buffer(cl_ctx, mf.READ_ONLY, image.nbytes)
-        cl.enqueue_copy(cl_queue, input_image, image).wait()
-
-        input_kernel = cl.Buffer(cl_ctx, mf.READ_ONLY, kernel.nbytes)
-        cl.enqueue_copy(cl_queue, input_kernel, kernel).wait()
-
-        output_opencl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, image_out.nbytes)
+        cl_queue.finish()
 
         code = self._get_cl_code("_le_convolution.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
@@ -236,14 +230,9 @@ class Convolution(LiquidEngine):
             None, 
             input_image, 
             output_opencl, 
-            input_kernel,
-            np.int32(nRows_kernel), 
-            np.int32(nCols_kernel), 
-            np.int32(center_r), 
-            np.int32(center_c)).wait() 
+            input_kernel).wait() 
 
-        cl.enqueue_copy(cl_queue, image_out, output_opencl).wait() 
+        cl.enqueue_copy(cl_queue, image_out, output_opencl,origin=(0,0), region=(image.shape[0], image.shape[1])).wait() 
 
         cl_queue.finish()
-
         return image_out
