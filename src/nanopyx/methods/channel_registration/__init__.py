@@ -4,7 +4,7 @@ from ...core.utils.timeit import timeit
 
 @timeit
 def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method="subpixel",
-                                  save_translation_masks=True, translation_mask_save_path=None,
+                                  save_translation_masks=True, translation_mask_save_path=None, algorithm="field",
                                   save_ccms=False, ccms_save_path=False, apply=True):
     """
     Function used to estimate shift between different color channels and align them of an image based on cross correlation.
@@ -25,7 +25,7 @@ def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_pe
     estimator = ChannelRegistrationEstimator()
     aligned_image = estimator.estimate(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method=method,
                                        save_translation_masks=save_translation_masks, translation_mask_save_path=translation_mask_save_path,
-                                       save_ccms=save_ccms, ccms_save_path=ccms_save_path, apply=apply)
+                                       save_ccms=save_ccms, ccms_save_path=ccms_save_path, algorithm=algorithm, apply=apply)
 
     if aligned_image is not None:
         return aligned_image
