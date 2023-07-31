@@ -20,7 +20,7 @@ class Workflow:
             else:
                 raise TypeError("Each arg must be a tuple of 3 items (fn, args, kwargs)")
 
-    def run(self,):
+    def run(self,_force_run_type=None):
         """
         Run the workflow sequentially
         """
@@ -47,8 +47,11 @@ class Workflow:
 
 
             # Get run type from the Agent
-            #run_type = Agent.get_run_type(fn, sane_args, kwargs)
-            #kwargs['run_type'] = run_type
+            run_type = Agent.get_run_type(fn, sane_args, kwargs)
+            kwargs['run_type'] = run_type
+
+            if _force_run_type:
+                kwargs['run_type'] = _force_run_type
 
             # TODO maybe we need to warn the agent its running and when it finishes
             return_value = fn.run(*sane_args, **kwargs)
@@ -60,7 +63,7 @@ class Workflow:
 
             Agent._inform(fn)
 
-        return self._return_values[-1]
+        return self._return_values[-1], fn._last_runtype, fn._last_time
     
 
     
