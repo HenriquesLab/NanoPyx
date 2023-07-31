@@ -46,7 +46,6 @@ class eSRRF(LiquidEngine):
         output_image = np.zeros(output_shape, dtype=np.float32)
 
         max_slices = 64 #int((dc.global_mem_size // total_memory)/25) #TODO change magic number to user device max image size for buffer
-        print(dc.global_mem_size, total_memory, max_slices)
         
         mf = cl.mem_flags
 
