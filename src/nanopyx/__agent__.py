@@ -46,43 +46,6 @@ class Agent_:
         
         self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
 
-    def _gaussian_weighted_average_std(self, run_info, n_points=200, sigma=20):
-        """
-        Calculates the weighted average and standard deviation of the last n_points from the run_info array.
-        
-        :param run_info: The array of data to calculate the weighted average and standard deviation.
-        :type run_info: numpy.ndarray
-        
-        :param n_points: The number of points to use in the calculation. Defaults to 200.
-        :type n_points: int
-        
-        :return: A tuple containing the weighted average and standard deviation of the last n_points.
-        :rtype: Tuple[float, float]
-        """
-        # TODO: update sigma to reflect choice of either timestamps vs n_points
-        
-        data = np.array(run_info)
-        # remove nan values TODO: give a penalty to nan aka crash instead of ignoring
-        data = data[np.isfinite(data)]
-        if data.shape[0] < n_points:
-            n_points = data.shape[0]
-        lower_limit = data.shape[0] - n_points
-        data = data[lower_limit:]
-        
-        # create truncated normal distribution
-        x = np.linspace(0, len(data)-1, len(data))
-        mu = x[-1]
-        weights = norm.pdf(x,mu,sigma)
-        weights = np.abs(weights)  # take absolute value
-        weights /= np.sum(weights)  # normalize to sum 1
-        
-        # calculate weighted average
-        weighted_average = np.sum(data * weights)
-        weighted_std = np.sqrt(np.sum(weights * (data - weighted_average)**2))
-        
-        return weighted_average, weighted_std # TODO test and uncomment
-        #return np.nanmean(run_info), np.nanstd(run_info)
-
     def _get_ordered_run_types(self, fn, args, kwargs):
         """
         Retrieves an ordered list of run_types for the given args and kwargs
@@ -91,8 +54,10 @@ class Agent_:
         # str representation of the arguments and their corresponding 'norm'
         repr_args, repr_norm = fn._get_args_repr_score(*args, **kwargs)
         # dictionary to hold speeds
-        avg_speed = {}
-        std_speed = {}
+        fast_avg_speed = {}
+        fast_std_speed = {}
+        slow_avg_speed = {}
+        slow_std_speed = {}
         # fn._benchmarks is a dictionary of dictionaries. The first key is the run_type, the second key is the repr_args
         # Check every run_type for the most similar args
         for run_type in fn._run_types:
@@ -114,10 +79,19 @@ class Agent_:
                     run_info = np.inf 
                 else:
                     run_info = fn._benchmarks[run_type][best_repr_args][1:]
-            
-            avg_speed[run_type], std_speed[run_type] = self._gaussian_weighted_average_std(run_info)
 
-        return avg_speed, std_speed
+            run_info = np.array(run_info)
+            if len(run_info)>50:
+                run_info = run_info[-50:]
+
+            fast_values = np.partition(run_info,len(run_info)//2)[:len(run_info)//2]
+            slow_values = np.partition(run_info,len(run_info)//2)[len(run_info)//2:]
+            fast_avg_speed[run_type] = np.average(fast_values)
+            fast_std_speed[run_type] = np.std(fast_values)
+            slow_avg_speed[run_type] = np.average(slow_values)
+            slow_std_speed[run_type] = np.std(slow_values)
+
+        return fast_avg_speed, fast_std_speed, slow_avg_speed, slow_std_speed
     
     def _calculate_prob_of_delay(self, runtimes_history, avg, std):
         """
@@ -125,12 +99,12 @@ class Agent_:
         """
 
         # Boolean array, True if delay, False if not
-        delays = runtimes_history > avg+2*std
+        delays = runtimes_history > avg+4*std
 
         model = LogisticRegression()
         model.fit([[state] for state in delays[:-1]], delays[1:])
         
-        return model.predict_proba([[True]])[:,model.classes_.tolist().index(True)]
+        return model.predict_proba([[True]])[:,model.classes_.tolist().index(True)][0]
 
     def _check_delay(self, run_type, runtime, runtimes_history):
         """
@@ -139,64 +113,94 @@ class Agent_:
             1. Calculates a probability that this delay is maintained
             2. Stores the delay factor and the probability
         """
+        
         threaded_runtypes = ["Threaded", "Threaded_static", "Threaded_dynamic", "Threaded_guided"]
-        avg = np.nanmean(runtimes_history) # standard average as opposed to weighted as a weighted average would throw false negatives if delays happen consecutively
-        std = np.nanstd(runtimes_history)
-        if runtime > avg + 2*std:
-            runtimes_history.append(runtime)
-            delay_factor = runtime / avg
+        
+        runtimes_history = np.array(runtimes_history)
+        if len(runtimes_history)>50:
+            runtimes_history = runtimes_history[-50:]
+        fast_values = np.partition(runtimes_history,len(runtimes_history)//2)[:len(runtimes_history)//2]
+        slow_values = np.partition(runtimes_history,len(runtimes_history)//2)[len(runtimes_history)//2:]
+        
+        fast_avg_speed = np.average(fast_values)
+        fast_std_speed = np.std(fast_values)
+        slow_avg_speed = np.average(slow_values)
+        slow_std_speed = np.std(slow_values)
+        
+        if False:
+            print("Checking delay", run_type)
+            print(runtimes_history)
+            print(fast_values)
+            print(slow_values)
+            print(fast_avg_speed, fast_std_speed)
+            print(slow_avg_speed, slow_std_speed)
+
+        if run_type in self.delayed_runtypes:
+            if runtime < (slow_avg_speed - slow_std_speed) or runtime < (fast_avg_speed + fast_std_speed):
+                if "Threaded" in run_type:
+                    for threaded_run_type in threaded_runtypes:
+                        self.delayed_runtypes.pop(threaded_run_type, None)
+                else:
+                    if run_type in self.delayed_runtypes:
+                        self.delayed_runtypes.pop(run_type, None)
+                return 'Delay off'
+    
+        if runtime > fast_avg_speed + 4*fast_std_speed:
+            runtimes_history = np.append(runtimes_history,runtime)
+            delay_factor = runtime / fast_avg_speed
             try:
-                delay_prob = self._calculate_prob_of_delay(runtimes_history, avg, std)
+                delay_prob = self._calculate_prob_of_delay(runtimes_history, fast_avg_speed, fast_std_speed)
             except ValueError:
                 delay_prob = 0.01
             print(f"Run type {run_type} was delayed in the previous run. Delay factor: {delay_factor}, Delay probability: {delay_prob}")
+
             if "Threaded" in run_type:
                 for threaded_run_type in threaded_runtypes:
                     self.delayed_runtypes[threaded_run_type] = (delay_factor, delay_prob)
             else:
                 self.delayed_runtypes[run_type] = (delay_factor, delay_prob)
+
     
-    def _adjust_times(self, device_times):
+    def _adjust_times(self, fast_device_times, slow_device_times):
         """
         Adjusts the historic avg time of a run_type if it was delayed in previous runs
         """
+        adjusted_times = fast_device_times.copy()
         for runtype in self.delayed_runtypes.keys():
-            if runtype in device_times.keys():
+            if runtype in fast_device_times.keys():
                 delay_factor, delay_prob = self.delayed_runtypes[runtype]
                 # Weighted avg by the probability the run_type is still delayed
                 # expected_time * P(~delay) + delayed_time * P(delay)
-                device_times[runtype] = device_times[runtype] * (1 - delay_prob) + device_times[runtype] * delay_factor * delay_prob
+                adjusted_times[runtype] = fast_device_times[runtype] * (1 - delay_prob) + fast_device_times[runtype] * delay_factor * delay_prob
 
-        return device_times
+        return adjusted_times
 
-    def get_run_type(self, fn, args, kwargs, mode='dynamic'):
+    def get_run_type(self, fn, args, kwargs):
         """
         Returns the best run_type for the given args and kwargs
         """
-
+        
         # Get list of run types
-        # Note that the avg and std are weighted to give more importance to the most recent runs
-        avg, std = self._get_ordered_run_types(fn, args, kwargs)
+        fast_avg, fast_std, slow_avg, slow_std = self._get_ordered_run_types(fn, args, kwargs)
         
         # Penalize the average time a run_type had if that run_type was delayed in previous runs
         if len(self.delayed_runtypes.keys()) > 0:
-            avg = self._adjust_times(avg)
-
-        sorted_fastest = sorted(avg, key=avg.get)
-
-        # no match case in python >=3.9 so elifs it is
-        if mode == 'fastest':
-            return sorted_fastest[0]
-        
-        elif mode == 'dynamic':
-            weights = [(1/avg[k])**2 for k in avg]
-            if sum(weights) == 0:
-                weights = [1 for k in avg]
-            return random.choices(list(avg.keys()), weights=weights, k=1)[0]
-        
+            adjusted_avg = self._adjust_times(fast_avg, slow_avg)
         else:
-            return sorted_fastest[0]   
+            return sorted(fast_avg, key=fast_avg.get)[0]
+        
+        #sorted_fastest = sorted(avg, key=avg.get)
+        #normalized_avgs = [avg[k]/(avg[sorted_fastest[-1]]-avg[sorted_fastest[0]]) for k in avg]
+        
+        weights = [(1/adjusted_avg[k])**2 for k in adjusted_avg]
+        weights = weights / np.sum(weights)
 
+        # failsafe
+        if sum(weights) == 0:
+            weights = [1 for k in adjusted_avg]
+
+        return random.choices(list(adjusted_avg.keys()), weights=weights, k=1)[0]
+    
     def _inform(self, fn):
         """
         Informs the Agent that a LE object finished running
@@ -213,5 +217,6 @@ class Agent_:
 
         if len(historical_data) > 19:
             self._check_delay(run_type, historical_data[-1], historical_data[:-1])
+
 
 Agent = Agent_()
