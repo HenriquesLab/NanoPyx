@@ -238,7 +238,7 @@ class Radiality(LiquidEngine):
         return imRad
 
     
-    def _run_opencl(self, image, image_interp, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting, dict device):
+    def _run_opencl(self, image, image_interp, magnification=5, ringRadius=0.5, border=0, radialityPositivityConstraint=True, doIntensityWeighting=True, device=None):
 
         cl_ctx = cl.Context([device['device']])
         cl_queue = cl.CommandQueue(cl_ctx)
