@@ -126,14 +126,6 @@ class Agent_:
         fast_std_speed = np.std(fast_values)
         slow_avg_speed = np.average(slow_values)
         slow_std_speed = np.std(slow_values)
-        
-        if False:
-            print("Checking delay", run_type)
-            print(runtimes_history)
-            print(fast_values)
-            print(slow_values)
-            print(fast_avg_speed, fast_std_speed)
-            print(slow_avg_speed, slow_std_speed)
 
         if run_type in self.delayed_runtypes:
             if runtime < (slow_avg_speed - slow_std_speed) or runtime < (fast_avg_speed + fast_std_speed):
@@ -186,21 +178,22 @@ class Agent_:
         # Penalize the average time a run_type had if that run_type was delayed in previous runs
         if len(self.delayed_runtypes.keys()) > 0:
             adjusted_avg = self._adjust_times(fast_avg, slow_avg)
+
+            if sorted(fast_avg, key=fast_avg.get)[0] == sorted(adjusted_avg, key=adjusted_avg.get)[0]:
+                return sorted(fast_avg, key=fast_avg.get)[0]
+
+            weights = [(1/adjusted_avg[k])**2 for k in adjusted_avg]
+            weights = weights / np.sum(weights)
+            
+            # failsafe
+            if sum(weights) == 0:
+                weights = [1 for k in adjusted_avg]
+                
+            return random.choices(list(adjusted_avg.keys()), weights=weights, k=1)[0]
         else:
             return sorted(fast_avg, key=fast_avg.get)[0]
         
-        #sorted_fastest = sorted(avg, key=avg.get)
-        #normalized_avgs = [avg[k]/(avg[sorted_fastest[-1]]-avg[sorted_fastest[0]]) for k in avg]
-        
-        weights = [(1/adjusted_avg[k])**2 for k in adjusted_avg]
-        weights = weights / np.sum(weights)
 
-        # failsafe
-        if sum(weights) == 0:
-            weights = [1 for k in adjusted_avg]
-
-        return random.choices(list(adjusted_avg.keys()), weights=weights, k=1)[0]
-    
     def _inform(self, fn):
         """
         Informs the Agent that a LE object finished running
