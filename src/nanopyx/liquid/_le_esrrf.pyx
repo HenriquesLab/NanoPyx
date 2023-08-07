@@ -27,13 +27,14 @@ class eSRRF(LiquidEngine):
 
     def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
         image = check_image(image)
-        return self._run(image, magnification, radius, sensitivity, doIntensityWeighting, run_type=run_type)
+        return self._run(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
     def benchmark(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
         image = check_image(image)
         return super().benchmark(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
-    def _run_opencl(self, image, magnification, radius, sensitivity, doIntensityWeighting, device):
+    def _run_opencl(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None):
+
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)
@@ -45,7 +46,7 @@ class eSRRF(LiquidEngine):
         total_memory = (3*image[0, :, :].nbytes) + (2*np.zeros((1, output_shape[1], output_shape[2]), dtype=np.float32).nbytes) + (2*np.zeros((1, output_shape[1]*2, output_shape[2]*2), dtype=np.float32).nbytes)
         output_image = np.zeros(output_shape, dtype=np.float32)
 
-        max_slices = 64 #int((dc.global_mem_size // total_memory)/25) #TODO change magic number to user device max image size for buffer
+        max_slices = int((dc.global_mem_size // total_memory)/3) #TODO change magic number to user device max image size for buffer
         
         mf = cl.mem_flags
 
@@ -142,7 +143,7 @@ class eSRRF(LiquidEngine):
 
         return output_image
 
-    def _run_threaded(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+    def _run_threaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "Threaded"
         crsm = ShiftAndMagnify()
         rbc = GradientRobertsCross()
@@ -156,7 +157,7 @@ class eSRRF(LiquidEngine):
 
         return radial_gradients
 
-    def _run_threaded_dynamic(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+    def _run_threaded_dynamic(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "Threaded_dynamic"
         crsm = ShiftAndMagnify()
         rbc = GradientRobertsCross()
@@ -170,7 +171,7 @@ class eSRRF(LiquidEngine):
 
         return radial_gradients
 
-    def _run_threaded_static(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+    def _run_threaded_static(self, image,  magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "Threaded_static"
         crsm = ShiftAndMagnify()
         rbc = GradientRobertsCross()
@@ -184,7 +185,7 @@ class eSRRF(LiquidEngine):
 
         return radial_gradients
 
-    def _run_threaded_guided(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+    def _run_threaded_guided(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "Threaded_guided"
         crsm = ShiftAndMagnify()
         rbc = GradientRobertsCross()
@@ -198,7 +199,7 @@ class eSRRF(LiquidEngine):
 
         return radial_gradients
 
-    def _run_unthreaded(self, image, magnification, radius, sensitivity, doIntensityWeighting):
+    def _run_unthreaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "Unthreaded"
         crsm = ShiftAndMagnify()
         rbc = GradientRobertsCross()
@@ -208,6 +209,6 @@ class eSRRF(LiquidEngine):
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
         gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
         gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        #radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
 
-        #return radial_gradients
+        return radial_gradients
