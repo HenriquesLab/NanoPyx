@@ -39,12 +39,11 @@ def eSRRF_2(image, magnification: int = 5, radius: float = 1.5, sensitivity: flo
 
       return _eSRRF
 
-def eSRRF_3(image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True,
-          run_type="Threaded"):
+def eSRRF_3(image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
       """
       eSRRF analysis of an image
       """
 
-      _eSRRF = Workflow((eSRRF_ST(), (image,), {'magnification': magnification, 'radius': radius, 'sensitivity': sensitivity, 'doIntensityWeighting': doIntensityWeighting, 'run_type':run_type}))
+      _eSRRF = Workflow((eSRRF_ST(), (image,), {'magnification': magnification, 'radius': radius, 'sensitivity': sensitivity, 'doIntensityWeighting': doIntensityWeighting}))
 
       return _eSRRF
