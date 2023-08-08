@@ -35,8 +35,6 @@ class Radiality(LiquidEngine):
                         unthreaded_=False, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
 
-    
-    @timeit2
     def run(self, image, image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
         image = check_image(image)
         image_interp = check_image(image_interp)
@@ -84,7 +82,7 @@ class Radiality(LiquidEngine):
                         else:
                             imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
 
-        return imRad
+        return np.asarray(imRad)
         # tag-end
 
     # tag-copy:  _le_radiality.Radiality._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range((1 + _border) * _magnification, (h - 1 - _border) * _magnification)", "prange((1 + _border) * _magnification, (h - 1 - _border) * _magnification)")
@@ -123,7 +121,7 @@ class Radiality(LiquidEngine):
                         else:
                             imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
 
-        return imRad
+        return np.asarray(imRad)
         # tag-end
 
     def _run_threaded_static(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
@@ -161,7 +159,7 @@ class Radiality(LiquidEngine):
                         else:
                             imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
 
-        return imRad
+        return np.asarray(imRad)
 
     def _run_threaded_dynamic(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
 
@@ -198,7 +196,7 @@ class Radiality(LiquidEngine):
                         else:
                             imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
         
-        return imRad
+        return np.asarray(imRad)
 
     def _run_threaded_guided(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
 
@@ -235,7 +233,7 @@ class Radiality(LiquidEngine):
                         else:
                             imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
 
-        return imRad
+        return np.asarray(imRad)
 
     
     def _run_opencl(self, image, image_interp, magnification=5, ringRadius=0.5, border=0, radialityPositivityConstraint=True, doIntensityWeighting=True, device=None):
