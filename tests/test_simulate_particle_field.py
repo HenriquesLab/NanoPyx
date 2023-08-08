@@ -23,10 +23,10 @@ def test_simulate_particle_field_based_on_2D_PDF(plt):
 
     # Simulate the particle field
     particle_field, mean_closest_distance = simulate_particle_field_based_on_2D_PDF(
-        image_pdf, min_particles=1, max_particles=1E3
+        image_pdf, min_particles=1, max_particles=1000
     )
 
-    image_particle_field = render_particle_histogram(particle_field, w, h)
+    image_particle_field = render_particle_histogram(particle_field, w, h, 1, 1, 1)
 
     # Plot the results
     f, axarr = plt.subplots(1, 2)
@@ -61,7 +61,7 @@ def test_simulate_particle_field_ensure_thresholds(plt):
     assert mean_closest_distance > 0.1
     assert get_closest_distance(particle_field) > 0.01
 
-    image_particle_field = render_particle_histogram(particle_field, 100, 100)
+    image_particle_field = render_particle_histogram(particle_field, 100, 100, 1, 1, 1)
 
     # Plot the results
     f, axarr = plt.subplots(1, 2)
