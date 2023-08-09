@@ -13,7 +13,7 @@ float _c_interpolate(__global float *image, float row, float col, int rows, int 
 // tag-start: _le_interpolation_*.cl
 __kernel void
 shiftAndMagnify(__global float *image_in, __global float *image_out,
-                __global float *shift_row, __global float *shift_col,
+                 float shift_row,  float shift_col,
                 float magnification_row, float magnification_col) {
 
   int f = get_global_id(0);
@@ -26,8 +26,8 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
   int cols = (int)(colsM / magnification_col);
   int nPixels = rowsM * colsM;
 
-  float row = rM / magnification_row - shift_row[f];
-  float col = cM / magnification_col - shift_col[f];
+  float row = rM / magnification_row - shift_row;
+  float col = cM / magnification_col - shift_col;
 
   image_out[f * nPixels + rM * colsM + cM] =
       _c_interpolate(&image_in[f * rows * cols], row, col, rows, cols);
