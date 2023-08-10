@@ -75,10 +75,17 @@ class Agent_:
                 # What happens if there are no benchmarks for this runtype?
                 # Make it slow TODO
                 if best_repr_args is None:
-                    print(f"run_type {run_type} has no benchmarks for the given args and kwargs.")
-                    run_info = np.inf 
+                    run_info = [None] 
                 else:
                     run_info = fn._benchmarks[run_type][best_repr_args][1:]
+
+            if len(run_info)<2:
+                # Fall back to default values
+                if 'OpenCL' in run_type:
+                    rt = 'OpenCL'
+                else:
+                    rt = run_type
+                run_info = fn._default_benchmarks[rt]
 
             run_info = np.array(run_info)
             if len(run_info)>50:

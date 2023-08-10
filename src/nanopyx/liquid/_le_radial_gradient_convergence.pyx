@@ -24,6 +24,9 @@ class RadialGradientConvergence(LiquidEngine):
                         unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
 
+        
+        self._default_benchmarks = {'OpenCL':[1,1,1],'Threaded':[2,2,2],'Threaded_static':[3,3,3],'Threaded_dynamic':[4,4,4],'Threaded_guided':[5,5,5],'Python':[6,6,6],'Numba':[7,7,7],'Unthreaded':[8,8,8]}
+
 
     def run(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, run_type = None): 
         gradient_col_interp = check_image(gradient_col_interp)

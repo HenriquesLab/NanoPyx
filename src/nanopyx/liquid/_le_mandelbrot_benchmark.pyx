@@ -26,6 +26,8 @@ class MandelbrotBenchmark(LiquidEngine):
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, python_=True, njit_=True)
 
+        self._default_benchmarks = {'OpenCL':[1,1,1],'Threaded':[2,2,2],'Threaded_static':[3,3,3],'Threaded_dynamic':[4,4,4],'Threaded_guided':[5,5,5],'Python':[6,6,6],'Numba':[7,7,7],'Unthreaded':[8,8,8]}
+
     def run(self, int size=1000, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1) -> np.ndarray:
         """
         Run the mandelbrot benchmark
