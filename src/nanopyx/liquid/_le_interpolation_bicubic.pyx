@@ -95,7 +95,7 @@ class ShiftAndMagnify(LiquidEngine):
         cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
         output_opencl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, image_out[0:max_slices,:,:].nbytes)
 
-        code = self._get_cl_code("_le_interpolation_bicubic.cl", device['DP'])
+        code = self._get_cl_code("_le_interpolation_bicubic_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.shiftAndMagnify
 
