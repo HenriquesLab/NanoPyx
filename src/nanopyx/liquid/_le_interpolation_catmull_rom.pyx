@@ -12,6 +12,10 @@ from .__interpolation_tools__ import check_image, value2array
 from .__liquid_engine__ import LiquidEngine
 from .__opencl__ import cl, cl_array
 
+from ._le_interpolation_catmull_rom_ import \
+    njit_shift_magnify as _njit_shift_magnify
+from ._le_interpolation_catmull_rom_ import \
+    shift_magnify as _py_shift_magnify
 
 cdef extern from "_c_interpolation_catmull_rom.h":
     float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
@@ -26,7 +30,7 @@ class ShiftAndMagnify(LiquidEngine):
         self._designation = "ShiftMagnify_CR"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True)
+                        threaded_dynamic_=True, threaded_guided_=True, python_=True, njit_=True)
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Catmull-Rom")
     def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
@@ -80,11 +84,6 @@ class ShiftAndMagnify(LiquidEngine):
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)
-
-        # Swap row and columns because opencl is strange and stores the
-        # array in a buffer in fortran ordering despite the original
-        # numpy array being in C order.
-        image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
         
         output_shape = (image.shape[0], int(image.shape[1]*magnification_row), int(image.shape[2]*magnification_col))
         image_out = np.zeros(output_shape, dtype=np.float32)
@@ -92,18 +91,17 @@ class ShiftAndMagnify(LiquidEngine):
         # TODO 3 is a magic number 
         max_slices = int((dc.global_mem_size // (image_out[0,:,:].nbytes + image[0,:,:].nbytes))/3)
         # TODO add exception if max_slices < 1 
-
+        
         mf = cl.mem_flags
         input_opencl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)
         cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
-        print(dc.global_mem_size, max_slices, image[0:max_slices,:,:].nbytes, image_out[0:max_slices,:,:].nbytes) 
         output_opencl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, image_out[0:max_slices,:,:].nbytes)
 
         code = self._get_cl_code("_le_interpolation_catmull_rom_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.shiftAndMagnify
 
-        for i in range(0, image.shape[0]-1, max_slices):
+        for i in range(0, image.shape[0], max_slices):
             if image.shape[0] - i >= max_slices:
                 n_slices = max_slices
             else:
@@ -127,8 +125,8 @@ class ShiftAndMagnify(LiquidEngine):
 
         input_opencl.release()
         output_opencl.release()
-        # Swap rows and columns back
-        return np.ascontiguousarray(np.swapaxes(image_out, 1, 2), dtype=np.float32)
+        
+        return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded
@@ -260,6 +258,14 @@ class ShiftAndMagnify(LiquidEngine):
 
         return image_out
     # tag-end
+
+    def _run_python(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
+        image_out = _py_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
+        return image_out
+
+    def _run_njit(self,image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
+        image_out = _njit_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
+        return image_out
 
 class ShiftScaleRotate(LiquidEngine):
     """

@@ -78,45 +78,51 @@ class ShiftAndMagnify(LiquidEngine):
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
+        dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)
+        
+        output_shape = (image.shape[0], int(image.shape[1]*magnification_row), int(image.shape[2]*magnification_col))
+        image_out = np.zeros(output_shape, dtype=np.float32)
 
-        # Swap row and columns because opencl is strange and stores the
-        # array in a buffer in fortran ordering despite the original
-        # numpy array being in C order.
-        image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
+        # TODO 3 is a magic number 
+        max_slices = int((dc.global_mem_size // (image_out[0,:,:].nbytes + image[0,:,:].nbytes))/3)
+        # TODO add exception if max_slices < 1 
+
+        mf = cl.mem_flags
+        input_opencl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)
+        cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
+        output_opencl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, image_out[0:max_slices,:,:].nbytes)
 
         code = self._get_cl_code("_le_interpolation_lanczos_.cl", device['DP'])
-
-        cdef int nFrames = image.shape[0]
-        cdef int rowsM = <int>(image.shape[1] * magnification_row)
-        cdef int colsM = <int>(image.shape[2] * magnification_col)
-
-        image_in = cl_array.to_device(cl_queue, image)
-        shift_col_in = cl_array.to_device(cl_queue, shift_col)
-        shift_row_in = cl_array.to_device(cl_queue, shift_row)
-        image_out = cl_array.zeros(cl_queue, (nFrames, rowsM, colsM), dtype=np.float32)
-
-        # Create the program
         prg = cl.Program(cl_ctx, code).build()
+        knl = prg.shiftAndMagnify
 
-        # Run the kernel
-        prg.shiftAndMagnify(
-            cl_queue,
-            image_out.shape,
-            None,
-            image_in.data,
-            image_out.data,
-            shift_col_in.data,
-            shift_row_in.data,
-            np.float32(magnification_row),
-            np.float32(magnification_col),
-        )
+        for i in range(0, image.shape[0], max_slices):
+            if image.shape[0] - i >= max_slices:
+                n_slices = max_slices
+            else:
+                n_slices = image.shape[0] - i
+            #TODO check that magnification_row and magnification_col are correct
+            knl(cl_queue,
+                (n_slices, int(image.shape[1]*magnification_row), int(image.shape[2]*magnification_col)), 
+                self.get_work_group(dc, (n_slices, image.shape[1]*magnification_row, image.shape[2]*magnification_col)), 
+                input_opencl, 
+                output_opencl, 
+                np.float32(shift_row[0]), 
+                np.float32(shift_col[0]), 
+                np.float32(magnification_row), 
+                np.float32(magnification_col)).wait() 
 
-        # Wait for queue to finish
-        cl_queue.finish()
+            cl.enqueue_copy(cl_queue, image_out[i:i+n_slices,:,:], output_opencl).wait() 
+            if i<=image.shape[0]-max_slices:
+                cl.enqueue_copy(cl_queue, input_opencl, image[i+n_slices:i+2*n_slices,:,:]).wait() 
 
-        # Swap rows and columns back
-        return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
+            cl_queue.finish()
+
+        input_opencl.release()
+        output_opencl.release()
+        
+        return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded
