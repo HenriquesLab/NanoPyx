@@ -362,11 +362,6 @@ class ShiftScaleRotate(LiquidEngine):
         cl_ctx = cl.Context([device['device']])
         cl_queue = cl.CommandQueue(cl_ctx)
 
-        # Swap row and columns because opencl is strange and stores the
-        # array in a buffer in fortran ordering despite the original
-        # numpy array being in C order.
-        #image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
-
         code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl", device['DP'])
 
         cdef int nFrames = image.shape[0]
@@ -388,8 +383,8 @@ class ShiftScaleRotate(LiquidEngine):
             None,
             image_in.data,
             image_out.data,
-            shift_col_in.data,
             shift_row_in.data,
+            shift_col_in.data,
             np.float32(scale_row),
             np.float32(scale_col),
             np.float32(angle)
@@ -398,8 +393,6 @@ class ShiftScaleRotate(LiquidEngine):
         # Wait for queue to finish
         cl_queue.finish()
 
-        # Swap rows and columns back
-        #return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
         return np.asarray(image_out.get(),dtype=np.float32)
 
     # tag-end
