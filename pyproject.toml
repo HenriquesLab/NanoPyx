@@ -16,7 +16,7 @@ name = "nanopyx"
 #version = "0.0.1"
 description = "Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 license = { file = "LICENSE.txt" }
 keywords = [
     "NanoJ",
