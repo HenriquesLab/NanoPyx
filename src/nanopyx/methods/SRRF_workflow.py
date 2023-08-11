@@ -5,7 +5,7 @@ from ..liquid import Radiality, CRShiftAndMagnify
 import numpy as np
 
 
-def SRRF(image, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting):
+def SRRF(image, magnification=5, ringRadius=0.5, border=0, radialityPositivityConstraint=True, doIntensityWeighting=True):
     """
     SRRF analysis of a single image
     """
