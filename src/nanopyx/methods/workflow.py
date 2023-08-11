@@ -65,6 +65,6 @@ class Workflow:
 
         return self._return_values[-1], fn._last_runtype, fn._last_time
     
-
-    
-        
+    def calculate(self, _force_run_type=None):
+        output, tmp, tmp = self.run(_force_run_type=_force_run_type)
+        return output
