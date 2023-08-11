@@ -73,7 +73,6 @@ class Agent_:
                         best_score = score
                         best_repr_args = repr_args_
                 # What happens if there are no benchmarks for this runtype?
-                # Make it slow TODO
                 if best_repr_args is None:
                     run_info = [None] 
                 else:
@@ -85,7 +84,15 @@ class Agent_:
                     rt = 'OpenCL'
                 else:
                     rt = run_type
-                run_info = fn._default_benchmarks[rt]
+
+                best_score = np.inf
+                best_repr_args = None
+                for repr_args_ in fn._default_benchmarks[rt]:
+                    score = np.abs(fn._default_benchmarks[rt][repr_args_][0] - repr_norm)
+                    if score < best_score:
+                        best_score = score
+                        best_repr_args = repr_args_
+                run_info = fn._default_benchmarks[rt][best_repr_args][1:]
 
             run_info = np.array(run_info)
             if len(run_info)>50:
