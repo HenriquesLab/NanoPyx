@@ -1,4 +1,4 @@
-![Logo](https://user-images.githubusercontent.com/7071808/235145866-602e9f03-5ad1-47c1-8790-a7ce3b678e89.svg)
+![Logo](https://user-images.githubusercontent.com/7071808/259983552-ef7aa814-16ba-4947-a69f-1f096d70370e.png)
 # Under Development, currently in beta stage
 [![PyPI](https://img.shields.io/pypi/v/nanopyx.svg?color=green)](https://pypi.org/project/nanopyx)
 [![Python Version](https://img.shields.io/pypi/pyversions/nanopyx.svg?color=green)](https://python.org)
@@ -28,6 +28,11 @@ Currently it implements the following approaches:
 - More to come soon™
 
 if you found this work useful, please cite: [![DOI](https://zenodo.org/badge/505388398.svg)](https://zenodo.org/badge/latestdoi/505388398)
+
+## Short Video Tutorials
+| What is NanoPyx? | How to use NanoPyx in Google Colab? |
+|:-:|:-:|
+| [![](https://user-images.githubusercontent.com/7071808/259985020-b629a570-f131-4666-aadb-ba62ac7dbea2.png)](https://youtu.be/iAdgusBAU0Q) | [![](https://user-images.githubusercontent.com/7071808/259985779-4403d895-76a8-4050-bfd7-9317516a8f3e.png)](https://youtu.be/KD0RzolFnd4) |
 
 ## Codeless jupyter notebooks available:
 
