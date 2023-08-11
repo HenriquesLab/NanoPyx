@@ -281,6 +281,6 @@ setup(
     build_ext={"inplace": 1},
     ext_modules=collect_extensions(),
     zip_safe=False,
-    version="0.1.2",  # versioneer.get_version(),
+    version="0.2.0",  # versioneer.get_version(),
     # cmdclass=versioneer.get_cmdclass(),
 )
