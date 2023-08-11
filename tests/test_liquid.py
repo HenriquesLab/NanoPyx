@@ -47,8 +47,8 @@ def test_interpolation_nearest_neighbor_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = np.ones(nFrames, dtype=np.float32) * 2
+    shift_col = np.ones(nFrames, dtype=np.float32) * 5
     SM = NNShiftAndMagnify(testing=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
@@ -86,8 +86,8 @@ def test_interpolation_bicubic_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = np.ones(nFrames, dtype=np.float32) * 2
+    shift_col = np.ones(nFrames, dtype=np.float32) * 5
     SM = BCShiftAndMagnify(testing=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
@@ -125,8 +125,8 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = np.ones(nFrames, dtype=np.float32) * 2
+    shift_col = np.ones(nFrames, dtype=np.float32) * 5
     SM = CRShiftAndMagnify(testing=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
@@ -164,8 +164,8 @@ def test_interpolation_lanczos_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = np.ones(nFrames, dtype=np.float32) * 2
+    shift_col = np.ones(nFrames, dtype=np.float32) * 5
     SM = LZShiftAndMagnify(testing=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
