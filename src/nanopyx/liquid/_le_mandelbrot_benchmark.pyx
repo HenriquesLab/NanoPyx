@@ -169,7 +169,7 @@ class MandelbrotBenchmark(LiquidEngine):
         _py_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
         return im_mandelbrot
 
-    def _run_njit(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+    def _run_njit(self, int size=10, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1) -> np.ndarray:
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         _njit_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
         return im_mandelbrot
