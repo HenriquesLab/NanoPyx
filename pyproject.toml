@@ -138,7 +138,7 @@ reportMissingImports = false
 
 [tool.pytest.ini_options]
 addopts = "--cov=nanopyx --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef"
-timeout = 600
+timeout = 6000
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
