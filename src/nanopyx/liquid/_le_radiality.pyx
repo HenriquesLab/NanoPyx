@@ -35,6 +35,8 @@ class Radiality(LiquidEngine):
                         unthreaded_=False, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
 
+        self._default_benchmarks = {'OpenCL':[1,1,1],'Threaded':[2,2,2],'Threaded_static':[3,3,3],'Threaded_dynamic':[4,4,4],'Threaded_guided':[5,5,5],'Python':[6,6,6],'Numba':[7,7,7],'Unthreaded':[8,8,8]}
+        
     def run(self, image, image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
         image = check_image(image)
         image_interp = check_image(image_interp)

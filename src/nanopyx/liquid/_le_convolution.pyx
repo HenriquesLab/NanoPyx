@@ -25,6 +25,7 @@ class Convolution(LiquidEngine):
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True)
+        self._default_benchmarks = {'OpenCL':[1,1,1],'Threaded':[2,2,2],'Threaded_static':[3,3,3],'Threaded_dynamic':[4,4,4],'Threaded_guided':[5,5,5],'Python':[6,6,6],'Numba':[7,7,7],'Unthreaded':[8,8,8]}
 
     def run(self, image, kernel, run_type=None):
         return self._run(image, kernel, run_type=run_type)
