@@ -9,6 +9,7 @@ jobs:
 
     strategy:
       matrix:
+        include:
           - os: ubuntu-latest
             python: 39
             platform_id: manylinux_x86_64
