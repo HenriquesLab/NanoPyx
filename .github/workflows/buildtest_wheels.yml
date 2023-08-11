@@ -1,4 +1,4 @@
-name: Wheel maker
+name: Test and Wheel maker
 
 on: workflow_dispatch
 
