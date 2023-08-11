@@ -27,7 +27,7 @@ class ShiftAndMagnify(LiquidEngine):
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True)
-        self._default_benchmarks = {'OpenCL':[1,1,1],'Threaded':[2,2,2],'Threaded_static':[3,3,3],'Threaded_dynamic':[4,4,4],'Threaded_guided':[5,5,5],'Python':[6,6,6],'Numba':[7,7,7],'Unthreaded':[8,8,8]}
+        self._default_benchmarks = {'OpenCL': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.16363358300009168, 0.03168145900008312, 0.03195112500020514], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.13761387500017008, 0.12955950000014127, 0.1233359999998811]}, 'Threaded': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.043898375000026135, 0.04184937499985608, 0.04176470899983542], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.31676054200011095, 0.31233449999990626, 0.30947470799992516]}, 'Threaded_dynamic': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.0345830000001115, 0.03378895800005921, 0.03426533299989387], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.23296766700013904, 0.23372599999993326, 0.23327137499995843]}, 'Threaded_guided': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.03484558300010576, 0.033381624999947235, 0.03443237499982388], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.2465884170001118, 0.24920333299996855, 0.2472722090001298]}, 'Threaded_static': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.0445847920000233, 0.04348195800002941, 0.04308850000006714], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.3090422909999688, 0.3100159589998839, 0.3112706250001338]}, 'Unthreaded': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.10468329200011794, 0.10376966599983461, 0.10351591599987842], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.9493457910000416, 0.9433519579999938, 0.9499724170000263]}}
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Lanczos")
     def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
@@ -266,7 +266,7 @@ class ShiftScaleRotate(LiquidEngine):
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True)
-        self._default_benchmarks = {'OpenCL':[1,1,1],'Threaded':[2,2,2],'Threaded_static':[3,3,3],'Threaded_dynamic':[4,4,4],'Threaded_guided':[5,5,5],'Python':[6,6,6],'Numba':[7,7,7],'Unthreaded':[8,8,8]}
+        self._default_benchmarks = {'OpenCL': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.020539166000162368, 0.01887329100009083, 0.018127374999949097], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.08613391700009743, 0.08152491700002429, 0.0788279999999304]}, 'Threaded': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.03088354199985588, 0.03240920799999003, 0.03100937499993961], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.27657187500017244, 0.27627350000011575, 0.27546158400014065]}, 'Threaded_dynamic': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.030809207999936916, 0.030729832999895734, 0.03082066699994357], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.2742402090000269, 0.27348333300005834, 0.27781258300001355]}, 'Threaded_guided': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.03071866600021167, 0.030636375000085536, 0.030323834000000716], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.2768276669999068, 0.27375016600012714, 0.27681395900003736]}, 'Threaded_static': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.030851999999867985, 0.03102012499994089, 0.030887082999925042], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.2733717500000239, 0.27371095800003786, 0.2762027499998112]}, 'Unthreaded': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.03058774999999514, 0.03372570800001995, 0.030668832999936058], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.27389116599988483, 0.27431166700012, 0.27594858299994485]}}
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run; replace("Nearest-Neighbor", "Lanczos")
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:
@@ -327,7 +327,7 @@ class ShiftScaleRotate(LiquidEngine):
         # Swap row and columns because opencl is strange and stores the
         # array in a buffer in fortran ordering despite the original
         # numpy array being in C order.
-        image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
+        #image = np.ascontiguousarray(np.swapaxes(image, 1, 2), dtype=np.float32)
 
         code = self._get_cl_code("_le_interpolation_lanczos_.cl", device['DP'])
 
@@ -361,7 +361,9 @@ class ShiftScaleRotate(LiquidEngine):
         cl_queue.finish()
 
         # Swap rows and columns back
-        return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
+        #return np.ascontiguousarray(np.swapaxes(image_out.get(), 1, 2), dtype=np.float32)
+        return np.asarray(image_out.get(),dtype=np.float32)
+
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded
