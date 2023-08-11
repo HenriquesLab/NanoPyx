@@ -4,6 +4,12 @@ from .__liquid_engine__ import LiquidEngine
 from .__interpolation_tools__ import check_image
 
 
+from ._le_template_simple_ import \
+    njit_template as _njit_template
+from ._le_template_simple_ import \
+    py_template as _py_template
+
+
 class Template(LiquidEngine):
     """
     Template to implement new methods using the Liquid Engine
@@ -24,14 +30,9 @@ class Template(LiquidEngine):
         return super().benchmark(image)
 
     def _run_python(self, image: np.ndarray):
+        image_out = _py_template(image)
+        return image_out
 
-        for i in range(image.shape[0]):
-            pass
-        return np.asarray(image)
-
-    @njit(cache=True, parallel=True)
     def _run_njit(self, image: np.ndarray):
-
-        for i in prange(image.shape[0]):
-            pass
-        return np.asarray(image)
+        image_out = _njit_template(image)
+        return image_out
