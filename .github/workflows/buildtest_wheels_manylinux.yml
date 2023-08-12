@@ -23,8 +23,8 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse
         # to supply options, put them in 'env', like:
         env:
-          CIBW_BUILD_FRONTEND: "pip"
-          CIBW_ENVIRONMENT_PASS_LINUX: "pip"
+          CIBW_BUILD_FRONTEND: "build"
+          CIBW_ENVIRONMENT_PASS_LINUX: "build"
 
       - uses: actions/upload-artifact@v3
         with:
