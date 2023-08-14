@@ -30,7 +30,7 @@ on:
 
 jobs:
   oncall_mechanic_ubuntu_container:
-    runs-on: [self-hosted, ubuntu]
+    runs-on: [self-hosted, deepthought]
     steps:
       - name: Setup Ubuntu dependencies
         run: |
