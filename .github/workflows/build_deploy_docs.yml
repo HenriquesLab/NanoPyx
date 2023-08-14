@@ -1,6 +1,8 @@
 name: build-deploy-docs
 
-on: workflow_dispatch
+on:
+  release:
+    types: [published]
 
   # creates a button
   workflow_dispatch:
