@@ -36,7 +36,7 @@ jobs:
     needs: build_doc
     # only run if main branch
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, windows]
+    runs-on: [self-hosted, deepthought]
     permissions:
       pages: write
       id-token: write
