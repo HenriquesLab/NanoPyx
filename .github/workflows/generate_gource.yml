@@ -1,28 +1,28 @@
 name: oncall_gource
-# does a massive check, every night
+# generates commit history video
 
 on: workflow_dispatch
 
 jobs:
-  generate_movie:
-    runs-on: [self-hosted, deepthought]
-      steps:
-        - name: Checkout
-          uses: actions/checkout@v3
-          with:
-            fetch-depth: 0
-        - name: Install Python
-          uses: actions/setup-python@v4
-          with:
-            python-version: "3.10"
-        - name: Generate movie
-          run: |
-            xvfb-run gource --output-custom-log repo-activity.log
-            python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
-            xvfb-run gource --highlight-dirs --highlight-users repo-activity.log -1280x720 --max-user-speed 100 --seconds-per-day 0.1 --auto-skip-seconds 1 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
-        - name: Archive generated movie
-          uses: actions/upload-artifact@v3
-          with:
-            name: gource-movie
-            path: gource.mp4
-            retention-days: 3
+    generate_movie:
+        runs-on: [self-hosted, ubuntu]
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v3
+            with:
+              fetch-depth: 0
+          - name: Install Python
+            uses: actions/setup-python@v4
+            with:
+              python-version: "3.10"
+          - name: Generate movie
+            run: |
+              xvfb-run gource --output-custom-log repo-activity.log
+              python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
+              xvfb-run gource --highlight-dirs --highlight-users repo-activity.log -1280x720 --max-user-speed 100 --seconds-per-day 0.1 --auto-skip-seconds 1 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
+          - name: Archive generated movie
+            uses: actions/upload-artifact@v3
+            with:
+              name: gource-movie
+              path: gource.mp4
+              retention-days: 3
