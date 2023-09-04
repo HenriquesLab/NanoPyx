@@ -115,14 +115,14 @@ Please read our [Contribution Guidelines](https://github.com/HenriquesLab/NanoPy
 
 ## License
 
-Distributed under the terms of the [GNU GPL v2.0] license,
+Distributed under the terms of the [CC-By v4.0] license,
 "NanoPyx" is free and open source software
 
 ## Issues
 
 If you encounter any problems, please [file an issue] along with a detailed description.
 
-[gnu gpl v2.0]: http://www.gnu.org/licenses/gpl-2.0.txt
+[CC-By v4.0]: https://creativecommons.org/licenses/by/4.0/
 [file an issue]: https://github.com/HenriquesLab/NanoPyx/issues
 [pip]: https://pypi.org/project/pip/
 
