@@ -72,7 +72,7 @@ pip install nanopyx[jupyter]
 or if you want to install with all optional dependencies:
 
 ```shell
-pip install 'nanopyx[all]'
+pip install nanopyx[all]
 ```
 
 To install latest development version:
