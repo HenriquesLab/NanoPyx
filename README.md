@@ -55,19 +55,27 @@ NanoPyx is also available as a napari plugin, which can be installed via pip:
 
 ## Installation
 
+`NanoPyx` is compatible and tested with Python 3.9, 3.10, 3.11 in MacOS, Windows and Linux. Installation time depends on your hardware and internet connection, but should take around 5 minutes.
+
 You can install `NanoPyx` via [pip]:
 
 ```shell
 pip install nanopyx
 ```
 
-or if you want to install with all optional dependencies
+If you want to install with support for Jupyter notebooks:
+
+```shell
+pip install nanopyx[jupyter]
+```
+
+or if you want to install with all optional dependencies:
 
 ```shell
 pip install 'nanopyx[all]'
 ```
 
-To install latest development version :
+To install latest development version:
 
 ```shell
 pip install git+https://github.com/HenriquesLab/NanoPyx.git
@@ -89,6 +97,16 @@ brew install gcc llvm libomp
 ```shell
 docker run --name nanopyx1 -p 8888:8888 henriqueslab/nanopyx:latest
 ```
+
+## Usage
+
+Depending on your preferences and coding proficiency you might be using NanoPyx differently. 
+
+- If you are using Jupyter Notebooks or Google Colab notebooks check out our [video tutorial](https://youtu.be/KD0RzolFnd4)
+- If you are using our [napari plugin](https://github.com/HenriquesLab/NanoPyx#napari-plugin) check out the official [napari tutorial](https://napari.org/stable/tutorials/index.html) and stay tuned for more!
+- If you prefer to use the Python library and take full advantage of the Liquid Engine flexibility, check out our Liquid Engine templates and our [official documentation](https://henriqueslab.github.io/NanoPyx/nanopyx.html).
+    - Simple Liquid Engine templates [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/liquid/_le_template_simple.pyx) and [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/liquid/_le_template_simple_.py)
+    - Fully fledged Liquid Engine templates [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/liquid/_le_template_advanced.pyx) and [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/liquid/_le_template_advanced.cl)
 
 ## Contributing
 
