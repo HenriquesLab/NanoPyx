@@ -32,11 +32,6 @@ jobs:
   oncall_mechanic_ubuntu_container:
     runs-on: [self-hosted, deepthought]
     steps:
-      - name: Setup Ubuntu dependencies
-        run: |
-          DEBIAN_FRONTEND=noninteractive apt-get -y install tzdata
-          apt install -y curl systemctl build-essential lsb-release python3-pip git libgl1-mesa-glx libglib2.0-0 ca-certificates jq htop gource ffmpeg xvfb python3.10-venv libavcodec-extra python3.11-full python3.10-full libpython3.10-dev libpython3.11-dev
-          python3 -m pip install --upgrade pipx
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
