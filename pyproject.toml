@@ -5,7 +5,6 @@ requires = [
     "build>=0.10.0",
     "cython>=0.29.0",
     "numpy>=1.19.0",
-    "versioneer[toml]>=0.26",
 ]
 
 build-backend = "setuptools.build_meta"
@@ -55,7 +54,7 @@ dependencies = [
     "statsmodels>=0.14.0",
     "matplotlib>=3.5",
 ]
-dynamic = ["version"]
+dynamic = ["version"] # changed in setup.py
 
 # [project.scripts]
 # nanopyx-pyx2pxd = "scripts.pyx2pxd:main"
@@ -101,14 +100,6 @@ bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
 [tool.setuptools.package-data]
 "*" = ["*.yaml", "*.jpg", "*.cl"]
-
-[tool.versioneer]
-VCS = "git"
-style = "pep440"
-versionfile_source = "src/nanopyx/_version.py"
-versionfile_build = "nanopyx/_version.py"
-tag_prefix = ""
-parentdir_prefix = "nanopyx-"
 
 [tool.black]
 exclude = '''

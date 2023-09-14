@@ -9,8 +9,6 @@ from Cython.Build import cythonize
 from Cython.Compiler import Options
 from setuptools import Extension, setup
 
-import versioneer
-
 EXTRA_C_FILES_PATH = [
     os.path.join("src", "nanopyx", "liquid"),
     os.path.join("src", "include"),
@@ -22,6 +20,8 @@ EXTRA_COMPILE_ARGS = [
     "-g0",  # for info on -g0 see https://github.com/pypa/cibuildwheel/issues/331,
 ]
 EXTRA_LING_ARGS = []
+
+VERSION = "0.2.0"  # sets version number for whole package
 
 
 def run_command(command: str) -> str:
@@ -256,9 +256,6 @@ def collect_extensions():
     collected_extensions = cythonize(cython_extensions, annotate=True, language_level="3")
 
     return collected_extensions
-
-
-VERSION = versioneer.get_version()
 # Show the logo
 print(
     r"""
@@ -281,6 +278,5 @@ setup(
     build_ext={"inplace": 1},
     ext_modules=collect_extensions(),
     zip_safe=False,
-    version="0.2.0",  # versioneer.get_version(),
-    # cmdclass=versioneer.get_cmdclass(),
+    version=VERSION,
 )
