@@ -11,6 +11,7 @@ cimport numpy as np
 from cython.parallel import prange
 from tqdm import tqdm
 
+# TODO RECHECK VALUES
 cdef extern from "_c_interpolation_catmull_rom.h":
     float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
 
