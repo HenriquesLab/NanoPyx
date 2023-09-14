@@ -219,7 +219,7 @@ class LiquidEngine:
         else:
             pcc = pearson_correlation(output_1, output_2)
         
-        if pcc < 0.8:
+        if pcc > 0.8:
             return True
         else:
             return False
