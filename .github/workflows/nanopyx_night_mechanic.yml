@@ -23,7 +23,7 @@ jobs:
   test_on_ubuntu_container:
     runs-on: [self-hosted, Ubuntu, Docker]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -50,7 +50,7 @@ jobs:
   test_on_windows:
     runs-on: [self-hosted, Windows]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -70,7 +70,7 @@ jobs:
   test_on_macos:
     runs-on: [self-hosted, macOS]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - uses: actions/setup-python@v4
@@ -93,7 +93,7 @@ jobs:
     runs-on: [self-hosted, Linux]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Install Python
