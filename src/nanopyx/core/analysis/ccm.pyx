@@ -9,8 +9,6 @@ from libc.math cimport pi
 from .ccm_helper_functions cimport _check_even_square, _make_even_square
 from .pearson_correlation cimport _calculate_ppmcc
 
-from ..transform.interpolation_catmull_rom cimport Interpolator
-
 def calculate_ccm(np.ndarray img_stack, int ref):
     """
     Function used to generate a cross correlation matrix of an image stack.
@@ -144,7 +142,8 @@ cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :]
             value = value * delta_ppmcc + min_ppmcc
             ccm_slice[j, i] = value
 
-
+# TODO finish reimplementing using LE methods
+'''
 def calculate_rccm(np.ndarray img_slice, np.ndarray img_ref):
     """
     Function used to generate a rotational cross correlation matrix of an image against a reference image
@@ -248,3 +247,5 @@ cdef float[:,:] _calculate_ccm_logpolar(float[:, :] img_slice, float[:, :] img_r
     cdef float[:,:] polar_ref = Interpolator(img_ref).polar(scale='log')
 
     return _calculate_slice_ccm(polar_ref, polar_slice)
+
+'''
