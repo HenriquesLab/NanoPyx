@@ -18,5 +18,7 @@ from .__agent__ import Agent  # noqa: E402
 
 
 # TODO: allow benchmarking of only specific implementations
-# ?: provide user interface to enable/disable run types?
 # TODO: provide parallelized batch processing
+
+from .__njit__ import njit_works
+from .__opencl__ import cl, cl_array, opencl_works, print_opencl_info, devices

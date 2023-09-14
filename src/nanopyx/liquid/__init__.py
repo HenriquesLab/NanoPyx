@@ -16,8 +16,6 @@ import os
 import warnings
 import platform
 
-from .__njit__ import njit_works
-from .__opencl__ import cl, cl_array, opencl_works, print_opencl_info, devices
 from ._le_interpolation_bicubic import ShiftAndMagnify as BCShiftAndMagnify
 from ._le_interpolation_bicubic import ShiftScaleRotate as BCShiftScaleRotate
 from ._le_interpolation_catmull_rom import ShiftAndMagnify as CRShiftAndMagnify
@@ -33,6 +31,8 @@ from ._le_roberts_cross_gradients import GradientRobertsCross
 from ._le_esrrf import eSRRF as eSRRF_ST
 from ._le_convolution import Convolution as Convolution2D
 from ._le_DUMMY import DUMMY
+
+from ..__opencl__ import opencl_works, print_opencl_info
 
 from multiprocessing import current_process
 
