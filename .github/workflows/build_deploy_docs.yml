@@ -28,7 +28,7 @@ jobs:
       - name: Run Nox - generate_docs
         run: |
           pipx run nox --sessions generate_docs
-      - uses: actions/upload-pages-artifact@v1
+      - uses: actions/upload-pages-artifact@v2
         with:
           path: docs/
 
