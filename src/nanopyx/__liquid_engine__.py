@@ -128,11 +128,11 @@ class LiquidEngine:
 
         if run_type is None:
             print("Querying the Agent...")
-            self.Agent.get_run_type(self,*args,**kwargs)
+            run_type = self.Agent.get_run_type(self,args,kwargs)
         elif run_type not in self._run_types:
             print(f"Unexpected run type {run_type}")
             print("Querying the Agent...")
-            self.Agent.get_run_type(self,*args,**kwargs)
+            run_type = self.Agent.get_run_type(self,args,kwargs)
         
         # try to run
         try:
