@@ -1,6 +1,6 @@
 import numpy as np
 
-from .__njit__ import njit, prange
+from ..__njit__ import njit, prange
 
 def py_template(image: np.ndarray) -> np.ndarray:
     """

@@ -7,8 +7,8 @@ from time import sleep
 
 from libc.math cimport cos, sin
 
-from .__liquid_engine__ import LiquidEngine
-from .__opencl__ import cl, cl_array
+from ..__liquid_engine__ import LiquidEngine
+from ..__opencl__ import cl, cl_array
 
 
 class DUMMY(LiquidEngine):

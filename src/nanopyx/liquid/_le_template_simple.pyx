@@ -1,6 +1,6 @@
 import numpy as np
-from .__njit__ import njit, prange
-from .__liquid_engine__ import LiquidEngine
+from ..__njit__ import njit, prange
+from ..__liquid_engine__ import LiquidEngine
 from .__interpolation_tools__ import check_image
 
 

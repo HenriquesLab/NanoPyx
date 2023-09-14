@@ -9,8 +9,8 @@ from cython.parallel import parallel, prange
 from libc.math cimport cos, sin, pi, hypot, exp, log
 
 from .__interpolation_tools__ import check_image, value2array
-from .__liquid_engine__ import LiquidEngine
-from .__opencl__ import cl, cl_array
+from ..__liquid_engine__ import LiquidEngine
+from ..__opencl__ import cl, cl_array
 from ._le_interpolation_nearest_neighbor_ import \
     njit_shift_magnify as _njit_shift_magnify
 from ._le_interpolation_nearest_neighbor_ import \

@@ -6,9 +6,11 @@ cimport numpy as np
 from cython.parallel import parallel, prange
 
 from libc.math cimport sqrt, pi, fabs, cos, sin
-from .__liquid_engine__ import LiquidEngine
-from .__opencl__ import cl, cl_array
+from ..__liquid_engine__ import LiquidEngine
+from ..__opencl__ import cl, cl_array
 from .__interpolation_tools__ import check_image
+
+# TODO is this supposed to be absolute?
 from nanopyx.liquid import CRShiftAndMagnify
 from nanopyx.core.utils.timeit import timeit2
 

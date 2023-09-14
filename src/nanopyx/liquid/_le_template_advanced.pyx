@@ -2,7 +2,7 @@
 
 # import libraries here
 import numpy as np
-from .__liquid_engine__ import LiquidEngine
+from ..__liquid_engine__ import LiquidEngine
 from .__interpolation_tools__ import check_image
 
 

@@ -21,7 +21,7 @@ except ImportError:
 
         return wrapper
 
-
+# TODO
 MAX_ITERATIONS = 1000
 DIVERGENCE = 10
 

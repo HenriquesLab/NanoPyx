@@ -5,8 +5,8 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from scipy.stats import norm
 
-from .liquid.__njit__ import njit_works
-from .liquid.__opencl__ import opencl_works, devices
+from .__njit__ import njit_works
+from .__opencl__ import opencl_works, devices
 
 class Agent_:
 

@@ -2,8 +2,9 @@
 
 import numpy as np
 cimport numpy as np
-from .__opencl__ import cl, cl_array
-from .__liquid_engine__ import LiquidEngine
+from ..__opencl__ import cl, cl_array
+from ..__liquid_engine__ import LiquidEngine
+
 from cython.parallel import prange
 from .__interpolation_tools__ import check_image
 
