@@ -17,10 +17,6 @@ from ..utils.timeit import timeit2
 
 from cython.parallel import prange
 
-
-cdef extern from "_c_sr_radiality.h":
-    void _c_calculate_radiality(float* imRaw, float* imRad, float* imIW, float* imGx, float* imGy, float shiftX, float shiftY, float border, float* xRingCoordinates, float* yRingCoordinates, int magnification, float ringRadius, int nRingCoordinates, int radialityPositivityConstraint, int doIntensityWeighting, int h, int w) nogil
-  
 cdef class Radiality:
     # autogen_pxd: cdef int magnification, symmetryAxis, border, nRingCoordinates
     # autogen_pxd: cdef float ringRadius, psfWidth, gradRadius
@@ -80,16 +76,11 @@ cdef class Radiality:
         cdef float[:,:,:] _imRad = imRad
         cdef float[:,:,:] _imIW = imIW
 
-        cdef int h = _imRaw.shape[1]
-        cdef int w = _imRaw.shape[2]
-
         with nogil:
             for n in prange(nFrames): #, schedule='static', chunksize=1):
-                #_c_calculate_radiality(&_imRaw[n,0,0], &_imRad[n,0,0], &_imIW[n,0,0], &_imGx[n,0,0], &_imGy[n,0,0], 0, 0, self.border, self.xRingCoordinates, self.yRingCoordinates, self.magnification, self.ringRadius, self.nRingCoordinates, self.radialityPositivityConstraint, self.doIntensityWeighting, h, w)
                 self._calculate_radiality(_imRaw[n,:,:], _imRad[n,:,:], _imIW[n,:,:], _imGx[n,:,:], _imGy[n,:,:], 0, 0)
 
         return imRad, imIW, imGx, imGy
-
 
     cdef void _calculate_radiality(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imIW, float[:,:] imGx, float[:,:] imGy, float shiftX, float shiftY) nogil:
         """
@@ -108,10 +99,11 @@ cdef class Radiality:
         # Radiality Variable
         cdef float Dk, DivDFactor = 0
 
-        for j in range(1, h-1):
-            for i in range(1, w-1):
-                imGx[j,i] = -imRaw[j,i-1]+imRaw[j,i+1]
-                imGy[j,i] = -imRaw[j-1,i]+imRaw[j+1,i]
+        # for j in range(1, h-1):
+        #     for i in range(1, w-1):
+        #         imGx[j,i] = -imRaw[j,i-1]+imRaw[j,i+1]
+        #         imGy[j,i] = -imRaw[j-1,i]+imRaw[j+1,i]
+        _c_gradient_radiality(&imRaw[0,0], &imGx[0,0], &imGy[0,0], imRaw.shape[0], imRaw.shape[1])
 
         for j in range((1 + self.border) * self.magnification, (h - 1 - self.border) * self.magnification):
             for i in range((1 + self.border) * self.magnification, (w - 1 - self.border) * self.magnification):
@@ -149,10 +141,10 @@ cdef class Radiality:
                     CGH = DivDFactor
 
                 if self.doIntensityWeighting:
-                    imRad[j,i] = CGH
+                    imRad[j,i] = CGH * imIW[j,i]
 
                 else:
-                    imRad[j,i] = CGH * imIW[j,i]
+                    imRad[j,i] = CGH
 
 
     cdef float _calculateDk(self, float x, float y, float xc, float yc, float vGx, float vGy, float vGx2Gy2) nogil:
@@ -160,75 +152,3 @@ cdef class Radiality:
             return self.ringRadius
         else:
             return fabs(vGy * (xc - x) - vGx * (yc - y)) / vGx2Gy2
-
-
-    # cdef void _calculate_radiality(self, float[:,:] imRaw, float[:,:] imRad, float[:,:] imIW, float[:,:] imGx, float[:,:] imGy, float shiftX, float shiftY) nogil:
-    #     """
-    #     Note that Gx and Gy are initialized but zeroed
-    #     """
-
-    #     cdef int w = imRaw.shape[1]
-    #     cdef int h = imRaw.shape[0]
-    #     cdef int i, j, sampleIter
-    #     cdef float x0, y0, xc, yc, GMag, xRing, yRing
-
-    #     # calculate Gx and Gy
-    #     cdef float vGx, vGy
-    #     cdef float CGH # for Culley Gustafsson Henriques transform
-
-    #     # Radiality Variable
-    #     cdef float Dk, DivDFactor = 0
-
-    #     # for j in range(1, h-1):
-    #     #     for i in range(1, w-1):
-    #     #         imGx[j,i] = -imRaw[j,i-1]+imRaw[j,i+1]
-    #     #         imGy[j,i] = -imRaw[j-1,i]+imRaw[j+1,i]
-    #     _c_gradient_radiality(&imRaw[0,0], &imGx[0,0], &imGy[0,0], imRaw.shape[0], imRaw.shape[1])
-
-    #     for j in range((1 + self.border) * self.magnification, (h - 1 - self.border) * self.magnification):
-    #         for i in range((1 + self.border) * self.magnification, (w - 1 - self.border) * self.magnification):
-    #             xc = i + 0.5 + shiftX * self.magnification
-    #             yc = j + 0.5 + shiftY * self.magnification
-
-    #             imIW[j,i] = _interpolate(imRaw, xc / self.magnification, yc / self.magnification)
-
-    #             # Output
-    #             CGH = 0
-    #             for sampleIter in range(0, self.nRingCoordinates):
-    #                 xRing = self.xRingCoordinates[sampleIter]
-    #                 yRing = self.yRingCoordinates[sampleIter]
-
-    #                 x0 = xc + xRing
-    #                 y0 = yc + yRing
-
-    #                 vGx = _interpolate(imGx, x0 / self.magnification, y0 / self.magnification)
-    #                 vGy = _interpolate(imGy, x0 / self.magnification, y0 / self.magnification)
-    #                 GMag = sqrt(vGx * vGx + vGy * vGy)
-
-    #                 Dk = 1 - self._calculateDk(x0, y0, xc, yc, vGx, vGy, GMag) / self.ringRadius
-    #                 Dk = Dk * Dk
-
-    #                 if (vGx * xRing + vGy * yRing) > 0: # inwards or outwards vector
-    #                     DivDFactor -= Dk
-    #                 else:
-    #                     DivDFactor += Dk
-
-    #             DivDFactor /= self.nRingCoordinates
-
-    #             if self.radialityPositivityConstraint:
-    #                 CGH = max(DivDFactor, 0)
-    #             else:
-    #                 CGH = DivDFactor
-
-    #             if self.doIntensityWeighting:
-    #                 imRad[j,i] = CGH * imIW[j,i]
-
-    #             else:
-    #                 imRad[j,i] = CGH
-
-
-    # cdef float _calculateDk(self, float x, float y, float xc, float yc, float vGx, float vGy, float vGx2Gy2) nogil:
-    #     if vGx2Gy2 == 0:
-    #         return self.ringRadius
-    #     else:
-    #         return fabs(vGy * (xc - x) - vGx * (yc - y)) / vGx2Gy2

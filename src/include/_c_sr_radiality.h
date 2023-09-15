@@ -7,6 +7,4 @@ float _c_calculate_radiality_per_subpixel(int i, int j, float* imGx, float* imGy
 
 float _c_calculate_dk(float x, float y, float xc, float yc, float vGx, float vGy, float GMag, float ringRadius);
 
-void _c_calculate_radiality(float* imRaw, float* imRad, float* imIW, float* imGx, float* imGy, float shiftX, float shiftY, float border, float* xRingCoordinates, float* yRingCoordinates, int magnification, float ringRadius, int nRingCoordinates, int radialityPositivityConstraint, int doIntensityWeighting, int h, int w);
-  
 #endif
