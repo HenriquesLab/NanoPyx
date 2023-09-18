@@ -12,7 +12,7 @@ from scipy.stats import (
 )
 
 # TODO RECHECK VALUES
-from ._le_interpolation_catmull_rom_ import ShiftAndMagnify
+from ._le_interpolation_catmull_rom import ShiftAndMagnify
 
 from ..analysis.pearson_correlation import pearson_correlation
 
