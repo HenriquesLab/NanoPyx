@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.optimize import minimize
 
-from ..transform.interpolation_bicubic import interpolate
+from ..transform._interpolation import cr_interpolate
 
 class GetMaxOptimizer(object):
     """
@@ -23,7 +23,7 @@ class GetMaxOptimizer(object):
         :return: float; value of cross correlation matrix at given coordinates.
         For minimizer reasons -> negatives values become positive and positive become negative.
         """
-        return -interpolate(self.slice_ccm, coords[1], coords[0])
+        return -cr_interpolate(self.slice_ccm, coords[1], coords[0])
 
     def get_max(self):
         """
