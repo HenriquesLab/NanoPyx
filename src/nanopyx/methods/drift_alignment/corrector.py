@@ -1,11 +1,11 @@
 from .estimator_table import DriftEstimatorTable
 from ...core.utils.timeit import timeit
-from ...core.transform import translation
 
 import cv2
 import numpy as np
 from skimage.transform import EuclideanTransform, warp
 
+# TODO cv2 to LE
 
 class DriftCorrector(object):
     """
