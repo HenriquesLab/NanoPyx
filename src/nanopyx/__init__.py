@@ -4,7 +4,7 @@
 
 import os
 
-from . import core, data, methods, liquid  # noqa: F401
+from . import core, data, methods  # noqa: F401
 
 # Get the user's home folder
 __home_folder__ = os.path.expanduser("~")
