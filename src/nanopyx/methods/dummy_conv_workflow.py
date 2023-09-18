@@ -1,5 +1,5 @@
 from .workflow import Workflow
-from ..liquid import Convolution2D as Conv
+from ..core.transform import Convolution2D as Conv
 
 import numpy as np
 
