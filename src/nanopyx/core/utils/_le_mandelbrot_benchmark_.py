@@ -1,27 +1,7 @@
-import warnings
-
 import numpy as np
-# TODO use our njit imports
-try:
-    from numba import njit, prange
+from ...__njit__ import njit, prange
 
-except ImportError:
-    # raise a warning that numba is not installed
-    # and that the njit functions will not be used
-    # and that the pure python functions will be used instead
 
-    prange = range
-
-    def njit(*args, **kwargs):
-        def wrapper(func):
-            warnings.warn(
-                f"Numba is not installed. Using pure python for {func.__name__}"
-            )
-            return func
-
-        return wrapper
-
-# TODO
 MAX_ITERATIONS = 1000
 DIVERGENCE = 10
 
