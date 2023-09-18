@@ -7,8 +7,9 @@ from cython.parallel import parallel, prange
 from libc.math cimport cos, sin
 
 from .__interpolation_tools__ import check_image, value2array
-from ..__liquid_engine__ import LiquidEngine
-from ..__opencl__ import cl, cl_array
+from ...__liquid_engine__ import LiquidEngine
+from ...__opencl__ import cl, cl_array
+
 from ._le_interpolation_catmull_rom import ShiftAndMagnify
 from ._le_roberts_cross_gradients import GradientRobertsCross
 from ._le_radial_gradient_convergence import RadialGradientConvergence

@@ -9,8 +9,8 @@ from cython.parallel import parallel, prange
 from libc.math cimport cos, sin
 
 from .__interpolation_tools__ import check_image, value2array
-from ..__liquid_engine__ import LiquidEngine
-from ..__opencl__ import cl, cl_array
+from ...__liquid_engine__ import LiquidEngine
+from ...__opencl__ import cl, cl_array
 
 from ._le_interpolation_catmull_rom_ import \
     njit_shift_magnify as _njit_shift_magnify

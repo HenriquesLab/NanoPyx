@@ -6,8 +6,8 @@ cimport numpy as np
 
 from cython.parallel import prange
 
-from ..__liquid_engine__ import LiquidEngine
-from ..__opencl__ import cl, cl_array
+from ...__liquid_engine__ import LiquidEngine
+from ...__opencl__ import cl, cl_array
 from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 from ._le_mandelbrot_benchmark_ import njit_mandelbrot as _njit_mandelbrot
 

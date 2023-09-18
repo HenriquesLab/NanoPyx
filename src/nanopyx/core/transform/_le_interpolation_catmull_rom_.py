@@ -1,6 +1,6 @@
 import numpy as np
 from math import floor
-from ..__njit__ import njit, prange
+from ...__njit__ import njit, prange
 
 
 def _cubic(v):

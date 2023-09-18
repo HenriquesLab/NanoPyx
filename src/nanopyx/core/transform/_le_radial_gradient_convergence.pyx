@@ -6,8 +6,8 @@ cimport numpy as np
 from cython.parallel import parallel, prange
 
 from libc.math cimport sqrt, pow
-from ..__opencl__ import cl, cl_array
-from ..__liquid_engine__ import LiquidEngine
+from ...__opencl__ import cl, cl_array
+from ...__liquid_engine__ import LiquidEngine
 from .__interpolation_tools__ import check_image
 
 cdef extern from "_c_sr_radial_gradient_convergence.h":

@@ -1,7 +1,7 @@
 import warnings
 
 import numpy as np
-
+# TODO use our njit imports
 try:
     from numba import njit, prange
 
