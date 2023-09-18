@@ -16,3 +16,5 @@ from ._le_radial_gradient_convergence import RadialGradientConvergence
 from ._le_roberts_cross_gradients import GradientRobertsCross
 from ._le_esrrf import eSRRF as eSRRF_ST
 from ._le_convolution import Convolution as Convolution2D
+
+from ._interpolation import cr_interpolate
