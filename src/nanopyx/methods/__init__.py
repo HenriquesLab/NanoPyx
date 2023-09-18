@@ -1,5 +1,5 @@
 from . import drift_alignment
 from . import channel_registration
 
-from .esrrf import eSRRF_workflow
-from .srrf import SRRF_workflow
+from .esrrf.eSRRF_workflow import eSRRF
+from .srrf.SRRF_workflow import SRRF

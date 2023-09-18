@@ -1,5 +1,5 @@
 from ..workflow import Workflow
-from ..core.transform import Radiality, CRShiftAndMagnify
+from ...core.transform import Radiality, CRShiftAndMagnify
 
 
 import numpy as np
