@@ -2,9 +2,7 @@
 
 # import libraries here
 import numpy as np
-from ..__liquid_engine__ import LiquidEngine
-from .__interpolation_tools__ import check_image
-
+from ...__liquid_engine__ import LiquidEngine
 
 cimport numpy as np
 
@@ -23,7 +21,6 @@ class Template(LiquidEngine):
                         threaded_dynamic_=False, threaded_guided_=False, opencl_=False) # change implemented run types to True
 
     def run(self, image, run_type = None): 
-        image = check_image(image)
         return self._run(image)
     
     def benchmark(self, image):

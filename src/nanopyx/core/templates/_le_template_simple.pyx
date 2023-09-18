@@ -1,14 +1,9 @@
 import numpy as np
-from ..__njit__ import njit, prange
-from ..__liquid_engine__ import LiquidEngine
-from .__interpolation_tools__ import check_image
+from ...__njit__ import njit, prange
+from ...__liquid_engine__ import LiquidEngine
 
-
-from ._le_template_simple_ import \
-    njit_template as _njit_template
-from ._le_template_simple_ import \
-    py_template as _py_template
-
+from ._le_template_simple_ import njit_template as _njit_template
+from ._le_template_simple_ import py_template as _py_template
 
 class Template(LiquidEngine):
     """
@@ -23,7 +18,6 @@ class Template(LiquidEngine):
                         njit_=True)  # change implemented run types to True 
 
     def run(self, image, run_type=None):
-        image = check_image(image)
         return self._run(image)
 
     def benchmark(self, image):
