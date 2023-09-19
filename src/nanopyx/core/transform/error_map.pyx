@@ -49,8 +49,10 @@ cdef class ErrorMap:
         #cdef float[:, :] imRSE = np.
         
         if magnification > 1:
-            img_ref_int[:,:] = interpolator.run(np.asarray(img_ref).astype(np.float32),0,0,magnification,magnification) 
+            result = interpolator.run(np.asarray(img_ref).astype(np.float32),0,0,magnification,magnification) 
+            img_ref_int[:,:] = result
             #imRef = resize(imRef, imSR.shape, order=3, preserve_range=True)
+            print(img_ref_int)
 
         #self.img_ref_magnified = img_ref_int
 
