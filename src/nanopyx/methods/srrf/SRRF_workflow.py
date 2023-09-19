@@ -16,4 +16,4 @@ def SRRF(image, magnification=5, ringRadius=0.5, border=0, radialityPositivityCo
                     (Radiality(),(image, 'PREV_RETURN_VALUE_0_0'),{'magnification':magnification, 'ringRadius':ringRadius, 'border':border,'radialityPositivityConstraint':radialityPositivityConstraint,'doIntensityWeighting':doIntensityWeighting}))
     
     
-    return _SRRF.run(_force_run_type=_force_run_type)
+    return _SRRF.calculate(_force_run_type=_force_run_type)

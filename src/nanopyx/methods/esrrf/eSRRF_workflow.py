@@ -12,4 +12,4 @@ def eSRRF(image, magnification: int = 5, radius: float = 1.5, sensitivity: float
 
       _eSRRF = Workflow((eSRRF_ST(), (image,), {'magnification': magnification, 'radius': radius, 'sensitivity': sensitivity, 'doIntensityWeighting': doIntensityWeighting}))
 
-      return _eSRRF.run(_force_run_type=_force_run_type)
+      return _eSRRF.calculate(_force_run_type=_force_run_type)
