@@ -16,7 +16,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade nox
-          python -m nox --sessions test_source
+          python -m nox --sessions build_sdist
       - uses: actions/upload-artifact@v3
         with:
           name: sdist
