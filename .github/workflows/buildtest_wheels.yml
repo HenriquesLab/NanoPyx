@@ -1,4 +1,4 @@
-name: Test and Wheel maker
+name: Build and Test wheels
 
 on: workflow_dispatch
 
@@ -63,7 +63,10 @@ jobs:
           python-version: '3.9'  
 
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.15.0
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pipx
+          python -m pip install cibuildwheel==2.15.0
 
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
@@ -71,6 +74,7 @@ jobs:
         env:
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
           CIBW_ARCHS: all
+          CIBW_SKIP: "*-musllinux_*"
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
           CIBW_BUILD_VERBOSITY: 1
@@ -79,3 +83,25 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
+
+  build_sdist:
+    runs-on: [self-hosted, Windows]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: |
+            3.9
+            3.10
+            3.11
+      - name: Run Nox Quick-Tests
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade nox
+          python setup.py sdist
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sdist
+          path: ./dist/*.tar.gz

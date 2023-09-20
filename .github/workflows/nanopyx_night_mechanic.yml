@@ -1,4 +1,4 @@
-name: test-nightly
+name: Test - Nightly
 # does a massive check, every night
 
 on:

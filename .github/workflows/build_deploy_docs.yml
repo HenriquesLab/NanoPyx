@@ -1,4 +1,4 @@
-name: build-deploy-docs
+name: Build and Deploy Docs
 
 on:
   release:

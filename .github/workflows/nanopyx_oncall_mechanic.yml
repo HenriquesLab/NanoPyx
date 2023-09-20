@@ -1,4 +1,4 @@
-name: test-oncall
+name: Test - Oncall
 # does a quick test
 
 on:
