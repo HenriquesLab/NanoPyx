@@ -3,48 +3,37 @@ name: Build and Test Manylinux wheel
 on: workflow_dispatch
 
 jobs:
-  build_wheels:
-    name: Build wheels on Python ${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
+  build_linux_39_and_above_wheels:
+    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-
     strategy:
+      fail-fast: True
       matrix:
-          include:
-
-          - os: ubuntu-latest
-            python: 39
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2010
-          - os: ubuntu-latest
-            python: 310
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2010
-          - os: ubuntu-latest
-            python: 311
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux2014
-
+        os: [ubuntu-latest]
+        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
+        cibw_manylinux: [manylinux2014]
+        cibw_arch: ["x86_64"]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        name: Install Python
+        with:
+          python-version: "3.9"
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.15.0
-
-      - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
-        # to supply options, put them in 'env', like:
+        run: python -m pip install cibuildwheel
+      - name: Build the wheel
+        run: python -m cibuildwheel --output-dir dist
         env:
-          CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
-          CIBW_ARCHS: all
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
+          CIBW_BUILD: ${{ matrix.cibw_python }}
+          CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
+          CIBW_SKIP: "*-musllinux_*"
+          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
+          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_COMMAND: "pytest {project}/tests"
-          
       - uses: actions/upload-artifact@v3
         with:
-          path: ./wheelhouse/*.whl
+          name: wheels
+          path: ./dist/*.whl
