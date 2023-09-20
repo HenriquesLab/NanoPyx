@@ -22,7 +22,7 @@ jobs:
           - os: ubuntu-latest
             python: 311
             platform_id: manylinux_x86_64
-            manylinux_image: manylinux2010
+            manylinux_image: manylinux2014
 
     steps:
       - name: Checkout
