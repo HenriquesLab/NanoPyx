@@ -256,13 +256,13 @@ cdef class DecorrAnalysis:
             if d_length == 0:
                 out[0] = 0
                 out[1] = 0
-                return out
+                break
             else:
                 out = _get_max(t, 0, self.n_r)
                 temp_min = _get_min(t, int(out[0]), d_length-1)
 
                 if t[<int>(out[0])] - temp_min[1] > dt:
-                    return out
+                    break
                 else:
                     t[<int>(out[0])] = temp_min[1]
                     out[0] = d_length - 1
