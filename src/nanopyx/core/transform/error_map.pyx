@@ -46,15 +46,11 @@ cdef class ErrorMap:
         
         
         cdef float[:, :] img_ref_int = np.zeros((np.asarray(img_ref).shape[0]*magnification, np.asarray(img_ref).shape[1]*magnification)).astype(np.float32)
-        #cdef float[:, :] imRSE = np.
-        
+        cdef float[:,:,:] result
+
         if magnification > 1:
             result = interpolator.run(np.asarray(img_ref).astype(np.float32),0,0,magnification,magnification) 
-            img_ref_int[:,:] = result
-            #imRef = resize(imRef, imSR.shape, order=3, preserve_range=True)
-            print(img_ref_int)
-
-        #self.img_ref_magnified = img_ref_int
+            img_ref_int[:,:] = result[0,:,:]
 
         max_sigma_boundary = (
             4 / 2.35482
