@@ -18,3 +18,5 @@ from ._le_esrrf import eSRRF as eSRRF_ST
 from ._le_convolution import Convolution as Convolution2D
 
 from ._interpolation import cr_interpolate
+
+from .error_map import ErrorMap
