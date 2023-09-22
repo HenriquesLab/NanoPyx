@@ -153,6 +153,8 @@ class LiquidEngine:
         self._last_args = arg_repr
         self._last_runtype = run_type
 
+        self.Agent._inform(self)
+
         return result
     
     def benchmark(self,*args, **kwargs):
