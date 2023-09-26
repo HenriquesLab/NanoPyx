@@ -10,6 +10,7 @@ from ._le_interpolation_lanczos import ShiftAndMagnify as LZShiftAndMagnify
 from ._le_interpolation_lanczos import ShiftScaleRotate as LZShiftScaleRotate
 from ._le_interpolation_nearest_neighbor import ShiftAndMagnify as NNShiftAndMagnify
 from ._le_interpolation_nearest_neighbor import ShiftScaleRotate as NNShiftScaleRotate
+from ._le_interpolation_nearest_neighbor import PolarTransform as NNPolarTransform
 
 from ._le_radiality import Radiality
 from ._le_radial_gradient_convergence import RadialGradientConvergence
