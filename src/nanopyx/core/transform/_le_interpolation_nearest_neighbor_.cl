@@ -70,40 +70,40 @@ __kernel void shiftScaleRotate(__global float *image_in,
 }
 // tag-end
 
-// // tag-start: _le_interpolation_nearest_neighbor_.cl.PolarTransform
-// __kernel void PolarTransform(__global float *image_in,
-//                                __global float *image_out, 
-//                                int og_row, int og_col, int scale) {
+// tag-start: _le_interpolation_nearest_neighbor_.cl.PolarTransform
+__kernel void PolarTransform(__global float *image_in,
+                               __global float *image_out, 
+                               int og_row, int og_col, int scale) {
                                 
-//   // these are the indexes of the loop
-//   int f = get_global_id(0);
-//   int rM = get_global_id(1);
-//   int cM = get_global_id(2);
+  // these are the indexes of the loop
+  int f = get_global_id(0);
+  int rM = get_global_id(1);
+  int cM = get_global_id(2);
 
-//   // these are the sizes of the array
-//   // int nFrames = get_global_size(0);
-//   int rows = get_global_size(1);
-//   int cols = get_global_size(2);
+  // these are the sizes of the array
+  // int nFrames = get_global_size(0);
+  int rows = get_global_size(1);
+  int cols = get_global_size(2);
 
-//   float center_col = og_col / 2;
-//   float center_row = og_row / 2;
+  float center_col = og_col / 2;
+  float center_row = og_row / 2;
 
-//   float max_radius = hypot(center_col, center_row);
+  float max_radius = hypot(center_col, center_row);
 
-//   float pi = 4 * atan(1);
+  float pi = 4 * atan(1.0);
 
-//   float angle =  rM * 2 * pi  / (rows-1);
-//   float radius;
-//   if (scale==1) {
-//     radius = exp(cM*log(max_radius)/(cols-1));
-//   } else {
-//     radius = cM * max_radius / (cols-1);
-//   }
+  float angle =  rM * 2 * pi  / (rows-1);
+  float radius;
+  if (scale==1) {
+    radius = exp(cM*log(max_radius)/(cols-1));
+  } else {
+    radius = cM * max_radius / (cols-1);
+  }
 
-//   float col = radius * cos(angle) + center_col;
-//   float row = radius * sin(angle) + center_row;
+  float col = radius * cos(angle) + center_col;
+  float row = radius * sin(angle) + center_row;
 
-//   image_out[f * rows * cols + rM * cols + cM] =
-//       _c_interpolate(&image_in[f * og_col*og_row], row, col, rows, cols);
-// }
-// // tag-end
+  image_out[f * rows * cols + rM * cols + cM] =
+      _c_interpolate(&image_in[f * og_col*og_row], row, col, rows, cols);
+}
+// tag-end
