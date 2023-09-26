@@ -355,7 +355,6 @@ class ShiftScaleRotate(LiquidEngine):
 
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_opencl
-    #@LiquidEngine._logger(logger)
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, dict device) -> np.ndarray:
 
         # QUEUE AND CONTEXT
@@ -398,7 +397,6 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded
-    #@LiquidEngine._logger(logger)
     def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -435,7 +433,6 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(cols)", "prange(cols)")
-    #@LiquidEngine._logger(logger)
     def _run_threaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -472,7 +469,6 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(cols)", "prange(cols, schedule='static')")
-    #@LiquidEngine._logger(logger)
     def _run_threaded_static(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -509,7 +505,6 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(cols)", "prange(cols, schedule='dynamic')")
-    #@LiquidEngine._logger(logger)
     def _run_threaded_dynamic(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -546,7 +541,6 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(cols)", "prange(cols, schedule='guided')")
-    #@LiquidEngine._logger(logger)
     def _run_threaded_guided(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -583,7 +577,6 @@ class ShiftScaleRotate(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_python
-    #@LiquidEngine._logger(logger)
     def _run_python(self, image, shift_row, shift_col, scale_row, scale_col, angle) -> np.ndarray:
         image_out = _py_shift_magnify_rotate(image, shift_row, shift_col, scale_row, scale_col, angle)
         return image_out
@@ -591,7 +584,6 @@ class ShiftScaleRotate(LiquidEngine):
 
 
     # tag-start: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_njit
-    #@LiquidEngine._logger(logger)
     def _run_njit(
         self,
         image=np.zeros((1,10,10),dtype=np.float32),
