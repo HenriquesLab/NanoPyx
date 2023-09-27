@@ -3,7 +3,7 @@ gui_error = EasyGui("Error")
 
 import numpy as np
 from matplotlib import pyplot as plt
-from nanopyx.core.transform.new_error_map import ErrorMap
+from nanopyx.core.transform import ErrorMap
 
 def run_error(b):
     clear_output()

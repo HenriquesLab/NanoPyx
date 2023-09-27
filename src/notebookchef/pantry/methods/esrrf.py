@@ -1,6 +1,6 @@
 #@title Create eSRRF GUI
 gui_esrrf = EasyGui("esrrf")
-from nanopyx.methods import eSRRF_w
+from nanopyx.methods import eSRRF
 from nanopyx.core.transform.sr_temporal_correlations import calculate_eSRRF_temporal_correlations
 
 def run_esrrf(b):
@@ -31,10 +31,10 @@ def run_esrrf(b):
 
     for i in range(dataset_original.shape[0] // frames_per_timepoint):
         block = dataset_original[i*frames_per_timepoint:(i+1)*frames_per_timepoint]
-        esrrf_generator = eSRRF_w(block, magnification=magnification, radius=ring_radius,
+        result = eSRRF(block, magnification=magnification, radius=ring_radius,
                                 sensitivity=sensitivity,
                                 doIntensityWeighting=True)
-        output.append(calculate_eSRRF_temporal_correlations(esrrf_generator.calculate()[0], esrrf_order))
+        output.append(calculate_eSRRF_temporal_correlations(result[0], esrrf_order))
 
     global dataset_esrrf
     dataset_esrrf = np.array(output)
