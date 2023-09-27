@@ -1,4 +1,6 @@
 #@title Create drift correction GUI
+from nanopyx.methods import drift_alignment
+
 gui_drift = EasyGui("Drift Correction")
 
 def on_button_align(b):

@@ -1,7 +1,5 @@
 #@title Create image loader GUI
 # Create a GUI
-from nanopyx.core.utils.easy_gui import EasyGui
-from nanopyx.core.utils.find_files import find_files
 
 gui_data = EasyGui("Data Loader")
 

@@ -1,4 +1,6 @@
 #@title Create channel registration GUI
+from nanopyx.methods import channel_registration
+
 gui_reg = EasyGui("Channel Registration")
 
 def on_button_register(b):

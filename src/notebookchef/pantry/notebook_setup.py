@@ -12,6 +12,9 @@ import matplotlib as mpl
 import ipywidgets as widgets
 from IPython.display import display, clear_output
 from matplotlib import pyplot as plt
+
+from nanopyx.core.utils.easy_gui import EasyGui
+from nanopyx.core.utils.find_files import find_files
 from nanopyx.data.download import ExampleDataManager
 
 IN_COLAB = 'google.colab' in sys.modules
