@@ -15,7 +15,7 @@ def run_decorr(b):
     gui_decorr_1["run"].description = "Calculating..."
     global decorr_calculator_raw
     decorr_calculator_raw = DecorrAnalysis(pixel_size=pixel_size, units=units, rmin=rmin, rmax=rmax)
-    decorr_calculator_raw.run_analysis(dataset_original, axis=0))
+    decorr_calculator_raw.run_analysis(dataset_original, axis=0)
     gui_decorr_1["run"].disabled = False
     gui_decorr_1["run"].description = "Calculate"
     plt.imshow(decorr_calculator_raw.plot_results())
