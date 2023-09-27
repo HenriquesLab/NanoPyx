@@ -13,7 +13,7 @@ def run_error(b):
     gui_error["run"].description = "Calculating..."
     global errormap
     error_map = ErrorMap()
-    error_map.optimise(np.mean(dataset_original, axis=0), np.mean(dataset_esrrf, axis=0))
+    error_map.optimise(np.mean(dataset_original, axis=0), np.mean(dataset_sr, axis=0))
     gui_error["run"].disabled = False
     gui_error["run"].description = "Calculate"
     print("RSE: ", error_map.getRSE())
