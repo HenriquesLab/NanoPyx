@@ -9,10 +9,14 @@ $include: citations/frc.txt
 $include: citations/decorr.txt
 __cellbreak__
 $code
+$include: opencl_colab_fix.py
+__cellbreak__
+$code
 $include: notebook_setup.py
 __cellbreak__
 $markdown
-## Create Data Loader GUI
+## Next lets create the Data Loader GUI.
+Once you run the cell, make sure to select the SMLMS2013_HDTubulingAlexa647 dataset
 __cellbreak__
 $code
 $include: image_loading.py
