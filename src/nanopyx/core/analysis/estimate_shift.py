@@ -23,7 +23,7 @@ class GetMaxOptimizer(object):
         :return: float; value of cross correlation matrix at given coordinates.
         For minimizer reasons -> negatives values become positive and positive become negative.
         """
-        return -cr_interpolate(self.slice_ccm, coords[1], coords[0])
+        return -cr_interpolate(self.slice_ccm, coords[0], coords[1])
 
     def get_max(self):
         """
