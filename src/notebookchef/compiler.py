@@ -134,9 +134,6 @@ def parse_recipe(recipe: str, notebook: dict, ingredient_path: str, output_path:
     nbformat.write(notebook, os.path.join(output_path, notebook_name + ".ipynb"))
 
 
-import nbformat
-
-
 def compile_notebook(recipe_path: str, ingredient_path: str, output_path: str) -> None:
     """
     Compiles a notebook using nbformat.v4 from a recipe file and ingredients.
@@ -168,5 +165,9 @@ def compile_all_notebooks(
     """
     for recipe_file in os.listdir(recipes_dir):
         if recipe_file.endswith(".txt"):
+            print("Compiling " + recipe_file)
             recipe_path = os.path.join(recipes_dir, recipe_file)
             compile_notebook(recipe_path, pantry_dir, output_dir)
+
+if __name__ == "__main__":
+    compile_all_notebooks()

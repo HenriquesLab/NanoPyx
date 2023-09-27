@@ -1,0 +1,60 @@
+$markdown
+# NanoPyx "Codeless" Jupyter Notebook
+
+This notebook allows you to generate a super-resolution image using SRRF (Super-Resolution Radiality Fluctuations) and then assess quality control metrics such as an Error Map (NanoJ-SQUIRREL), FRC (Fourier Ring Correlation) and Decorrelation analysis.
+
+$include: notebook_intro.txt
+$include: citations/srrf.txt
+$include: citations/nanoj-squirrel.txt
+$include: citations/frc.txt
+$include: citations/decorr.txt
+__cellbreak__
+$code
+$include: opencl_colab_fix.py
+__cellbreak__
+$code
+$include: notebook_setup.py
+__cellbreak__
+$code
+$include: image_loading.py
+__cellbreak__
+$markdown
+# Use eSRRF to generate a super-resolved image
+$include: parameters/esrrf.txt
+__cellbreak__
+$code
+$include: methods/esrrf.py
+__cellbreak__
+$markdown
+## Calculate error map for the eSRRF image
+__cellbreak__
+$code
+$include: methods/error_map.py $tag2tag: dataset_srrf,dataset_esrrf
+__cellbreak__
+$markdown
+## Calculate FRC resolution of the diffraction limited image
+$include: parameters/frc.txt
+__cellbreak__
+$code
+$include: methods/frc.py $tag2tag: dataset_srrf,dataset_esrrf
+__cellbreak__
+$markdown
+## Calculate FRC resolution of the SR image
+$include: parameters/frc.txt
+__cellbreak__
+$code
+$include: methods/frc.py $tag2tag: original image,SR image;dataset_original,dataset_esrrf;gui_frc_1,gui_frc_esrrf
+__cellbreak__
+$markdown
+## Calculate Decorrelation analysis resolution of the diffraction limited image
+$include: parameters/decorr.txt
+__cellbreak__
+$code
+$include: methods/decorr.py $tag2tag: dataset_srrf,dataset_esrrf
+__cellbreak__
+$markdown
+## Calculate Decorrelation analysis resolution of the SR image
+$include: parameters/decorr.txt
+__cellbreak__
+$code
+$include: methods/decorr.py $tag2tag: original image,SR image;dataset_original,dataset_esrrf, gui_decorr_1,gui_decorr_esrrf

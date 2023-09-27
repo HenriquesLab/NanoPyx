@@ -1,7 +1,7 @@
 $markdown
 # NanoPyx "Codeless" Jupyter Notebook
 
-This notebook allows you to perform channel registration of multi-channel image stacks
+This notebook allows you to perform channel registration of 2D multi-channel image stacks
 
 $include: notebook_intro.txt
 $include: citations/channel_registration.txt
@@ -13,7 +13,7 @@ $code
 $include: image_loading.py
 __cellbreak__
 $markdown
-$include: methods/channel_registration_params.txt
+$include: parameters/channel_registration.txt
 __cellbreak__
 $code
 $include: methods/channel_registration.py

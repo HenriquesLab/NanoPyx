@@ -37,7 +37,7 @@ $code
 $include: methods/error_map.py
 __cellbreak__
 $markdown
-## Let's compare the resolution of the raw data with the SRRF using FRC and DecorrelationAnalysis. Let's start with calculation the FRC resolution of the raw data.
+## Let's compare the resolution of the raw data with the SRRF using FRC and DecorrelationAnalysis. Let's start with calculation the FRC resolution of the raw data (select frame 3 and 11).
 __cellbreak__
 $markdown
 $include: parameters/frc.txt

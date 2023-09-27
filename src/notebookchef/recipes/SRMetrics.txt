@@ -1,0 +1,58 @@
+$markdown
+# NanoPyx "Codeless" Jupyter Notebook
+
+This notebook allows you to assess quality control metrics of microscopy images such as an Error Map (NanoJ-SQUIRREL), FRC (Fourier Ring Correlation) and Decorrelation analysis.
+
+$include: notebook_intro.txt
+$include: citations/nanoj-squirrel.txt
+$include: citations/frc.txt
+$include: citations/decorr.txt
+__cellbreak__
+$code
+$include: opencl_colab_fix.py
+__cellbreak__
+$markdown
+## Load difraction limited image (only needed if you want to use the FRC and Decorrelation analysis on this image or if you want to perform the Error Map analysis)
+__cellbreak__
+$code
+$include: image_loading.py $tag2tag: Create image loader GUI,Create image loader GUI for diffraction limited image;gui_data,gui_data_df;dataset_original,dataset_df
+__cellbreak__
+$markdown
+## Load super-resolved image
+__cellbreak__
+$code
+$include: image_loading.py $tag2tag: Create image loader GUI,Create image loader GUI for SR image;gui_data,gui_data_sr;dataset_original,dataset_sr
+__cellbreak__
+$markdown
+## Calculate Error Map
+__cellbreak__
+$code
+$include: methods/error_map.py $tag2tag: dataset_original,dataset_df;dataset_srrf,dataset_sr
+__cellbreak__
+$markdown
+# Calculate FRC of the diffraction limited image
+$include: parameters/frc.txt
+__cellbreak__
+$code
+$include: methods/frc.py $tag2tag: gui_frc_1,gui_frc_df;dataset_original,dataset_df
+__cellbreak__
+$markdown
+# Calculate FRC of the SR image
+$include: parameters/frc.txt
+__cellbreak__
+$code
+$include: methods/frc.py $tag2tag: original image,SR image;dataset_original,dataset_sr;gui_frc_1,gui_frc_sr
+__cellbreak__
+$markdown
+# Calculate Decorrelation analysis of diffraction limited image
+$include: parameters/decorr.txt
+__cellbreak__
+$code
+$include: methods/decorr.py $tag2tag: dataset_original,dataset_df;gui_decorr_1,gui_decorr_df;original image,diffraction limited image
+__cellbreak__
+$markdown
+# Calculate Decorrelation analysis of SR image
+$include: parameters/decorr.txt
+__cellbreak__
+$code
+$include: methods/decorr.py $tag2tag: dataset_original,dataset_sr;gui_decorr_1,gui_decorr_sr;original image,SR image

@@ -1,0 +1,19 @@
+$markdown
+# NanoPyx "Codeless" Jupyter Notebook
+
+This notebook allows you to perform drift correction of 2D timelapses
+
+$include: notebook_intro.txt
+$include: citations/drift_correction.txt
+__cellbreak__
+$code
+$include: notebook_setup.py
+__cellbreak__
+$code
+$include: image_loading.py
+__cellbreak__
+$markdow
+$include: parameters/drift_correction.txt
+__cellbreak__
+$code
+$include: methods/drift_correction.py
