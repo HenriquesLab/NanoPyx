@@ -15,7 +15,7 @@ def run_decorr(b):
     gui_decorr_1["run"].description = "Calculating..."
     global decorr_calculator_raw
     decorr_calculator_raw = DecorrAnalysis(pixel_size=pixel_size, units=units, rmin=rmin, rmax=rmax)
-    decorr_calculator_raw.run_analysis(np.mean(dataset_original, axis=0))
+    decorr_calculator_raw.run_analysis(dataset_original, axis=0))
     gui_decorr_1["run"].disabled = False
     gui_decorr_1["run"].description = "Calculate"
     plt.imshow(decorr_calculator_raw.plot_results())
@@ -24,6 +24,7 @@ def run_decorr(b):
     
 gui_decorr_1.add_int_slider("pixel_size", description="Pixel Size:", min=0.01, max=1000, value=100, remember_value=True)
 gui_decorr_1.add_dropdown("units", description="Units: ", options=["nm", "um", "mm"], value="nm")
+gui_decorr_1.add_int_slider("frame", description="Frame:", min=0, max=dataset_original[0].shape[0]-1, value=0)
 gui_decorr_1.add_float_slider("rmin", description="Radius Min:", min=0.0, max=0.5, value=0.0)
 gui_decorr_1.add_float_slider("rmax", description="Radius Max:", min=0.5, max=1.0, value=1.0)
 gui_decorr_1.add_button("run", description="Calculate")

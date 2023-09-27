@@ -1,0 +1,7 @@
+# Drift Correction Parameters:  
+
+Requires an image stack with shape: (time, rows, columns)  
+
+- **Reference Frame:** Which frame to be used as reference. Either always use the first frame (better for fixed cells) or the previous frame (better for live cells).  
+- **Max Expected Drift:** Maximum amount of expected drift in pixels.  
+- **Time Averaging:** Whether to register each individual frame, if using 1, or how many frames to average before calculating drift correction (better for single molecule data). Output keeps the original number of frames, single frame drift estimation is calculated by interpolating using the calculated drift of the averaged image stack.
