@@ -11,11 +11,12 @@ def run_decorr(b):
     units = gui_decorr_1["units"].value
     rmin = gui_decorr_1["rmin"].value
     rmax = gui_decorr_1["rmax"].value
+    frame = gui_decorr_1["frame"].value
     gui_decorr_1["run"].disabled = True
     gui_decorr_1["run"].description = "Calculating..."
     global decorr_calculator_raw
     decorr_calculator_raw = DecorrAnalysis(pixel_size=pixel_size, units=units, rmin=rmin, rmax=rmax)
-    decorr_calculator_raw.run_analysis(dataset_original, axis=0)
+    decorr_calculator_raw.run_analysis(dataset_original[frame])
     gui_decorr_1["run"].disabled = False
     gui_decorr_1["run"].description = "Calculate"
     plt.imshow(decorr_calculator_raw.plot_results())
