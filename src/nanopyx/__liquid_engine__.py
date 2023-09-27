@@ -133,6 +133,7 @@ class LiquidEngine:
             print(f"Unexpected run type {run_type}")
             print("Querying the Agent...")
             run_type = self.Agent.get_run_type(self,args,kwargs)
+            print(f"Agent chose:{run_type}")
         
         # try to run
         try:
