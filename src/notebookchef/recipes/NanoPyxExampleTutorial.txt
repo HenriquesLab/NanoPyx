@@ -34,7 +34,7 @@ $markdown
 ## Let's use NanoPyx to generate an error map of the SRRF image
 __cellbreak__
 $code
-$include: methods/error_map.py
+$include: methods/error_map.py $tag2tag: dataset_sr,dataset_srrf
 __cellbreak__
 $markdown
 ## Let's compare the resolution of the raw data with the SRRF using FRC and DecorrelationAnalysis. Let's start with calculation the FRC resolution of the raw data (select frame 3 and 11).
@@ -43,13 +43,13 @@ $markdown
 $include: parameters/frc.txt
 __cellbreak__
 $code
-$include: methods/frc.py $tag2tag: gui_frc_1,gui_frc_df;original image,diffraction limited image
+$include: methods/frc.py $tag2tag: gui_frc,gui_frc_df
 __cellbreak__
 $markdown
-## Now do the same for the srrf image
+## Now do the same for the SRRF image
 __cellbreak__
 $code
-$include: methods/frc.py $tag2tag: original image,srrf image
+$include: methods/frc.py $tag2tag: original image,srrf image;dataset_original,dataset_srrf;gui_frc,gui_frc_srrf
 __cellbreak__
 $markdown
 ## Let's do the same using Decorrelation analysis
@@ -58,10 +58,10 @@ $markdown
 $include: parameters/decorr.txt
 __cellbreak__
 $code
-$include: methods/decorr.py $tag2tag: gui_decorr_1,gui_decorr_df;original image,diffraction limited image
+$include: methods/decorr.py $tag2tag: gui_decorr,gui_decorr_df
 __cellbreak__
 $markdown
 ## Now let's measure the resolution of the generated SRRF image using Decorrelation analysis
 __cellbreak__
 $code
-$include: methods/decorr.py $tag2tag: original image,srrf image
+$include: methods/decorr.py $tag2tag: original image,srrf image;gui_decorr,gui_decorr_srrf;dataset_original,dataset_srrf

@@ -29,32 +29,32 @@ $markdown
 ## Calculate error map for the SRRF image
 __cellbreak__
 $code
-$include: methods/error_map.py
+$include: methods/error_map.py $tag2tag: dataset_sr,dataset_srrf
 __cellbreak__
 $markdown
 ## Calculate FRC resolution of the diffraction limited image
 $include: parameters/frc.txt
 __cellbreak__
 $code
-$include: methods/frc.py
+$include: methods/frc.py $tag2tag: gui_frc,gui_frc_df
 __cellbreak__
 $markdown
 ## Calculate FRC resolution of the SR image
 $include: parameters/frc.txt
 __cellbreak__
 $code
-$include: methods/frc.py $tag2tag: original image,SR image;dataset_original,dataset_srrf;gui_frc_1,gui_frc_srrf
+$include: methods/frc.py $tag2tag: original image,SR image;dataset_original,dataset_srrf;gui_frc,gui_frc_srrf
 __cellbreak__
 $markdown
 ## Calculate Decorrelation analysis resolution of the diffraction limited image
 $include: parameters/decorr.txt
 __cellbreak__
 $code
-$include: methods/decorr.py
+$include: methods/decorr.py $tag2tag: gui_decorr,gui_decorr_df
 __cellbreak__
 $markdown
 ## Calculate Decorrelation analysis resolution of the SR image
 $include: parameters/decorr.txt
 __cellbreak__
 $code
-$include: methods/decorr.py $tag2tag: original image,SR image;dataset_original,dataset_srrf, gui_decorr_1,gui_decorr_srrf
+$include: methods/decorr.py $tag2tag: original image,SR image;dataset_original,dataset_srrf, gui_decorr,gui_decorr_srrf
