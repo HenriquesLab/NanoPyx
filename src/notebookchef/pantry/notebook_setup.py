@@ -16,7 +16,7 @@ from nanopyx.data.download import ExampleDataManager
 
 IN_COLAB = 'google.colab' in sys.modules
 if IN_COLAB:
-    !pip install -q ipycanvas==0.13.0
+    !pip install -q ipycanvas==0.11.0
     from google.colab import output
     output.enable_custom_widget_manager()
     from google.colab import drive
