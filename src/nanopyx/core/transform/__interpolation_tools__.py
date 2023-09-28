@@ -2,6 +2,19 @@ import numpy as np
 
 
 def check_image(image: np.ndarray) -> np.ndarray:
+    """
+    Check the given image and ensure it meets the required conditions.
+
+    Parameters:
+        image (numpy.ndarray): The image to be checked.
+
+    Returns:
+        numpy.ndarray: The checked and potentially modified image.
+
+    Raises:
+        TypeError: If the image is not of type numpy.ndarray.
+        ValueError: If the image is not 2D or 3D.
+    """
     image = np.asarray(image)
     if type(image) is not np.ndarray:
         raise TypeError("Image must be of type np.ndarray")

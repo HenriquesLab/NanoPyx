@@ -8,16 +8,67 @@ from .estimate_shift import GetMaxOptimizer
 from ..transform.blocks import assemble_frame_from_blocks
 
 
-def calculate_translation_mask(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel", algorithm="weight"):
-    
+def calculate_translation_mask(
+    img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel", algorithm="weight"
+):
+    """
+    Generate the function comment for the given function body in a markdown code block with the correct language syntax.
+
+    Parameters:
+        img_slice (numpy.ndarray): The input image slice.
+        img_ref (numpy.ndarray): The reference image.
+        max_shift (int): The maximum shift allowed for the translation.
+        blocks_per_axis (int): The number of blocks per axis.
+        min_similarity (float): The minimum similarity required for a block to be considered a match.
+        method (str, optional): The method used for subpixel interpolation. Defaults to "subpixel".
+        algorithm (str, optional): The algorithm used for calculating the translation mask. Defaults to "weight".
+
+    Returns:
+        numpy.ndarray: The translation mask.
+
+    Raises:
+        None
+    """
+
     if algorithm == "weight":
-        return calculate_translation_mask_vector_weight(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method=method)
+        return calculate_translation_mask_vector_weight(
+            img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method=method
+        )
     elif algorithm == "field":
-        return calculate_translation_mask_vector_field(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method=method)
+        return calculate_translation_mask_vector_field(
+            img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method=method
+        )
     else:
         print("Not a valid algorithm option! Select either 'weight' or 'field'")
 
-def calculate_translation_mask_vector_weight(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"):
+
+def calculate_translation_mask_vector_weight(
+    img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"
+):
+    """
+    Calculates the translation mask vector weight for a given image slice and reference image.
+
+    Parameters:
+    - img_slice: The image slice to calculate the translation mask vector weight for.
+    - img_ref: The reference image.
+    - max_shift: The maximum shift allowed for calculating the translation mask vector weight.
+    - blocks_per_axis: The number of blocks per axis for dividing the image.
+    - min_similarity: The minimum similarity required for considering a block.
+    - method: The method to use for calculating the translation mask vector weight. Defaults to "subpixel".
+
+    Returns:
+    - translation_matrix: The translation matrix.
+    - blocks: The assembled frame from blocks.
+
+    Raises:
+    - AssertionError: If the width and height of the image slice and reference image do not match.
+
+    Note:
+    - The translation mask vector weight is calculated by dividing the image into blocks and finding the maximum similarity between the image slice and reference image within each block. The translation vector is then calculated based on the maximum similarity and the block position.
+    - The translation mask vector weight is used to determine the translation matrix and the assembled frame from blocks.
+    - If no correlation is found between frames, a message is printed and None is returned.
+    - If the number of blocks per axis is greater than 1, Gaussian smoothing is applied to the translation matrix.
+    """
 
     width = img_slice.shape[1]
     height = img_slice.shape[0]
@@ -36,14 +87,20 @@ def calculate_translation_mask_vector_weight(img_slice, img_ref, max_shift, bloc
             x_start = x_i * block_width
             y_start = y_i * block_height
 
-            slice_crop = img_slice[y_start:y_start+block_height, x_start:x_start+block_width]
-            ref_crop = img_ref[y_start:y_start+block_height, x_start:x_start+block_width]
-            slice_ccm = np.array(calculate_ccm_from_ref(np.array([slice_crop]).astype(np.float32), np.array(ref_crop).astype(np.float32))[0])
+            slice_crop = img_slice[y_start : y_start + block_height, x_start : x_start + block_width]
+            ref_crop = img_ref[y_start : y_start + block_height, x_start : x_start + block_width]
+            slice_ccm = np.array(
+                calculate_ccm_from_ref(
+                    np.array([slice_crop]).astype(np.float32), np.array(ref_crop).astype(np.float32)
+                )[0]
+            )
 
-            if max_shift > 0 and max_shift*2+1 < slice_ccm.shape[0] and max_shift*2+1 < slice_ccm.shape[1]:
-                ccm_x_start = int(slice_ccm.shape[1]/2 - max_shift)
-                ccm_y_start = int(slice_ccm.shape[0]/2 - max_shift)
-                slice_ccm = slice_ccm[ccm_y_start:ccm_y_start+(max_shift*2), ccm_x_start:ccm_x_start+(max_shift*2)]
+            if max_shift > 0 and max_shift * 2 + 1 < slice_ccm.shape[0] and max_shift * 2 + 1 < slice_ccm.shape[1]:
+                ccm_x_start = int(slice_ccm.shape[1] / 2 - max_shift)
+                ccm_y_start = int(slice_ccm.shape[0] / 2 - max_shift)
+                slice_ccm = slice_ccm[
+                    ccm_y_start : ccm_y_start + (max_shift * 2), ccm_x_start : ccm_x_start + (max_shift * 2)
+                ]
 
             if method == "subpixel":
                 optimizer = GetMaxOptimizer(slice_ccm)
@@ -58,15 +115,15 @@ def calculate_translation_mask_vector_weight(img_slice, img_ref, max_shift, bloc
             blocks_stack.append(slice_ccm)
 
             if ccm_max_value >= min_similarity:
-                vector_x = (ccm_width/2.0 - max_coords[1] - 1)
-                vector_y = (ccm_height/2.0 - max_coords[0] - 1)
-                flow_arrows.append([x_start + block_width/2.0, y_start + block_height/2.0, vector_x, vector_y])
+                vector_x = ccm_width / 2.0 - max_coords[1] - 1
+                vector_y = ccm_height / 2.0 - max_coords[0] - 1
+                flow_arrows.append([x_start + block_width / 2.0, y_start + block_height / 2.0, vector_x, vector_y])
 
     if len(flow_arrows) == 0:
         print("Couldn't find any correlation between frames... try reducing the 'Min Similarity' parameter")
         return None
 
-    translation_matrix = np.zeros((height, width*2))
+    translation_matrix = np.zeros((height, width * 2))
     translation_matrix_x = np.zeros((height, width))
     translation_matrix_y = np.zeros((height, width))
 
@@ -106,8 +163,8 @@ def calculate_translation_mask_vector_weight(img_slice, img_ref, max_shift, bloc
             translation_matrix_y[j, i] = dy
 
     if blocks_per_axis > 1:
-        translation_matrix_x = gaussian(translation_matrix_x, sigma=max(block_width, block_height/2.0))
-        translation_matrix_y = gaussian(translation_matrix_y, sigma=max(block_width, block_height/2.0))
+        translation_matrix_x = gaussian(translation_matrix_x, sigma=max(block_width, block_height / 2.0))
+        translation_matrix_y = gaussian(translation_matrix_y, sigma=max(block_width, block_height / 2.0))
 
     translation_matrix[:, :width] += translation_matrix_x
     translation_matrix[:, width:] += translation_matrix_y
@@ -116,7 +173,10 @@ def calculate_translation_mask_vector_weight(img_slice, img_ref, max_shift, bloc
 
     return translation_matrix, blocks
 
-def calculate_translation_mask_vector_field(img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"):
+
+def calculate_translation_mask_vector_field(
+    img_slice, img_ref, max_shift, blocks_per_axis, min_similarity, method="subpixel"
+):
     """
     Function used to calculate a translation mask between 2 different images.
     Method based on dividing both images in smaller blocks and calculate cross correlation matrix between corresponding
@@ -153,18 +213,23 @@ def calculate_translation_mask_vector_field(img_slice, img_ref, max_shift, block
             x_start = x_i * block_width
             y_start = y_i * block_height
 
-            slice_crop = img_slice[y_start:y_start+block_height, x_start:x_start+block_width]
-            ref_crop = img_ref[y_start:y_start+block_height, x_start:x_start+block_width]
-            slice_ccm = np.array(calculate_ccm_from_ref(np.array([slice_crop]).astype(np.float32),
-                                                        np.array(ref_crop).astype(np.float32))[0])
+            slice_crop = img_slice[y_start : y_start + block_height, x_start : x_start + block_width]
+            ref_crop = img_ref[y_start : y_start + block_height, x_start : x_start + block_width]
+            slice_ccm = np.array(
+                calculate_ccm_from_ref(
+                    np.array([slice_crop]).astype(np.float32), np.array(ref_crop).astype(np.float32)
+                )[0]
+            )
 
             ccm_x_start = 0
             ccm_y_start = 0
 
-            if max_shift > 0 and max_shift*2+1 < slice_ccm.shape[0] and max_shift*2+1 < slice_ccm.shape[1]:
-                ccm_x_start = int(slice_ccm.shape[1]/2 - max_shift)
-                ccm_y_start = int(slice_ccm.shape[0]/2 - max_shift)
-                slice_ccm = slice_ccm[ccm_y_start:ccm_y_start+(max_shift*2), ccm_x_start:ccm_x_start+(max_shift*2)]
+            if max_shift > 0 and max_shift * 2 + 1 < slice_ccm.shape[0] and max_shift * 2 + 1 < slice_ccm.shape[1]:
+                ccm_x_start = int(slice_ccm.shape[1] / 2 - max_shift)
+                ccm_y_start = int(slice_ccm.shape[0] / 2 - max_shift)
+                slice_ccm = slice_ccm[
+                    ccm_y_start : ccm_y_start + (max_shift * 2), ccm_x_start : ccm_x_start + (max_shift * 2)
+                ]
 
             if method == "subpixel":
                 optimizer = GetMaxOptimizer(slice_ccm)
@@ -178,19 +243,19 @@ def calculate_translation_mask_vector_field(img_slice, img_ref, max_shift, block
 
             if ccm_max_value >= min_similarity:
                 shift_x, shift_y = get_shift_from_ccm_slice(slice_ccm, method=method)
-                y_translation.append([y_start + max_coords[0] + ccm_y_start,
-                                      x_start + max_coords[1] + ccm_x_start,
-                                      shift_y - 0.5])
-                x_translation.append([y_start + max_coords[0] + ccm_y_start,
-                                      x_start + max_coords[1] + ccm_x_start,
-                                      shift_x - 0.5])
+                y_translation.append(
+                    [y_start + max_coords[0] + ccm_y_start, x_start + max_coords[1] + ccm_x_start, shift_y - 0.5]
+                )
+                x_translation.append(
+                    [y_start + max_coords[0] + ccm_y_start, x_start + max_coords[1] + ccm_x_start, shift_x - 0.5]
+                )
 
     y_translation = np.array(y_translation)
     x_translation = np.array(x_translation)
     y_interp = interp2d(y_translation[:, 0], y_translation[:, 1], y_translation[:, 2])
     x_interp = interp2d(x_translation[:, 0], x_translation[:, 1], x_translation[:, 2])
 
-    translation_matrix = np.zeros((height, width*2))
+    translation_matrix = np.zeros((height, width * 2))
     translation_matrix_x = np.zeros((height, width))
     translation_matrix_y = np.zeros((height, width))
 
@@ -205,6 +270,7 @@ def calculate_translation_mask_vector_field(img_slice, img_ref, max_shift, block
     blocks = assemble_frame_from_blocks(np.array(blocks_stack), blocks_per_axis, blocks_per_axis)
 
     return translation_matrix, blocks
+
 
 def get_shift_from_ccm_slice(slice_ccm, method="subpixel"):
     """

@@ -28,6 +28,18 @@ class ZipTiffIterator:
         # print(self.tiff_file_names)
 
     def __getitem__(self, index: int) -> np.ndarray:
+        """
+        Get the item at the specified index.
+
+        Parameters:
+            index (int): The index of the item to get.
+
+        Returns:
+            np.ndarray: The item at the specified index.
+
+        Raises:
+            IndexError: If the index is out of range.
+        """
         if index >= len(self.tiff_file_names):
             raise IndexError
         else:
@@ -36,13 +48,30 @@ class ZipTiffIterator:
                 return np.array(image)
 
     def __len__(self) -> int:
+        """
+        Returns the length of the `tiff_file_names` list.
+
+        :return: An integer representing the length of the `tiff_file_names` list.
+        :rtype: int
+        """
         return len(self.tiff_file_names)
 
     def __iter__(self):
+        """
+        Returns an iterator object that iterates over the elements of the class.
+        
+        Yields:
+            The elements of the class.
+        """
         for index in range(len(self.tiff_file_names)):
             yield self[index]
 
     def _get_im0(self):
+        """
+        Get the first image in the stack.
+
+        :return: The first image in the stack.
+        """
         if self._im0 is None:
             self._im0 = self[0]
             self._shape = (
