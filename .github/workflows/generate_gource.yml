@@ -1,4 +1,4 @@
-name: oncall_gource
+name: Generate Gource Movie
 # generates commit history video
 
 on: workflow_dispatch
@@ -8,7 +8,7 @@ jobs:
         runs-on: [self-hosted, deepthought]
         steps:
           - name: Checkout
-            uses: actions/checkout@v3
+            uses: actions/checkout@v4
             with:
               fetch-depth: 0
           - name: Install Python

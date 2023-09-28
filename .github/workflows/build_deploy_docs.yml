@@ -1,4 +1,4 @@
-name: build-deploy-docs
+name: Build and Deploy Docs
 
 on:
   release:
@@ -22,13 +22,13 @@ jobs:
     runs-on: [self-hosted, deepthought]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 1
       - name: Run Nox - generate_docs
         run: |
           pipx run nox --sessions generate_docs
-      - uses: actions/upload-pages-artifact@v1
+      - uses: actions/upload-pages-artifact@v2
         with:
           path: docs/
 

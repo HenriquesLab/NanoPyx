@@ -1,12 +1,31 @@
-name: Test and Wheel maker
+name: Build and Test wheels
 
 on: workflow_dispatch
 
 jobs:
+  build_sdist:
+    runs-on: [self-hosted, Windows]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Build sdist
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --upgrade nox
+          python -m nox --sessions build_sdist
+      - uses: actions/upload-artifact@v3
+        with:
+          name: sdist
+          path: ./wheelhouse/*.tar.gz
+
   build_wheels:
     name: Build wheels on Python ${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
     runs-on: ${{ matrix.os }}
-
+    needs: build_sdist
     strategy:
       matrix:
           include:
@@ -55,7 +74,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v4
@@ -63,7 +82,10 @@ jobs:
           python-version: '3.9'  
 
       - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==2.15.0
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pipx
+          python -m pip install cibuildwheel==2.15.0
 
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
@@ -71,6 +93,7 @@ jobs:
         env:
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
           CIBW_ARCHS: all
+          CIBW_SKIP: "*-musllinux_*"
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
           CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
           CIBW_BUILD_VERBOSITY: 1

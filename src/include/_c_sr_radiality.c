@@ -1,5 +1,7 @@
 #include <math.h>
 #include "_c_interpolation_catmull_rom.h"
+#include "_c_gradients.h"
+#include <stdio.h>
 
 float _c_calculate_dk(float x, float y, float xc, float yc, float vGx, float vGy, float GMag, float ringRadius){
     float Dk = 0;
