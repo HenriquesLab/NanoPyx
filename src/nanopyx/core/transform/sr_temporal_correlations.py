@@ -3,7 +3,30 @@ import numpy as np
 
 def calculate_SRRF_temporal_correlations(
     im: np.array, order: int = 1, do_integrate_lag_times: bool = 0
-):  # these are for SRRF
+):
+    """
+    Calculate temporal correlations for Super-Resolution Radial Fluctuations (SRRF).
+
+    Args:
+        im (np.array): Input 3D numpy array containing temporal data.
+        order (int, optional): Order of temporal correlation. Should be 0, 1, -1, 2, 3, or 4.
+            Defaults to 1.
+        do_integrate_lag_times (bool, optional): Whether to integrate lag times.
+            Defaults to False (0).
+
+    Returns:
+        np.array: Calculated temporal correlations based on the specified order and integration.
+
+    Raises:
+        AssertionError: If the input array doesn't have 3 dimensions or if the order is greater than 4.
+
+    Note:
+        - If `order` is 0, the maximum value over time is calculated.
+        - If `order` is 1, the mean value over time is calculated.
+        - If `order` is -1, the pairwise product sum is calculated.
+        - If `order` is 2, 3, or 4, more advanced calculations are performed based on `do_integrate_lag_times`.
+
+    """
     im = np.array(im, dtype="float32")
     assert im.ndim == 3 and order <= 4
 
@@ -23,6 +46,20 @@ def calculate_SRRF_temporal_correlations(
 
 
 def calculate_eSRRF_temporal_correlations(im: np.array, correlation: str):
+    """
+    Calculate temporal correlations for enhanced Super-Resolution Radial Fluctuations (eSRRF).
+
+    Args:
+        im (np.array): Input 3D numpy array containing temporal data.
+        correlation (str): Type of correlation to calculate. Should be "AVG", "VAR", or "TAC2".
+
+    Returns:
+        np.array: Calculated temporal correlations based on the specified correlation type.
+
+    Raises:
+        ValueError: If the specified correlation type is not "AVG", "VAR", or "TAC2".
+
+    """
     im = np.array(im, dtype="float32")
 
     if correlation == "AVG":
@@ -41,6 +78,16 @@ def calculate_eSRRF_temporal_correlations(im: np.array, correlation: str):
 
 
 def calculate_pairwise_product_sum(rad_array):
+    """
+    Calculate pairwise product sum of a 3D numpy array.
+
+    Args:
+        rad_array (np.array): Input 3D numpy array.
+
+    Returns:
+        np.array: Pairwise product sum of the input array.
+
+    """
     n_time_points, height_m, width_m = rad_array.shape
 
     out_array = np.zeros((height_m, width_m), dtype=np.float32)
@@ -64,6 +111,18 @@ def calculate_pairwise_product_sum(rad_array):
 
 
 def calculate_acrf_(rad_array, order, do_integrate_lag_times):
+    """
+    Calculate Auto-Correlation Radial Fluctuations (ACRF) for temporal data.
+
+    Args:
+        rad_array (np.array): Input 3D numpy array containing temporal data.
+        order (int): Order of ACRF calculation.
+        do_integrate_lag_times (bool): Whether to integrate lag times.
+
+    Returns:
+        np.array: Calculated ACRF based on the specified order and integration.
+
+    """
     im = rad_array.copy()
     n_time_points, height_m, width_m = im.shape
     mean = np.mean(im, axis=0)
@@ -146,6 +205,16 @@ def calculate_acrf_(rad_array, order, do_integrate_lag_times):
 
 
 def calculate_tac2(rad_array):
+    """
+    Calculate Temporal Autocorrelation 2 (TAC2) for temporal data.
+
+    Args:
+        rad_array (np.array): Input 3D numpy array containing temporal data.
+
+    Returns:
+        np.array: Calculated TAC2.
+
+    """
     mean = np.mean(rad_array, axis=0)
     centered = rad_array - mean  # center data around the mean
     nlag = 1  # number of lags to compute TAC2 for

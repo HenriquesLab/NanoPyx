@@ -9,13 +9,14 @@ class DriftEstimatorTable(object):
     Class used to store DriftAlignment parameters as a dictionary.
     Parameters can be changes individually by setting the corresponding params key value to desired parameter
     """
+
     def __init__(self):
         self.params = {}
         self.params["lib_version"] = metadata.version("nanopyx")
         self.params["date"] = datetime.today()
         self.params["apply"] = False
         self.params["do_batch"] = False
-        self.params["ref_option"] = 1 # 0 if it is to use first frame, 1 if uses the previous frame
+        self.params["ref_option"] = 1  # 0 if it is to use first frame, 1 if uses the previous frame
         self.params["time_averaging"] = 1
         self.params["max_expected_drift"] = 0
         self.params["normalize"] = True
@@ -70,10 +71,10 @@ class DriftEstimatorTable(object):
 
         tmp = np.load(path, allow_pickle=True)
 
-        for i in range(tmp.shape[0]-1):
+        for i in range(tmp.shape[0] - 1):
             key, value = tmp[i]
             self.params[key] = value
-        self.drift_table = tmp[tmp.shape[0]-1]
+        self.drift_table = tmp[tmp.shape[0] - 1]
 
     def export_csv(self, path: str = None):
         """
@@ -91,7 +92,14 @@ class DriftEstimatorTable(object):
         txt += "Drift Table\n"
         txt += "XY;X;Y\n"
         for i in range(self.drift_table.shape[0]):
-            txt += str(self.drift_table[i][0]) + ";" + str(self.drift_table[i][1]) + ";" + str(self.drift_table[i][2]) + "\n"
+            txt += (
+                str(self.drift_table[i][0])
+                + ";"
+                + str(self.drift_table[i][1])
+                + ";"
+                + str(self.drift_table[i][2])
+                + "\n"
+            )
 
         open(path, "w").writelines(txt)
 
@@ -128,7 +136,7 @@ class DriftEstimatorTable(object):
 
         drift_table = []
 
-        for row in tmp[count+2:]:
+        for row in tmp[count + 2 :]:
             row_split = row.split(";")
             drift_xy = float(row_split[0])
             drift_x = float(row_split[1])

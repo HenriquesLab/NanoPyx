@@ -26,6 +26,43 @@ except ImportError:
 
 
 class EasyGui:
+    """
+    A class to simplify the creation of GUIs in Jupyter notebooks using ipywidgets.
+
+    Args:
+        title (str): The title of the GUI.
+        width (str): The width of the widget container (e.g., "50%").
+
+    Attributes:
+        _layout (ipywidgets.Layout): The layout for widgets.
+        _style (dict): Style configuration for widgets.
+        _widgets (dict): A dictionary to store widgets.
+        _nLabels (int): The number of labels added to the GUI.
+        _main_display (ipywidgets.Output): The main output widget for the GUI.
+        _title (str): The title of the GUI.
+        _cfg (dict): Configuration dictionary to store widget values.
+        cfg (dict): Alias for the _cfg dictionary associated with the GUI.
+
+    Methods:
+        add_label: Add a label widget to the GUI.
+        add_button: Add a button widget to the GUI.
+        add_text: Add a text widget to the GUI.
+        add_int_slider: Add an integer slider widget to the GUI.
+        add_float_slider: Add a float slider widget to the GUI.
+        add_checkbox: Add a checkbox widget to the GUI.
+        add_int_text: Add an integer text widget to the GUI.
+        add_float_text: Add a float text widget to the GUI.
+        add_dropdown: Add a dropdown widget to the GUI.
+        add_file_upload: Add a file upload widget to the GUI.
+        save_settings: Save widget values to a configuration file.
+        show: Display the GUI with its widgets.
+        clear: Clear all widgets from the GUI.
+
+    Note:
+        This class simplifies the creation of GUIs in Jupyter notebooks using ipywidgets. It provides a variety of methods
+        for adding different types of widgets to the GUI, and it allows for saving and loading widget values to
+        maintain user settings across sessions.
+    """
     def __init__(self, title="basic_gui", width="50%"):
         """
         Container for widgets.
