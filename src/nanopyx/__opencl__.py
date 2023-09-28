@@ -6,21 +6,21 @@ os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
 try:
     import pyopencl as cl
     import pyopencl.array as cl_array
-    
+
     devices = []
     for platform in cl.get_platforms():
-        if 'Microsoft' in platform.vendor: # TODO this takes out integrated graphics 
+        if "Microsoft" in platform.vendor:  # TODO this takes out integrated graphics
             continue
         for dev in platform.get_devices():
             # check if the device is a GPU
             if "GPU" not in cl.device_type.to_string(dev.type):
                 continue
-            if 'cl_khr_fp64' in dev.extensions.strip().split(' '):
+            if "cl_khr_fp64" in dev.extensions.strip().split(" "):
                 cl_dp = True
             else:
                 cl_dp = False
 
-            devices.append({'device':dev, 'DP':cl_dp})
+            devices.append({"device": dev, "DP": cl_dp})
 
 
 except (ImportError, OSError, Exception):
@@ -39,7 +39,7 @@ def print_opencl_info():
     # Print each platform on this computer
     for platform in cl.get_platforms():
         msg += "=" * 60 + "\n"
-        msg += "Platform - Name:  " + platform.name  + "\n"
+        msg += "Platform - Name:  " + platform.name + "\n"
         msg += "Platform - Vendor:  " + platform.vendor + "\n"
         msg += "Platform - Version:  " + platform.version + "\n"
         msg += "Platform - Profile:  " + platform.profile + "\n"
@@ -58,7 +58,7 @@ def print_opencl_info():
             msg += f"\tDevice - Max Work Group Size: {device.max_work_group_size:.0f}" + "\n"
 
     return msg
-            
+
 
 def opencl_works():
     """
@@ -69,9 +69,7 @@ def opencl_works():
     enabled = os.environ.get("NANOPYX_ENABLE_OPENCL", "1") == "1"
 
     if disabled or not enabled:
-        warnings.warn(
-            "OpenCL is disabled. To enable it, set the environment variable NANOPYX_ENABLE_OPENCL=1"
-        )
+        warnings.warn("OpenCL is disabled. To enable it, set the environment variable NANOPYX_ENABLE_OPENCL=1")
         return False
 
     elif enabled:

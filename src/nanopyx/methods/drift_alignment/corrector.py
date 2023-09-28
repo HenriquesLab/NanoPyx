@@ -7,6 +7,7 @@ from skimage.transform import EuclideanTransform, warp
 
 # TODO cv2 to LE
 
+
 class DriftCorrector(object):
     """
     Main class for aligning timelapse images with drift.
@@ -41,6 +42,7 @@ class DriftCorrector(object):
     Note:
         The `DriftCorrector` class is used for correcting drift in timelapse images using a precomputed drift table.
     """
+
     def __init__(self):
         """
         Initialize the `DriftCorrector` object.
@@ -79,7 +81,11 @@ class DriftCorrector(object):
         if drift_x == 0 and drift_y == 0:
             return self.image_arr[slice_idx]
         else:
-            return cv2.warpAffine(self.image_arr[slice_idx].astype(np.float32), np.float32([[1, 0, drift_x], [0, 1, drift_y]]), self.image_arr[slice_idx].shape[:2][::-1]).astype(self.image_arr.dtype)
+            return cv2.warpAffine(
+                self.image_arr[slice_idx].astype(np.float32),
+                np.float32([[1, 0, drift_x], [0, 1, drift_y]]),
+                self.image_arr[slice_idx].shape[:2][::-1],
+            ).astype(self.image_arr.dtype)
 
     # @timeit
     def apply_correction(self, image_array):

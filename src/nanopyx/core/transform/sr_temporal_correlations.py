@@ -1,9 +1,7 @@
 import numpy as np
 
 
-def calculate_SRRF_temporal_correlations(
-    im: np.array, order: int = 1, do_integrate_lag_times: bool = 0
-):
+def calculate_SRRF_temporal_correlations(im: np.array, order: int = 1, do_integrate_lag_times: bool = 0):
     """
     Calculate temporal correlations for Super-Resolution Radial Fluctuations (SRRF).
 

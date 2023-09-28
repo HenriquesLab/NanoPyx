@@ -31,6 +31,7 @@ class ChannelRegistrationCorrector(object):
         The `ChannelRegistrationCorrector` class is used for correcting channel registration in an image stack.
         It provides methods for loading translation masks and aligning channels using these masks.
     """
+
     def __init__(self):
         """
         Initialize the `ChannelRegistrationCorrector` object.
@@ -108,7 +109,7 @@ class ChannelRegistrationCorrector(object):
                     for x_i in range(width):
                         dx = translation_mask[y_i, x_i]
                         dy = translation_mask[y_i, x_i + width]
-                        value = cr_interpolate(img_slice, y_i-dy, x_i-dx)
+                        value = cr_interpolate(img_slice, y_i - dy, x_i - dx)
                         self.aligned_stack[channel][y_i, x_i] = value
 
         return self.aligned_stack.astype(input_d_type)

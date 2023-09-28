@@ -63,6 +63,7 @@ class EasyGui:
         for adding different types of widgets to the GUI, and it allows for saving and loading widget values to
         maintain user settings across sessions.
     """
+
     def __init__(self, title="basic_gui", width="50%"):
         """
         Container for widgets.
@@ -170,9 +171,8 @@ class EasyGui:
         if remember_value and tag in self.cfg:
             kwargs["value"] = self.cfg[tag]
 
-        self._widgets[tag] = widgets.IntText(
-            *args, **kwargs, layout=self._layout, style=self._style)
-        
+        self._widgets[tag] = widgets.IntText(*args, **kwargs, layout=self._layout, style=self._style)
+
     def add_float_text(self, tag, *args, remember_value=False, **kwargs):
         """
         Add a float text widget to the container.
@@ -183,8 +183,7 @@ class EasyGui:
         """
         if remember_value and tag in self.cfg:
             kwargs["value"] = self.cfg[tag]
-        self._widgets[tag] = widgets.FloatText(
-            *args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.FloatText(*args, **kwargs, layout=self._layout, style=self._style)
 
     def add_dropdown(self, tag, *args, remember_value=False, **kwargs):
         """
@@ -304,7 +303,7 @@ def view_curtain_stack(image_1: np.ndarray, image_2: np.ndarray, cmap: str = "vi
     fig, ax = plt.subplots()
     fig.canvas.header_visible = False
     fig.canvas.footer_visible = False
-    
+
     def show_slice(**kwargs):
         tmp_1 = rescale_intensity(image_1)
         tmp_2 = rescale_intensity(image_2)

@@ -29,7 +29,7 @@ class Estimator3D(object):
         __init__(): Initialize the `Estimator3D` object.
 
         correct_xy_drift(projection_mode="Mean", **kwargs): Correct XY drift in the image stack using projection.
-        
+
         correct_z_drift(axis_mode="top", projection_mode="Mean", **kwargs): Correct Z drift in the image stack using projection.
 
         correct_3d_drift(image_array, axis_mode="top", projection_mode="Mean", **kwargs): Correct both XY and Z drift in the 3D image stack.

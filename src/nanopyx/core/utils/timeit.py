@@ -20,6 +20,7 @@ def timeit(func: types.FunctionType):
         When my_function is called, it will print the execution time in seconds.
 
     """
+
     def wrapper(*args, **kwargs):
         t = time.time()
         retval = func(*args, **kwargs)
@@ -47,6 +48,7 @@ def timeit2(func):
         When my_function is called, it will print the execution time in an appropriate time unit (s, ms, or ns).
 
     """
+
     def wrapper(*args, **kwargs):
         start = time.time()
         result = func(*args, **kwargs)
@@ -60,4 +62,5 @@ def timeit2(func):
             msg = f"{func.__name__} took {delta:.6f} seconds"
         print(msg)
         return result
+
     return wrapper

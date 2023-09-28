@@ -31,6 +31,7 @@ class ChannelRegistrationEstimator(object):
         This class is designed for estimating and applying channel registration to an image stack.
         It calculates translation masks for channel alignment and provides options for saving results to files.
     """
+
     def __init__(self) -> None:
         """
         Initialize a ChannelRegistrationEstimator instance.
