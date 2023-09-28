@@ -1,0 +1,8 @@
+# Channel Registration Parameters:  
+
+Requires an image stack with shape: (channel, rows, columns).  
+
+- **Reference Channel:** Which channel to be used as reference.  
+- **Max Expected Shift:** Maximum amount of expected shift between channels, in pixels.  
+- **Blocks per Axis:** As channel misalignmnet is not always homogeneous across the field of view, shift can be calculated for individual blocks of the field of view. This parameters sets how many blocks are created along both axis.  
+- **Minimum Similarity:** Since smaller blocks may lead to shift calculation in areas of the image without any cells, minimum similarity can be used to define the minimum Pearson's Correlation Coefficient, between two blocks of different channels, required to use the calculated shifts as part of the registration. 

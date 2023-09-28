@@ -2,10 +2,22 @@ from .estimator import ChannelRegistrationEstimator
 from .corrector import ChannelRegistrationCorrector
 from ...core.utils.timeit import timeit
 
+
 @timeit
-def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method="subpixel",
-                                  save_translation_masks=True, translation_mask_save_path=None, algorithm="field",
-                                  save_ccms=False, ccms_save_path=False, apply=True):
+def estimate_channel_registration(
+    image_array,
+    ref_channel,
+    max_shift,
+    blocks_per_axis,
+    min_similarity,
+    method="subpixel",
+    save_translation_masks=True,
+    translation_mask_save_path=None,
+    algorithm="field",
+    save_ccms=False,
+    ccms_save_path=False,
+    apply=True,
+):
     """
     Function used to estimate shift between different color channels and align them of an image based on cross correlation.
     :param image_array:numpy array  with shape (n_channels, y, x); image to be corrected
@@ -23,14 +35,26 @@ def estimate_channel_registration(image_array, ref_channel, max_shift, blocks_pe
     :return: if apply==True, returns corrected image with shape (c, y, x)
     """
     estimator = ChannelRegistrationEstimator()
-    aligned_image = estimator.estimate(image_array, ref_channel, max_shift, blocks_per_axis, min_similarity, method=method,
-                                       save_translation_masks=save_translation_masks, translation_mask_save_path=translation_mask_save_path,
-                                       save_ccms=save_ccms, ccms_save_path=ccms_save_path, algorithm=algorithm, apply=apply)
+    aligned_image = estimator.estimate(
+        image_array,
+        ref_channel,
+        max_shift,
+        blocks_per_axis,
+        min_similarity,
+        method=method,
+        save_translation_masks=save_translation_masks,
+        translation_mask_save_path=translation_mask_save_path,
+        save_ccms=save_ccms,
+        ccms_save_path=ccms_save_path,
+        algorithm=algorithm,
+        apply=apply,
+    )
 
     if aligned_image is not None:
         return aligned_image
     else:
         pass
+
 
 @timeit
 def apply_channel_registration(image_array, translation_masks=None):
@@ -44,4 +68,3 @@ def apply_channel_registration(image_array, translation_masks=None):
     aligned_image = corrector.align_channels(image_array, translation_masks=translation_masks)
 
     return aligned_image
-

@@ -12,11 +12,14 @@ import matplotlib as mpl
 import ipywidgets as widgets
 from IPython.display import display, clear_output
 from matplotlib import pyplot as plt
+
+from nanopyx.core.utils.easy_gui import EasyGui
+from nanopyx.core.utils.find_files import find_files
 from nanopyx.data.download import ExampleDataManager
 
 IN_COLAB = 'google.colab' in sys.modules
 if IN_COLAB:
-    !pip install -q ipycanvas==0.13.0
+    !pip install -q ipycanvas==0.11.0
     from google.colab import output
     output.enable_custom_widget_manager()
     from google.colab import drive

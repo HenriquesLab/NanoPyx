@@ -27,9 +27,7 @@ def download(url: str, file_path: str):
             downloaded = 0
             total = int(total)
             with tqdm.tqdm(total=total, unit="iB", unit_scale=True) as pbar:
-                for data in response.iter_content(
-                    chunk_size=max(int(total / 1000), 1024 * 1024)
-                ):
+                for data in response.iter_content(chunk_size=max(int(total / 1000), 1024 * 1024)):
                     downloaded += len(data)
                     f.write(data)
                     pbar.update(len(data))

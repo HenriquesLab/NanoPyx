@@ -25,6 +25,7 @@ def generate_random_position(n_rows, n_cols):
 
     return r, c
 
+
 def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float16):
     """
     Generates a random image with objects in random positions
@@ -48,8 +49,10 @@ def generate_image(n_objects=10, shape=(2, 300, 300), dtype=np.float16):
 
     return img
 
-def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float16, drift=None,
-                             drift_mode="directional"):
+
+def generate_timelapse_drift(
+    n_objects=10, shape=(10, 300, 300), dtype=np.float16, drift=None, drift_mode="directional"
+):
     """
     Generate random timelapse image with drift over time.
     :param n_objects: int; number of objects to generate
@@ -62,18 +65,17 @@ def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float1
     """
 
     if drift is None:
-        drift = min(shape[1]*0.02, shape[2]*0.02)
+        drift = min(shape[1] * 0.02, shape[2] * 0.02)
 
     img = generate_image(n_objects=n_objects, shape=shape, dtype=dtype)
 
     if drift_mode == "directional":
         transformation_matrix = EuclideanTransform(translation=(-drift, -drift))
-        for i in range(shape[0]-1):
-            img[i+1] = warp(img[i], transformation_matrix.inverse, order=3, preserve_range=True)
+        for i in range(shape[0] - 1):
+            img[i + 1] = warp(img[i], transformation_matrix.inverse, order=3, preserve_range=True)
 
     elif drift_mode == "random":
-        for i in range(shape[0]-1):
-
+        for i in range(shape[0] - 1):
             state = np.random.randint(0, 3)
 
             if state == 1:
@@ -85,9 +87,10 @@ def generate_timelapse_drift(n_objects=10, shape=(10, 300, 300), dtype=np.float1
             else:
                 transformation_matrix = EuclideanTransform(translation=(sqrt(drift), sqrt(drift)))
 
-            img[i+1] = warp(img[i], transformation_matrix.inverse, order=3, preserve_range=True)
+            img[i + 1] = warp(img[i], transformation_matrix.inverse, order=3, preserve_range=True)
 
     return img
+
 
 def generate_channel_misalignment():
     """
@@ -100,10 +103,10 @@ def generate_channel_misalignment():
     h = 300
     w = 300
 
-    block_img = np.zeros((int(h/n_blocks), int(w/n_blocks)))
+    block_img = np.zeros((int(h / n_blocks), int(w / n_blocks)))
     block_h = int(h / n_blocks)
     block_w = int(w / n_blocks)
-    block_img[int(block_h/2), int(block_w/2)] = 1
+    block_img[int(block_h / 2), int(block_w / 2)] = 1
     block_img = gaussian(block_img, sigma=3)
 
     ref_channel = np.zeros((h, w))
@@ -112,25 +115,25 @@ def generate_channel_misalignment():
 
     for x_i in range(n_blocks):
         for y_i in range(n_blocks):
-            ref_channel[y_i*block_h:y_i*block_h+block_h, x_i*block_w:x_i*block_w+block_w] += block_img
+            ref_channel[y_i * block_h : y_i * block_h + block_h, x_i * block_w : x_i * block_w + block_w] += block_img
 
     misalignments = [(-3, -3), (-3, 0), (-3, 3), (0, -3), (0, 0), (0, 3), (3, -3), (3, 0), (3, 3)]
 
     for mis in misalignments:
-        block_img = np.zeros((int(h/n_blocks), int(w/n_blocks)))
+        block_img = np.zeros((int(h / n_blocks), int(w / n_blocks)))
         block_h = h / n_blocks
         block_w = w / n_blocks
-        block_img[int(block_h/2)+mis[0], int(block_w/2)+mis[1]] = 1
+        block_img[int(block_h / 2) + mis[0], int(block_w / 2) + mis[1]] = 1
         block_img = gaussian(block_img, sigma=3)
         misaligned_blocks.append(block_img)
 
     misalignments.reverse()
 
     for mis in misalignments:
-        block_img = np.zeros((int(h/n_blocks), int(w/n_blocks)))
+        block_img = np.zeros((int(h / n_blocks), int(w / n_blocks)))
         block_h = h / n_blocks
         block_w = w / n_blocks
-        block_img[int(block_h/2)+mis[0], int(block_w/2)+mis[1]] = 1
+        block_img[int(block_h / 2) + mis[0], int(block_w / 2) + mis[1]] = 1
         block_img = gaussian(block_img, sigma=3)
         misaligned_blocks_2.append(block_img)
 

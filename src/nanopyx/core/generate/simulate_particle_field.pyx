@@ -1,7 +1,6 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
 from ..utils.random cimport _random
-from ..transform.interpolation_catmull_rom cimport _interpolate
 from ..generate.noise_add_gaussians cimport _render_erf_gaussian
 
 from libc.math cimport sqrt, fabs
@@ -11,6 +10,10 @@ cimport numpy as np
 
 from cython.parallel import prange
 from tqdm import tqdm
+
+# TODO RECHECK VALUES
+cdef extern from "_c_interpolation_catmull_rom.h":
+    float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
 
 def simulate_particle_field_based_on_2D_PDF(image_pdf,
                                             min_particles: int = 10, max_particles: int = 1000,
@@ -144,7 +147,7 @@ cdef bint _get_particle_candidate(float[:, :] _image_pdf, int particle_index, fl
 
     cdef float x = _random() * (_image_pdf.shape[1] - 1)
     cdef float y = _random() * (_image_pdf.shape[0] - 1)
-    cdef float pdf = _interpolate(_image_pdf, x, y)
+    cdef float pdf = _c_interpolate(&_image_pdf[0,0], x, y,_image_pdf.shape[1],_image_pdf.shape[0])
     cdef float r = _random()
 
     if r < pdf and _get_closest_distance(x, y, xp, yp) > min_distance:

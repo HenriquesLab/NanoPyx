@@ -50,14 +50,10 @@ class ExampleDataManager:
 
                 info = {
                     "info_path": info_file_path,
-                    "thumbnail_path": os.path.join(
-                        self._base_path, path, "thumbnail.jpg"
-                    ),
+                    "thumbnail_path": os.path.join(self._base_path, path, "thumbnail.jpg"),
                     "tiff_sequence_path": None,
                 }
-                tiff_sequence_path = os.path.join(
-                    self._to_download_path, path, "tiff_sequence.zip"
-                )
+                tiff_sequence_path = os.path.join(self._to_download_path, path, "tiff_sequence.zip")
                 if os.path.exists(tiff_sequence_path):
                     info["tiff_sequence_path"] = tiff_sequence_path
 
@@ -106,9 +102,7 @@ class ExampleDataManager:
         raise ValueError(f"{dataset_name} not found in example datasets")
 
     def _download(self, url, file_path, download_type=None, unzip=False):
-        if os.path.exists(
-            file_path
-        ):  # or os.path.exists(os.path.splitext(file_path)[0]):
+        if os.path.exists(file_path):  # or os.path.exists(os.path.splitext(file_path)[0]):
             # raise Warning(f"already exists, no need to download: {file_path}")
             return
 
@@ -172,9 +166,7 @@ class ExampleDataManager:
         info = self.get_dataset_info(dataset_name)
         return info["tiff_sequence_path"] is not None
 
-    def get_ZipTiffIterator(
-        self, dataset_name: str, as_ndarray: bool = False
-    ) -> ZipTiffIterator:
+    def get_ZipTiffIterator(self, dataset_name: str, as_ndarray: bool = False) -> ZipTiffIterator:
         """
         Downloads the tiff sequence and returns the ZipTiffIterator
 

@@ -24,6 +24,11 @@ cdef class FIRECalculator:
     # autogen_pxd: cdef public float fire_number
 
     def __init__(self, pixel_size: float = 1, units: str = "pixel"):
+        """
+        Class responsible Fourier Ring Correlation (FRC) implementation 
+        :param pixel_size: float denoting pixel size of the input image 
+        :param units: string representing the dimensional units of pixel_size
+        """
         self.pixel_size = pixel_size
         self.units = units
         self.threshold = 1/7

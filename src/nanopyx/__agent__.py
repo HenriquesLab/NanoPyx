@@ -5,17 +5,20 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 from scipy.stats import norm
 
-from .liquid.__njit__ import njit_works
-from .liquid.__opencl__ import opencl_works, devices
+from .__njit__ import njit_works
+from .__opencl__ import opencl_works, devices
+
 
 class Agent_:
 
     """
-    Base class for the Agent of the Nanopyx Liquid Engine 
+    Base class for the Agent of the Nanopyx Liquid Engine
     Pond, James Pond
     """
 
-    def __init__(self,) -> None:
+    def __init__(
+        self,
+    ) -> None:
         """
         Initialize the Agent
         The agent is supposed to work as a singleton object, initialized only once in the __init__.py of nanopyx
@@ -30,20 +33,24 @@ class Agent_:
         """
 
         ### MACHINE INFO ###
-        self.os_info = {'OS':platform.platform(),'Architecture':platform.machine()}
-        self.cpu_info = {'CPU':platform.processor()}
-        self.ram_info = {'RAM':'TBD'}
-        self.py_info = {'Version':platform.python_version(),'Implementation':platform.python_implementation(),'Compiler':platform.python_compiler()}
+        self.os_info = {"OS": platform.platform(), "Architecture": platform.machine()}
+        self.cpu_info = {"CPU": platform.processor()}
+        self.ram_info = {"RAM": "TBD"}
+        self.py_info = {
+            "Version": platform.python_version(),
+            "Implementation": platform.python_implementation(),
+            "Compiler": platform.python_compiler(),
+        }
 
-        self.numba_info = {'Numba':njit_works()}
-        self.pyopencl_info = {'PyOpenCL':opencl_works(),'Devices':devices}
-        self.cuda_info = {'CUDA':'TBD'}
+        self.numba_info = {"Numba": njit_works()}
+        self.pyopencl_info = {"PyOpenCL": opencl_works(), "Devices": devices}
+        self.cuda_info = {"CUDA": "TBD"}
         ### MACHINE INFO ###
 
         self._current_runs = []
         self._scheduled_runs = []
         self._finished_runs = []
-        
+
         self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
 
     def _get_ordered_run_types(self, fn, args, kwargs):
@@ -74,14 +81,14 @@ class Agent_:
                         best_repr_args = repr_args_
                 # What happens if there are no benchmarks for this runtype?
                 if best_repr_args is None:
-                    run_info = [None] 
+                    run_info = [None]
                 else:
                     run_info = fn._benchmarks[run_type][best_repr_args][1:]
 
-            if len(run_info)<2:
+            if len(run_info) < 2:
                 # Fall back to default values
-                if 'OpenCL' in run_type:
-                    rt = 'OpenCL'
+                if "OpenCL" in run_type:
+                    rt = "OpenCL"
                 else:
                     rt = run_type
 
@@ -95,30 +102,30 @@ class Agent_:
                 run_info = fn._default_benchmarks[rt][best_repr_args][1:]
 
             run_info = np.array(run_info)
-            if len(run_info)>50:
+            if len(run_info) > 50:
                 run_info = run_info[-50:]
 
-            fast_values = np.partition(run_info,len(run_info)//2)[:len(run_info)//2]
-            slow_values = np.partition(run_info,len(run_info)//2)[len(run_info)//2:]
+            fast_values = np.partition(run_info, len(run_info) // 2)[: len(run_info) // 2]
+            slow_values = np.partition(run_info, len(run_info) // 2)[len(run_info) // 2 :]
             fast_avg_speed[run_type] = np.average(fast_values)
             fast_std_speed[run_type] = np.std(fast_values)
             slow_avg_speed[run_type] = np.average(slow_values)
             slow_std_speed[run_type] = np.std(slow_values)
 
         return fast_avg_speed, fast_std_speed, slow_avg_speed, slow_std_speed
-    
+
     def _calculate_prob_of_delay(self, runtimes_history, avg, std):
         """
         Calculates the probability that the given run_type is still delayed using historical data
         """
 
         # Boolean array, True if delay, False if not
-        delays = runtimes_history > avg+4*std
+        delays = runtimes_history > avg + 4 * std
 
         model = LogisticRegression()
         model.fit([[state] for state in delays[:-1]], delays[1:])
-        
-        return model.predict_proba([[True]])[:,model.classes_.tolist().index(True)][0]
+
+        return model.predict_proba([[True]])[:, model.classes_.tolist().index(True)][0]
 
     def _check_delay(self, run_type, runtime, runtimes_history):
         """
@@ -127,15 +134,15 @@ class Agent_:
             1. Calculates a probability that this delay is maintained
             2. Stores the delay factor and the probability
         """
-        
+
         threaded_runtypes = ["Threaded", "Threaded_static", "Threaded_dynamic", "Threaded_guided"]
-        
+
         runtimes_history = np.array(runtimes_history)
-        if len(runtimes_history)>50:
+        if len(runtimes_history) > 50:
             runtimes_history = runtimes_history[-50:]
-        fast_values = np.partition(runtimes_history,len(runtimes_history)//2)[:len(runtimes_history)//2]
-        slow_values = np.partition(runtimes_history,len(runtimes_history)//2)[len(runtimes_history)//2:]
-        
+        fast_values = np.partition(runtimes_history, len(runtimes_history) // 2)[: len(runtimes_history) // 2]
+        slow_values = np.partition(runtimes_history, len(runtimes_history) // 2)[len(runtimes_history) // 2 :]
+
         fast_avg_speed = np.average(fast_values)
         fast_std_speed = np.std(fast_values)
         slow_avg_speed = np.average(slow_values)
@@ -149,16 +156,18 @@ class Agent_:
                 else:
                     if run_type in self.delayed_runtypes:
                         self.delayed_runtypes.pop(run_type, None)
-                return 'Delay off'
-    
-        if runtime > fast_avg_speed + 4*fast_std_speed:
-            runtimes_history = np.append(runtimes_history,runtime)
+                return "Delay off"
+
+        if runtime > fast_avg_speed + 4 * fast_std_speed:
+            runtimes_history = np.append(runtimes_history, runtime)
             delay_factor = runtime / fast_avg_speed
             try:
                 delay_prob = self._calculate_prob_of_delay(runtimes_history, fast_avg_speed, fast_std_speed)
             except ValueError:
                 delay_prob = 0.01
-            print(f"Run type {run_type} was delayed in the previous run. Delay factor: {delay_factor}, Delay probability: {delay_prob}")
+            print(
+                f"Run type {run_type} was delayed in the previous run. Delay factor: {delay_factor}, Delay probability: {delay_prob}"
+            )
 
             if "Threaded" in run_type:
                 for threaded_run_type in threaded_runtypes:
@@ -166,7 +175,6 @@ class Agent_:
             else:
                 self.delayed_runtypes[run_type] = (delay_factor, delay_prob)
 
-    
     def _adjust_times(self, fast_device_times, slow_device_times):
         """
         Adjusts the historic avg time of a run_type if it was delayed in previous runs
@@ -177,7 +185,10 @@ class Agent_:
                 delay_factor, delay_prob = self.delayed_runtypes[runtype]
                 # Weighted avg by the probability the run_type is still delayed
                 # expected_time * P(~delay) + delayed_time * P(delay)
-                adjusted_times[runtype] = fast_device_times[runtype] * (1 - delay_prob) + fast_device_times[runtype] * delay_factor * delay_prob
+                adjusted_times[runtype] = (
+                    fast_device_times[runtype] * (1 - delay_prob)
+                    + fast_device_times[runtype] * delay_factor * delay_prob
+                )
 
         return adjusted_times
 
@@ -185,10 +196,10 @@ class Agent_:
         """
         Returns the best run_type for the given args and kwargs
         """
-        
+
         # Get list of run types
         fast_avg, fast_std, slow_avg, slow_std = self._get_ordered_run_types(fn, args, kwargs)
-        
+
         # Penalize the average time a run_type had if that run_type was delayed in previous runs
         if len(self.delayed_runtypes.keys()) > 0:
             adjusted_avg = self._adjust_times(fast_avg, slow_avg)
@@ -196,17 +207,16 @@ class Agent_:
             if sorted(fast_avg, key=fast_avg.get)[0] == sorted(adjusted_avg, key=adjusted_avg.get)[0]:
                 return sorted(fast_avg, key=fast_avg.get)[0]
 
-            weights = [(1/adjusted_avg[k])**2 for k in adjusted_avg]
+            weights = [(1 / adjusted_avg[k]) ** 2 for k in adjusted_avg]
             weights = weights / np.sum(weights)
-            
+
             # failsafe
             if sum(weights) == 0:
                 weights = [1 for k in adjusted_avg]
-                
+
             return random.choices(list(adjusted_avg.keys()), weights=weights, k=1)[0]
         else:
             return sorted(fast_avg, key=fast_avg.get)[0]
-        
 
     def _inform(self, fn):
         """
@@ -215,9 +225,9 @@ class Agent_:
 
         repr_args = fn._last_args
         run_type = fn._last_runtype
-        
+
         historical_data = fn._benchmarks[run_type][repr_args][1:]
-        
+
         assert historical_data[-1] == fn._last_time, "Historical data is not consistent with the last runtime"
 
         print(f"Agent: {fn._designation} using {run_type} ran in {fn._last_time} seconds")

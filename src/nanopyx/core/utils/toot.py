@@ -10,14 +10,13 @@ def toot(msg):
 
     import requests
 
-    r = requests.get('https://ipinfo.io')
+    r = requests.get("https://ipinfo.io")
     data = r.json()
     msg = f"[{data['city']}:{data['country']}]: {msg}"
 
     #   Set up Mastodon
     mastodon = Mastodon(
-        access_token = 'qdFtF6ODx-z4w9O-GIu5iYUyddieCZeAUWXgyQ2scpE',
-        api_base_url = 'https://botsin.space/'
+        access_token="qdFtF6ODx-z4w9O-GIu5iYUyddieCZeAUWXgyQ2scpE", api_base_url="https://botsin.space/"
     )
 
     mastodon.status_post(msg)
