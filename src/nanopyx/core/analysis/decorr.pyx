@@ -31,7 +31,8 @@ cdef class DecorrAnalysis:
     # autogen_pxd: cdef str units
 
     def __init__(self, rmin:float = 0, rmax:float = 1, n_r:int = 50, n_g:int =10, pixel_size: float = 1, units: str = "pixel", roi: tuple = (0, 0, 0, 0), do_plot: bool = False):
-        """_summary_
+        """
+        Class responsible for decorrelation analysis implementation 
 
         Args:
             rmin (float, optional): Minimum radius [0,rMax] (normalized frequencies) used for decorrelation analysis. Defaults to 0.
@@ -66,7 +67,6 @@ cdef class DecorrAnalysis:
         self.resolution = 0
         self.units = units
 
-    # @timeit2
     def run_analysis(self,  img: np.ndarray):
         """
         Method used to run the analysis. Starting parameters are defined on class instance initialization.
