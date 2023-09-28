@@ -74,15 +74,6 @@ def render_gaussians(float[:,:] image, double[:] x, double[:] y, double[:] ampli
 
 
 cdef float[:,:] _render_erf_gaussian(float[:,:] image, double xp, double yp, double amplitude, double sigma_x, double sigma_y) nogil:
-    """
-    Render a gaussian particle on an image using the error function (erf) to calculate the integral of the gaussian
-    :param image: the image to render the particles on
-    :param xp: the x position of the center of the gaussian
-    :param yp: the y position of the center of the gaussian
-    :param amplitude: the intensity of each particle
-    :param sigma_x: the sigma of the gaussian in the x direction
-    :param sigma_y: the sigma of the gaussian in the y direction
-    """
 
     cdef int w = image.shape[1]
     cdef int h = image.shape[0]
@@ -112,5 +103,14 @@ cdef float[:,:] _render_erf_gaussian(float[:,:] image, double xp, double yp, dou
     return image
 
 def render_erf_gaussian(image, xp, yp, amplitude, sigma_x, sigma_y):
+    """
+    Render a gaussian particle on an image using the error function (erf) to calculate the integral of the gaussian
+    :param image: the image to render the particles on
+    :param xp: the x position of the center of the gaussian
+    :param yp: the y position of the center of the gaussian
+    :param amplitude: the intensity of each particle
+    :param sigma_x: the sigma of the gaussian in the x direction
+    :param sigma_y: the sigma of the gaussian in the y direction
+    """
     image = np.asarray(image, dtype=np.float32)
     return _render_erf_gaussian(image, xp, yp, amplitude, sigma_x, sigma_y)

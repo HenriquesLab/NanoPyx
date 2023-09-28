@@ -16,7 +16,9 @@ r = np.random.RandomState()
 
 cdef double _log_factorial(int x) nogil:
     """
-    Return the logarithm of the factorial of x. Uses Stirling's approximation for large values.
+    Calculates the logarithm of the factorial of x. Uses Stirling's approximation for large values.
+    :param x: argument
+    :return: logarithm of the factorial of x
     """
     cdef double ans = 0
     cdef int i = 0
@@ -32,7 +34,9 @@ cdef double _log_factorial(int x) nogil:
 
 cdef int _poisson_small(double mean) nogil:
     """
-    Returns a poisson distributed random value with the specified mean using an algorithm based on the factorial function. This method is more efficient for small means.
+    Calculates a poisson distributed random value with the specified mean using an algorithm based on the factorial function. This method is more efficient for small means.
+    :param mean: mean of the poisson distribution
+    :return: random value
     """
     cdef double L = exp(-mean)
     cdef double p = 1.
@@ -49,7 +53,9 @@ cdef int _poisson_small(double mean) nogil:
 
 cdef int _poisson_large(double mean) nogil:
     """
-    Returns a poisson distributed random value with the specified mean using the rejection method PA. This method is more efficient for large means.
+    Calculates a poisson distributed random value with the specified mean using the rejection method PA. This method is more efficient for large means.
+    :param mean: mean of the poisson distribution
+    :return: random value
     """
     # "Rejection method PA" from "The Computer Generation of
     # Poisson Random Variables" by A. C. Atkinson,
@@ -82,7 +88,9 @@ cdef int _poisson_large(double mean) nogil:
 
 cdef int _poisson_value(double mean) nogil:
     """
-    Returns a poisson distributed random value with the specified mean. Uses a different algorithm for small and large means.
+    Calculates a poisson distributed random value with the specified mean. Uses a different algorithm for small and large means.
+    :param mean: mean of the poisson distribution
+    :return: random value
     """
     if mean < 100:
         return _poisson_small(mean)
