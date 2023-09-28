@@ -20,9 +20,7 @@ class ZipTiffIterator:
         self.zip_file_path = zip_file_path
         self.zip_file = zipfile.ZipFile(zip_file_path)
         self.tiff_file_names = [
-            name
-            for name in self.zip_file.namelist()
-            if name.endswith(".tif") and not name.startswith("_")
+            name for name in self.zip_file.namelist() if name.endswith(".tif") and not name.startswith("_")
         ]
         self.tiff_file_names = sorted(self.tiff_file_names)
         # print(self.tiff_file_names)
@@ -59,7 +57,7 @@ class ZipTiffIterator:
     def __iter__(self):
         """
         Returns an iterator object that iterates over the elements of the class.
-        
+
         Yields:
             The elements of the class.
         """

@@ -51,8 +51,7 @@ def _interpolate(image, r, c, rows, cols):
             if r_neighbor < 0 or r_neighbor >= rows:
                 continue
 
-            p = p + image[r_neighbor, c_neighbor] * \
-                _cubic(r - (r_neighbor + 0.5))
+            p = p + image[r_neighbor, c_neighbor] * _cubic(r - (r_neighbor + 0.5))
         q = q + p * _cubic(c - (c_neighbor + 0.5))
 
     return q
@@ -91,8 +90,7 @@ def _njit_interpolate(image, r, c, rows, cols):
             if r_neighbor < 0 or r_neighbor >= rows:
                 continue
 
-            p = p + image[r_neighbor, c_neighbor] * \
-                _njit_cubic(r - (r_neighbor + 0.5))
+            p = p + image[r_neighbor, c_neighbor] * _njit_cubic(r - (r_neighbor + 0.5))
         q = q + p * _njit_cubic(c - (c_neighbor + 0.5))
 
     return q
@@ -127,8 +125,7 @@ def shift_magnify(
             col = j / magnification_col - shift_col[f]
             for i in range(rowsM):
                 row = i / magnification_row - shift_row[f]
-                image_out[f, i, j] = _interpolate(
-                    image[f, :, :], row, col, rows, cols)
+                image_out[f, i, j] = _interpolate(image[f, :, :], row, col, rows, cols)
 
     return image_out
 
@@ -163,7 +160,6 @@ def njit_shift_magnify(
             col = j / magnification_col - shift_col[f]
             for i in range(rowsM):
                 row = i / magnification_row - shift_row[f]
-                image_out[f, i, j] = _njit_interpolate(
-                    image[f, :, :], row, col, rows, cols)
+                image_out[f, i, j] = _njit_interpolate(image[f, :, :], row, col, rows, cols)
 
     return image_out

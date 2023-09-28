@@ -2,10 +2,11 @@ import numpy as np
 
 from ...__njit__ import njit, prange
 
+
 def py_template(image: np.ndarray) -> np.ndarray:
     """
     Template python function
-    :param image: 
+    :param image:
     """
     for p in range(image.shape[0]):
         pass

@@ -12,9 +12,7 @@ except ImportError:
 
     def njit(*args, **kwargs):
         def wrapper(func):
-            warnings.warn(
-                f"Numba is not installed. Using pure python for {func.__name__}"
-            )
+            warnings.warn(f"Numba is not installed. Using pure python for {func.__name__}")
             return func
 
         return wrapper
