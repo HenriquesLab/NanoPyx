@@ -89,6 +89,13 @@ cdef float[:, :] _calculate_slice_ccm(float[:, :] img_ref, float[:, :] img_slice
     return ccm_slice[0:ccm_slice.shape[0], 0:ccm_slice.shape[1]]
 
 def calculate_slice_ccm(np.ndarray img_ref, np.ndarray img_slice):
+    """
+    Function used to calculate cross correlation between two 2D images.
+
+    :param img_reg: numpy array with shape (y,x)
+    :param img_slice: numpy array with shape (y,x)
+    :return: numpy array with shape (y,x) corresponding to the cross correlation
+    """
     return np.array(_calculate_slice_ccm(img_ref, img_slice))
 
 cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :] ccm_slice) nogil:
@@ -141,6 +148,7 @@ cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :]
             value = (ccm_slice[j, i] - min_value) / delta_v
             value = value * delta_ppmcc + min_ppmcc
             ccm_slice[j, i] = value
+
 
 # TODO finish reimplementing using LE methods
 '''
