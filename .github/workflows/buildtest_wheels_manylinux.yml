@@ -3,41 +3,36 @@ name: Build and Test Manylinux wheel
 on: workflow_dispatch
 
 jobs:
-  build_linux_39_and_above_wheels:
-    name: Build python ${{ matrix.cibw_python }} ${{ matrix.cibw_arch }} wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  build_wheels:
+    name: Build wheel for ${{ matrix.python }}-${{ matrix.buildplat[1] }}
+    runs-on: ${{ matrix.buildplat[0] }}
     strategy:
-      fail-fast: True
+      # Ensure that a wheel builder finishes even if another fails
+      fail-fast: false
       matrix:
-        os: [ubuntu-latest]
-        cibw_python: ["cp39-*", "cp310-*", "cp311-*"]
-        cibw_manylinux: [manylinux2014]
-        cibw_arch: ["x86_64"]
+        # Github Actions doesn't support pairing matrix values together, let's improvise
+        # https://github.com/github/feedback/discussions/7835#discussioncomment-1769026
+        buildplat:
+          - [ubuntu-20.04, manylinux_x86_64]
+        python: ["cp39", "cp310", "cp311"]  
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout numpy
+        uses: actions/checkout@v3
         with:
+          submodules: true
           fetch-depth: 0
+          
       - uses: actions/setup-python@v4
-        name: Install Python
         with:
-          python-version: "3.9"
-      - name: Install cibuildwheel
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install pipx
-          python -m pip install cibuildwheel
-      - name: Build the wheel
-        run:
-          python -m cibuildwheel --output-dir dist
+          python-version: "3.x"
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@2.16.1
         env:
-          CIBW_BUILD: ${{ matrix.cibw_python }}
-          CIBW_ARCHS_LINUX: ${{ matrix.cibw_arch }}
-          CIBW_SKIP: "*-musllinux_*"
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.cibw_manylinux }}
-          CIBW_BUILD_VERBOSITY: 1
-          CIBW_TEST_COMMAND: "pytest {project}/tests"
+          CIBW_PRERELEASE_PYTHONS: True
+          CIBW_BUILD: ${{ matrix.python }}-${{ matrix.buildplat[1] }}
+
       - uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: ./dist/*.whl
+          path: ./wheelhouse/*.whl

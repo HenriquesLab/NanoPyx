@@ -169,7 +169,8 @@ test-requires = ["nanopyx[test]"]
 # test-extras = []
 
 [tool.cibuildwheel.linux]
-archs = ["x86_64"]
+# archs = ["x86_64"]
+manylinux-x86_64-image = "manylinux2014"
 # before-all = "yum install opencv opencv-devel opencv-python"
 # before-all = "yum install opencv-python"
 # repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
