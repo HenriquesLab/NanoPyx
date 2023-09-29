@@ -12,7 +12,6 @@ build-backend = "setuptools.build_meta"
 [project]
 # For an example see REF: https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
 name = "nanopyx"
-#version = "0.0.1"
 description = "Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging"
 readme = "README.md"
 requires-python = ">=3.9"
