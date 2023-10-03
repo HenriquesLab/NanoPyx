@@ -646,17 +646,17 @@ class PolarTransform(LiquidEngine):
     # tag-end
 
     # tag-start: _le_interpolation_nearest_neighbor.PolarTransform._run_opencl
-    def _run_opencl(self, float[:,:,:] image, int nrow, int ncol, str scale, dict device):
+    def _run_opencl(self, image, int nrow, int ncol, str scale, dict device):
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         cl_queue = cl.CommandQueue(cl_ctx)
-
-        code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl")
+        
+        code = self._get_cl_code("_le_interpolation_nearest_neighbor_.cl", device['DP'])
 
         cdef int nFrames = image.shape[0]
-        cdef int rowsM = image.shape[1]
-        cdef int colsM = image.shape[2]
+        cdef int nRows = image.shape[1]
+        cdef int nCols = image.shape[2]
 
         image_in = cl_array.to_device(cl_queue, image)
         image_out = cl_array.zeros(cl_queue, (nFrames, nrow, ncol), dtype=np.float32)
@@ -675,13 +675,14 @@ class PolarTransform(LiquidEngine):
             None,
             image_in.data,
             image_out.data,
-            scale_int
+            np.int32(nRows),
+            np.int32(nCols),
+            np.int32(scale_int)
         )
 
         # Wait for queue to finish
         cl_queue.finish()
 
-        # Swap rows and columns back
         return np.asarray(image_out.get(), dtype=np.float32)
     # tag-end
 
