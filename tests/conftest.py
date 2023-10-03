@@ -7,6 +7,7 @@ import pytest
 from nanopyx.core.generate.noise_add_squares import add_squares, get_squares
 from nanopyx.core.generate.noise_add_ramp import add_ramp, get_ramp
 from nanopyx.core.generate.beads import generate_timelapse_drift, generate_channel_misalignment
+from nanopyx.core.analysis.pearson_correlation import pearson_correlation
 from nanopyx.data.download import ExampleDataManager
 
 
@@ -43,3 +44,20 @@ def random_channel_misalignment():
 @pytest.fixture
 def downloader():
     return ExampleDataManager()
+
+@pytest.fixture
+def compare():
+    def compare_imgs(output_1, output_2):
+        if output_1.ndim > 2:
+            pcc = 0
+            for i in range(output_1.shape[0]):
+                pcc += pearson_correlation(output_1[i, :, :], output_2[i, :, :])
+            pcc /= output_1.shape[0]
+        else:
+            pcc = pearson_correlation(output_1, output_2)
+
+        if pcc > 0.8:
+            return True
+        else:
+            return False
+    return compare_imgs
