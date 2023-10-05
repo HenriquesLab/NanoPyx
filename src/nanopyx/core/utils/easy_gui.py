@@ -18,7 +18,7 @@ else:
 try:
     import ipywidgets as widgets
     from IPython import display as dp
-    from IPython.display import display
+    from IPython.display import display, clear_output
     from matplotlib import pyplot as plt
 except ImportError:
     print("jupyter optional-dependencies not installed, conside installing with 'pip install nanopyx[jupyter]'")
@@ -73,7 +73,7 @@ class EasyGui:
         self._style = {"description_width": "initial"}
         self._widgets = {}
         self._nLabels = 0
-        self._main_display = widgets.Output()
+        self._main_display = widgets.VBox()
         self._title = title
         self._cfg = {title: {}}
         self.cfg = self._cfg[title]
@@ -224,7 +224,9 @@ class EasyGui:
         Show the widgets in the container.
         """
         # display the widgets
-        display(*self._widgets.values())
+        self._main_display.children = (tuple(self._widgets.values()))
+        clear_output()
+        display(self._main_display)
 
     def clear(self):
         """
@@ -232,93 +234,4 @@ class EasyGui:
         """
         self._widgets = {}
         self._nLabels = 0
-        self._main_display.clear_output()
-
-
-def view_image(image):
-    """
-    Plot an image.
-    :param image: image to be plotted
-    """
-    fig, ax = plt.subplots()
-    fig.canvas.header_visible = False
-    fig.canvas.footer_visible = False
-
-    ax.imshow(image)
-    plt.axis("off")
-    plt.draw()
-
-
-def view_image_stack(image, cmap="viridis"):
-    """
-    Plot an image stack with dimensions >= 2.
-    Sliders to move across the dimensions are added.
-    :param cmap: colormap to be use to plot the image
-    """
-    cm = plt.get_cmap(cmap)
-    dims = image.shape
-    params = {}
-    if len(dims) > 2:
-        for i in range(len(dims) - 2):
-            params["dim" + str(i)] = widgets.IntSlider(
-                min=0, max=dims[i] - 1, step=1, value=0, description="dim" + str(i)
-            )
-    fig, ax = plt.subplots()
-    fig.canvas.header_visible = False
-    fig.canvas.footer_visible = False
-
-    def show_slice(**kwargs):
-        tmp_1 = rescale_intensity(image)
-        for k, value in kwargs.items():
-            if k != "curtain":
-                tmp_1 = tmp_1[value]
-        ax.imshow(tmp_1, cmap=cmap)
-        plt.axis("off")
-        plt.draw()
-
-    widgets.interact(show_slice, **params)
-
-
-def view_curtain_stack(image_1: np.ndarray, image_2: np.ndarray, cmap: str = "viridis"):
-    """
-    Plot two image stacks with dimensions >= 2.
-    Sliders to move across the dimensions are added.
-
-    :param image_1: Left image to be plotted on the curtain
-    :param image_2: Right image to be plotted on the curtain
-    :param cmap: Matplotlib colormap to be used to plot the images. Defaults to "viridis".
-    """
-    assert image_1.shape == image_2.shape
-    dims = image_1.shape
-    params = {}
-    params["curtain"] = widgets.IntSlider(
-        value=image_1.shape[-1] / 2, min=0, max=image_1.shape[-1], description="Curtain"
-    )
-    if len(dims) > 2:
-        for i in range(len(dims) - 2):
-            params["dim" + str(i)] = widgets.IntSlider(
-                min=0, max=dims[i] - 1, step=1, value=0, description="dim" + str(i)
-            )
-
-    fig, ax = plt.subplots()
-    fig.canvas.header_visible = False
-    fig.canvas.footer_visible = False
-
-    def show_slice(**kwargs):
-        tmp_1 = rescale_intensity(image_1)
-        tmp_2 = rescale_intensity(image_2)
-        for k, value in kwargs.items():
-            if k != "curtain":
-                tmp_1 = tmp_1[value]
-                tmp_2 = tmp_2[value]
-
-        for k, value in kwargs.items():
-            if k == "curtain":
-                combined = np.zeros((image_1.shape[-2], image_1.shape[-1]))
-                combined[:, : int(value)] += tmp_1[:, : int(value)]
-                combined[:, int(value) :] += tmp_2[:, int(value) :]
-        ax.imshow(combined, cmap=cmap)
-        plt.axis("off")
-        plt.draw()
-
-    widgets.interact(show_slice, **params)
+        self._main_display.children = ()
