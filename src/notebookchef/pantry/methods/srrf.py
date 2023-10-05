@@ -41,9 +41,7 @@ def run_srrf(b):
         else:
             name = gui_data["data_source"].value.replace("Example dataset: ", "")
             tiff.imwrite(name + "_srrf.tif", dataset_srrf)
-    display(stackview.slice(dataset_srrf,
-                            colormap=gui_srrf["cmaps"].value,
-                            continuous_update=True))
+    gui_srrf._main_display.children = gui_srrf._main_display.children + (stackview.slice(dataset_srrf, colormap=gui_srrf["cmaps"].value, continuous_update=True),)
 
 gui_srrf.add_float_slider("ring_radius", description="Ring Radius:", min=0.1, max=3.0, value=0.5, remember_value=True)
 gui_srrf.add_int_slider("magnification", description="Magnification:", min=1, max=10, value=5)
