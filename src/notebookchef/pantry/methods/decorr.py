@@ -30,7 +30,13 @@ def run_decorr(b):
             tiff.imwrite(name + "_eSRRF_decorr_analysis.tif", plot)
     plt.imshow(plot)
     plt.axis("off")
-    plt.show()
+    img_buf = io.BytesIO()
+    plt.savefig(img_buf, format="png")
+    output_plot = widgets.Output()
+    with output_plot:
+        display(Image.open(img_buf))
+    gui_decorr._main_display.children = gui_decorr._main_display.children + (output_plot,)
+    plt.clf()
 
 gui_decorr.add_int_slider("pixel_size", description="Pixel Size:", min=0.01, max=1000, value=100, remember_value=True)
 gui_decorr.add_dropdown("units", description="Units: ", options=["nm", "um", "mm"], value="nm")

@@ -29,7 +29,17 @@ def run_error(b):
             tiff.imwrite(name + "_error_map.tif", errormap)
     plt.imshow(errormap)
     plt.axis("off")
-    plt.show()
+    img_buf = io.BytesIO()
+    plt.savefig(img_buf, format="png")
+    output_plot = widgets.Output()
+    with output_plot:
+        display(Image.open(img_buf))
+    gui_error._main_display.children = gui_error._main_display.children + (
+        widgets.Label(value="RSE: "+str(error_map.getRSE())),
+        widgets.Label(value="RSP: "+str(error_map.getRSP())),
+        output_plot)
+    plt.clf()
+
 
 gui_error.add_checkbox("save", description="Save output", value=True)
 gui_error.add_dropdown("cmaps", description="Colormap:",

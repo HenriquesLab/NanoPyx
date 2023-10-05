@@ -3,6 +3,7 @@
 import io
 import os
 import sys
+import cv2 as cv
 import skimage
 import nanopyx
 import stackview
@@ -10,6 +11,7 @@ import numpy as np
 import tifffile as tiff
 import matplotlib as mpl
 import ipywidgets as widgets
+from PIL import Image
 from IPython.display import display, clear_output
 from matplotlib import pyplot as plt
 

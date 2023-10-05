@@ -31,8 +31,7 @@ def on_button_align(b):
             tiff.imwrite(name + "_aligned.tif", dataset_aligned)
     gui_drift["align"].disabled = False
     gui_drift["align"].description = "Align"
-    display(stackview.slice(dataset_aligned, colormap=gui_drift["cmaps"].value,
-                            continuous_update=True))
+    gui_drift._main_display.children = gui_drift._main_display.children + (stackview.slice(dataset_aligned, colormap=gui_drift["cmaps"].value, continuous_update=True),)
 
 gui_drift.add_label("Drift Correction parameters:")
 gui_drift.add_dropdown("ref", description="Reference frame", options=["First frame", "Previous frame"], value="First frame")

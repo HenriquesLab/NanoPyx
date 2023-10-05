@@ -39,8 +39,7 @@ def on_button_load_data_clicked(b):
     dataset_original = tiff.imread(gui_data["upload"].selected)
     gui_data["load_data_own"].disabled = False
     gui_data["load_data_own"].description = "Load data"
-    display(stackview.slice(dataset_original, colormap=gui_data["cmaps"].value,
-                            continuous_update=True))
+    gui_data._main_display.children = gui_data._main_display.children + (stackview.slice(dataset_original, colormap=gui_data["cmaps"].value, continuous_update=True),)
 
 def on_button_load_data_clicked_example(b):
     clear_output()
@@ -56,12 +55,10 @@ def on_button_load_data_clicked_example(b):
         dataset_name = gui_data["data_source"].value.replace(
             "Example dataset: ", "")
         dataset_original = EDM.get_ZipTiffIterator(dataset_name, as_ndarray=True)
-        display(stackview.slice(dataset_original, continuous_update=True,
-                                colormap=gui_data["cmaps"].value))
+        gui_data._main_display.children = gui_data._main_display.children + (stackview.slice(dataset_original, continuous_update=True, colormap=gui_data["cmaps"].value),)
     else:
         dataset_original = skimage.io.imread(gui_data["data_source"].value)
-        display(stackview.slice(dataset_original, continuous_update=True,
-                                colormap=gui_data["cmaps"].value))
+        gui_data._main_display.children = gui_data._main_display.children + (stackview.slice(dataset_original, continuous_update=True, colormap=gui_data["cmaps"].value),)
 
     # enable button
     gui_data["load_data"].disabled = False

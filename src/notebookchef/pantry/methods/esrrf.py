@@ -49,9 +49,7 @@ def run_esrrf(b):
         else:
             name = gui_data["data_source"].value.replace("Example dataset: ", "")
             tiff.imwrite(name + "_esrrf.tif", dataset_esrrf)
-    display(stackview.slice(dataset_esrrf,
-                              colormap=gui_esrrf["cmaps"].value,
-                              continuous_update=True))
+    gui_esrrf._main_display.children = gui_esrrf._main_display.children + (stackview.slice(dataset_esrrf, colormap=gui_esrrf["cmaps"].value, continuous_update=True),)
 
 gui_esrrf.add_float_slider("ring_radius", description="Ring Radius:", min=0.1, max=3.0, value=1.5, remember_value=True)
 gui_esrrf.add_int_slider("sensitivity", description="Sensitivity:", min=1, max=10, value=1)

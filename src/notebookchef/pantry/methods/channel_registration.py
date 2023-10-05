@@ -31,8 +31,8 @@ def on_button_register(b):
             tiff.imwrite(name + "_registered.tif", dataset_registered)
     gui_reg["register"].disabled = False
     gui_reg["register"].description = "Align"
-    display(stackview.slice(dataset_registered, colormap=gui_reg["cmaps"].value,
-                            continuous_update=True))
+    gui_reg._main_display.children = gui_reg._main_display.children + (stackview.slice(dataset_registered, colormap=gui_reg["cmaps"].value, continuous_update=True),)
+
 
 gui_reg.add_label("Channel Registration parameters:")
 gui_reg.add_int_slider("ref", description="Reference channel", min=0, max=dataset_original.shape[0]-1, value=0)
