@@ -39,19 +39,6 @@ jobs:
             python: 311
             platform_id: win_amd64
 
-          # - os: ubuntu-latest
-          #   python: 39
-          #   platform_id: manylinux_x86_64
-          #   manylinux_image: manylinux2014
-          # - os: ubuntu-latest
-          #   python: 310
-          #   platform_id: manylinux_x86_64
-          #   manylinux_image: manylinux2014
-          # - os: ubuntu-latest
-          #   python: 311
-          #   platform_id: manylinux_x86_64
-          #   manylinux_image: manylinux2014
-
           - os: macos-latest
             python: 39
             platform_id: macosx_x86_64
@@ -61,16 +48,6 @@ jobs:
           - os: macos-latest
             python: 311
             platform_id: macosx_x86_64
-
-          - os: macos-latest
-            python: 39
-            platform_id: macosx_arm64
-          - os: macos-latest
-            python: 310
-            platform_id: macosx_arm64
-          - os: macos-latest
-            python: 311
-            platform_id: macosx_arm64
 
     steps:
       - name: Checkout
@@ -91,12 +68,12 @@ jobs:
         # to supply options, put them in 'env', like:
         env:
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
-          CIBW_ARCHS: all
-          CIBW_SKIP: "*-musllinux_*"
-          CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
-          CIBW_MANYLINUX_I686_IMAGE: ${{ matrix.manylinux_image }}
+          CIBW_ARCHS: auto
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_COMMAND: "pytest {project}/tests"
+
+      - name: Test wheels
+        run: python -m nox --sessions test_wheel
           
       - uses: actions/upload-artifact@v3
         with:
