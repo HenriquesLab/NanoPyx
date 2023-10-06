@@ -38,7 +38,7 @@ class EasyGui:
         _style (dict): Style configuration for widgets.
         _widgets (dict): A dictionary to store widgets.
         _nLabels (int): The number of labels added to the GUI.
-        _main_display (ipywidgets.Output): The main output widget for the GUI.
+        _main_display (ipywidgets.VBox): The main output widget for the GUI.
         _title (str): The title of the GUI.
         _cfg (dict): Configuration dictionary to store widget values.
         cfg (dict): Alias for the _cfg dictionary associated with the GUI.
@@ -59,9 +59,7 @@ class EasyGui:
         clear: Clear all widgets from the GUI.
 
     Note:
-        This class simplifies the creation of GUIs in Jupyter notebooks using ipywidgets. It provides a variety of methods
-        for adding different types of widgets to the GUI, and it allows for saving and loading widget values to
-        maintain user settings across sessions.
+        This class simplifies the creation of GUIs in Jupyter notebooks using ipywidgets. It provides a variety of methods for adding different types of widgets to the GUI, and it allows for saving and loading widget values to maintain user settings across sessions.
     """
 
     def __init__(self, title="basic_gui", width="50%"):
