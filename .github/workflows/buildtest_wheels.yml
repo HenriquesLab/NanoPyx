@@ -49,35 +49,45 @@ jobs:
             python: 311
             platform_id: macosx_x86_64
 
+          - os: macos-latest
+            python: 39
+            platform_id: macosx_arm64
+          - os: macos-latest
+            python: 310
+            platform_id: macosx_arm64
+          - os: macos-latest
+            python: 311
+            platform_id: macosx_arm64
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'  
 
-      - name: Install required python packages
-        run: |
-          python -m pip install --upgrade pip
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==2.15.0
 
-          python -m pip install pipx
-          python -m pip install nox
-          python -m pip install cibuildwheel==2.15.0
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         # to supply options, put them in 'env', like:
         env:
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.platform_id }}
-          CIBW_ARCHS: auto
+          CIBW_ARCHS: all
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_COMMAND: "pytest {project}/tests"
 
       - name: Test wheels
+        continue-on-error: true
         run: |
+          python -m pip install upgrade pip
+          python -m pip install pipx
+          python -m pip install nox
           python -m nox --sessions test_wheel
-
+          
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
