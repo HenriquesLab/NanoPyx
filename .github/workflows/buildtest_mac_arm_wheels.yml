@@ -20,14 +20,11 @@ jobs:
           python -m pip install --upgrade nox
           python -m pip install cibuildwheel==2.15.0
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
+        run: python -m nox --sessions build_wheel test_wheel
         env:
           CIBW_ARCHS: arm64
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_COMMAND: "pytest {project}/tests"
-
-      - name: Test wheels
-        run: python -m nox --sessions test_wheel
         
       - uses: actions/upload-artifact@v3
         with:
