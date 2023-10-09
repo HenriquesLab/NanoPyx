@@ -19,7 +19,6 @@ jobs:
           python -m nox --sessions build_sdist
       - uses: actions/upload-artifact@v3
         with:
-          name: sdist
           path: ./wheelhouse/*.tar.gz
 
   build_wheels:
