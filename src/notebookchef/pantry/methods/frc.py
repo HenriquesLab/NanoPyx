@@ -31,7 +31,7 @@ def run_frc(b):
     plt.imshow(plot)
     plt.axis("off")
     img_buf = io.BytesIO()
-    plt.savefig(img_buf, format="png")
+    plt.savefig(img_buf, format="jpeg")
     output_plot = widgets.Output()
     with output_plot:
         display(Image.open(img_buf))
