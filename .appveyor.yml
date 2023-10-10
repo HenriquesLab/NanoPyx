@@ -23,6 +23,7 @@ only_commits:
     - src/
     - pyproject.toml
     - .appveyor.yml
+    - setup.py
 
 environment:
   matrix:
