@@ -11,7 +11,7 @@ import numpy as np
 
 # This will in the future come from the Agent
 from .__njit__ import njit_works
-from .__opencl__ import opencl_works, devices
+from .__opencl__ import opencl_works, devices, cl
 
 __home_folder__ = os.path.expanduser("~")
 __benchmark_folder__ = os.path.join(__home_folder__, ".nanopyx")
@@ -92,6 +92,7 @@ class LiquidEngine:
                 print("Consider adding default arguments to the njit implementation to trigger early compilation")
 
         self.testing = testing
+        self.mem_div = 1
 
         # benchmarks file path
         # e.g.: ~/.nanopyx/liquid/_le_interpolation_nearest_neighbor.cpython-310-darwin/ShiftAndMagnify.yml
@@ -120,7 +121,7 @@ class LiquidEngine:
 
         self.Agent = Agent
 
-    def _run(self, *args, run_type: str, **kwargs):
+    def _run(self, *args, run_type=None, **kwargs):
         """
         Runs the function with the given args and kwargs
 
@@ -143,29 +144,38 @@ class LiquidEngine:
             print(f"Unexpected run type {run_type}")
             print("Querying the Agent...")
             run_type = self.Agent.get_run_type(self, args, kwargs)
-            print(f"Agent chose:{run_type}")
-
+            print(f"Agent chose:{run_type}")  # magical number to get enough memory space for buffers
         # try to run
         try:
             t_start = timeit.default_timer()
             result = self._run_types[run_type](*args, **kwargs)
             t2run = timeit.default_timer() - t_start
+            arg_repr, arg_score = self._get_args_repr_score(*args, **kwargs)
+            self._store_results(arg_repr, arg_score, run_type, t2run)
+
+            self._last_time = t2run
+            self._last_args = arg_repr
+            self._last_runtype = run_type
+
+            self.Agent._inform(self)
+
+        except cl.LogicError as e:
+            if e.__str__() == "create_buffer failed: INVALID_BUFFER_SIZE":
+                print("Found: ", e)
+                print("Reducing maximum buffer size and trying again...")
+                self.mem_div += 1
+                kwargs["mem_div"] = self.mem_div
+                result = self._run(*args, run_type=run_type, **kwargs)
+            else:
+                print(e)
+                result = None
         except Exception as e:
             print(f"Unexpected error while trying to run {run_type}")
             print(e)
             print("Please try again with another run type")
             result = None
-            t2run = np.inf
 
-        arg_repr, arg_score = self._get_args_repr_score(*args, **kwargs)
-        self._store_results(arg_repr, arg_score, run_type, t2run)
-
-        self._last_time = t2run
-        self._last_args = arg_repr
-        self._last_runtype = run_type
-
-        self.Agent._inform(self)
-
+        self.mem_div = 1
         return result
 
     def benchmark(self, *args, **kwargs):
