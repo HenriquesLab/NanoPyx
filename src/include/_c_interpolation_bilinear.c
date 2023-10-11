@@ -7,8 +7,8 @@ float _c_interpolate(float* image, float r, float c, int rows, int cols) {
     return 0;
   }
 
-  const int r_int = (int)floor(r - 0.5);
-  const int c_int = (int)floor(c - 0.5);
+  const int r_int = (int)floor((float)(r - 0.5));
+  const int c_int = (int)floor((float)(c - 0.5));
 
   double dr = r - (r_int + 0.5);
   double dc = c - (c_int + 0.5);

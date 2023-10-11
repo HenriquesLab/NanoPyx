@@ -23,8 +23,8 @@ float _c_interpolate(__global float *image, float r, float c, int rows, int cols
     return 0;
   }
 
-  const int r_int = (int)floor(r - 0.5);
-  const int c_int = (int)floor(c - 0.5);
+  const int r_int = (int)floor((float) (r - 0.5));
+  const int c_int = (int)floor((float) (c - 0.5));
   double v_interpolated = 0;
 
   double weight = 0;
