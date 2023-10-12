@@ -369,7 +369,6 @@ class LiquidEngine:
         max_two = max_glo_dims / three
         two = self.get_highest_divisor(shape[1], max_two)
         one = 1
-        # return (1,1,1)
         return (one, two, three)
     
     def _check_max_slices(self, number_of_max_slices):
