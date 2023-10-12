@@ -371,12 +371,16 @@ class LiquidEngine:
         one = 1
         return (one, two, three)
     
-    def _check_max_slices(self, number_of_max_slices):
+    def _check_max_slices(self, input, number_of_max_slices):
         """
         Checks if number of maximum slices is greater than 0
         """
         if number_of_max_slices < 1:
             raise ValueError("This device doesn't have enough memory to run this function with this input")
+        elif input.shape[0] < number_of_max_slices:
+            return input.shape[0]
+        else:
+            return number_of_max_slices
 
     #####################################################
     #                   RUN METHODS                     #
