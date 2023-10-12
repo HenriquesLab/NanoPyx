@@ -35,9 +35,9 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
 
 __kernel void shiftScaleRotate(__global float *image_in,
                                __global float *image_out,
-                               __global float *shift_row,
-                               __global float *shift_col, float scale_row,
-                               float scale_col, float angle) {
+                              float shift_row,
+                              float shift_col, float scale_row,
+                              float scale_col, float angle) {
   // these are the indexes of the loop
   int f = get_global_id(0);
   int rM = get_global_id(1);
@@ -58,11 +58,11 @@ __kernel void shiftScaleRotate(__global float *image_in,
 
   int nPixels = rows * cols;
 
-  float col = (a * (cM - center_col - shift_col[f]) +
-               b * (rM - center_row - shift_row[f])) +
+  float col = (a * (cM - center_col - shift_col) +
+               b * (rM - center_row - shift_row)) +
               center_col;
-  float row = (c * (cM - center_col - shift_col[f]) +
-               d * (rM - center_row - shift_row[f])) +
+  float row = (c * (cM - center_col - shift_col) +
+               d * (rM - center_row - shift_row)) +
               center_row;
 
   image_out[f * nPixels + rM * cols + cM] =
