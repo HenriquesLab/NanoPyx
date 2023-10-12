@@ -50,7 +50,7 @@ class eSRRF(LiquidEngine):
 
         max_slices = int((dc.global_mem_size // total_memory)/mem_div)
 
-        self._check_min_slices(max_slices)
+        max_slices = self._check_max_slices(image, max_slices)
         
         mf = cl.mem_flags
 
@@ -75,7 +75,7 @@ class eSRRF(LiquidEngine):
         rgc_prg = cl.Program(cl_ctx, rgc_code).build(options=["-cl-mad-enable -cl-fast-relaxed-math"])
         rgc_knl = rgc_prg.calculate_rgc
 
-        for i in range(0, image.shape[0]-1, max_slices):
+        for i in range(0, image.shape[0], max_slices):
             if image.shape[0] - i >= max_slices:
                 n_slices = max_slices
             else:

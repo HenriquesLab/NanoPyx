@@ -194,7 +194,7 @@ class RadialGradientConvergence(LiquidEngine):
         # tag-end
 
     
-    def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None):
+    def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, int mem_div=1):
 
         # gradient gxgymag*mag*size
         # image_interp = mag*size
@@ -230,20 +230,20 @@ class RadialGradientConvergence(LiquidEngine):
 
         # Calculating max slices
         size_per_slice = gradient_col_interp[0,:,:].nbytes + gradient_row_interp[0,:,:].nbytes + image_interp[0,:,:].nbytes + rgc_map[0,:,:].nbytes
-        max_slices = int((device['device'].global_mem_size // (size_per_slice))/4)   # TODO 3 is a magic number 
+        max_slices = int((device['device'].global_mem_size // (size_per_slice))/mem_div)
+        max_slices = self._check_max_slices(image_interp, max_slices)
 
         # Initial buffers
         mf = cl.mem_flags
         grad_col_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, gradient_col_interp[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[0:max_slices,:,:]).wait()
-
         grad_row_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, gradient_row_interp[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, grad_row_int_in, gradient_row_interp[0:max_slices,:,:]).wait()
-
         image_interp_in = cl.Buffer(cl_ctx, mf.READ_ONLY, image_interp[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, image_interp_in, image_interp[0:max_slices,:,:]).wait()
-
         rgc_map_out = cl.Buffer(cl_ctx, mf.WRITE_ONLY, rgc_map[0:max_slices,:,:].nbytes)
+
+
+        cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[0:max_slices,:,:]).wait()
+        cl.enqueue_copy(cl_queue, grad_row_int_in, gradient_row_interp[0:max_slices,:,:]).wait()
+        cl.enqueue_copy(cl_queue, image_interp_in, image_interp[0:max_slices,:,:]).wait()
 
         # Code and building the kernel
         code = self._get_cl_code("_le_radial_gradient_convergence.cl", device['DP'])

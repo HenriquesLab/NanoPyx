@@ -87,7 +87,7 @@ class ShiftAndMagnify(LiquidEngine):
         image_out = np.zeros(output_shape, dtype=np.float32)
 
         max_slices = int((dc.global_mem_size // (image_out[0,:,:].nbytes + image[0,:,:].nbytes))/mem_div)
-        self._check_max_slices(max_slices)
+        max_slices = self._check_max_slices(image, max_slices)
 
         mf = cl.mem_flags
         input_opencl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)
@@ -329,7 +329,7 @@ class ShiftScaleRotate(LiquidEngine):
         image_out = np.zeros(output_shape, dtype=np.float32)
 
         max_slices = int((dc.global_mem_size // (image_out[0,:,:].nbytes + image[0,:,:].nbytes))/mem_div)
-        self._check_max_slices(max_slices)
+        max_slices = self._check_max_slices(image, max_slices)
 
         mf = cl.mem_flags
         input_opencl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)

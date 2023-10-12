@@ -238,12 +238,10 @@ class Radiality(LiquidEngine):
         return np.asarray(imRad)
 
     
-    def _run_opencl(self, image, image_interp, magnification=5, ringRadius=0.5, border=0, radialityPositivityConstraint=True, doIntensityWeighting=True, device=None):
+    def _run_opencl(self, image, image_interp, magnification=5, ringRadius=0.5, border=0, radialityPositivityConstraint=True, doIntensityWeighting=True, device=None, int mem_div=1):
 
         cl_ctx = cl.Context([device['device']])
         cl_queue = cl.CommandQueue(cl_ctx)
-
-        code = self._get_cl_code("_le_radiality.cl", device['DP'])
 
         cdef float _ringRadius = ringRadius * magnification
         
@@ -261,21 +259,41 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        cdef float [:,:,:] imGx = np.zeros_like(image) 
-        cdef float [:,:,:] imGy = np.zeros_like(image)
+        cdef float[:,:,:] imGx = np.zeros_like(image) 
+        cdef float[:,:,:] imGy = np.zeros_like(image)
         cdef float[:,:,:] image_MV = image
         with nogil:
             for f in range(nFrames):
                 _c_gradient_radiality(&image_MV[f,0,0], &imGx[f,0,0], &imGy[f,0,0], h, w)
 
-        image_in = cl_array.to_device(cl_queue, image)
-        imageinter_in = cl_array.to_device(cl_queue, image_interp)
-        imGx_in = cl_array.to_device(cl_queue, np.array(imGx, dtype=np.float32))
-        imGy_in = cl_array.to_device(cl_queue, np.array(imGy, dtype=np.float32))
-        imRad_out = cl_array.zeros(cl_queue, (nFrames, h*magnification, w*magnification), dtype=np.float32)
+        image_out = np.zeros(image.shape)
 
-        xRingCoordinates_in = cl_array.to_device(cl_queue, np.array(xRingCoordinates, dtype=np.float32))
-        yRingCoordinates_in = cl_array.to_device(cl_queue, np.array(yRingCoordinates, dtype=np.float32))
+        x_ring_coords = np.asarray(xRingCoordinates)
+        y_ring_coords = np.asarray(yRingCoordinates)
+
+        print(x_ring_coords.nbytes, y_ring_coords.nbytes)
+
+        # Calculate maximum number of slices that can fit in the GPU
+        size_per_slice = 2*image[0,:,:].nbytes + image_interp[0,:,:].nbytes + imGx[0,:,:].nbytes + imGy[0,:,:].nbytes + x_ring_coords.nbytes + y_ring_coords.nbytes
+        max_slices = int((device["device"].global_mem_size // (size_per_slice))/mem_div)
+        max_slices = self._check_max_slices(image, max_slices)
+
+        # Initialize Buffers
+        mf = cl.mem_flags
+        image_in = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)
+        imageinter_in = cl.Buffer(cl_ctx, mf.READ_ONLY, image_interp[0:max_slices,:,:].nbytes)
+        imGx_in = cl.Buffer(cl_ctx, mf.READ_ONLY, imGx[0:max_slices,:,:].nbytes)
+        imGy_in = cl.Buffer(cl_ctx, mf.READ_ONLY, imGy[0:max_slices,:,:].nbytes)
+        xRingCoordinates_in = cl.Buffer(cl_ctx, mf.READ_ONLY, x_ring_coords.nbytes)
+        yRingCoordinates_in = cl.Buffer(cl_ctx, mf.READ_ONLY, y_ring_coords.nbytes)
+        imRad_out = cl.Buffer(cl_ctx, mf.WRITE_ONLY, image_out[0:max_slices,:,:].nbytes)
+
+        cl.enqueue_copy(cl_queue, image_in, image[0:max_slices,:,:]).wait()
+        cl.enqueue_copy(cl_queue, imageinter_in, image_interp[0:max_slices,:,:]).wait()
+        cl.enqueue_copy(cl_queue, imGx_in, imGx[0:max_slices,:,:]).wait()
+        cl.enqueue_copy(cl_queue, imGy_in, imGy[0:max_slices,:,:]).wait()
+        cl.enqueue_copy(cl_queue, xRingCoordinates_in, x_ring_coords).wait()
+        cl.enqueue_copy(cl_queue, yRingCoordinates_in, y_ring_coords).wait()
 
         # Grid size
         lowest_row = (1 + border) * magnification 
@@ -284,29 +302,45 @@ class Radiality(LiquidEngine):
         lowest_col = (1 + border) * magnification
         highest_col = (w - 1 - border) * magnification
 
-        prg = cl.Program(cl_ctx, code).build()  
- 
-        prg.radiality(
-            cl_queue,
-            (nFrames, highest_row - lowest_row, highest_col - lowest_col),
-            None,
-            image_in.data,
-            imageinter_in.data,
-            imGx_in.data,
-            imGy_in.data,
-            imRad_out.data,
-            xRingCoordinates_in.data,
-            yRingCoordinates_in.data,
-            np.int32(magnification),
-            np.float32(_ringRadius),
-            np.int32(nRingCoordinates),
-            np.int32(radialityPositivityConstraint),
-            np.int32(border),
-            np.int32(h),
-            np.int32(w)
-        )
+        code = self._get_cl_code("_le_radiality.cl", device['DP'])
+        prg = cl.Program(cl_ctx, code).build()
+        knl = prg.radiality
+
+        for i in range(0, nFrames-1, max_slices):
+            if nFrames - i >= max_slices:
+                n_slices = max_slices
+            else:
+                n_slices = nFrames - i
+
+            knl(
+                cl_queue,
+                (n_slices, highest_row - lowest_row, highest_col - lowest_col),
+                self.get_work_group(device['device'],(n_slices, highest_row - lowest_row, highest_col - lowest_col)),
+                image_in,
+                imageinter_in,
+                imGx_in,
+                imGy_in,
+                imRad_out,
+                xRingCoordinates_in,
+                yRingCoordinates_in,
+                np.int32(magnification),
+                np.float32(_ringRadius),
+                np.int32(nRingCoordinates),
+                np.int32(radialityPositivityConstraint),
+                np.int32(border),
+                np.int32(h),
+                np.int32(w)
+            )
+
+            cl.enqueue_copy(cl_queue, image_out[i:i+n_slices,:,:], imRad_out).wait()
+
+            if i<=nFrames-max_slices:
+                cl.enqueue_copy(cl_queue, image_in, image[i+n_slices:i+2*n_slices,:,:]).wait()
+                cl.enqueue_copy(cl_queue, imageinter_in, image_interp[i+n_slices:i+2*n_slices,:,:]).wait()
+                cl.enqueue_copy(cl_queue, imGx_in, imGx[i+n_slices:i+2*n_slices,:,:]).wait()
+                cl.enqueue_copy(cl_queue, imGy_in, imGy[i+n_slices:i+2*n_slices,:,:]).wait()
     
-        cl_queue.finish()        
+            cl_queue.finish()        
         
-        return np.asarray(imRad_out.get(),dtype=np.float32)
+        return image_out
     

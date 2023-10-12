@@ -109,7 +109,7 @@ class GradientRobertsCross(LiquidEngine):
         return gradient_col, gradient_row
     # tag-end
 
-    def _run_opencl(self, float[:,:,:] image, dict device):
+    def _run_opencl(self, float[:,:,:] image, dict device, int mem_div=1):
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
@@ -127,15 +127,16 @@ class GradientRobertsCross(LiquidEngine):
         cdef float [:,:,:] gradient_col = np.zeros_like(image) 
         cdef float [:,:,:] gradient_row = np.zeros_like(image)
 
-        max_slices = int((dc.global_mem_size // (image[0,:,:].nbytes + gradient_col[0,:,:].nbytes + gradient_row[0,:,:].nbytes))/3)
-        # TODO add exception if max_slices < 1 
+        max_slices = int((dc.global_mem_size // (image[0,:,:].nbytes + gradient_col[0,:,:].nbytes + gradient_row[0,:,:].nbytes))/mem_div)
+        max_slices = self._check_max_slices(image, max_slices) 
 
         mf = cl.mem_flags
 
         input_opencl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)
-        cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
         output_opencl_col = cl.Buffer(cl_ctx, mf.WRITE_ONLY, gradient_col[0:max_slices,:,:].nbytes)
         output_opencl_row = cl.Buffer(cl_ctx, mf.WRITE_ONLY, gradient_row[0:max_slices, :, :].nbytes)
+
+        cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
 
         code = self._get_cl_code("_le_roberts_cross_gradients.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
@@ -165,6 +166,5 @@ class GradientRobertsCross(LiquidEngine):
         input_opencl.release()
         output_opencl_col.release()
         output_opencl_row.release()
-        # Swap rows and columns back
-        #return np.ascontiguousarray(np.swapaxes(gradient_col, 1, 2), dtype=np.float32), np.ascontiguousarray(np.swapaxes(gradient_row, 1, 2), dtype=np.float32)
+
         return gradient_col, gradient_row
