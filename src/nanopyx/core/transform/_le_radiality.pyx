@@ -266,7 +266,7 @@ class Radiality(LiquidEngine):
             for f in range(nFrames):
                 _c_gradient_radiality(&image_MV[f,0,0], &imGx[f,0,0], &imGy[f,0,0], h, w)
 
-        image_out = np.zeros(image.shape)
+        image_out = np.zeros(image.shape, dtype=np.float32)
 
         x_ring_coords = np.asarray(xRingCoordinates)
         y_ring_coords = np.asarray(yRingCoordinates)
