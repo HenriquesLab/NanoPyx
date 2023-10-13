@@ -142,7 +142,7 @@ class GradientRobertsCross(LiquidEngine):
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.gradient_roberts_cross
 
-        for i in range(0, image.shape[0]-1, max_slices):
+        for i in range(0, image.shape[0], max_slices):
             if image.shape[0] - i >= max_slices:
                 n_slices = max_slices
             else:

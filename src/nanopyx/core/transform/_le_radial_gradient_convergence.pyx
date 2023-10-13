@@ -251,7 +251,7 @@ class RadialGradientConvergence(LiquidEngine):
         knl = prg.calculate_rgc
 
         # Actual computation
-        for i in range(0, nFrames-1, max_slices):
+        for i in range(0, nFrames, max_slices):
             if nFrames - i >= max_slices:
                 n_slices = max_slices
             else:
