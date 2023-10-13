@@ -259,8 +259,8 @@ class Radiality(LiquidEngine):
         cdef int h = image.shape[1]
         cdef int w = image.shape[2]
 
-        cdef float[:,:,:] imGx = np.zeros_like(image) 
-        cdef float[:,:,:] imGy = np.zeros_like(image)
+        cdef float[:,:,:] imGx = np.zeros(image.shape, dtype=np.float32) 
+        cdef float[:,:,:] imGy = np.zeros(image.shape, dtype=np.float32)
         cdef float[:,:,:] image_MV = image
         with nogil:
             for f in range(nFrames):
@@ -270,8 +270,6 @@ class Radiality(LiquidEngine):
 
         x_ring_coords = np.asarray(xRingCoordinates)
         y_ring_coords = np.asarray(yRingCoordinates)
-
-        print(x_ring_coords.nbytes, y_ring_coords.nbytes)
 
         # Calculate maximum number of slices that can fit in the GPU
         size_per_slice = 2*image[0,:,:].nbytes + image_interp[0,:,:].nbytes + imGx[0,:,:].nbytes + imGy[0,:,:].nbytes + x_ring_coords.nbytes + y_ring_coords.nbytes
@@ -342,5 +340,13 @@ class Radiality(LiquidEngine):
     
             cl_queue.finish()        
         
+        image_in.release()
+        imageinter_in.release()
+        imGx_in.release()
+        imGy_in.release()
+        xRingCoordinates_in.release()
+        yRingCoordinates_in.release()
+        imRad_out.release()
+
         return image_out
     
