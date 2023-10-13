@@ -3,6 +3,7 @@ import timeit
 import yaml
 import datetime
 import inspect
+import warnings
 from functools import partial
 from itertools import combinations
 from pathlib import Path
@@ -226,7 +227,7 @@ class LiquidEngine:
                 if self._compare_runs(pair[0][2], pair[1][2]):
                     print(f"{pair[0][1]} and {pair[1][1]} have similar outputs!")
                 else:
-                    print(f"WARNING: outputs of {pair[0][1]} and {pair[1][1]} don't match!")
+                    warnings.warn(f"WARNING: outputs of {pair[0][1]} and {pair[1][1]} don't match!")
 
         return speed_sort
 
