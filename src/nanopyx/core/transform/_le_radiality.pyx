@@ -268,12 +268,12 @@ class Radiality(LiquidEngine):
 
         image_out = np.zeros((nFrames, h*magnification, w*magnification), dtype=np.float32)
 
-        x_ring_coords = np.asarray(xRingCoordinates)
-        y_ring_coords = np.asarray(yRingCoordinates)
+        x_ring_coords = np.asarray(xRingCoordinates, dtype=np.float32)
+        y_ring_coords = np.asarray(yRingCoordinates, dtype=np.float32)
 
         # Calculate maximum number of slices that can fit in the GPU
-        size_per_slice = 2*image[0,:,:].nbytes + image_interp[0,:,:].nbytes + imGx[0,:,:].nbytes + imGy[0,:,:].nbytes + x_ring_coords.nbytes + y_ring_coords.nbytes
-        max_slices = int((device["device"].global_mem_size // (size_per_slice))/mem_div)
+        size_per_slice = 2*image[0,:,:].nbytes + image_interp[0,:,:].nbytes + imGx[0,:,:].nbytes + imGy[0,:,:].nbytes
+        max_slices = int(((x_ring_coords.nbytes + y_ring_coords.nbytes)+(device["device"].global_mem_size // size_per_slice))/mem_div)
         max_slices = self._check_max_slices(image, max_slices)
 
         # Initialize Buffers
@@ -328,7 +328,7 @@ class Radiality(LiquidEngine):
                 np.int32(border),
                 np.int32(h),
                 np.int32(w)
-            )
+            ).wait()
 
             cl.enqueue_copy(cl_queue, image_out[i:i+n_slices,:,:], imRad_out).wait()
 
