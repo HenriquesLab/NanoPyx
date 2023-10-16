@@ -1,7 +1,7 @@
 import numpy as np
 from math import sqrt
 from skimage.filters import gaussian
-from scipy.interpolate import interp2d
+from scipy.interpolate import bisplrep, bisplev # replacement for interp2d see: https://gist.github.com/ev-br/8544371b40f414b7eaf3fe6217209bff
 
 from .ccm import calculate_ccm_from_ref
 from .estimate_shift import GetMaxOptimizer
@@ -252,8 +252,11 @@ def calculate_translation_mask_vector_field(
 
     y_translation = np.array(y_translation)
     x_translation = np.array(x_translation)
-    y_interp = interp2d(y_translation[:, 0], y_translation[:, 1], y_translation[:, 2])
-    x_interp = interp2d(x_translation[:, 0], x_translation[:, 1], x_translation[:, 2])
+
+    y_spline = bisplrep(y_translation[:, 0], y_translation[:, 1], y_translation[:, 2],kx=1, ky=1, s=0) # bspline representation
+    x_spline = bisplrep(x_translation[:, 0], x_translation[:, 1], x_translation[:, 2],kx=1, ky=1, s=0)
+    x_interp = lambda x, y: bisplev(x, y, x_spline).T  # bspline evaluation
+    y_interp = lambda x, y: bisplev(x, y, y_spline).T   
 
     translation_matrix = np.zeros((height, width * 2))
     translation_matrix_x = np.zeros((height, width))

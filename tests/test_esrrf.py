@@ -9,8 +9,8 @@ def test_rgc(downloader):
     small_dataset = dataset[:10,:20,:20]
 
     crsm = CRShiftAndMagnify()
-    grc = GradientRobertsCross(testing=True)
-    rgc = RadialGradientConvergence(testing=True)
+    grc = GradientRobertsCross(testing=True,clear_benchmarks=True)
+    rgc = RadialGradientConvergence(testing=True,clear_benchmarks=True)
     
     small_dataset_interp = crsm.run(small_dataset, 0, 0, 5, 5)
     gradient_col, gradient_row = grc.run(small_dataset)

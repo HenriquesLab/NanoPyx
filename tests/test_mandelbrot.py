@@ -2,7 +2,7 @@ from nanopyx.core.utils import MandelbrotBenchmark
 
 # flake8: noqa: E501
 def test_mandelbrot_benchmark(plt):
-    mb = MandelbrotBenchmark(testing=True)
+    mb = MandelbrotBenchmark(testing=True,clear_benchmarks=True)
     values = mb.benchmark(128)
 
     images = []

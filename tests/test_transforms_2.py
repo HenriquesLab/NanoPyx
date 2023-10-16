@@ -11,7 +11,7 @@ def test_interpolation_nearest_neighbor_PolarTransform_linear(plt,compare):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 64, frames=nFrames, amplitude=1000)
-    SM = NNPolarTransform(testing=True)
+    SM = NNPolarTransform(testing=True,clear_benchmarks=True)
     bench_values = SM.benchmark(image, (100,100), 'linear')
 
     skimage_linear = warp_polar(image, output_shape=(100,100), channel_axis=0, order=0)
@@ -48,7 +48,7 @@ def test_interpolation_nearest_neighbor_PolarTransform_log(plt,compare):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 64, frames=nFrames, amplitude=1000)
-    SM = NNPolarTransform(testing=True)
+    SM = NNPolarTransform(testing=True,clear_benchmarks=True)
     bench_values = SM.benchmark(image, (100,100), 'log')
 
     skimage_linear = warp_polar(image, output_shape=(100,100), channel_axis=0, scaling='log', order=0)
