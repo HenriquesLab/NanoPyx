@@ -129,7 +129,7 @@ def test_interpolation_lanczos_ShiftAndMagnify(plt):
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
     shift_row = 5.0
     shift_col = 5.0
-    SM = LZShiftAndMagnify(testing=True, clear_benchmarks)
+    SM = LZShiftAndMagnify(testing=True, clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
     images = []
