@@ -50,8 +50,8 @@ def _njit_interpolate(image, row, col, rows, cols):
 
 def shift_magnify(
     image: np.ndarray,
-    shift_row: np.ndarray,
-    shift_col: np.ndarray,
+    shift_row: float,
+    shift_col: float,
     magnification_row: float,
     magnification_col: float,
 ) -> np.ndarray:
@@ -74,9 +74,9 @@ def shift_magnify(
     image_out = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
     for f in range(nFrames):
         for j in range(colsM):
-            col = j / magnification_col - shift_col[f]
+            col = j / magnification_col - shift_col
             for i in range(rowsM):
-                row = i / magnification_row - shift_row[f]
+                row = i / magnification_row - shift_row
                 image_out[f, i, j] = _interpolate(image[f, :, :], row, col, rows, cols)
 
     return image_out
@@ -85,8 +85,8 @@ def shift_magnify(
 @njit(cache=True, parallel=True)
 def njit_shift_magnify(
     image: np.ndarray,
-    shift_row: np.ndarray,
-    shift_col: np.ndarray,
+    shift_row: float,
+    shift_col: float,
     magnification_row: float,
     magnification_col: float,
 ) -> np.ndarray:
@@ -109,9 +109,9 @@ def njit_shift_magnify(
     image_out = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
     for f in range(nFrames):
         for j in prange(colsM):
-            col = j / magnification_col - shift_col[f]
+            col = j / magnification_col - shift_col
             for i in range(rowsM):
-                row = i / magnification_row - shift_row[f]
+                row = i / magnification_row - shift_row
                 image_out[f, i, j] = _njit_interpolate(image[f, :, :], row, col, rows, cols)
 
     return image_out
@@ -119,8 +119,8 @@ def njit_shift_magnify(
 
 def shift_scale_rotate(
     image: np.ndarray,
-    shift_row: np.ndarray,
-    shift_col: np.ndarray,
+    shift_row: float,
+    shift_col: float,
     scale_row: float,
     scale_col: float,
     angle: float,
@@ -176,8 +176,8 @@ def shift_scale_rotate(
     for f in range(nFrames):
         for j in range(cols):
             for i in range(rows):
-                col = (a * (j - center_col - shift_col[f]) + b * (i - center_row - shift_row[f])) + center_col
-                row = (c * (j - center_col - shift_col[f]) + d * (i - center_row - shift_row[f])) + center_row
+                col = (a * (j - center_col - shift_col) + b * (i - center_row - shift_row)) + center_col
+                row = (c * (j - center_col - shift_col) + d * (i - center_row - shift_row)) + center_row
                 image_out[f, i, j] = _interpolate(image[f, :, :], row, col, rows, cols)
 
     return image_out
@@ -186,8 +186,8 @@ def shift_scale_rotate(
 @njit(cache=True, parallel=True)
 def njit_shift_scale_rotate(
     image: np.ndarray,
-    shift_row: np.ndarray,
-    shift_col: np.ndarray,
+    shift_row: float,
+    shift_col: float,
     scale_row: float,
     scale_col: float,
     angle: float,
@@ -223,8 +223,8 @@ def njit_shift_scale_rotate(
     for f in range(nFrames):
         for j in prange(cols):
             for i in range(rows):
-                col = (a * (j - center_col - shift_col[f]) + b * (i - center_row - shift_row[f])) + center_col
-                row = (c * (j - center_col - shift_col[f]) + d * (i - center_row - shift_row[f])) + center_row
+                col = (a * (j - center_col - shift_col) + b * (i - center_row - shift_row)) + center_col
+                row = (c * (j - center_col - shift_col) + d * (i - center_row - shift_row)) + center_row
                 image_out[f, i, j] = _njit_interpolate(image[f, :, :], row, col, rows, cols)
 
     return image_out
