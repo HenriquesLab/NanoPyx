@@ -10,9 +10,9 @@ def test_interpolation_nearest_neighbor_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.ones(nFrames, dtype=np.float32) * 2
-    shift_col = np.ones(nFrames, dtype=np.float32) * 5
-    SM = NNShiftAndMagnify(testing=True)
+    shift_row = 5.0
+    shift_col = 5.0
+    SM = NNShiftAndMagnify(testing=True, clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
     images = []
@@ -49,9 +49,9 @@ def test_interpolation_bicubic_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.ones(nFrames, dtype=np.float32) * 2
-    shift_col = np.ones(nFrames, dtype=np.float32) * 5
-    SM = BCShiftAndMagnify(testing=True)
+    shift_row = 5.0
+    shift_col = 5.0
+    SM = BCShiftAndMagnify(testing=True, clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
     images = []
@@ -88,9 +88,9 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.ones(nFrames, dtype=np.float32) * 2
-    shift_col = np.ones(nFrames, dtype=np.float32) * 5
-    SM = CRShiftAndMagnify(testing=True)
+    shift_row = 5.0
+    shift_col = 5.0
+    SM = CRShiftAndMagnify(testing=True, clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
     images = []
@@ -127,9 +127,9 @@ def test_interpolation_lanczos_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.ones(nFrames, dtype=np.float32) * 2
-    shift_col = np.ones(nFrames, dtype=np.float32) * 5
-    SM = LZShiftAndMagnify(testing=True)
+    shift_row = 5.0
+    shift_col = 5.0
+    SM = LZShiftAndMagnify(testing=True, clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
     images = []
@@ -166,10 +166,10 @@ def test_interpolation_nearest_neighbor_ShiftScaleRotate(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = 5.0
+    shift_col = 5.0
     angle = np.pi / 4
-    SM = NNShiftScaleRotate(testing=True)
+    SM = NNShiftScaleRotate(testing=True,clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
 
     images = []
@@ -205,10 +205,10 @@ def test_interpolation_bicubic_ShiftScaleRotate(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = 5.0
+    shift_col = 5.0
     angle = np.pi / 4
-    SM = BCShiftScaleRotate(testing=True)
+    SM = BCShiftScaleRotate(testing=True,clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
 
     images = []
@@ -244,10 +244,10 @@ def test_interpolation_catmull_rom_ShiftScaleRotate(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = 5.0
+    shift_col = 5.0
     angle = np.pi / 4
-    SM = CRShiftScaleRotate(testing=True)
+    SM = CRShiftScaleRotate(testing=True,clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
 
     images = []
@@ -283,10 +283,10 @@ def test_interpolation_lanzcos_ShiftScaleRotate(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = np.arange(nFrames, dtype=np.float32) * 0.5
-    shift_col = np.arange(nFrames, dtype=np.float32) * -0.5
+    shift_row = 5.0
+    shift_col = 5.0
     angle = np.pi / 4
-    SM = LZShiftScaleRotate(testing=True)
+    SM = LZShiftScaleRotate(testing=True,clear_benchmarks=True)
     bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
 
     images = []
@@ -295,7 +295,7 @@ def test_interpolation_lanzcos_ShiftScaleRotate(plt):
 
     # unzip the values
     for run_time, title, image in bench_values:
-        run_times.append(run_time)
+        run_times.append(run_time)  
         titles.append(title)
         images.append(image)
 

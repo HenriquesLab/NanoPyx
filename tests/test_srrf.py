@@ -10,7 +10,7 @@ def test_radiality(downloader):
     interp = CRShiftAndMagnify()
     small_dataset_interp = interp.run(small_dataset,0,0,5,5)
 
-    liquid_rad = Radiality(testing=True)
+    liquid_rad = Radiality(testing=True,clear_benchmarks=True)
     imRad = liquid_rad.benchmark(small_dataset,small_dataset_interp)
 
 def test_srrf(downloader):

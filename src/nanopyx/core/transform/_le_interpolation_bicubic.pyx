@@ -47,8 +47,6 @@ class ShiftAndMagnify(LiquidEngine):
         :return: The shifted and magnified image
         """
         image = check_image(image)
-        shift_row = value2array(shift_row, image.shape[0])
-        shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, magnification_row, magnification_col, run_type=run_type)
     # tag-end
 
@@ -70,8 +68,6 @@ class ShiftAndMagnify(LiquidEngine):
         :rtype: [[run_time, run_type_name, return_value], ...]
         """
         image = check_image(image)
-        shift_row = value2array(shift_row, image.shape[0])
-        shift_col = value2array(shift_col, image.shape[0])
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
     # tag-end
 
@@ -109,8 +105,8 @@ class ShiftAndMagnify(LiquidEngine):
                 self.get_work_group(dc, (n_slices, image.shape[1]*magnification_row, image.shape[2]*magnification_col)), 
                 input_opencl, 
                 output_opencl, 
-                np.float32(shift_row[0]), 
-                np.float32(shift_col[0]), 
+                np.float32(shift_row), 
+                np.float32(shift_col), 
                 np.float32(magnification_row), 
                 np.float32(magnification_col)).wait() 
 
@@ -127,7 +123,7 @@ class ShiftAndMagnify(LiquidEngine):
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded
-    def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def _run_unthreaded(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -144,16 +140,16 @@ class ShiftAndMagnify(LiquidEngine):
         with nogil:
             for f in range(nFrames):
                 for j in range(colsM):
-                    col = j / magnification_col - shift_col[f]
+                    col = j / magnification_col - shift_col
                     for i in range(rowsM):
-                        row = i / magnification_row - shift_row[f]
+                        row = i / magnification_row - shift_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(colsM)", "prange(colsM)")
-    def _run_threaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def _run_threaded(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -170,16 +166,16 @@ class ShiftAndMagnify(LiquidEngine):
         with nogil:
             for f in range(nFrames):
                 for j in prange(colsM):
-                    col = j / magnification_col - shift_col[f]
+                    col = j / magnification_col - shift_col
                     for i in range(rowsM):
-                        row = i / magnification_row - shift_row[f]
+                        row = i / magnification_row - shift_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(colsM)", 'prange(colsM, schedule="static")')
-    def _run_threaded_static(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def _run_threaded_static(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -196,16 +192,16 @@ class ShiftAndMagnify(LiquidEngine):
         with nogil:
             for f in range(nFrames):
                 for j in prange(colsM, schedule="static"):
-                    col = j / magnification_col - shift_col[f]
+                    col = j / magnification_col - shift_col
                     for i in range(rowsM):
-                        row = i / magnification_row - shift_row[f]
+                        row = i / magnification_row - shift_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(colsM)", 'prange(colsM, schedule="dynamic")')
-    def _run_threaded_dynamic(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def _run_threaded_dynamic(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -222,16 +218,16 @@ class ShiftAndMagnify(LiquidEngine):
         with nogil:
             for f in range(nFrames):
                 for j in prange(colsM, schedule="dynamic"):
-                    col = j / magnification_col - shift_col[f]
+                    col = j / magnification_col - shift_col
                     for i in range(rowsM):
-                        row = i / magnification_row - shift_row[f]
+                        row = i / magnification_row - shift_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(colsM)", 'prange(colsM, schedule="guided")')
-    def _run_threaded_guided(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+    def _run_threaded_guided(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -248,9 +244,9 @@ class ShiftAndMagnify(LiquidEngine):
         with nogil:
             for f in range(nFrames):
                 for j in prange(colsM, schedule="guided"):
-                    col = j / magnification_col - shift_col[f]
+                    col = j / magnification_col - shift_col
                     for i in range(rowsM):
-                        row = i / magnification_row - shift_row[f]
+                        row = i / magnification_row - shift_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
@@ -287,8 +283,6 @@ class ShiftScaleRotate(LiquidEngine):
         :return: The shifted, magnified and rotated image
         """
         image = check_image(image)
-        shift_row = value2array(shift_row, image.shape[0])
-        shift_col = value2array(shift_col, image.shape[0])
         return self._run(image, shift_row, shift_col, scale_row, scale_col, angle, run_type=run_type)
     # tag-end
 
@@ -312,8 +306,6 @@ class ShiftScaleRotate(LiquidEngine):
         :rtype: [[run_time, run_type_name, return_value], ...]
         """
         image = check_image(image)
-        shift_row = value2array(shift_row, image.shape[0])
-        shift_col = value2array(shift_col, image.shape[0])
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
     # tag-end
 
@@ -367,11 +359,11 @@ class ShiftScaleRotate(LiquidEngine):
         input_opencl.release()
         output_opencl.release()
 
-        return image_out
+        return np.asarray(image_out, dtype=np.float32)
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded
-    def _run_unthreaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+    def _run_unthreaded(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -399,15 +391,15 @@ class ShiftScaleRotate(LiquidEngine):
             for f in range(nFrames):
                 for j in range(cols):
                     for i in range(rows):
-                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
-                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
+                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
+                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(colsM)", "prange(colsM)")
-    def _run_threaded(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+    def _run_threaded(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -435,15 +427,15 @@ class ShiftScaleRotate(LiquidEngine):
             for f in range(nFrames):
                 for j in range(cols):
                     for i in range(rows):
-                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
-                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
+                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
+                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(colsM)", 'prange(colsM, schedule="static")')
-    def _run_threaded_static(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+    def _run_threaded_static(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -471,15 +463,15 @@ class ShiftScaleRotate(LiquidEngine):
             for f in range(nFrames):
                 for j in range(cols):
                     for i in range(rows):
-                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
-                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
+                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
+                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(colsM)", 'prange(colsM, schedule="dynamic")')
-    def _run_threaded_dynamic(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+    def _run_threaded_dynamic(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -507,15 +499,15 @@ class ShiftScaleRotate(LiquidEngine):
             for f in range(nFrames):
                 for j in range(cols):
                     for i in range(rows):
-                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
-                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
+                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
+                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
     # tag-end
 
     # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(colsM)", 'prange(colsM, schedule="guided")')
-    def _run_threaded_guided(self, float[:,:,:] image, float[:] shift_row, float[:] shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+    def _run_threaded_guided(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -543,8 +535,8 @@ class ShiftScaleRotate(LiquidEngine):
             for f in range(nFrames):
                 for j in range(cols):
                     for i in range(rows):
-                        col = (a*(j-center_col-shift_col[f])+b*(i-center_row-shift_row[f])) + center_col
-                        row = (c*(j-center_col-shift_col[f])+d*(i-center_row-shift_row[f])) + center_row
+                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
+                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
