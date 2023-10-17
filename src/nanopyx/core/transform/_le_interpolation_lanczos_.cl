@@ -9,7 +9,7 @@ double _c_lanczos_kernel(double v) {
   if (v == 0) {
     return 1.0;
   } else if (fabs(v) < TAPS) {
-    double v_pi = v * M_PI;
+    double v_pi = v * M_PI_F;
     return TAPS * sin(v_pi) * sin(v_pi / TAPS) / (v_pi * v_pi);
   } else {
     return 0.0;
