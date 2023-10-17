@@ -278,7 +278,7 @@ class RadialGradientConvergence(LiquidEngine):
             cl.enqueue_copy(cl_queue, rgc_map[i:i+n_slices,:,:], rgc_map_out).wait()
 
             # Copy input
-            if i<=nFrames-max_slices:
+            if i+n_slices<nFrames:
                 cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[i+n_slices:i+2*n_slices,:,:]).wait() 
                 cl.enqueue_copy(cl_queue, grad_row_int_in, gradient_row_interp[i+n_slices:i+2*n_slices,:,:]).wait() 
                 cl.enqueue_copy(cl_queue, image_interp_in, image_interp[i+n_slices:i+2*n_slices,:,:]).wait() 

@@ -115,7 +115,7 @@ class ShiftAndMagnify(LiquidEngine):
                 np.float32(magnification_col)).wait() 
 
             cl.enqueue_copy(cl_queue, image_out[i:i+n_slices,:,:], output_opencl).wait() 
-            if i<=image.shape[0]-max_slices:
+            if i+n_slices<image.shape[0]:
                 cl.enqueue_copy(cl_queue, input_opencl, image[i+n_slices:i+2*n_slices,:,:]).wait() 
 
             cl_queue.finish()
@@ -367,7 +367,7 @@ class ShiftScaleRotate(LiquidEngine):
             ).wait()
 
             cl.enqueue_copy(cl_queue, image_out[i:i+n_slices,:,:], output_opencl).wait()
-            if i<=image.shape[0]-max_slices:
+            if i+n_slices<image.shape[0]:
                 cl.enqueue_copy(cl_queue, input_opencl, image[i+n_slices:i+2*n_slices,:,:]).wait()
 
             cl_queue.finish()

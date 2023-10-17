@@ -332,7 +332,7 @@ class Radiality(LiquidEngine):
 
             cl.enqueue_copy(cl_queue, image_out[i:i+n_slices,:,:], imRad_out).wait()
 
-            if i<=nFrames-max_slices:
+            if i+n_slices<image.shape[0]:
                 cl.enqueue_copy(cl_queue, image_in, image[i+n_slices:i+2*n_slices,:,:]).wait()
                 cl.enqueue_copy(cl_queue, imageinter_in, image_interp[i+n_slices:i+2*n_slices,:,:]).wait()
                 cl.enqueue_copy(cl_queue, imGx_in, imGx[i+n_slices:i+2*n_slices,:,:]).wait()

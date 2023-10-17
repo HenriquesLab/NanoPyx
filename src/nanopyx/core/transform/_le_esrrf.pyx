@@ -139,7 +139,7 @@ class eSRRF(LiquidEngine):
             
             cl.enqueue_copy(cl_queue, output_image[i:i+n_slices,:,:], output_cl).wait()
 
-            if i<=image.shape[0]-max_slices:
+            if i+n_slices<image.shape[0]:
                 cl.enqueue_copy(cl_queue, input_cl, image[i+n_slices:i+2*n_slices,:,:]).wait()
 
             cl_queue.finish()

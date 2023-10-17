@@ -158,7 +158,7 @@ class GradientRobertsCross(LiquidEngine):
 
             cl.enqueue_copy(cl_queue, gradient_col[i:i+n_slices,:,:], output_opencl_col).wait()
             cl.enqueue_copy(cl_queue, gradient_row[i:i+n_slices,:,:], output_opencl_row).wait()  
-            if i<=image.shape[0]-max_slices:
+            if i+n_slices<image.shape[0]:
                 cl.enqueue_copy(cl_queue, input_opencl, image[i+n_slices:i+2*n_slices,:,:]).wait() 
 
             cl_queue.finish()
