@@ -8,7 +8,7 @@ if IN_COLAB:
     from google.colab import drive
     drive.mount('/content/drive')
 else:
-    !pip instal -q "nanopyx[jupyter]"
+    !pip install -q "nanopyx[jupyter]"
 
 import io
 import os
