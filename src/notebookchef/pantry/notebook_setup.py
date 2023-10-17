@@ -1,8 +1,17 @@
 #@title Install NanoPyx, import necessary libraries and connect to Google Drive
-!pip install -q "nanopyx[jupyter]"
+import sys
+IN_COLAB = 'google.colab' in sys.modules
+if IN_COLAB:
+    !pip install -q "nanopyx[colab]"
+    from google.colab import output
+    output.enable_custom_widget_manager()
+    from google.colab import drive
+    drive.mount('/content/drive')
+else:
+    !pip instal -q "nanopyx[jupyter]"
+
 import io
 import os
-import sys
 import cv2 as cv
 import skimage
 import nanopyx
@@ -18,14 +27,6 @@ from matplotlib import pyplot as plt
 from nanopyx.core.utils.easy_gui import EasyGui
 from nanopyx.core.utils.find_files import find_files
 from nanopyx.data.download import ExampleDataManager
-
-IN_COLAB = 'google.colab' in sys.modules
-if IN_COLAB:
-    !pip install -q ipycanvas==0.11.0
-    from google.colab import output
-    output.enable_custom_widget_manager()
-    from google.colab import drive
-    drive.mount('/content/drive')
 
 cwd = os.getcwd()
 image_folder = "datasets"
