@@ -88,6 +88,10 @@ jupyter = [
     "stackview>=0.6.1",
     "ipycanvas>=0.13",
 ]
+colab = [
+    "stackview>=0.6.1",
+    "ipycanvas==0.11.0",
+]
 doc = ["pdoc>=12.3.1", "nanopyx[jupyter,developer]"]
 
 [project.urls]
