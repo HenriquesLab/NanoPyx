@@ -81,7 +81,7 @@ __kernel void PolarTransform(__global float *image_in,
   int cM = get_global_id(2);
 
   // these are the sizes of the output array
-  int nFrames = get_global_size(0);
+  // int nFrames = get_global_size(0);
   int rows = get_global_size(1);
   int cols = get_global_size(2);
 
@@ -89,7 +89,7 @@ __kernel void PolarTransform(__global float *image_in,
   float center_row = og_row / 2;
 
   float max_radius = hypot(center_row, center_col);
-  float pi = 4 * atan(1.0);
+  float pi = 4 * atan((float)(1.0));
   
   float angle =  rM * 2 * pi  / (rows-1);
 
