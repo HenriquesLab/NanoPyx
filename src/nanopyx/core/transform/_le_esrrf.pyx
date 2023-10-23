@@ -47,20 +47,19 @@ class eSRRF(LiquidEngine):
         
         total_memory = (3*image[0, :, :].nbytes) + (2*np.zeros((1, output_shape[1], output_shape[2]), dtype=np.float32).nbytes) + (2*np.zeros((1, output_shape[1]*2, output_shape[2]*2), dtype=np.float32).nbytes)
         output_image = np.zeros(output_shape, dtype=np.float32)
-
+        
         max_slices = int((dc.global_mem_size // total_memory)/mem_div)
-
         max_slices = self._check_max_slices(image, max_slices)
         
         mf = cl.mem_flags
 
-        input_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices, :, :].nbytes)
-        output_cl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, np.empty(output_shape, dtype=np.float32).nbytes)
-        magnified_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, np.empty((max_slices, output_shape[1], output_shape[2]), dtype=np.float32).nbytes)
-        col_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, np.empty((max_slices, image.shape[1], image.shape[2]), dtype=np.float32).nbytes)
-        row_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, np.empty((max_slices, image.shape[1], image.shape[2]), dtype=np.float32).nbytes)
-        col_magnified_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, np.empty((max_slices, image.shape[1]*magnification*2, image.shape[2]*magnification*2), dtype=np.float32).nbytes)
-        row_magnified_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, np.empty((max_slices, image.shape[1]*magnification*2, image.shape[2]*magnification*2), dtype=np.float32).nbytes)
+        input_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image[0:max_slices, :, :].nbytes, dc, max_slices))
+        output_cl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(np.empty(output_shape, dtype=np.float32).nbytes, dc, max_slices))
+        magnified_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, output_shape[1], output_shape[2]), dtype=np.float32).nbytes, dc, max_slices))
+        col_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, image.shape[1], image.shape[2]), dtype=np.float32).nbytes, dc, max_slices))
+        row_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, image.shape[1], image.shape[2]), dtype=np.float32).nbytes, dc, max_slices))
+        col_magnified_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, image.shape[1]*magnification*2, image.shape[2]*magnification*2), dtype=np.float32).nbytes, dc, max_slices))
+        row_magnified_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, image.shape[1]*magnification*2, image.shape[2]*magnification*2), dtype=np.float32).nbytes, dc, max_slices))
         cl.enqueue_copy(cl_queue, input_cl, image[0:max_slices,:,:]).wait()
 
         cr_code = self._get_cl_code("_le_interpolation_catmull_rom_.cl", device['DP'])

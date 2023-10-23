@@ -148,6 +148,8 @@ class LiquidEngine:
             print(f"Agent chose:{run_type}")  # magical number to get enough memory space for buffers
         # try to run
         try:
+            if self.mem_div > 999:
+                raise ValueError(f"Maxmimum memory division factor achieved, can not try any longer with {run_type}. Use a smaller input or a different run_type")
             t_start = timeit.default_timer()
             result = self._run_types[run_type](*args, **kwargs)
             t2run = timeit.default_timer() - t_start
@@ -160,15 +162,23 @@ class LiquidEngine:
 
             self.Agent._inform(self)
 
-        except cl.LogicError as e:
-            if e.__str__() == "create_buffer failed: INVALID_BUFFER_SIZE":
+        except (cl.MemoryError, cl.LogicError) as e:
+            print("Found: ", e)
+            print("Reducing maximum buffer size and trying again...")
+            self.mem_div += 1
+            kwargs["mem_div"] = self.mem_div
+            result = self._run(*args, run_type=run_type, **kwargs)
+        except cl.Error as e:
+            if e.__str__() == "Buffer size is larger than device maximum memory allocation size":
                 print("Found: ", e)
                 print("Reducing maximum buffer size and trying again...")
                 self.mem_div += 1
                 kwargs["mem_div"] = self.mem_div
                 result = self._run(*args, run_type=run_type, **kwargs)
             else:
+                print(f"Unexpected error while trying to run {run_type}")
                 print(e)
+                print("Please try again with another run type")
                 result = None
         except Exception as e:
             print(f"Unexpected error while trying to run {run_type}")
@@ -371,6 +381,16 @@ class LiquidEngine:
             return input.shape[0]
         else:
             return number_of_max_slices
+
+    def _check_max_buffer_size(self, size, device, n_slices):
+
+        if size > device.max_mem_alloc_size and n_slices == 1:
+            raise ValueError("This device cannot handle this input size with these parameters, try using a smaller input or other parameters")
+
+        if size > device.max_mem_alloc_size:
+            raise cl.Error("Buffer size is larger than device maximum memory allocation size")
+
+        return size
 
     #####################################################
     #                   RUN METHODS                     #
