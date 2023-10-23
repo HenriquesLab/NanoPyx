@@ -278,13 +278,13 @@ class Radiality(LiquidEngine):
 
         # Initialize Buffers
         mf = cl.mem_flags
-        image_in = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)
-        imageinter_in = cl.Buffer(cl_ctx, mf.READ_ONLY, image_interp[0:max_slices,:,:].nbytes)
-        imGx_in = cl.Buffer(cl_ctx, mf.READ_ONLY, imGx[0:max_slices,:,:].nbytes)
-        imGy_in = cl.Buffer(cl_ctx, mf.READ_ONLY, imGy[0:max_slices,:,:].nbytes)
-        xRingCoordinates_in = cl.Buffer(cl_ctx, mf.READ_ONLY, x_ring_coords.nbytes)
-        yRingCoordinates_in = cl.Buffer(cl_ctx, mf.READ_ONLY, y_ring_coords.nbytes)
-        imRad_out = cl.Buffer(cl_ctx, mf.WRITE_ONLY, image_out[0:max_slices,:,:].nbytes)
+        image_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        imageinter_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image_interp[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        imGx_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(imGx[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        imGy_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(imGy[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        xRingCoordinates_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(x_ring_coords.nbytes, device['device'], max_slices))
+        yRingCoordinates_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(y_ring_coords.nbytes, device['device'], max_slices))
+        imRad_out = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(image_out[0:max_slices,:,:].nbytes, device['device'], max_slices))
 
         cl.enqueue_copy(cl_queue, image_in, image[0:max_slices,:,:]).wait()
         cl.enqueue_copy(cl_queue, imageinter_in, image_interp[0:max_slices,:,:]).wait()

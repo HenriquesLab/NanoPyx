@@ -36,7 +36,7 @@ class eSRRF(LiquidEngine):
         return super().benchmark(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
     def _run_opencl(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
-        # TODO doIntensityWeighting is irrelevant on gpu
+        # TODO doIntensityWeighting is irrelevant on gpu2
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)

@@ -235,10 +235,10 @@ class RadialGradientConvergence(LiquidEngine):
 
         # Initial buffers
         mf = cl.mem_flags
-        grad_col_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, gradient_col_interp[0:max_slices,:,:].nbytes)
-        grad_row_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, gradient_row_interp[0:max_slices,:,:].nbytes)
-        image_interp_in = cl.Buffer(cl_ctx, mf.READ_ONLY, image_interp[0:max_slices,:,:].nbytes)
-        rgc_map_out = cl.Buffer(cl_ctx, mf.WRITE_ONLY, rgc_map[0:max_slices,:,:].nbytes)
+        grad_col_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(gradient_col_interp[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        grad_row_int_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(gradient_row_interp[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        image_interp_in = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image_interp[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        rgc_map_out = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(rgc_map[0:max_slices,:,:].nbytes, device['device'], max_slices))
 
 
         cl.enqueue_copy(cl_queue, grad_col_int_in, gradient_col_interp[0:max_slices,:,:]).wait()

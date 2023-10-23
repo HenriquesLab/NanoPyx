@@ -132,9 +132,9 @@ class GradientRobertsCross(LiquidEngine):
 
         mf = cl.mem_flags
 
-        input_opencl = cl.Buffer(cl_ctx, mf.READ_ONLY, image[0:max_slices,:,:].nbytes)
-        output_opencl_col = cl.Buffer(cl_ctx, mf.WRITE_ONLY, gradient_col[0:max_slices,:,:].nbytes)
-        output_opencl_row = cl.Buffer(cl_ctx, mf.WRITE_ONLY, gradient_row[0:max_slices, :, :].nbytes)
+        input_opencl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        output_opencl_col = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(gradient_col[0:max_slices,:,:].nbytes, device['device'] , max_slices))
+        output_opencl_row = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(gradient_row[0:max_slices, :, :].nbytes, device['device'], max_slices))
 
         cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
 

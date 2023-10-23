@@ -663,8 +663,8 @@ class PolarTransform(LiquidEngine):
 
         max_slices = int((device["device"].global_mem_size // (output[0,:,:].nbytes + image[0,:,:].nbytes))/mem_div)
         max_slices = self._check_max_slices(image, max_slices)
-        image_in = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, image[0:max_slices,:,:].nbytes)
-        image_out = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, output[0:max_slices,:,:].nbytes)
+        image_in = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(image[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        image_out = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, self._check_max_buffer_size(output[0:max_slices,:,:].nbytes, device['device'], max_slices))
         cl.enqueue_copy(cl_queue, image_in, image[0:max_slices,:,:]).wait()
         
         cdef int scale_int = 0
