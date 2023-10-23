@@ -50,11 +50,10 @@ class eSRRF(LiquidEngine):
         
         max_slices = int((dc.global_mem_size // total_memory)/mem_div)
         max_slices = self._check_max_slices(image, max_slices)
-        
-        mf = cl.mem_flags
 
+        mf = cl.mem_flags
         input_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image[0:max_slices, :, :].nbytes, dc, max_slices))
-        output_cl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(np.empty(output_shape, dtype=np.float32).nbytes, dc, max_slices))
+        output_cl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(np.empty((max_slices, output_shape[1], output_shape[2]), dtype=np.float32).nbytes, dc, max_slices))
         magnified_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, output_shape[1], output_shape[2]), dtype=np.float32).nbytes, dc, max_slices))
         col_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, image.shape[1], image.shape[2]), dtype=np.float32).nbytes, dc, max_slices))
         row_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, image.shape[1], image.shape[2]), dtype=np.float32).nbytes, dc, max_slices))
