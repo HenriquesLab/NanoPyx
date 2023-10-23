@@ -383,7 +383,9 @@ class LiquidEngine:
             return number_of_max_slices
 
     def _check_max_buffer_size(self, size, device, n_slices):
-
+        """
+        Checks if buffer size is larger than device maximum memory allocation size and n_slices is 1 and raises appropriate errors that are handled in the _run function.
+        """
         if size > device.max_mem_alloc_size and n_slices == 1:
             raise ValueError("This device cannot handle this input size with these parameters, try using a smaller input or other parameters")
 
