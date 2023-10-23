@@ -344,10 +344,6 @@ class ShiftScaleRotate(LiquidEngine):
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.shiftScaleRotate
 
-        print(dc.name)
-        print(knl.get_work_group_info(cl.kernel_work_group_info.PREFERRED_WORK_GROUP_SIZE_MULTIPLE,dc))
-        print(knl.get_work_group_info(cl.kernel_work_group_info.WORK_GROUP_SIZE,dc))
-
         for i in range(0, image.shape[0], max_slices):
             if image.shape[0] - i >= max_slices:
                 n_slices = max_slices
