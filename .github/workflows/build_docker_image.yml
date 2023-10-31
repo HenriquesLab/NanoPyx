@@ -16,7 +16,7 @@ on:
           - debug
 jobs:
   build_docker:
-    runs-on: [self-hosted, Linux, dl4miceverywhere-builder ]
+    runs-on: [self-hosted, ubuntu]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
