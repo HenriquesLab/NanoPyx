@@ -145,7 +145,8 @@ class LiquidEngine:
             print(f"Unexpected run type {run_type}")
             print("Querying the Agent...")
             run_type = self.Agent.get_run_type(self, args, kwargs)
-            print(f"Agent chose:{run_type}")  # magical number to get enough memory space for buffers
+            print(f"Agent chose:{run_type}") 
+
         # try to run
         try:
             if self.mem_div > 999:
