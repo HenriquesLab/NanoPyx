@@ -52,6 +52,7 @@ dependencies = [
     "scikit-learn>=1.1.0",
     "statsmodels>=0.14.0",
     "matplotlib>=3.5",
+    "pyvkfft"
 ]
 dynamic = ["version"] # changed in setup.py
 
