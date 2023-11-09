@@ -243,6 +243,9 @@ class LiquidEngine:
         return speed_sort
 
     def _compare_runs(self, output_1, output_2):
+        if np.iscomplexobj(output_1):
+            output_1 = np.abs(output_1)
+            output_2 = np.abs(output_2)
         if output_1.ndim > 2:
             pcc = 0
             for i in range(output_1.shape[0]):
