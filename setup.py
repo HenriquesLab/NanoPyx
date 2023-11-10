@@ -202,15 +202,16 @@ def collect_extensions():
 
     path = os.path.join("src")
 
-    inters = ['nearest_neighbor','bicubic','catmull_rom','lanczos']
-    mako_files = ['_le_interpolation.mako.pyx']
     # Compile mako template(s)
-    lookup = TemplateLookup(directories = [dp for dp, _, _ in os.walk(path)])
-    for template_file in mako_files:
-        for inter_name in inters:
-            template = lookup.get_template(template_file)
-            with open(template.filename.replace('.mako',f'_{inter_name}'), 'w') as outfile:
-                outfile.write(template.render(inter_name=inter_name))
+    lookup = TemplateLookup(directories = ['src/mako_templates'])
+    for template_ in os.listdir('src/mako_templates'):
+        if 'base' in template_:
+            continue
+        path2out = os.path.join(path,template_.replace('.',os.sep,template_.count('.')-1))
+        template_obj = lookup.get_template(template_)
+        with open(path2out,'w') as outfile:
+            outfile.write(template_obj.render())
+    
 
     cython_files = [
         os.path.join(dir, file)
@@ -222,7 +223,6 @@ def collect_extensions():
     
     # remove mako templates
     cython_files = [c for c in cython_files if 'mako' not in c]
-
 
     cython_extensions = []
     extra_c_files = []
