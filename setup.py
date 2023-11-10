@@ -219,6 +219,10 @@ def collect_extensions():
         if file.endswith(".pyx")
         or (file.endswith(".py") and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read())
     ]
+    
+    # remove mako templates
+    cython_files = [c for c in cython_files if 'mako' not in c]
+
 
     cython_extensions = []
     extra_c_files = []
@@ -252,10 +256,6 @@ def collect_extensions():
         # Remove files that don't exist
         sources = [file for file in sources if os.path.exists(file)]
         extra_c_files = [file for file in extra_c_files if os.path.exists(file)]
-
-        # Remove mako templates
-        sources = [file for file in sources if not ('mako' in file)]
-        extra_c_files = [file for file in extra_c_files if not ('mako' in file)]
 
         # Make sure we have all the include paths
         for path in extra_c_files:
