@@ -1,4 +1,6 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
+<%!
+schedulers = ['unthreaded','threaded','threaded_guided','threaded_dynamic','threaded_static']
+%># cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
 cimport numpy as np
@@ -10,7 +12,7 @@ from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 
 
-cdef extern from "_c_interpolation_${inter_name}.h":
+cdef extern from "_c_interpolation_${self.attr.inter_name}.h":
     float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
 
 
@@ -20,14 +22,14 @@ class ShiftAndMagnify(LiquidEngine):
     """
 
     def __init__(self, clear_benchmarks=False, testing=False):
-        self._designation = "ShiftMagnify_${inter_name}"
+        self._designation = "ShiftMagnify_${self.attr.inter_name}"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True)
 
     def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
         """
-        Shift and magnify an image using ${inter_name} interpolation
+        Shift and magnify an image using ${self.attr.inter_name} interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray or memoryview
         :param shift_row: The number of rows to shift the image
@@ -80,7 +82,7 @@ class ShiftAndMagnify(LiquidEngine):
         output_opencl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, image_out[0:max_slices,:,:].nbytes)
         cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
 
-        code = self._get_cl_code("_le_interpolation_${inter_name}_.cl", device['DP'])
+        code = self._get_cl_code("_le_interpolation_${self.attr.inter_name}_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.shiftAndMagnify
 
@@ -150,14 +152,14 @@ class ShiftScaleRotate(LiquidEngine):
     """
 
     def __init__(self, clear_benchmarks=False, testing=False):
-        self._designation = "ShiftScaleRotate_${inter_name}"
+        self._designation = "ShiftScaleRotate_${self.attr.inter_name}"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True)
         
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:
         """
-        Shift and scale an image using ${inter_name} interpolation
+        Shift and scale an image using ${self.attr.inter_name} interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray
         :param shift_row: The number of rows to shift the image
@@ -214,7 +216,7 @@ class ShiftScaleRotate(LiquidEngine):
         output_opencl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(image_out[0:max_slices,:,:].nbytes, dc, max_slices))
         cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
 
-        code = self._get_cl_code("_le_interpolation_${inter_name}_.cl", device['DP'])
+        code = self._get_cl_code("_le_interpolation_${self.attr.inter_name}_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.shiftScaleRotate
 

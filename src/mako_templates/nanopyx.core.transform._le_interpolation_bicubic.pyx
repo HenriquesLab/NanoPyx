@@ -1,5 +1,5 @@
 <%!
-inter_name = 'catmull_rom'
+inter_name = 'bicubic'
 %>
 <%inherit file="_le_interpolation_base.pyx"/>
 
