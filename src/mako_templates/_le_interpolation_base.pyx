@@ -1,6 +1,4 @@
-<%!
-schedulers = ['unthreaded', 'threaded', 'threaded_static', 'threaded_dynamic', 'threaded_guided']
-%># cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
 cimport numpy as np
@@ -34,7 +32,7 @@ class ShiftAndMagnify(LiquidEngine):
         :type image: np.ndarray or memoryview
         :param shift_row: The number of rows to shift the image
         :type shift_row: int or float or np.ndarray
-        :param shift_col: The number of columns to shift the image
+        :param shift_col: The number of columns to shift the image«
         :type shift_col: int or float or np.ndarray
         :param magnification_row: The magnification factor for the rows
         :type magnification_row: float
