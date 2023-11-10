@@ -5,7 +5,7 @@ schedulers = ['unthreaded','threaded','threaded_guided','threaded_dynamic','thre
 import numpy as np
 cimport numpy as np
 from cython.parallel import parallel, prange
-from libc.math cimport cos, sin
+from libc.math cimport cos, sin, pi, hypot, exp, log
 
 from .__interpolation_tools__ import check_image, value2array
 from ...__liquid_engine__ import LiquidEngine
@@ -250,7 +250,7 @@ class ShiftScaleRotate(LiquidEngine):
         return image_out
 
     % for sch in schedulers:
-    def _run_unthreaded(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+    def _run_${sch}(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -290,4 +290,148 @@ class ShiftScaleRotate(LiquidEngine):
 
         return image_out
         
+        % endfor
+
+class PolarTransform(LiquidEngine):
+    """
+    Polar Transformations using the NanoPyx Liquid Engine
+    """
+    
+    def __init__(self, clear_benchmarks=False, testing=False):
+        self._designation = "PolarTransform_${self.attr.inter_name}"
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
+                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
+                        threaded_dynamic_=True, threaded_guided_=True)
+
+    def run(self, image, tuple out_shape, str scale, run_type=None) -> np.ndarray:
+        """
+        Polar Transform an image using ${self.attr.inter_name} interpolation
+        :param image: The image to transform
+        :type image: np.ndarray or memoryview
+        :param out_shape: Desired shape for the output image
+        :type out_shape: tuple (n_row, n_col)
+        :param scale: Linear or Log transform
+        :type scale: str, either 'log' or 'linear'
+        :return: The transformed image in polar coordinates
+        """
+        image = check_image(image)
+        nrow, ncol = out_shape
+        if scale not in ['linear', 'log']:
+            scale = 'linear'
+        return self._run(image, nrow, ncol, scale, run_type=run_type)
+
+    def benchmark(self, image, tuple out_shape, str scale):
+        """
+        Benchmark the PolarTransform run function in multiple run types
+        :param image: The image to transform
+        :type image: np.ndarray or memoryview
+        :param out_shape: Desired shape for the output image
+        :type out_shape: tuple (n_row, n_col)
+        :param scale: Linear or Log transform
+        :type scale: str, either 'log' or 'linear'
+        :return: The benchmark results
+        :rtype: [[run_time, run_type_name, return_value], ...]
+        """
+        image = check_image(image)
+        nrow, ncol = out_shape
+        if scale not in ['linear', 'log']:
+            scale = 'linear'
+        return super().benchmark(image, nrow, ncol, scale)
+
+    def _run_opencl(self, image, int nrow, int ncol, str scale, dict device, int mem_div=1):
+
+        # QUEUE AND CONTEXT
+        cl_ctx = cl.Context([device['device']])
+        cl_queue = cl.CommandQueue(cl_ctx)
+
+        cdef int nFrames = image.shape[0]
+        cdef int nRows = image.shape[1]
+        cdef int nCols = image.shape[2]
+
+        output = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+
+        max_slices = int((device["device"].global_mem_size // (output[0,:,:].nbytes + image[0,:,:].nbytes))/mem_div)
+        max_slices = self._check_max_slices(image, max_slices)
+        image_in = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(image[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        image_out = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, self._check_max_buffer_size(output[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        cl.enqueue_copy(cl_queue, image_in, image[0:max_slices,:,:]).wait()
+        
+        cdef int scale_int = 0
+        if scale == 'log':
+            scale_int = 1
+
+        # Create the program        
+        code = self._get_cl_code("_le_interpolation_${self.attr.inter_name}_.cl", device['DP'])
+        prg = cl.Program(cl_ctx, code).build()
+        knl = prg.PolarTransform
+
+        for i in range(0, image.shape[0], max_slices):
+            if image.shape[0] - i >= max_slices:
+                n_slices = max_slices
+            else:
+                n_slices = image.shape[0] - i
+
+            knl(
+                cl_queue,
+                (n_slices, nrow, ncol),
+                self.get_work_group(device["device"], (n_slices, nrow, ncol)),
+                image_in,
+                image_out,
+                np.int32(nRows),
+                np.int32(nCols),
+                np.int32(scale_int)
+            )
+
+            cl.enqueue_copy(cl_queue, output[i:i+n_slices,:,:], image_out).wait()
+            if i+n_slices<image.shape[0]:
+                cl.enqueue_copy(cl_queue, image_in, image[i+n_slices:i+2*n_slices,:,:]).wait()
+
+            cl_queue.finish()
+
+        image_in.release()
+        image_out.release()
+
+        return output
+        
+    % for sch in schedulers:
+    def _run_${sch}(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                % if sch=='unthreaded':
+                for i in range(ncol):
+                % elif sch=='threaded':
+                for i in prange(ncol):
+                % else:
+                for i in prange(ncol, schedule="${sch.split('_')[1]}"):
+                % endif
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
         % endfor
