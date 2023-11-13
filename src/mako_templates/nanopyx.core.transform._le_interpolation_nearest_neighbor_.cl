@@ -1,5 +1,5 @@
 <%!
-from c2cl import extract_batch_code
+from src.scripts.c2cl import extract_batch_code
 
 c_function_names = [('_c_interpolation_nearest_neighbor.c','_c_interpolate')]
 
