@@ -2,8 +2,13 @@
 ${h}
 % endfor
 
+% for d in self.attr.defines:
+#define ${d[0]} ${d[1]}
+% endfor
+
 % for f in self.attr.functions:
 ${f}
+
 % endfor
 
 __kernel void
