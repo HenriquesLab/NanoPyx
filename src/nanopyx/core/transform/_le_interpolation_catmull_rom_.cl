@@ -1,5 +1,20 @@
+double _c_cubic(double v);
 float _c_interpolate(__global float *image, float r, float c, int rows, int cols);
 
+
+double _c_cubic(double v) {
+  double a = 0.5;
+  double z = 0;
+  if (v < 0) {
+    v = -v;
+  }
+  if (v < 1) {
+    z = v * v * (v * (-a + 2) + (a - 3)) + 1;
+  } else if (v < 2) {
+    z = -a * v * v * v + 5 * a * v * v - 8 * a * v + 4 * a;
+  }
+  return z;
+}
 
 float _c_interpolate(__global float *image, float r, float c, int rows, int cols) {
   // return 0 if r OR c positions do not exist in image
