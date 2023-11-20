@@ -6,9 +6,8 @@ void _c_integral_image(
     float* integral,
     int n_row,
     int n_col,
-    int n_channels,
     int t_row,
     int t_col,
     float var_diff);
 
-#endif  // _C_INTEGRAL_IMAGE_2D_H
+#endif  // _C_INTEGRAL_IMAGE_H
