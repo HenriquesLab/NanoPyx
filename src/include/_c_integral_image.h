@@ -1,9 +1,6 @@
 #ifndef _C_INTEGRAL_IMAGE_H
 #define _C_INTEGRAL_IMAGE_H
 
-#include <Python.h>
-#include <stddef.h>
-
 void _c_integral_image(
     float* padded,
     float* integral,

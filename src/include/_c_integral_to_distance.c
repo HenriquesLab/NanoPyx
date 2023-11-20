@@ -1,6 +1,3 @@
-#include <Python.h>
-#include <stddef.h>
-
 float _c_integral_to_distance(
     const float* integral,
     int rows,

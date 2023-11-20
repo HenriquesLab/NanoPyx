@@ -1,9 +1,6 @@
 #ifndef _C_INTEGRAL_TO_DISTANCE_H
 #define _C_INTEGRAL_TO_DISTANCE_H
 
-#include <Python.h>
-#include <stddef.h>
-
 float _c_integral_to_distance(
     const float* integral,
     int rows,
@@ -11,6 +8,6 @@ float _c_integral_to_distance(
     int row,
     int col,
     int offset,
-    float h2s2)
+    float h2s2);
 
 #endif  // _C_INTEGRAL_TO_DISTANCE_H

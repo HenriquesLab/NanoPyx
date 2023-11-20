@@ -1,5 +1,3 @@
-#include <Python.h>
-#include <stddef.h>
 
 void _c_integral_image(
     float* padded,
@@ -46,16 +44,15 @@ void _c_integral_image(
         for (col = 1; col < n_col - t_col; ++col) {
             distance = 0;
             for (channel = 0; channel < n_channels; ++channel) {
-                t = (float)(PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(padded, row), col * n_channels + channel)) -
-                            PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(padded, row + t_row), (col + t_col) * n_channels + channel)));
+                t = (padded[row * n_col * n_channels + col * n_channels + channel] -
+                     padded[(row + t_row) * n_col * n_channels + (col + t_col) * n_channels + channel]);
                 distance += t * t;
             }
             distance -= n_channels * var_diff;
-            PyList_SetItem(PyList_GetItem(integral, row), col, Py_BuildValue(
-                "f", distance +
-                (float)PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(integral, row - 1), col)) +
-                (float)PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(integral, row), col - 1)) -
-                (float)PyFloat_AsDouble(PyList_GetItem(PyList_GetItem(integral, row - 1), col - 1))));
+            integral[row * n_col + col] = (distance +
+                                           integral[(row - 1) * n_col + col] +
+                                           integral[row * n_col + col - 1] -
+                                           integral[(row - 1) * n_col + col - 1]);
         }
     }
 }
