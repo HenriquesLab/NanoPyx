@@ -1,12 +1,5 @@
 
-void _c_integral_image(
-    float* padded,
-    float* integral,
-    int n_row,
-    int n_col,
-    int t_row,
-    int t_col,
-    float var_diff) {
+void _c_integral_image(float* padded,float* integral,int n_row,int n_col,int t_row,int t_col,float var_diff) {
     /*
     Parameters
     ----------

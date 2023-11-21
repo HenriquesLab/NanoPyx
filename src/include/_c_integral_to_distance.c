@@ -1,11 +1,4 @@
-float _c_integral_to_distance(
-    const float* integral,
-    int rows,
-    int cols,
-    int row,
-    int col,
-    int offset,
-    float h2s2) {
+float _c_integral_to_distance(const float* integral,int rows,int cols,int row,int col,int offset,float h2s2) {
     /*
     Parameters
     ----------
