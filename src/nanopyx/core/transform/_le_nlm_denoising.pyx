@@ -214,7 +214,7 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(np.asarray(result[:, pad_size: -pad_size,
                                             pad_size: -pad_size]).astype(np.float32))
 
-    def _run_threaded_static(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+    def _run_threaded_guided(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
         cdef float var = sigma * sigma
 
@@ -242,7 +242,7 @@ class NLMDenoising(LiquidEngine):
         
         with nogil:
             for f in range(n_frames):
-                for t_row in prange(-patch_distance, patch_distance + 1, schedule="static"):
+                for t_row in prange(-patch_distance, patch_distance + 1, schedule="guided"):
                     row_start = max(offset, offset - t_row)
                     row_end = min(n_row - offset, n_row - offset - t_row)
                     # Iterate over shifts along the column axis
@@ -368,7 +368,7 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(np.asarray(result[:, pad_size: -pad_size,
                                             pad_size: -pad_size]).astype(np.float32))
 
-    def _run_threaded_guided(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+    def _run_threaded_static(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
         cdef float var = sigma * sigma
 
@@ -396,7 +396,7 @@ class NLMDenoising(LiquidEngine):
         
         with nogil:
             for f in range(n_frames):
-                for t_row in prange(-patch_distance, patch_distance + 1, schedule="guided"):
+                for t_row in prange(-patch_distance, patch_distance + 1, schedule="static"):
                     row_start = max(offset, offset - t_row)
                     row_end = min(n_row - offset, n_row - offset - t_row)
                     # Iterate over shifts along the column axis
@@ -444,3 +444,5 @@ class NLMDenoising(LiquidEngine):
         # Return cropped result, undoing padding
         return np.squeeze(np.asarray(result[:, pad_size: -pad_size,
                                             pad_size: -pad_size]).astype(np.float32))
+
+    
