@@ -250,27 +250,38 @@ class NLMDenoising(LiquidEngine):
         h2s2 = patch_size * patch_size * h * h
         var *=  2
 
-        padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
+        padded_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.READ_ONLY)(padded.nbytes)
         cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
-        
-        result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, result.nbytes)
+
+        result_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.WRITE_ONLY)(result.nbytes)
         cl.enqueue_copy(cl_queue, result_opencl, result).wait()
-        
-        weights_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, padded[0].nbytes)
-        cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
-        
-        integral_opencl = cl.Buffer(cl_ctx,cl.mem_flags.READ_WRITE,integral.nbytes)
+
+        weights_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.READ_WRITE)(padded[0].nbytes)
+
+        integral_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.READ_WRITE)(integral.nbytes)
         cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
+        
+        # padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
+        # cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
+        
+        # result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, result.nbytes)
+        # cl.enqueue_copy(cl_queue, result_opencl, result).wait()
+        
+        # weights_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, padded[0].nbytes)
+        # cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
+        
+        # integral_opencl = cl.Buffer(cl_ctx,cl.mem_flags.READ_WRITE,integral.nbytes)
+        # cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
 
         buffers_time = time.time()
         print(f"Time spent creating buffers: {buffers_time - arrays_time}")
-
         
         code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.nlm_denoising
         
         for f in range(n_frames):
+            cl.enqueue_copy(cl_queue, weights_opencl, np.zeros_like(padded[0])).wait()
             frame_start_time = time.time()
             knl(cl_queue,
                 (2*patch_distance,), 
@@ -287,8 +298,10 @@ class NLMDenoising(LiquidEngine):
                 np.int32(offset),
                 np.float32(h2s2)).wait() 
             cl_queue.finish()
-            cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
+            cl.enqueue_copy(cl_queue, weights, weights_opencl).wait()
+
             print(f"Time spent on frame {f}: {time.time() - frame_start_time}")
+
             for row in range(pad_size, n_row - pad_size):
                 for col in range(pad_size, n_col - pad_size):
                     # No risk of division by zero, since the contribution
