@@ -27,7 +27,7 @@ class NLMDenoising(LiquidEngine):
         self._designation = "NLMDenoising"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
                         unthreaded_=True, threaded_=True, threaded_static_=True,
-                        threaded_dynamic_=True, threaded_guided_=True, opencl_=False)
+                        threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
 
     def run(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0, run_type=None) -> np.ndarray:
         """
@@ -446,3 +446,64 @@ class NLMDenoising(LiquidEngine):
                                             pad_size: -pad_size]).astype(np.float32))
 
     
+        
+    def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device) -> np.ndarray:
+        # QUEUE AND CONTEXT
+        cl_ctx = cl.Context([device['device']])
+        dc = device['device']
+        cl_queue = cl.CommandQueue(cl_ctx)
+
+        # prepare inputs
+        var = sigma*sigma
+        if patch_size % 2 == 0:
+            patch_size += 1
+        offset = patch_size / 2
+        pad_size = offset + patch_distance + 1
+        padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
+        result = np.zeros_like(padded)
+        weights = np.zeros_like(padded[0])
+        integral = np.zeros((2*patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
+
+        n_frames, n_row, n_col = padded.shape
+        h2s2 = patch_size * patch_size * h * h
+        var *=  2
+
+        padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
+        cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
+        
+        result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, result.nbytes)
+        cl.enqueue_copy(cl_queue, result_opencl, result).wait()
+        
+        weights_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, padded[0].nbytes)
+        cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
+        
+        integral_opencl = cl.Buffer(cl_ctx,cl.mem_flags.READ_WRITE,integral.nbytes)
+        cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
+
+        
+        code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
+        prg = cl.Program(cl_ctx, code).build()
+        knl = prg.nlm_denoising
+        
+        for f in range(n_frames):
+            knl(cl_queue,
+                (2*patch_distance,), 
+                None,
+                padded_opencl, 
+                result_opencl,
+                weights_opencl,
+                integral_opencl,
+                np.int32(f),
+                np.int32(n_row),
+                np.int32(n_col),
+                np.int32(patch_distance),
+                np.float32(var),
+                np.int32(offset),
+                np.float32(h2s2)).wait() 
+            cl_queue.finish()
+            cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
+
+
+        cl.enqueue_copy(cl_queue, result, result_opencl).wait()
+        
+        return np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
