@@ -284,7 +284,7 @@ class NLMDenoising(LiquidEngine):
             cl.enqueue_copy(cl_queue, weights_opencl, np.zeros_like(padded[0])).wait()
             frame_start_time = time.time()
             knl(cl_queue,
-                (2*patch_distance,), 
+                (2*patch_distance+1,), 
                 None,
                 padded_opencl, 
                 result_opencl,
