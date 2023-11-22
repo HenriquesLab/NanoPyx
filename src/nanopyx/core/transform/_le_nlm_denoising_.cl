@@ -143,13 +143,13 @@ nlm_denoising(__global float *padded_img, __global float *result, __global float
         }
     }
 
-    int pad_size = offset+patch_distance+1;
-    int row,col;
-    for (row=pad_size; row<n_row-pad_size;++row){
-        for (col=pad_size; col<n_col-pad_size;++col){
-            result[f*n_row*n_col+row*n_col+col] /= weights[row*n_col+col];
-        }
-    }
+    // int pad_size = offset+patch_distance+1;
+    // int row,col;
+    // for (row=pad_size; row<n_row-pad_size;++row){
+    //     for (col=pad_size; col<n_col-pad_size;++col){
+    //         result[f*n_row*n_col+row*n_col+col] /= weights[row*n_col+col];
+    //     }
+    // }
 
 }
     
