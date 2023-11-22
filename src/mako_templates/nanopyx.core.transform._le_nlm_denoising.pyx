@@ -2,6 +2,7 @@
 schedulers = ['threaded','threaded_guided','threaded_dynamic','threaded_static']
 %># cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
+import time
 import numpy as np
 cimport numpy as np
 
@@ -225,6 +226,7 @@ class NLMDenoising(LiquidEngine):
     
         
     def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device) -> np.ndarray:
+        start_time = time.time()
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
@@ -240,6 +242,9 @@ class NLMDenoising(LiquidEngine):
         result = np.zeros_like(padded)
         weights = np.zeros_like(padded[0])
         integral = np.zeros((2*patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
+
+        arrays_time = time.time()
+        print(f"Time spent creating arrays: {arrays_time - start_time}")
 
         n_frames, n_row, n_col = padded.shape
         h2s2 = patch_size * patch_size * h * h
@@ -257,12 +262,16 @@ class NLMDenoising(LiquidEngine):
         integral_opencl = cl.Buffer(cl_ctx,cl.mem_flags.READ_WRITE,integral.nbytes)
         cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
 
+        buffers_time = time.time()
+        print(f"Time spent creating buffers: {buffers_time - arrays_time}")
+
         
         code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.nlm_denoising
         
         for f in range(n_frames):
+            frame_start_time = time.time()
             knl(cl_queue,
                 (2*patch_distance,), 
                 None,
@@ -279,7 +288,7 @@ class NLMDenoising(LiquidEngine):
                 np.float32(h2s2)).wait() 
             cl_queue.finish()
             cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
-
+            print(f"Time spent on frame {f}: {time.time() - frame_start_time}")
             for row in range(pad_size, n_row - pad_size):
                 for col in range(pad_size, n_col - pad_size):
                     # No risk of division by zero, since the contribution
