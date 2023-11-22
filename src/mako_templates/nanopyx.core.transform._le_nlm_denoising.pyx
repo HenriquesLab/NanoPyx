@@ -6,6 +6,8 @@ import time
 import numpy as np
 cimport numpy as np
 
+from skimage.restoration import denoise_nl_means
+
 from libc.math cimport exp
 from cython.parallel import parallel, prange
 
@@ -30,7 +32,8 @@ class NLMDenoising(LiquidEngine):
         self._designation = "NLMDenoising"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
                         unthreaded_=True, threaded_=True, threaded_static_=True,
-                        threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
+                        threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
+                        python_=True)
 
     def run(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0, run_type=None) -> np.ndarray:
         """
@@ -62,6 +65,13 @@ class NLMDenoising(LiquidEngine):
         image = check_image(image)
         
         return super().benchmark(image, patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma)
+
+    def _run_python(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        out = np.zeros_like(image)
+        for i in range(image.shape[0]):
+            out[i] = denoise_nl_means(image[i], patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma, fast_mode=True)
+
+        return np.squeeze(out)
 
     def _run_unthreaded(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
