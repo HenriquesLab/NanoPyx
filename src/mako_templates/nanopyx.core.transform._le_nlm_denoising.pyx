@@ -236,7 +236,8 @@ class NLMDenoising(LiquidEngine):
         var = sigma*sigma
         if patch_size % 2 == 0:
             patch_size += 1
-        offset = patch_size / 2
+
+        offset = patch_size // 2
         pad_size = offset + patch_distance + 1
         padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
         result = np.zeros_like(padded)
@@ -254,7 +255,6 @@ class NLMDenoising(LiquidEngine):
         cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
 
         result_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.WRITE_ONLY)(result.nbytes)
-        cl.enqueue_copy(cl_queue, result_opencl, result).wait()
 
         weights_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.READ_WRITE)(padded[0].nbytes)
 
@@ -282,6 +282,8 @@ class NLMDenoising(LiquidEngine):
         
         for f in range(n_frames):
             cl.enqueue_copy(cl_queue, weights_opencl, np.zeros_like(padded[0])).wait()
+            cl.enqueue_copy(cl_queue, result_opencl, result).wait()
+
             frame_start_time = time.time()
             knl(cl_queue,
                 (2*patch_distance+1,), 
@@ -299,6 +301,7 @@ class NLMDenoising(LiquidEngine):
                 np.float32(h2s2)).wait() 
             cl_queue.finish()
             cl.enqueue_copy(cl_queue, weights, weights_opencl).wait()
+            cl.enqueue_copy(cl_queue,result,result_opencl).wait()
 
             print(f"Time spent on frame {f}: {time.time() - frame_start_time}")
 
@@ -308,7 +311,4 @@ class NLMDenoising(LiquidEngine):
                     # of a null shift is strictly positive
                     result[f, row, col] /= weights[row, col]
 
-
-        cl.enqueue_copy(cl_queue, result, result_opencl).wait()
-        
         return np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))

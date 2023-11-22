@@ -133,11 +133,11 @@ nlm_denoising(__global float *padded_img, __global float *result, __global float
                 if (distance<=5.0){
                     col_shift = col+t_col;
                     weight = alpha * exp(-distance);
-                    weights[row*n_col+col] += weight;
-                    weights[row_shift*n_col+col_shift] += weight;
+                    weights[row*n_col+col] = weights[row*n_col+col] + weight;
+                    weights[row_shift*n_col+col_shift] = weights[row_shift*n_col+col_shift]+ weight;
 
-                    result[f*n_row*n_col+row*n_col+col] += weight * padded_img[f*n_row*n_col+row_shift*n_col+col_shift];
-                    result[f*n_row*n_col+row_shift*n_col+col_shift] += weight * padded_img[f*n_row*n_col+row*n_col+col];
+                    result[f*n_row*n_col+row*n_col+col] = result[f*n_row*n_col+row*n_col+col] + weight * padded_img[f*n_row*n_col+row_shift*n_col+col_shift];
+                    result[f*n_row*n_col+row_shift*n_col+col_shift] = result[f*n_row*n_col+row_shift*n_col+col_shift] + weight * padded_img[f*n_row*n_col+row*n_col+col];
                 }
             }
         }
