@@ -15,7 +15,7 @@ from ...__opencl__ import cl, cl_array
 
 
 cdef extern from "_c_patch_distance.h":
-    float _c_patch_distance(float* image, float* integral, float* w, int patch_distance, float var) nogil
+    float _c_patch_distance(float* image, float* integral, float* w, int patch_distance, int n_col, float var) nogil
 
 
 class NLMDenoising(LiquidEngine):
@@ -131,7 +131,7 @@ class NLMDenoising(LiquidEngine):
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
                                     &padded[f, i, j],
-                                    &w[0, 0], patch_size, var)
+                                    &w[0, 0], patch_size, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
@@ -192,7 +192,7 @@ class NLMDenoising(LiquidEngine):
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
                                     &padded[f, i, j],
-                                    &w[0, 0], patch_size, var)
+                                    &w[0, 0], patch_size, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
@@ -253,7 +253,7 @@ class NLMDenoising(LiquidEngine):
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
                                     &padded[f, i, j],
-                                    &w[0, 0], patch_size, var)
+                                    &w[0, 0], patch_size, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
@@ -314,7 +314,7 @@ class NLMDenoising(LiquidEngine):
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
                                     &padded[f, i, j],
-                                    &w[0, 0], patch_size, var)
+                                    &w[0, 0], patch_size, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
@@ -375,7 +375,7 @@ class NLMDenoising(LiquidEngine):
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
                                     &padded[f, i, j],
-                                    &w[0, 0], patch_size, var)
+                                    &w[0, 0], patch_size, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
