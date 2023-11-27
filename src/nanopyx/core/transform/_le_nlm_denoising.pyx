@@ -15,7 +15,7 @@ from ...__opencl__ import cl, cl_array
 
 
 cdef extern from "_c_patch_distance.h":
-    float _c_patch_distance(float* image, float* integral, float* w, int patch_distance, int n_col, float var) nogil
+    float _c_patch_distance(float* image, float* integral, float* w, int patch_size, int iglobal, int jglobal,  int n_col, float var) nogil
 
 
 class NLMDenoising(LiquidEngine):
@@ -42,7 +42,7 @@ class NLMDenoising(LiquidEngine):
         """
 
         image = check_image(image)
-        
+
         return self._run(image, patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma, run_type=run_type)
 
     def benchmark(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0, run_type=None):
@@ -59,7 +59,7 @@ class NLMDenoising(LiquidEngine):
 
         image = check_image(image)
         
-        return super().benchmark(image, patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma)
+        return super().benchmark(image, patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma) 
 
     def _run_python(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         out = np.zeros_like(image)
@@ -69,18 +69,8 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(out)
 
     def _run_unthreaded(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
-        """
-        Run the non-local means denoising algorithm
-        :param image: np.ndarray or memoryview
-        :param patch_size: int, default 7, the size of the patch
-        :param patch_distance: int, default 11, the maximum patch distance
-        :param h: float, default 0.1, Cut-off distance (in gray levels).
-        :param sigma: float, default 0.0, the standard deviation of the gaussian kernel
-        :return: np.ndarray
-        """
-
         if patch_size % 2 == 0:
-            patch_size += 1  # odd value for symmetric patch
+            patch_size = patch_size + 1  # odd value for symmetric patch
 
         cdef int n_frames, n_row, n_col,
         n_frames, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
@@ -97,18 +87,16 @@ class NLMDenoising(LiquidEngine):
         cdef float weight_sum, weight
 
         cdef float A = ((patch_size - 1.) / 4.)
-        cdef float[:] range_vals = np.arange(-offset, offset + 1,
-                                                    dtype=np.float32)
+        cdef float[:] range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
         xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
-        cdef float[ :,:] w = np.ascontiguousarray(
+        cdef float[:,:] w = np.ascontiguousarray(
             np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
-        w *= 1. / (np.sum(w) * h * h)
+        w = w * (1. / (np.sum(w) * h * h))
 
-        cdef float[:, :, :] central_patch  = np.zeros((image.shape[0], patch_size, patch_size), dtype=np.float32)
-        cdef float var = sigma * sigma
-        var *= 2
-
-        # Iterate over rows, taking padding into account
+        cdef float[:, :, :] central_patch = np.zeros((image.shape[0], patch_size, patch_size), dtype=np.float32)
+        cdef float var = 2*(sigma * sigma)
+        cdef float new_value
+        
         with nogil:
             for f in range(n_frames):
                 for row in range(n_row):
@@ -118,8 +106,8 @@ class NLMDenoising(LiquidEngine):
 
                     for col in range(n_col):
                         # Reset weights for each local region
+                        new_value = 0 
                         weight_sum = 0
-                        weight = 0
 
                         central_patch[f] = padded[f, row:row+patch_size, col:col+patch_size]
                         j_start = col - min(patch_distance, col)
@@ -128,21 +116,23 @@ class NLMDenoising(LiquidEngine):
                         # Iterate over local 2d patch for each pixel
                         for i in range(i_start, i_end):
                             for j in range(j_start, j_end):
+
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
-                                    &padded[f, i, j],
-                                    &w[0, 0], patch_size, n_col, var)
+                                    &padded[f, 0, 0],
+                                    &w[0, 0], patch_size, i, j, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
-                                result[f, row, col] = result[f, row, col] + weight * padded[f, i+offset, j+offset]
-                        result[f, row, col] = result[f, row, col] / weight_sum
-
+                                new_value = new_value + weight * padded[f, i+offset, j+offset]
+                        
+                        result[f, row, col] = new_value / weight_sum
+                        
         return np.squeeze(np.asarray(result))
 
     def _run_threaded(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         if patch_size % 2 == 0:
-            patch_size += 1  # odd value for symmetric patch
+            patch_size = patch_size + 1  # odd value for symmetric patch
 
         cdef int n_frames, n_row, n_col,
         n_frames, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
@@ -159,16 +149,15 @@ class NLMDenoising(LiquidEngine):
         cdef float weight_sum, weight
 
         cdef float A = ((patch_size - 1.) / 4.)
-        cdef float[:] range_vals = np.arange(-offset, offset + 1,
-                                                    dtype=np.float32)
+        cdef float[:] range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
         xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
         cdef float[:,:] w = np.ascontiguousarray(
             np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
-        w *= 1. / (np.sum(w) * h * h)
+        w = w * (1. / (np.sum(w) * h * h))
 
         cdef float[:, :, :] central_patch = np.zeros((image.shape[0], patch_size, patch_size), dtype=np.float32)
-        cdef float var = sigma * sigma
-        var *= 2
+        cdef float var = 2*(sigma * sigma)
+        cdef float new_value
         
         with nogil:
             for f in range(n_frames):
@@ -179,8 +168,8 @@ class NLMDenoising(LiquidEngine):
 
                     for col in range(n_col):
                         # Reset weights for each local region
+                        new_value = 0 
                         weight_sum = 0
-                        weight = 0
 
                         central_patch[f] = padded[f, row:row+patch_size, col:col+patch_size]
                         j_start = col - min(patch_distance, col)
@@ -189,21 +178,23 @@ class NLMDenoising(LiquidEngine):
                         # Iterate over local 2d patch for each pixel
                         for i in range(i_start, i_end):
                             for j in range(j_start, j_end):
+
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
-                                    &padded[f, i, j],
-                                    &w[0, 0], patch_size, n_col, var)
+                                    &padded[f, 0, 0],
+                                    &w[0, 0], patch_size, i, j, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
-                                result[f, row, col] = result[f, row, col] + weight * padded[f, i+offset, j+offset]
-                        result[f, row, col] = result[f, row, col] / weight_sum
-
+                                new_value = new_value + weight * padded[f, i+offset, j+offset]
+                        
+                        result[f, row, col] = new_value / weight_sum
+                        
         return np.squeeze(np.asarray(result))
 
     def _run_threaded_guided(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         if patch_size % 2 == 0:
-            patch_size += 1  # odd value for symmetric patch
+            patch_size = patch_size + 1  # odd value for symmetric patch
 
         cdef int n_frames, n_row, n_col,
         n_frames, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
@@ -220,16 +211,15 @@ class NLMDenoising(LiquidEngine):
         cdef float weight_sum, weight
 
         cdef float A = ((patch_size - 1.) / 4.)
-        cdef float[:] range_vals = np.arange(-offset, offset + 1,
-                                                    dtype=np.float32)
+        cdef float[:] range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
         xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
         cdef float[:,:] w = np.ascontiguousarray(
             np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
-        w *= 1. / (np.sum(w) * h * h)
+        w = w * (1. / (np.sum(w) * h * h))
 
         cdef float[:, :, :] central_patch = np.zeros((image.shape[0], patch_size, patch_size), dtype=np.float32)
-        cdef float var = sigma * sigma
-        var *= 2
+        cdef float var = 2*(sigma * sigma)
+        cdef float new_value
         
         with nogil:
             for f in range(n_frames):
@@ -240,8 +230,8 @@ class NLMDenoising(LiquidEngine):
 
                     for col in range(n_col):
                         # Reset weights for each local region
+                        new_value = 0 
                         weight_sum = 0
-                        weight = 0
 
                         central_patch[f] = padded[f, row:row+patch_size, col:col+patch_size]
                         j_start = col - min(patch_distance, col)
@@ -250,21 +240,23 @@ class NLMDenoising(LiquidEngine):
                         # Iterate over local 2d patch for each pixel
                         for i in range(i_start, i_end):
                             for j in range(j_start, j_end):
+
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
-                                    &padded[f, i, j],
-                                    &w[0, 0], patch_size, n_col, var)
+                                    &padded[f, 0, 0],
+                                    &w[0, 0], patch_size, i, j, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
-                                result[f, row, col] = result[f, row, col] + weight * padded[f, i+offset, j+offset]
-                        result[f, row, col] = result[f, row, col] / weight_sum
-
+                                new_value = new_value + weight * padded[f, i+offset, j+offset]
+                        
+                        result[f, row, col] = new_value / weight_sum
+                        
         return np.squeeze(np.asarray(result))
 
     def _run_threaded_dynamic(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         if patch_size % 2 == 0:
-            patch_size += 1  # odd value for symmetric patch
+            patch_size = patch_size + 1  # odd value for symmetric patch
 
         cdef int n_frames, n_row, n_col,
         n_frames, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
@@ -281,16 +273,15 @@ class NLMDenoising(LiquidEngine):
         cdef float weight_sum, weight
 
         cdef float A = ((patch_size - 1.) / 4.)
-        cdef float[:] range_vals = np.arange(-offset, offset + 1,
-                                                    dtype=np.float32)
+        cdef float[:] range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
         xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
         cdef float[:,:] w = np.ascontiguousarray(
             np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
-        w *= 1. / (np.sum(w) * h * h)
+        w = w * (1. / (np.sum(w) * h * h))
 
         cdef float[:, :, :] central_patch = np.zeros((image.shape[0], patch_size, patch_size), dtype=np.float32)
-        cdef float var = sigma * sigma
-        var *= 2
+        cdef float var = 2*(sigma * sigma)
+        cdef float new_value
         
         with nogil:
             for f in range(n_frames):
@@ -301,8 +292,8 @@ class NLMDenoising(LiquidEngine):
 
                     for col in range(n_col):
                         # Reset weights for each local region
+                        new_value = 0 
                         weight_sum = 0
-                        weight = 0
 
                         central_patch[f] = padded[f, row:row+patch_size, col:col+patch_size]
                         j_start = col - min(patch_distance, col)
@@ -311,21 +302,23 @@ class NLMDenoising(LiquidEngine):
                         # Iterate over local 2d patch for each pixel
                         for i in range(i_start, i_end):
                             for j in range(j_start, j_end):
+
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
-                                    &padded[f, i, j],
-                                    &w[0, 0], patch_size, n_col, var)
+                                    &padded[f, 0, 0],
+                                    &w[0, 0], patch_size, i, j, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
-                                result[f, row, col] = result[f, row, col] + weight * padded[f, i+offset, j+offset]
-                        result[f, row, col] = result[f, row, col] / weight_sum
-
+                                new_value = new_value + weight * padded[f, i+offset, j+offset]
+                        
+                        result[f, row, col] = new_value / weight_sum
+                        
         return np.squeeze(np.asarray(result))
 
     def _run_threaded_static(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         if patch_size % 2 == 0:
-            patch_size += 1  # odd value for symmetric patch
+            patch_size = patch_size + 1  # odd value for symmetric patch
 
         cdef int n_frames, n_row, n_col,
         n_frames, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
@@ -342,16 +335,15 @@ class NLMDenoising(LiquidEngine):
         cdef float weight_sum, weight
 
         cdef float A = ((patch_size - 1.) / 4.)
-        cdef float[:] range_vals = np.arange(-offset, offset + 1,
-                                                    dtype=np.float32)
+        cdef float[:] range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
         xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
         cdef float[:,:] w = np.ascontiguousarray(
             np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
-        w *= 1. / (np.sum(w) * h * h)
+        w = w * (1. / (np.sum(w) * h * h))
 
         cdef float[:, :, :] central_patch = np.zeros((image.shape[0], patch_size, patch_size), dtype=np.float32)
-        cdef float var = sigma * sigma
-        var *= 2
+        cdef float var = 2*(sigma * sigma)
+        cdef float new_value
         
         with nogil:
             for f in range(n_frames):
@@ -362,8 +354,8 @@ class NLMDenoising(LiquidEngine):
 
                     for col in range(n_col):
                         # Reset weights for each local region
+                        new_value = 0 
                         weight_sum = 0
-                        weight = 0
 
                         central_patch[f] = padded[f, row:row+patch_size, col:col+patch_size]
                         j_start = col - min(patch_distance, col)
@@ -372,16 +364,18 @@ class NLMDenoising(LiquidEngine):
                         # Iterate over local 2d patch for each pixel
                         for i in range(i_start, i_end):
                             for j in range(j_start, j_end):
+
                                 weight = _c_patch_distance(
                                     &central_patch[f, 0, 0],
-                                    &padded[f, i, j],
-                                    &w[0, 0], patch_size, n_col, var)
+                                    &padded[f, 0, 0],
+                                    &w[0, 0], patch_size, i, j, n_col, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
-                                result[f, row, col] = result[f, row, col] + weight * padded[f, i+offset, j+offset]
-                        result[f, row, col] = result[f, row, col] / weight_sum
-
+                                new_value = new_value + weight * padded[f, i+offset, j+offset]
+                        
+                        result[f, row, col] = new_value / weight_sum
+                        
         return np.squeeze(np.asarray(result))
 
     
