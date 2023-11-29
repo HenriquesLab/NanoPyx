@@ -144,5 +144,70 @@ class NLMDenoising(LiquidEngine):
         %endfor
     
         
-    def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device) -> np.ndarray:
-        pass
+    def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device, int mem_div=1) -> np.ndarray:
+        # QUEUE AND CONTEXT
+        cl_ctx = cl.Context([device['device']])
+        dc = device['device']
+        cl_queue = cl.CommandQueue(cl_ctx)
+
+        # prepare inputs
+        var = sigma*sigma
+        if patch_size % 2 == 0:
+            patch_size += 1
+
+        offset = patch_size // 2
+
+        padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
+        result = np.zeros_like(padded)
+
+        A = ((patch_size - 1.) / 4.)
+        range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
+        xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
+        w = np.ascontiguousarray(np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
+        w = w * (1. / (np.sum(w) * h * h))
+
+        max_slices = int((device["device"].global_mem_size // (w.nbytes + 2*padded[0].nbytes))/mem_div)
+        max_slices = self._check_max_slices(image, max_slices)
+
+        padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(padded[0:max_slices,:,:].nbytes, device['device'], max_slices))
+
+        w_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, w.nbytes)
+        cl.enqueue_copy(cl_queue, w_opencl, w).wait()
+
+        result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, self._check_max_buffer_size(result[0:max_slices,:,:].nbytes, device['device'], max_slices))
+
+        cl.enqueue_copy(cl_queue, padded_opencl, padded[0:max_slices,:,:]).wait()
+
+        code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
+        prg = cl.Program(cl_ctx, code).build()
+        knl = prg.nlm_denoising
+
+        for i in range(0, image.shape[0], max_slices):
+            if image.shape[0] - i >= max_slices:
+                n_slices = max_slices
+            else:
+                n_slices = image.shape[0] - i
+
+            knl(
+                cl_queue,
+                (n_slices, padded.shape[1], padded.shape[2]),
+                self.get_work_group(device["device"], (n_slices, padded.shape[1], padded.shape[2])),
+                padded_opencl,
+                w_opencl,
+                result_opencl,
+                np.int32(image.shape[1]),
+                np.int32(image.shape[2]),
+                np.int32(patch_size),
+                np.int32(patch_distance),
+                np.float32(offset),
+                np.float32(var),
+                )
+
+            cl.enqueue_copy(cl_queue, result[i:i+n_slices,:,:], result_opencl).wait()
+            if i+n_slices<image.shape[0]:
+                cl.enqueue_copy(cl_queue, padded_opencl, padded[i+n_slices:i+2*n_slices,:,:]).wait()
+
+            cl_queue.finish()
+
+
+        return np.squeeze(np.asarray(result[:, pad_size:-pad_size, pad_size:-pad_size]).astype(np.float32))
