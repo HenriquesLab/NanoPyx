@@ -14,7 +14,7 @@ float _c_patch_distance(const float* p1, const float* p2, const float* w, int pa
             return 0.0;
         }
         for (j = 0; j < patch_size; j++) {
-            tmp_diff = p1[i * patch_size + j] - p2[(iglobal+i) * n_col + (jglobal+j)];
+            tmp_diff = p1[i * n_col + j] - p2[(iglobal+i) * n_col + (jglobal+j)];
             distance = distance + w[i * patch_size + j] * (tmp_diff * tmp_diff - var);
             // printf("i=%d, j=%d, tmp_diff=%f, w=%f, distance=%f\n", i, j, tmp_diff, w[i * patch_size + j], distance);
         }

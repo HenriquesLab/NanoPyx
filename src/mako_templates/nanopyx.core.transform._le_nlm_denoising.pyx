@@ -95,9 +95,7 @@ class NLMDenoising(LiquidEngine):
         cdef float[:,:] w = np.ascontiguousarray(
             np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
         w = w * (1. / (np.sum(w) * h * h))
-        print(w.shape)
 
-        cdef float[:, :, :, :, :] central_patch = np.zeros((image.shape[0], n_row, n_col, patch_size, patch_size), dtype=np.float32)
         cdef float var = 2*(sigma * sigma)
         cdef float new_value
         
@@ -119,7 +117,6 @@ class NLMDenoising(LiquidEngine):
                         new_value = 0 
                         weight_sum = 0
 
-                        central_patch[f, row, col] = padded[f, row:row+patch_size, col:col+patch_size]
                         j_start = col - min(patch_distance, col)
                         j_end = col + min(patch_distance + 1, n_col - col)
 
@@ -127,12 +124,10 @@ class NLMDenoising(LiquidEngine):
                         for i in range(i_start, i_end):
                             for j in range(j_start, j_end):
 
-                                ## weight = _c_patch_distance(
-                                ##    &central_patch[f, 0, 0],
-                                ##    &padded[f, 0, 0],
-                                ##    &w[0, 0], patch_size, i, j, n_col, var)
-
-                                weight = _patch_distance(central_patch[f, row, col], padded[f, i:i+patch_size, j:j+patch_size], w, patch_size, var)
+                                weight = _c_patch_distance(
+                                    &padded[f, row, col],
+                                    &padded[f, 0, 0],
+                                    &w[0, 0], patch_size, i, j, n_col+2*offset, var)
 
                                 # Collect results in weight sum
                                 weight_sum = weight_sum + weight
@@ -151,21 +146,3 @@ class NLMDenoising(LiquidEngine):
         
     def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device) -> np.ndarray:
         pass
-
-
-cdef float _patch_distance(float[:,:] p1, float[:,:] p2, float[:, :] w, int patch_size, float var) nogil:
-    cdef float distance_cutoff = 5.0
-    cdef float distance = 0.0
-    cdef float tmp_diff = 0.0
-
-    cdef int i, j
-
-    for i in range(patch_size):
-
-        if distance > distance_cutoff:
-            return 0.0
-
-        for j in range(patch_size):
-            tmp_diff = p1[i, j] - p2[i, j]
-            distance += w[i, j] * (tmp_diff * tmp_diff - var)
-    return exp(-fmax(0.0, distance))
