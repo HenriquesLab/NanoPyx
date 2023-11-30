@@ -3,7 +3,7 @@
 
 float _c_patch_distance(const float* p1, const float* p2, const float* w, int patch_size, int iglobal, int jglobal, int n_col, float var) {
     int i, j;
-    const float DISTANCE_CUTOFF = 100.0;
+    const float DISTANCE_CUTOFF = 5.0;
     float tmp_diff = 0.0;
     float distance = 0.0;
 
