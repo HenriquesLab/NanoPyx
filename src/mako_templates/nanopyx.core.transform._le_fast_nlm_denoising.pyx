@@ -2,7 +2,6 @@
 schedulers = ['threaded','threaded_guided','threaded_dynamic','threaded_static']
 %># cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
-import time
 import numpy as np
 cimport numpy as np
 
@@ -236,7 +235,6 @@ class NLMDenoising(LiquidEngine):
     
         
     def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device) -> np.ndarray:
-        start_time = time.time()
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
@@ -254,37 +252,21 @@ class NLMDenoising(LiquidEngine):
         weights = np.zeros_like(padded[0])
         integral = np.zeros((2*patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
 
-        arrays_time = time.time()
-        print(f"Time spent creating arrays: {arrays_time - start_time}")
-
         n_frames, n_row, n_col = padded.shape
         h2s2 = patch_size * patch_size * h * h
         var *=  2
-
-        padded_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.READ_ONLY)(padded.nbytes)
+        
+        padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
         cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
-
-        result_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.WRITE_ONLY)(result.nbytes)
-
-        weights_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.READ_WRITE)(padded[0].nbytes)
-
-        integral_opencl = cl.tools.ImmediateAllocator(cl_queue,cl.mem_flags.READ_WRITE)(integral.nbytes)
+        
+        result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, result.nbytes)
+        cl.enqueue_copy(cl_queue, result_opencl, result).wait()
+        
+        weights_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, padded[0].nbytes)
+        cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
+        
+        integral_opencl = cl.Buffer(cl_ctx,cl.mem_flags.READ_WRITE,integral.nbytes)
         cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
-        
-        # padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
-        # cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
-        
-        # result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, result.nbytes)
-        # cl.enqueue_copy(cl_queue, result_opencl, result).wait()
-        
-        # weights_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, padded[0].nbytes)
-        # cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
-        
-        # integral_opencl = cl.Buffer(cl_ctx,cl.mem_flags.READ_WRITE,integral.nbytes)
-        # cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
-
-        buffers_time = time.time()
-        print(f"Time spent creating buffers: {buffers_time - arrays_time}")
         
         code = self._get_cl_code("_le_fast_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
@@ -293,8 +275,6 @@ class NLMDenoising(LiquidEngine):
         for f in range(n_frames):
             cl.enqueue_copy(cl_queue, weights_opencl, np.zeros_like(padded[0])).wait()
             cl.enqueue_copy(cl_queue, result_opencl, result).wait()
-
-            frame_start_time = time.time()
             knl(cl_queue,
                 (2*patch_distance+1,), 
                 None,
@@ -312,8 +292,6 @@ class NLMDenoising(LiquidEngine):
             cl_queue.finish()
             cl.enqueue_copy(cl_queue, weights, weights_opencl).wait()
             cl.enqueue_copy(cl_queue,result,result_opencl).wait()
-
-            print(f"Time spent on frame {f}: {time.time() - frame_start_time}")
 
             for row in range(pad_size, n_row - pad_size):
                 for col in range(pad_size, n_col - pad_size):
