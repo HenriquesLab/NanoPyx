@@ -157,7 +157,7 @@ class NLMDenoising(LiquidEngine):
 
         offset = patch_size // 2
 
-        padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
+        padded = np.ascontiguousarray(np.pad(image,((0, 0), (offset, offset), (offset, offset)),mode='reflect').astype(np.float32))
         result = np.zeros_like(padded)
 
         A = ((patch_size - 1.) / 4.)
@@ -210,4 +210,4 @@ class NLMDenoising(LiquidEngine):
             cl_queue.finish()
 
 
-        return np.squeeze(np.asarray(result[:, pad_size:-pad_size, pad_size:-pad_size]).astype(np.float32))
+        return np.squeeze(np.asarray(result[:, offset:-offset, offset:-offset]).astype(np.float32))
