@@ -242,61 +242,71 @@ class NLMDenoising(LiquidEngine):
 
         # prepare inputs
         var = sigma*sigma
+        var *=  2
+
         if patch_size % 2 == 0:
             patch_size += 1
 
         offset = patch_size // 2
         pad_size = offset + patch_distance + 1
-        padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
-        result = np.zeros_like(padded)
-        weights = np.zeros_like(padded[0])
-        integral = np.zeros((2*patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
 
-        n_frames, n_row, n_col = padded.shape
         h2s2 = patch_size * patch_size * h * h
-        var *=  2
         
+        padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
+        n_frames, n_row, n_col = padded.shape[0], padded.shape[1], padded.shape[2]
+
+        result = np.zeros_like(padded)
+        blank_integral = np.zeros(((2*patch_distance+1)**2,n_row,n_col),dtype=np.float32)
+
         padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
         cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
-        
         result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, result.nbytes)
         cl.enqueue_copy(cl_queue, result_opencl, result).wait()
+
+        integral_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, blank_integral.nbytes)
+        M_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
+        Z_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
         
-        weights_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, padded[0].nbytes)
-        cl.enqueue_copy(cl_queue, weights_opencl, weights).wait()
-        
-        integral_opencl = cl.Buffer(cl_ctx,cl.mem_flags.READ_WRITE,integral.nbytes)
-        cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
         
         code = self._get_cl_code("_le_fast_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
-        knl = prg.nlm_denoising
+        knl_denoising = prg.nlm_denoising
+        knl_normalization = prg.nlm_normalizer
         
         for f in range(n_frames):
-            cl.enqueue_copy(cl_queue, weights_opencl, np.zeros_like(padded[0])).wait()
-            cl.enqueue_copy(cl_queue, result_opencl, result).wait()
-            knl(cl_queue,
-                (2*patch_distance+1,), 
-                None,
-                padded_opencl, 
-                result_opencl,
-                weights_opencl,
-                integral_opencl,
-                np.int32(f),
-                np.int32(n_row),
-                np.int32(n_col),
-                np.int32(patch_distance),
-                np.float32(var),
-                np.int32(offset),
-                np.float32(h2s2)).wait() 
-            cl_queue.finish()
-            cl.enqueue_copy(cl_queue, weights, weights_opencl).wait()
-            cl.enqueue_copy(cl_queue,result,result_opencl).wait()
+            cl.enqueue_fill_buffer(cl_queue,integral_opencl,np.float32(0),0,blank_integral.nbytes).wait()
+            cl.enqueue_fill_buffer(cl_queue,M_opencl,np.float32(0),0,padded.nbytes).wait()
+            cl.enqueue_fill_buffer(cl_queue,Z_opencl,np.float32(0),0,padded.nbytes).wait()
 
-            for row in range(pad_size, n_row - pad_size):
-                for col in range(pad_size, n_col - pad_size):
-                    # No risk of division by zero, since the contribution
-                    # of a null shift is strictly positive
-                    result[f, row, col] /= weights[row, col]
+            knl_denoising(cl_queue,
+                        (2*patch_distance+1,2*patch_distance+1), 
+                        None,
+                        padded_opencl, 
+                        result_opencl,
+                        integral_opencl,
+                        M_opencl,
+                        Z_opencl,
+                        np.int32(f),
+                        np.int32(n_row),
+                        np.int32(n_col),
+                        np.int32(offset),
+                        np.float32(var),
+                        np.float32(h2s2)).wait() 
+
+            knl_normalization(cl_queue,
+                              (n_row,n_col),
+                              None,
+                              padded_opencl,
+                              result_opencl,
+                              M_opencl,
+                              Z_opencl,
+                              np.int32(f)).wait()
+
+            cl_queue.finish()
+
+        cl.enqueue_copy(cl_queue, result, result_opencl).wait()
+        cl.enqueue_copy(cl_queue, blank_integral, integral_opencl).wait()
+
+        print(blank_integral)
 
         return np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
