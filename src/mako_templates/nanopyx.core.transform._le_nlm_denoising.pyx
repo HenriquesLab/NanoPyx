@@ -187,11 +187,10 @@ class NLMDenoising(LiquidEngine):
                 n_slices = max_slices
             else:
                 n_slices = image.shape[0] - i
-
             knl(
                 cl_queue,
-                (n_slices, padded.shape[1], padded.shape[2]),
-                self.get_work_group(device["device"], (n_slices, padded.shape[1], padded.shape[2])),
+                (n_slices, image.shape[1], image.shape[2]),
+                self.get_work_group(device["device"], (n_slices, image.shape[1], image.shape[2])),
                 padded_opencl,
                 w_opencl,
                 result_opencl,

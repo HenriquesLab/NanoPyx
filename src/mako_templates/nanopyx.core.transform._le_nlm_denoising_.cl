@@ -24,43 +24,36 @@ float _c_patch_distance(const __global float *p1, const __global float *p2, cons
 }
 
 __kernel void
-nlm_denoising(__global float *padded, __global float *w, __global float *result, const int n_frames, const int n_row, const int n_col, const int patch_size, const int patch_distance, const int offset, const float var) {
+nlm_denoising(__global float *padded, __global float *w, __global float *result, const int n_row, const int n_col, const int patch_size, const int patch_distance, const int offset, const float var) {
 
-    for (int f = 0; f < n_frames; ++f) {
-        for (int row = 0; row < n_row; ++row) {
-            int i_start = max(row - min(patch_distance, row), 0);
-            int i_end = min(row + min(patch_distance + 1, n_row - row), n_row);
+    int f = get_global_id(0);
+    int row = get_global_id(1);
+    int col = get_global_id(2);
 
-            for (int col = 0; col < n_col; ++col) {
-                float new_value = 0.0;
-                float weight_sum = 0.0;
+    int n_row_padded = n_row + 2*offset;
+    int n_col_padded = n_col + 2*offset;
 
-                int j_start = max(col - min(patch_distance, col), 0);
-                int j_end = min(col + min(patch_distance + 1, n_col - col), n_col);
+    int i_start = row - min(patch_distance, row);
+    int i_end = row + min(patch_distance + 1, n_row - row);
 
-                for (int i = i_start; i < i_end; ++i) {
-                    for (int j = j_start; j < j_end; ++j) {
-                        int index_padded = f * n_row * n_col + i * n_col + j;
-                        int index_w = i * patch_size + j;
+    float new_value = 0.0;
+    float weight_sum = 0.0;
 
-                        float distance = _c_patch_distance(&padded[index_padded],
-                                                            &padded[f * n_row * n_col],
-                                                            &w[index_w], patch_size,
-                                                            i, j, n_col + 2 * offset, var);
+    int j_start = col - min(patch_distance, col);
+    int j_end = col + min(patch_distance + 1, n_col - col);
 
-                        // Replace expf and fmaxf with OpenCL equivalents
-                        float weight = exp(-max(0.0, distance));
+    for (int i = i_start; i < i_end; ++i) {
+        for (int j = j_start; j < j_end; ++j) {
+            float weight = _c_patch_distance(
+                            &padded[f * n_row * n_col + row * n_col + col],
+                            &padded[f * n_row_padded * n_col_padded],
+                            &w[0], patch_size,
+                            i, j, n_col + 2 * offset, var);
 
-                        weight_sum += weight;
-                        new_value += weight * padded[index_padded];
-                    }
-                }
+            weight_sum = weight_sum + weight;
 
-                if (weight_sum > 0.0) {
-                    int index_result = f * n_row * n_col + row * n_col + col;
-                    result[index_result] = new_value / weight_sum;
-                }
-            }
+            new_value = new_value + weight * padded[f * n_row * n_col + i * n_col + j];
         }
     }
+    result[f * n_row * n_col + row * n_col + col] = new_value / weight_sum;
 }
