@@ -45,14 +45,14 @@ nlm_denoising(__global float *padded, __global float *w, __global float *result,
     for (int i = i_start; i < i_end; ++i) {
         for (int j = j_start; j < j_end; ++j) {
             float weight = _c_patch_distance(
-                            &padded[f * n_row * n_col + row * n_col + col],
+                            &padded[f * n_row_padded * n_col_padded + row * n_col_padded + col],
                             &padded[f * n_row_padded * n_col_padded],
                             &w[0], patch_size,
                             i, j, n_col + 2 * offset, var);
 
             weight_sum = weight_sum + weight;
 
-            new_value = new_value + weight * padded[f * n_row * n_col + i * n_col + j];
+            new_value = new_value + weight * padded[f * n_row_padded * n_col_padded + (i+offset) * n_col_padded + (j+offset)];
         }
     }
     result[f * n_row * n_col + row * n_col + col] = new_value / weight_sum;

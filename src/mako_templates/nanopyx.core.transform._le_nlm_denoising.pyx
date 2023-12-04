@@ -133,11 +133,7 @@ class NLMDenoising(LiquidEngine):
                                 weight_sum = weight_sum + weight
                                 
                                 new_value = new_value + weight * padded[f, i+offset, j+offset]
-                        if isnan(weight_sum):
-                            with gil:
-                                print(weight_sum)
-                        if weight_sum > 0:
-                            result[f, row, col] = new_value / weight_sum
+                        result[f, row, col] = new_value / weight_sum
                         
         return np.squeeze(np.asarray(result))
 
@@ -151,14 +147,18 @@ class NLMDenoising(LiquidEngine):
         cl_queue = cl.CommandQueue(cl_ctx)
 
         # prepare inputs
-        var = sigma*sigma
+        var = 2*sigma*sigma
         if patch_size % 2 == 0:
             patch_size += 1
 
         offset = patch_size // 2
 
         padded = np.ascontiguousarray(np.pad(image,((0, 0), (offset, offset), (offset, offset)),mode='reflect').astype(np.float32))
-        result = np.zeros_like(padded)
+        result = np.zeros_like(image)
+
+        print(image.shape)
+        print(padded.shape)
+        print(2*offset)
 
         A = ((patch_size - 1.) / 4.)
         range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
@@ -172,11 +172,11 @@ class NLMDenoising(LiquidEngine):
         padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(padded[0:max_slices,:,:].nbytes, device['device'], max_slices))
 
         w_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, w.nbytes)
-        cl.enqueue_copy(cl_queue, w_opencl, w).wait()
 
         result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, self._check_max_buffer_size(result[0:max_slices,:,:].nbytes, device['device'], max_slices))
 
         cl.enqueue_copy(cl_queue, padded_opencl, padded[0:max_slices,:,:]).wait()
+        cl.enqueue_copy(cl_queue, w_opencl, w).wait()
 
         code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
@@ -209,4 +209,4 @@ class NLMDenoising(LiquidEngine):
             cl_queue.finish()
 
 
-        return np.squeeze(np.asarray(result[:, offset:-offset, offset:-offset]).astype(np.float32))
+        return np.squeeze(np.asarray(result).astype(np.float32))
