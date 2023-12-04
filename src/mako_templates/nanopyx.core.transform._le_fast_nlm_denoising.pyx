@@ -256,7 +256,7 @@ class NLMDenoising(LiquidEngine):
         n_frames, n_row, n_col = padded.shape[0], padded.shape[1], padded.shape[2]
 
         result = np.zeros_like(padded)
-        blank_integral = np.zeros(((2*patch_distance+1)**2,n_row,n_col),dtype=np.float32)
+        blank_integral = np.zeros(((2*patch_distance+1)*patch_distance+1,n_row,n_col),dtype=np.float32)
 
         padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
         cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
@@ -264,9 +264,9 @@ class NLMDenoising(LiquidEngine):
         cl.enqueue_copy(cl_queue, result_opencl, result).wait()
 
         integral_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, blank_integral.nbytes)
-        M_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
+        cl.enqueue_fill_buffer(cl_queue,integral_opencl,np.float32(0),0,blank_integral.nbytes).wait()
+
         Z_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
-        
         
         code = self._get_cl_code("_le_fast_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
@@ -274,39 +274,32 @@ class NLMDenoising(LiquidEngine):
         knl_normalization = prg.nlm_normalizer
         
         for f in range(n_frames):
-            cl.enqueue_fill_buffer(cl_queue,integral_opencl,np.float32(0),0,blank_integral.nbytes).wait()
-            cl.enqueue_fill_buffer(cl_queue,M_opencl,np.float32(0),0,padded.nbytes).wait()
             cl.enqueue_fill_buffer(cl_queue,Z_opencl,np.float32(0),0,padded.nbytes).wait()
-
+            
             knl_denoising(cl_queue,
-                        (2*patch_distance+1,2*patch_distance+1), 
+                        (2*patch_distance+1,patch_distance+1), 
                         None,
                         padded_opencl, 
                         result_opencl,
                         integral_opencl,
-                        M_opencl,
                         Z_opencl,
                         np.int32(f),
                         np.int32(n_row),
                         np.int32(n_col),
                         np.int32(offset),
                         np.float32(var),
-                        np.float32(h2s2)).wait() 
+                        np.float32(h2s2),
+                        np.int32(patch_distance)).wait() 
 
-            knl_normalization(cl_queue,
-                              (n_row,n_col),
-                              None,
-                              padded_opencl,
-                              result_opencl,
-                              M_opencl,
-                              Z_opencl,
-                              np.int32(f)).wait()
+            # knl_normalization(cl_queue,
+            #                   (n_row,n_col),
+            #                   None,
+            #                   result_opencl,
+            #                   Z_opencl,
+            #                   np.int32(f)).wait()
 
             cl_queue.finish()
 
         cl.enqueue_copy(cl_queue, result, result_opencl).wait()
-        cl.enqueue_copy(cl_queue, blank_integral, integral_opencl).wait()
-
-        print(blank_integral)
 
         return np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
