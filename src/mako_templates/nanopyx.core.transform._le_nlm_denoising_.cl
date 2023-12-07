@@ -16,7 +16,12 @@ float _c_patch_distance(const __global float *p1, const __global float *p2, cons
         for (j = 0; j < patch_size; j++) {
             tmp_diff = p1[i * n_col + j] - p2[(iglobal+i) * n_col + (jglobal+j)];
             distance = distance + w[i * patch_size + j] * (tmp_diff * tmp_diff - var);
-            // printf("i=%d, j=%d, tmp_diff=%f, w=%f, distance=%f\n", i, j, tmp_diff, w[i * patch_size + j], distance);
+
+            if (i > 35){
+                if (j > 35) {
+                    printf("i=%d, j=%d, tmp_diff=%f, w=%f, distance=%f\n", i, j, tmp_diff, w[i * patch_size + j], distance);
+                }
+            }
             
         }
     }
@@ -42,7 +47,7 @@ nlm_denoising(__global float *padded_opencl, __global float *w_opencl, __global 
     float new_value = 0.0;
     float weight_sum = 0.0;
 
-    //printf("f=%i, n_row=%i, n_col=%i, patch_size=%i, patch_distance=%i, offset=%i, var=%f, n_row_padded=%i, n_col_padded=%i, central_value=%f, padded_value=%f\n", f, n_row, n_col, patch_size, patch_distance, offset, var, n_row_padded, n_col_padded, padded_opencl[74*148 + 74], padded_opencl[f * n_row_padded * n_col_padded + (74) * n_col_padded + (74)]);
+// printf("f=%i, n_row=%i, n_col=%i, patch_size=%i, patch_distance=%i, offset=%i, var=%f, n_row_padded=%i, n_col_padded=%i, central_value=%f, padded_value=%f\n", f, n_row, n_col, patch_size, patch_distance, offset, var, n_row_padded, n_col_padded, padded_opencl[74*148 + 74], padded_opencl[f * n_row_padded * n_col_padded + (74) * n_col_padded + (74)]);
 
     for (int i = i_start; i < i_end; i++) {
         for (int j = j_start; j < j_end; j++) {
