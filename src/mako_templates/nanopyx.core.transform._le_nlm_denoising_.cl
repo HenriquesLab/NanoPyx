@@ -10,19 +10,12 @@ float _c_patch_distance(const __global float *p1, const __global float *p2, cons
     for (i = 0; i < patch_size; i++) {
         // exp of large negative numbers will be 0, so we'd better stop
         if (distance > DISTANCE_CUTOFF) {
-            printf("Distance exceeds cutoff. Returning 0.0.\n");
+            //printf("Distance exceeds cutoff. Returning 0.0.\n");
             return 0.0;
         }
         for (j = 0; j < patch_size; j++) {
             tmp_diff = p1[i * n_col + j] - p2[(iglobal+i) * n_col + (jglobal+j)];
             distance = distance + w[i * patch_size + j] * (tmp_diff * tmp_diff - var);
-
-            if (i > 35){
-                if (j > 35) {
-                    printf("i=%d, j=%d, tmp_diff=%f, w=%f, distance=%f\n", i, j, tmp_diff, w[i * patch_size + j], distance);
-                }
-            }
-            
         }
     }
     // printf("distance=%f\n", exp(-max(0.0, distance)));

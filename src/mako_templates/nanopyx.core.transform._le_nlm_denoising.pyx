@@ -142,6 +142,7 @@ class NLMDenoising(LiquidEngine):
     
         
     def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device, int mem_div=1) -> np.ndarray:
+        # Bug: if either patch_size or h are too large, the kernel crashes
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
@@ -208,6 +209,9 @@ class NLMDenoising(LiquidEngine):
 
             cl_queue.finish()
 
+        w_opencl.release()
+        result_opencl.release()
+        padded_opencl.release()
 
         # return padded
         return np.squeeze(np.asarray(result).astype(np.float32))
