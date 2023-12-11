@@ -256,7 +256,7 @@ class NLMDenoising(LiquidEngine):
         n_frames, n_row, n_col = padded.shape[0], padded.shape[1], padded.shape[2]
 
         result = np.zeros_like(padded)
-        blank_integral = np.zeros(((2*patch_distance+1)*patch_distance+1,n_row,n_col),dtype=np.float32)
+        blank_integral = np.zeros(((2*patch_distance+1),patch_distance+1,n_row,n_col),dtype=np.float32)
 
         padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
         cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
@@ -291,12 +291,12 @@ class NLMDenoising(LiquidEngine):
                         np.float32(h2s2),
                         np.int32(patch_distance)).wait() 
 
-            # knl_normalization(cl_queue,
-            #                   (n_row,n_col),
-            #                   None,
-            #                   result_opencl,
-            #                   Z_opencl,
-            #                   np.int32(f)).wait()
+            knl_normalization(cl_queue,
+                              (n_row,n_col),
+                              None,
+                              result_opencl,
+                              Z_opencl,
+                              np.int32(f)).wait()
 
             cl_queue.finish()
 
