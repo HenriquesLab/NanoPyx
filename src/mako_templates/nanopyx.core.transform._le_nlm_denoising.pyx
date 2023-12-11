@@ -156,21 +156,21 @@ class NLMDenoising(LiquidEngine):
 
         offset = patch_size // 2
 
-        padded = np.ascontiguousarray(np.pad(image,((0, 0), (offset, offset), (offset, offset)),mode='reflect').astype(np.float32))
+        padded = np.asarray(np.pad(image,((0, 0), (offset, offset), (offset, offset)),mode='reflect').astype(np.float32))
         result = np.zeros_like(image)
 
         A = ((patch_size - 1.) / 4.)
         range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
         xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
-        w = np.ascontiguousarray(np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)), dtype=np.float32)
+        w = np.asarray(np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)), dtype=np.float32)
         w = w / (np.sum(w) * h * h)
 
-        max_slices = int((device["device"].global_mem_size // (w.nbytes + 2*padded[0].nbytes))/mem_div)
+        max_slices = int((device["device"].global_mem_size // (w.nbytes + padded[0].nbytes + result[0].nbytes))/mem_div)
         max_slices = self._check_max_slices(image, max_slices)
 
         padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(padded[0:max_slices,:,:].nbytes, device['device'], max_slices))
 
-        w_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, w.nbytes)
+        w_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(w.nbytes, device['device'], max_slices))
 
         result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, self._check_max_buffer_size(result[0:max_slices,:,:].nbytes, device['device'], max_slices))
 
@@ -180,8 +180,6 @@ class NLMDenoising(LiquidEngine):
         code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.nlm_denoising
-
-        print(w.shape)
         
         for i in range(0, n_frames, max_slices):
             if n_frames - i >= max_slices:
@@ -213,5 +211,4 @@ class NLMDenoising(LiquidEngine):
         result_opencl.release()
         padded_opencl.release()
 
-        # return padded
         return np.squeeze(np.asarray(result).astype(np.float32))
