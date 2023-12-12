@@ -144,13 +144,13 @@ nlm_denoising(__global float *padded, __global float *result, __global float* in
 }
 
 __kernel void
-nlm_normalizer(__global float *result, __global float* Z, const int f) {
+nlm_normalizer(__global float *result, __global float* Z, const int f, const int pad_size) {
 
-        int row = get_global_id(0);
-        int col = get_global_id(1);
+        int row = get_global_id(0)+pad_size;
+        int col = get_global_id(1)+pad_size;
 
-        int n_row = get_global_size(0);
-        int n_col = get_global_size(1);
+        int n_row = get_global_size(0)+pad_size*2;
+        int n_col = get_global_size(1)+pad_size*2;
 
         result[f*n_row*n_col + row * n_col + col] = result[f*n_row*n_col + row * n_col + col] / Z[f*n_row*n_col + row * n_col + col];
         

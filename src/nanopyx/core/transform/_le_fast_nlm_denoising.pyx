@@ -163,8 +163,8 @@ class NLMDenoising(LiquidEngine):
                 ((0, 0), (pad_size, pad_size), (pad_size, pad_size)),
                 mode='reflect'
             ).astype(np.float32))
-        cdef float[:, :] weights = np.zeros_like(padded[0])
-        cdef float[:, :, :] integral = np.zeros((2*patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
+        cdef float[:, :, :] weights = np.zeros_like(padded)
+        cdef float[:, :, :, :] integral = np.zeros((2*patch_distance+1, patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
         cdef float[:, :, :] result = np.zeros_like(padded)
 
         cdef float distance, h2s2, weight, alpha
@@ -186,7 +186,7 @@ class NLMDenoising(LiquidEngine):
 
                         # Compute integral image of the squared difference between
                         # padded and the same image shifted by (t_row, t_col)
-                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, 0, 0],
+                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, t_col, 0, 0],
                                         n_row, n_col, t_row, t_col, var)
 
                         # Inner loops on pixel coordinates
@@ -197,15 +197,15 @@ class NLMDenoising(LiquidEngine):
                             for col in range(offset, n_col - offset - t_col):
                                 # Compute squared distance between shifted patches
                                 distance = _c_integral_to_distance(
-                                    &integral[t_row+patch_distance, 0, 0], n_row, n_col, row, col, offset, h2s2)
+                                    &integral[t_row+patch_distance, t_col, 0, 0], n_row, n_col, row, col, offset, h2s2)
                                 # exp of large negative numbers is close to zero
                                 if distance > distance_cutoff:
                                     continue
                                 col_shift = col + t_col
                                 weight = alpha * exp(-distance)
                                 # Accumulate weights corresponding to different shifts
-                                weights[row, col] += weight
-                                weights[row_shift, col_shift] += weight
+                                weights[f,row, col] = weights[f,row,col] + weight
+                                weights[f, row_shift, col_shift] = weights[f,row_shift,col_shift] + weight
 
                                 result[f, row, col] = result[f, row, col] + weight * padded[f, row_shift, col_shift]
                                 result[f, row_shift, col_shift] = result[f, row_shift, col_shift] + weight * padded[f, row, col]
@@ -215,14 +215,10 @@ class NLMDenoising(LiquidEngine):
                     for col in prange(pad_size, n_col - pad_size):
                         # No risk of division by zero, since the contribution
                         # of a null shift is strictly positive
-                        result[f, row, col] /= weights[row, col]
-
-                with gil:
-                    weights = np.zeros_like(padded[0])
+                        result[f, row, col] = result[f,row,col] / weights[f, row, col]
 
         # Return cropped result, undoing padding
-        return np.squeeze(np.asarray(result[:, pad_size: -pad_size,
-                                            pad_size: -pad_size]).astype(np.float32))
+        return np.asarray(weights).astype(np.float32) # np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
 
     def _run_threaded_guided(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
@@ -240,8 +236,8 @@ class NLMDenoising(LiquidEngine):
                 ((0, 0), (pad_size, pad_size), (pad_size, pad_size)),
                 mode='reflect'
             ).astype(np.float32))
-        cdef float[:, :] weights = np.zeros_like(padded[0])
-        cdef float[:, :, :] integral = np.zeros((2*patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
+        cdef float[:, :, :] weights = np.zeros_like(padded)
+        cdef float[:, :, :, :] integral = np.zeros((2*patch_distance+1, patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
         cdef float[:, :, :] result = np.zeros_like(padded)
 
         cdef float distance, h2s2, weight, alpha
@@ -263,7 +259,7 @@ class NLMDenoising(LiquidEngine):
 
                         # Compute integral image of the squared difference between
                         # padded and the same image shifted by (t_row, t_col)
-                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, 0, 0],
+                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, t_col, 0, 0],
                                         n_row, n_col, t_row, t_col, var)
 
                         # Inner loops on pixel coordinates
@@ -274,32 +270,28 @@ class NLMDenoising(LiquidEngine):
                             for col in range(offset, n_col - offset - t_col):
                                 # Compute squared distance between shifted patches
                                 distance = _c_integral_to_distance(
-                                    &integral[t_row+patch_distance, 0, 0], n_row, n_col, row, col, offset, h2s2)
+                                    &integral[t_row+patch_distance, t_col, 0, 0], n_row, n_col, row, col, offset, h2s2)
                                 # exp of large negative numbers is close to zero
                                 if distance > distance_cutoff:
                                     continue
                                 col_shift = col + t_col
                                 weight = alpha * exp(-distance)
                                 # Accumulate weights corresponding to different shifts
-                                weights[row, col] += weight
-                                weights[row_shift, col_shift] += weight
+                                weights[f,row, col] = weights[f,row,col] + weight
+                                weights[f, row_shift, col_shift] = weights[f,row_shift,col_shift] + weight
 
                                 result[f, row, col] = result[f, row, col] + weight * padded[f, row_shift, col_shift]
                                 result[f, row_shift, col_shift] = result[f, row_shift, col_shift] + weight * padded[f, row, col]
 
                 # Normalize pixel values using sum of weights of contributing patches
                 for row in range(pad_size, n_row - pad_size):
-                    for col in prange(pad_size, n_col - pad_size):
+                    for col in prange(pad_size, n_col - pad_size, schedule="guided"):
                         # No risk of division by zero, since the contribution
                         # of a null shift is strictly positive
-                        result[f, row, col] /= weights[row, col]
-
-                with gil:
-                    weights = np.zeros_like(padded[0])
+                        result[f, row, col] = result[f,row,col] / weights[f, row, col]
 
         # Return cropped result, undoing padding
-        return np.squeeze(np.asarray(result[:, pad_size: -pad_size,
-                                            pad_size: -pad_size]).astype(np.float32))
+        return np.asarray(weights).astype(np.float32) # np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
 
     def _run_threaded_dynamic(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
@@ -317,8 +309,8 @@ class NLMDenoising(LiquidEngine):
                 ((0, 0), (pad_size, pad_size), (pad_size, pad_size)),
                 mode='reflect'
             ).astype(np.float32))
-        cdef float[:, :] weights = np.zeros_like(padded[0])
-        cdef float[:, :, :] integral = np.zeros((2*patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
+        cdef float[:, :, :] weights = np.zeros_like(padded)
+        cdef float[:, :, :, :] integral = np.zeros((2*patch_distance+1, patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
         cdef float[:, :, :] result = np.zeros_like(padded)
 
         cdef float distance, h2s2, weight, alpha
@@ -340,7 +332,7 @@ class NLMDenoising(LiquidEngine):
 
                         # Compute integral image of the squared difference between
                         # padded and the same image shifted by (t_row, t_col)
-                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, 0, 0],
+                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, t_col, 0, 0],
                                         n_row, n_col, t_row, t_col, var)
 
                         # Inner loops on pixel coordinates
@@ -351,32 +343,28 @@ class NLMDenoising(LiquidEngine):
                             for col in range(offset, n_col - offset - t_col):
                                 # Compute squared distance between shifted patches
                                 distance = _c_integral_to_distance(
-                                    &integral[t_row+patch_distance, 0, 0], n_row, n_col, row, col, offset, h2s2)
+                                    &integral[t_row+patch_distance, t_col, 0, 0], n_row, n_col, row, col, offset, h2s2)
                                 # exp of large negative numbers is close to zero
                                 if distance > distance_cutoff:
                                     continue
                                 col_shift = col + t_col
                                 weight = alpha * exp(-distance)
                                 # Accumulate weights corresponding to different shifts
-                                weights[row, col] += weight
-                                weights[row_shift, col_shift] += weight
+                                weights[f,row, col] = weights[f,row,col] + weight
+                                weights[f, row_shift, col_shift] = weights[f,row_shift,col_shift] + weight
 
                                 result[f, row, col] = result[f, row, col] + weight * padded[f, row_shift, col_shift]
                                 result[f, row_shift, col_shift] = result[f, row_shift, col_shift] + weight * padded[f, row, col]
 
                 # Normalize pixel values using sum of weights of contributing patches
                 for row in range(pad_size, n_row - pad_size):
-                    for col in prange(pad_size, n_col - pad_size):
+                    for col in prange(pad_size, n_col - pad_size, schedule="dynamic"):
                         # No risk of division by zero, since the contribution
                         # of a null shift is strictly positive
-                        result[f, row, col] /= weights[row, col]
-
-                with gil:
-                    weights = np.zeros_like(padded[0])
+                        result[f, row, col] = result[f,row,col] / weights[f, row, col]
 
         # Return cropped result, undoing padding
-        return np.squeeze(np.asarray(result[:, pad_size: -pad_size,
-                                            pad_size: -pad_size]).astype(np.float32))
+        return np.asarray(weights).astype(np.float32) # np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
 
     def _run_threaded_static(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
@@ -394,8 +382,8 @@ class NLMDenoising(LiquidEngine):
                 ((0, 0), (pad_size, pad_size), (pad_size, pad_size)),
                 mode='reflect'
             ).astype(np.float32))
-        cdef float[:, :] weights = np.zeros_like(padded[0])
-        cdef float[:, :, :] integral = np.zeros((2*patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
+        cdef float[:, :, :] weights = np.zeros_like(padded)
+        cdef float[:, :, :, :] integral = np.zeros((2*patch_distance+1, patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
         cdef float[:, :, :] result = np.zeros_like(padded)
 
         cdef float distance, h2s2, weight, alpha
@@ -417,7 +405,7 @@ class NLMDenoising(LiquidEngine):
 
                         # Compute integral image of the squared difference between
                         # padded and the same image shifted by (t_row, t_col)
-                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, 0, 0],
+                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, t_col, 0, 0],
                                         n_row, n_col, t_row, t_col, var)
 
                         # Inner loops on pixel coordinates
@@ -428,32 +416,28 @@ class NLMDenoising(LiquidEngine):
                             for col in range(offset, n_col - offset - t_col):
                                 # Compute squared distance between shifted patches
                                 distance = _c_integral_to_distance(
-                                    &integral[t_row+patch_distance, 0, 0], n_row, n_col, row, col, offset, h2s2)
+                                    &integral[t_row+patch_distance, t_col, 0, 0], n_row, n_col, row, col, offset, h2s2)
                                 # exp of large negative numbers is close to zero
                                 if distance > distance_cutoff:
                                     continue
                                 col_shift = col + t_col
                                 weight = alpha * exp(-distance)
                                 # Accumulate weights corresponding to different shifts
-                                weights[row, col] += weight
-                                weights[row_shift, col_shift] += weight
+                                weights[f,row, col] = weights[f,row,col] + weight
+                                weights[f, row_shift, col_shift] = weights[f,row_shift,col_shift] + weight
 
                                 result[f, row, col] = result[f, row, col] + weight * padded[f, row_shift, col_shift]
                                 result[f, row_shift, col_shift] = result[f, row_shift, col_shift] + weight * padded[f, row, col]
 
                 # Normalize pixel values using sum of weights of contributing patches
                 for row in range(pad_size, n_row - pad_size):
-                    for col in prange(pad_size, n_col - pad_size):
+                    for col in prange(pad_size, n_col - pad_size, schedule="static"):
                         # No risk of division by zero, since the contribution
                         # of a null shift is strictly positive
-                        result[f, row, col] /= weights[row, col]
-
-                with gil:
-                    weights = np.zeros_like(padded[0])
+                        result[f, row, col] = result[f,row,col] / weights[f, row, col]
 
         # Return cropped result, undoing padding
-        return np.squeeze(np.asarray(result[:, pad_size: -pad_size,
-                                            pad_size: -pad_size]).astype(np.float32))
+        return np.asarray(weights).astype(np.float32) # np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
 
     
         
@@ -476,29 +460,29 @@ class NLMDenoising(LiquidEngine):
         h2s2 = patch_size * patch_size * h * h
         
         padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
-        n_frames, n_row, n_col = padded.shape[0], padded.shape[1], padded.shape[2]
-
-        result = np.zeros_like(padded)
-        blank_integral = np.zeros(((2*patch_distance+1),patch_distance+1,n_row,n_col),dtype=np.float32)
-
         padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
         cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
+
+        n_frames, n_row, n_col = padded.shape[0], padded.shape[1], padded.shape[2]
+        
+        result = np.zeros_like(padded)
         result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, result.nbytes)
         cl.enqueue_copy(cl_queue, result_opencl, result).wait()
 
-        integral_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, blank_integral.nbytes)
-        cl.enqueue_fill_buffer(cl_queue,integral_opencl,np.float32(0),0,blank_integral.nbytes).wait()
+        integral = np.zeros(((2*patch_distance+1),patch_distance+1,n_row,n_col),dtype=np.float32)
+        integral_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, integral.nbytes)
+        cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
 
+        Z = np.zeros_like(padded)
         Z_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
-        
+        cl.enqueue_copy(cl_queue, Z_opencl, Z).wait()
+
         code = self._get_cl_code("_le_fast_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl_denoising = prg.nlm_denoising
         knl_normalization = prg.nlm_normalizer
         
         for f in range(n_frames):
-            cl.enqueue_fill_buffer(cl_queue,Z_opencl,np.float32(0),0,padded.nbytes).wait()
-            
             knl_denoising(cl_queue,
                         (2*patch_distance+1,patch_distance+1), 
                         None,
@@ -515,14 +499,15 @@ class NLMDenoising(LiquidEngine):
                         np.int32(patch_distance)).wait() 
 
             knl_normalization(cl_queue,
-                              (n_row,n_col),
+                              (n_row-pad_size*2,n_col-pad_size*2),
                               None,
                               result_opencl,
                               Z_opencl,
-                              np.int32(f)).wait()
+                              np.int32(f),
+                              np.int32(pad_size)).wait()
 
             cl_queue.finish()
 
-        cl.enqueue_copy(cl_queue, result, result_opencl).wait()
+        cl.enqueue_copy(cl_queue, result, Z_opencl).wait()
 
-        return np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
+        return result #np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
