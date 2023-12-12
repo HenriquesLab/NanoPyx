@@ -78,7 +78,7 @@ class NLMDenoising(LiquidEngine):
             patch_size += 1
         
         cdef int n_row, n_col, t_row, t_col, row, col, row_start, row_end, row_shift, col_shift, f
-        cdef int offset = patch_size / 2
+        cdef int offset = patch_size // 2
         cdef int pad_size = offset + patch_distance + 1
         cdef float[:, :, :] padded = np.ascontiguousarray(
             np.pad(
@@ -155,7 +155,7 @@ class NLMDenoising(LiquidEngine):
             patch_size += 1
         
         cdef int n_row, n_col, t_row, t_col, row, col, row_start, row_end, row_shift, col_shift, f
-        cdef int offset = patch_size / 2
+        cdef int offset = patch_size // 2
         cdef int pad_size = offset + patch_distance + 1
         cdef float[:, :, :] padded = np.ascontiguousarray(
             np.pad(
@@ -218,7 +218,7 @@ class NLMDenoising(LiquidEngine):
                         result[f, row, col] = result[f,row,col] / weights[f, row, col]
 
         # Return cropped result, undoing padding
-        return np.asarray(weights).astype(np.float32) # np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
+        return np.asarray(weights).astype(np.float32) #np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
 
     def _run_threaded_guided(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
@@ -228,7 +228,7 @@ class NLMDenoising(LiquidEngine):
             patch_size += 1
         
         cdef int n_row, n_col, t_row, t_col, row, col, row_start, row_end, row_shift, col_shift, f
-        cdef int offset = patch_size / 2
+        cdef int offset = patch_size // 2
         cdef int pad_size = offset + patch_distance + 1
         cdef float[:, :, :] padded = np.ascontiguousarray(
             np.pad(
@@ -291,7 +291,7 @@ class NLMDenoising(LiquidEngine):
                         result[f, row, col] = result[f,row,col] / weights[f, row, col]
 
         # Return cropped result, undoing padding
-        return np.asarray(weights).astype(np.float32) # np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
+        return np.asarray(weights).astype(np.float32) #np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
 
     def _run_threaded_dynamic(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
@@ -301,7 +301,7 @@ class NLMDenoising(LiquidEngine):
             patch_size += 1
         
         cdef int n_row, n_col, t_row, t_col, row, col, row_start, row_end, row_shift, col_shift, f
-        cdef int offset = patch_size / 2
+        cdef int offset = patch_size // 2
         cdef int pad_size = offset + patch_distance + 1
         cdef float[:, :, :] padded = np.ascontiguousarray(
             np.pad(
@@ -364,7 +364,7 @@ class NLMDenoising(LiquidEngine):
                         result[f, row, col] = result[f,row,col] / weights[f, row, col]
 
         # Return cropped result, undoing padding
-        return np.asarray(weights).astype(np.float32) # np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
+        return np.asarray(weights).astype(np.float32) #np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
 
     def _run_threaded_static(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
         cdef float distance_cutoff = 5.0
@@ -374,7 +374,7 @@ class NLMDenoising(LiquidEngine):
             patch_size += 1
         
         cdef int n_row, n_col, t_row, t_col, row, col, row_start, row_end, row_shift, col_shift, f
-        cdef int offset = patch_size / 2
+        cdef int offset = patch_size // 2
         cdef int pad_size = offset + patch_distance + 1
         cdef float[:, :, :] padded = np.ascontiguousarray(
             np.pad(
@@ -437,7 +437,7 @@ class NLMDenoising(LiquidEngine):
                         result[f, row, col] = result[f,row,col] / weights[f, row, col]
 
         # Return cropped result, undoing padding
-        return np.asarray(weights).astype(np.float32) # np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
+        return np.asarray(weights).astype(np.float32) #np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
 
     
         
@@ -460,21 +460,21 @@ class NLMDenoising(LiquidEngine):
         h2s2 = patch_size * patch_size * h * h
         
         padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
-        padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
+        padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, padded.nbytes)
         cl.enqueue_copy(cl_queue, padded_opencl, padded).wait()
 
         n_frames, n_row, n_col = padded.shape[0], padded.shape[1], padded.shape[2]
         
         result = np.zeros_like(padded)
-        result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, result.nbytes)
+        result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, result.nbytes)
         cl.enqueue_copy(cl_queue, result_opencl, result).wait()
 
         integral = np.zeros(((2*patch_distance+1),patch_distance+1,n_row,n_col),dtype=np.float32)
-        integral_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, integral.nbytes)
+        integral_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, integral.nbytes)
         cl.enqueue_copy(cl_queue, integral_opencl, integral).wait()
 
         Z = np.zeros_like(padded)
-        Z_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, padded.nbytes)
+        Z_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, padded.nbytes)
         cl.enqueue_copy(cl_queue, Z_opencl, Z).wait()
 
         code = self._get_cl_code("_le_fast_nlm_denoising_.cl", device['DP'])
