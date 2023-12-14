@@ -9,6 +9,9 @@ from ...__liquid_engine__ import LiquidEngine
 cdef extern from "_c_gradients.h":
     void _c_gradient_3d(float* pixels, float* GcArray, float* GrArray, float* GsArray, int frame, int w, int h) nogil
 
+cdef extern from "_c_sr_radial_gradient_convergence.h":
+    float _c_calculate_rgc3D(float xM, float yM, float sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int _magnification_xy, int _magnification_z, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) nogil
+
 class eSRRF3D(LiquidEngine):
     """
     eSRRF 3D using the NanoPyx Liquid Engine and running as a single task.
@@ -25,24 +28,52 @@ class eSRRF3D(LiquidEngine):
         image = check_image(image)
         return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
     
-    def _run_unthreaded(self, float[:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Unthreaded"):
+    def _run_unthreaded(self, float[:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Unthreaded"):
+
+        cdef float sigma = radius / 2.355
+        cdef float fwhm = radius
+        cdef float tSS = 2 * sigma * sigma
+        cdef float tSO = 2 * sigma + 1
+        cdef float sigma_z = radius_z / 2.355
+        cdef float fwhm_z = radius_z
+        cdef float tSS_z = 2 * sigma_z * sigma_z
+        cdef float tSO_z = 2 * sigma_z + 1
+        cdef float Gx_Gy_Gz_MAGNIFICATION = 2.0
+        cdef int _magnification_xy = magnification_xy
+        cdef int _magnification_z = magnification_z
+        cdef int _doIntensityWeighting = doIntensityWeighting
 
         cdef int n_slices, n_rows, n_cols
         n_frames, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2]
-        cdef float[:, :, :] image_interpolated = interpolate_3d(image, magnification_xy, magnification_z)
+
+        cdef float[:, :, :] image_interpolated = interpolate_3d(image, _magnification_xy, _magnification_z)
+
+        cdef int n_slices_mag, n_rows_mag, n_cols_mag
+        n_slices_mag, n_rows_mag, n_cols_mag = image_interpolated.shape[0], image_interpolated.shape[1], image_interpolated.shape[2]
 
         cdef float[:, :, :] gradients_s = np.zeros_like(image)
         cdef float[:, :, :] gradients_r = np.zeros_like(image)
         cdef float[:, :, :] gradients_c = np.zeros_like(image)
 
-        cdef int f
+        cdef int sM, rM, cM;
 
         with nogil:
             _c_gradient_3d(&image[0, 0, 0], &gradients_c[0, 0, 0], &gradients_r[0, 0, 0], &gradients_s[0, 0, 0], n_frames, n_rows, n_cols)
 
-        gradients_s_interpolated = interpolate_3d(gradients_s, magnification_xy, magnification_z)
-        gradients_r_interpolated = interpolate_3d(gradients_r, magnification_xy, magnification_z)
-        gradients_c_interpolated = interpolate_3d(gradients_c, magnification_xy, magnification_z)
+        cdef float[:, :, :] gradients_s_interpolated = interpolate_3d(gradients_s, _magnification_xy*Gx_Gy_Gz_MAGNIFICATION, _magnification_z*Gx_Gy_Gz_MAGNIFICATION)
+        cdef float[:, :, :] gradients_r_interpolated = interpolate_3d(gradients_r, _magnification_xy*Gx_Gy_Gz_MAGNIFICATION, _magnification_z*Gx_Gy_Gz_MAGNIFICATION)
+        cdef float[:, :, :] gradients_c_interpolated = interpolate_3d(gradients_c, _magnification_xy*Gx_Gy_Gz_MAGNIFICATION, _magnification_z*Gx_Gy_Gz_MAGNIFICATION)
 
-        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated)
+        cdef float[:, :, :] rgc_map = np.zeros_like(image_interpolated)
+
+        with nogil:
+            for sM in range(_magnification_z*2, n_slices_mag - _magnification_z*2):
+                for rM in range(_magnification_xy*2, n_rows_mag - _magnification_xy*2):
+                    for cM in range(_magnification_xy*2, n_cols - _magnification_xy*2):
+                        if _doIntensityWeighting:
+                            rgc_map[sM, rM, cM] = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, Gx_Gy_Gz_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity) * image_interpolated[sM, rM, cM]
+                        else:
+                            rgc_map[sM, rM, cM] = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, Gx_Gy_Gz_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+
+        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated), np.asarray(rgc_map)
 

@@ -139,7 +139,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
 
                                 Gx = imIntGx[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
                                 Gy = imIntGy[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
-                                Gy = imIntGz[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
+                                Gz = imIntGz[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
 
                                 distanceWeight = _c_calculate_dw3D(distance_xy, distance_z, tSS, tSS_z);
 
