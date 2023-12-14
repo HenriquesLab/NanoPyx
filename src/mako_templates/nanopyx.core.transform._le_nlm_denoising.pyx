@@ -142,73 +142,60 @@ class NLMDenoising(LiquidEngine):
     
         
     def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device, int mem_div=1) -> np.ndarray:
-        # Bug: if either patch_size or h are too large, the kernel crashes
-        # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)
 
-        var = 2*sigma*sigma
+        # assure patch size is odd
         if patch_size % 2 == 0:
-            patch_size += 1
+            patch_size = patch_size + 1
 
-        n_frames, n_row, n_col = image.shape[0], image.shape[1], image.shape[2]
-
+        
+        # todo check if it makes sense to also use Py_ssize_t for indexing
+        nframes, nrow, ncol = image.shape
         offset = patch_size // 2
 
-        padded = np.asarray(np.pad(image,((0, 0), (offset, offset), (offset, offset)),mode='reflect').astype(np.float32))
-        result = np.zeros_like(image)
+        padded = np.ascontiguousarray(np.pad(image, ((0,0), (offset, offset), (offset, offset)), mode='reflect'))
+        result = np.empty_like(image)
+        result_per_frame = np.empty_like(result[0,:,:])
 
         A = ((patch_size - 1.) / 4.)
         range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
         xg_row, xg_col = np.meshgrid(range_vals, range_vals, indexing='ij')
-        w = np.asarray(np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)), dtype=np.float32)
-        w = w / (np.sum(w) * h * h)
+        w = np.ascontiguousarray(np.exp(-(xg_row * xg_row + xg_col * xg_col) / (2 * A * A)))
+        w *= 1. / ( np.sum(w) * h * h)
 
-        max_slices = int((device["device"].global_mem_size // (w.nbytes + padded[0].nbytes + result[0].nbytes))/mem_div)
-        max_slices = self._check_max_slices(image, max_slices)
-
-        padded_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(padded[0:max_slices,:,:].nbytes, device['device'], max_slices))
-
-        w_opencl = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(w.nbytes, device['device'], max_slices))
-
-        result_opencl = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, self._check_max_buffer_size(result[0:max_slices,:,:].nbytes, device['device'], max_slices))
-
-        cl.enqueue_copy(cl_queue, padded_opencl, padded[0:max_slices,:,:]).wait()
-        cl.enqueue_copy(cl_queue, w_opencl, w).wait()
+        var = 2 * sigma * sigma
 
         code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.nlm_denoising
-        
-        for i in range(0, n_frames, max_slices):
-            if n_frames - i >= max_slices:
-                n_slices = max_slices
-            else:
-                n_slices = n_frames - i
-            knl(
-                cl_queue,
-                (n_slices, n_row, n_col),
+
+        padded_cl = cl.image_from_array(cl_ctx, padded[0,:,:], mode='r')
+        result_cl = cl.image_from_array(cl_ctx, result_per_frame, mode='w')
+        w_cl = cl.image_from_array(cl_ctx, w, mode='r')
+        cl_queue.finish()
+
+
+        for f in range(nframes):
+            
+            knl(cl_queue,
+                (nrow,ncol),
                 None,
-                padded_opencl,
-                w_opencl,
-                result_opencl,
-                np.int32(n_row),
-                np.int32(n_col),
-                np.int32(patch_size),
+                padded_cl,
+                result_cl,
+                w_cl,
                 np.int32(patch_distance),
+                np.int32(patch_size),
                 np.int32(offset),
-                np.float32(var),
-                ).wait()
+                np.float32(var)).wait()
 
-            cl.enqueue_copy(cl_queue, result[i:i+n_slices,:,:], result_opencl).wait()
-            if i+n_slices<n_frames:
-                cl.enqueue_copy(cl_queue, padded_opencl, padded[i+n_slices:i+2*n_slices,:,:]).wait()
+            cl.enqueue_copy(cl_queue, result_per_frame, result_cl, origin=(0,0), region=(nrow,ncol)).wait()
+            result[f,:,:] = result_per_frame
 
-            cl_queue.finish()
+            if f<(nframes-1):
+                cl.enqueue_copy(cl_queue, padded_cl, padded[f+1,:,:],origin=(0,0),region=(nrow,ncol)).wait()
 
-        w_opencl.release()
-        result_opencl.release()
-        padded_opencl.release()
+        cl_queue.finish()
 
-        return np.squeeze(np.asarray(result).astype(np.float32))
+        return np.squeeze(result)
