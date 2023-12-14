@@ -380,8 +380,6 @@ class NLMDenoising(LiquidEngine):
         if patch_size % 2 == 0:
             patch_size = patch_size + 1
 
-        
-        # todo check if it makes sense to also use Py_ssize_t for indexing
         nframes, nrow, ncol = image.shape
         offset = patch_size // 2
 
@@ -424,8 +422,8 @@ class NLMDenoising(LiquidEngine):
             result[f,:,:] = result_per_frame
 
             if f<(nframes-1):
-                cl.enqueue_copy(cl_queue, padded_cl, padded[f+1,:,:],origin=(0,0),region=(nrow,ncol)).wait()
+                cl.enqueue_copy(cl_queue, padded_cl, padded[f+1,:,:],origin=(0,0),region=(nrow+offset*2,ncol+offset*2)).wait()
 
-        cl_queue.finish()
+            cl_queue.finish()
 
         return np.squeeze(result)
