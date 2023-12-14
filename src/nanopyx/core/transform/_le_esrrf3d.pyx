@@ -55,7 +55,7 @@ class eSRRF3D(LiquidEngine):
         cdef float[:, :, :] gradients_r = np.zeros_like(image)
         cdef float[:, :, :] gradients_c = np.zeros_like(image)
 
-        cdef int sM, rM, cM;
+        cdef int sM, rM, cM
 
         with nogil:
             _c_gradient_3d(&image[0, 0, 0], &gradients_c[0, 0, 0], &gradients_r[0, 0, 0], &gradients_s[0, 0, 0], n_frames, n_rows, n_cols)
