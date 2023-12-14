@@ -69,7 +69,7 @@ class eSRRF3D(LiquidEngine):
         with nogil:
             for sM in range(_magnification_z*2, n_slices_mag - _magnification_z*2):
                 for rM in range(_magnification_xy*2, n_rows_mag - _magnification_xy*2):
-                    for cM in range(_magnification_xy*2, n_cols - _magnification_xy*2):
+                    for cM in range(_magnification_xy*2, n_cols_mag - _magnification_xy*2):
                         if _doIntensityWeighting:
                             rgc_map[sM, rM, cM] = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, Gx_Gy_Gz_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity) * image_interpolated[sM, rM, cM]
                         else:
