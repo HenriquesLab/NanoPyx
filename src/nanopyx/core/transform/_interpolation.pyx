@@ -25,6 +25,7 @@ def interpolate_3d(image, magnification_xy: int = 5, magnification_z: int = 5):
 
     xy_interpolated = interpolator.run(image, 0, 0, magnification_xy, magnification_xy)
 
-    xyz_interpolated = interpolator.run(np.transpose(xy_interpolated, axes=[1, 0, 2]).copy(), 0, 0, magnification_z, 1)
+    yz_interpolated = np.transpose(interpolator.run(np.transpose(xy_interpolated, axes=[1, 0, 2]).copy(), 0, 0, magnification_z, 1), axes=[1, 0, 2]).copy()
+    xz_interpolated = np.transpose(interpolator.run(np.transpose(xy_interpolated, axes=[2, 1, 0]).copy(), 0, 0, 1, magnification_z), axes=[2,1,0]).copy()
 
-    return np.transpose(xyz_interpolated, axes=[1, 0, 2]).copy()
+    return np.mean(np.array([yz_interpolated, xz_interpolated]), axis=0)
