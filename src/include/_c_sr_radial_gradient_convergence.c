@@ -78,13 +78,13 @@ double _c_calculate_dk3D(float Gx, float Gy, float Gz, float dx, float dy, float
   return Dk;
 }
 
-float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSS, float sensitivity) {
+float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSS, float sensitivity) {
 
     float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, distance, distanceWeight, GdotR, Dk;
 
-    float xc = (xM + 0.5) / magnification;
-    float yc = (yM + 0.5) / magnification;
-    float zc = (sliceM + 0.5) / magnification;
+    float xc = (xM + 0.5) / magnification_xy;
+    float yc = (yM + 0.5) / magnification_xy;
+    float zc = (sliceM + 0.5) / magnification_z;
 
     float RGC = 0;
     float distanceWeightSum = 0;
@@ -116,9 +116,9 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                             distance = sqrt(dx * dx + dy * dy + dz * dz);
 
                             if (distance != 0 && distance <= tSO) {
-                                Gx = imIntGx[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification * Gz_MAGNIFICATION)];
-                                Gy = imIntGy[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification * Gz_MAGNIFICATION)];
-                                Gy = imIntGz[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification * Gz_MAGNIFICATION)];
+                                Gx = imIntGx[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
+                                Gy = imIntGy[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
+                                Gy = imIntGz[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
 
                                 distanceWeight = _c_calculate_dw(distance, tSS);
                                 distanceWeightSum += distanceWeight;
