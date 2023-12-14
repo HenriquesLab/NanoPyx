@@ -27,7 +27,7 @@ class eSRRF3D(LiquidEngine):
     
     def _run_unthreaded(self, float[:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Unthreaded"):
 
-        cdef int n_frames, n_rows, n_cols
+        cdef int n_slices, n_rows, n_cols
         n_frames, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2]
         cdef float[:, :, :] image_interpolated = interpolate_3d(image, magnification_xy, magnification_z)
 
@@ -38,17 +38,11 @@ class eSRRF3D(LiquidEngine):
         cdef int f
 
         with nogil:
-            for f in range(n_frames):
-                _c_gradient_3d(&image[f, 0, 0], &gradients_c[f, 0, 0], &gradients_r[f, 0, 0], &gradients_s[f, 0, 0], f, n_rows, n_cols)
+            _c_gradient_3d(&image[0, 0, 0], &gradients_c[0, 0, 0], &gradients_r[0, 0, 0], &gradients_s[0, 0, 0], n_frames, n_rows, n_cols)
 
         gradients_s_interpolated = interpolate_3d(gradients_s, magnification_xy, magnification_z)
         gradients_r_interpolated = interpolate_3d(gradients_r, magnification_xy, magnification_z)
         gradients_c_interpolated = interpolate_3d(gradients_c, magnification_xy, magnification_z)
 
         return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated)
-
-
-
-
-
 

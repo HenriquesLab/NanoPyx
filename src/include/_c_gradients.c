@@ -66,13 +66,13 @@ void _c_gradient_roberts_cross(float* image, float* imGc, float* imGr, int rows,
 
 // as in https://www.nature.com/articles/s41592-022-01669-y#MOESM1
 // 3D Gradient calculation
-void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slice,
+void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slices,
                  int rows, int cols) {
   float ip0, ip1, ip2, ip3, ip4, ip5, ip6, ip7;
 
   int z_i, y_i, x_i;
 
-  for (z_i = 0; z_i < slice - 1; z_i++) {
+  for (z_i = 0; z_i < slices - 1; z_i++) {
     for (y_i = 0; y_i < rows - 1; y_i++) {
       for (x_i = 0; x_i < cols - 1; x_i++) {
         ip0 = image[z_i * rows * cols + y_i * cols + x_i];
