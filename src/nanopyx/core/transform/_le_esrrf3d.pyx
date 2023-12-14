@@ -38,7 +38,7 @@ class eSRRF3D(LiquidEngine):
         cdef float fwhm_z = radius_z
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
-        cdef float Gx_Gy_Gz_MAGNIFICATION = 2.0
+        cdef int Gx_Gy_Gz_MAGNIFICATION = 2
         cdef int _magnification_xy = magnification_xy
         cdef int _magnification_z = magnification_z
         cdef int _doIntensityWeighting = doIntensityWeighting
