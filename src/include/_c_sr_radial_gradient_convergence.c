@@ -69,12 +69,14 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM
     return RGC;
 }
 
-double _c_calculate_dw3D(double distance_xy, double distance_z, double tSS, double tSS_z) {
-  float D_weight_xy, D_weight_z, D_weight;
-  D_weight_xy = (distance_xy * exp((-distance_xy * distance_xy) / tSS));
-  D_weight_z = (distance_z * exp((-distance_z * distance_z) / tSS_z));
-  D_weight = (D_weight_xy + D_weight_z) / 2;
-  return pow(D_weight, 4);
+double _c_calculate_dw3D(double distance, double tSS) {
+//   (double distance_xy, double distance_z, double tSS, double tSS_z)
+//   float D_weight_xy, D_weight_z, D_weight;
+//   D_weight_xy = (distance_xy * exp((-distance_xy * distance_xy) / tSS));
+//   D_weight_z = (distance_z * exp((-distance_z * distance_z) / tSS_z));
+//   D_weight = (D_weight_xy + D_weight_z) / 2;
+//   return pow(D_weight, 4);
+  return pow((distance * exp((-distance * distance) / tSS)), 4);
 }
 
 double _c_calculate_dw_xy(double distance_xy, double tSS) {
@@ -135,13 +137,13 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                             distance_xy = sqrt(dx * dx + dy * dy);
                             distance_z = dz;
 
-                            if (distance != 0 && distance_xy <= tSO && distance_z <= tSO_z) {
+                            if (distance != 0 && distance_xy <= tSO ) { // && distance_z <= tSO_z) {
 
                                 Gx = imIntGx[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
                                 Gy = imIntGy[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
                                 Gz = imIntGz[(int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION) + (int)(vz * magnification_z * Gz_MAGNIFICATION)];
 
-                                distanceWeight = _c_calculate_dw3D(distance_xy, distance_z, tSS, tSS_z);
+                                distanceWeight = _c_calculate_dw3D(distance, tSS);
 
                                 distanceWeight_xy = _c_calculate_dw_xy(distance_xy, tSS); distanceWeight_z = _c_calculate_dw_z(distance_z, tSS_z);
                                 
@@ -152,8 +154,8 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
 
                                 if (GdotR < 0) {
                                     Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, dz, distance);
-                                    RGC += Dk * (distanceWeightSum_xy + distanceWeightSum_z) / 2;
-                                    // RGC += Dk * distanceWeightSum;
+                                    // RGC += Dk * (distanceWeightSum_xy + distanceWeightSum_z) / 2;
+                                    RGC += Dk * distanceWeightSum;
                                 }
                             }
                         }
