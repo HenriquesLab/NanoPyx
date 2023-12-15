@@ -17,7 +17,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade nox
           python -m nox --sessions build_sdist
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.tar.gz
 
@@ -77,6 +77,6 @@ jobs:
           python -m pip install nox
           python -m nox --sessions test_wheel
           
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
