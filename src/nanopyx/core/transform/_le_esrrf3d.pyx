@@ -60,18 +60,18 @@ class eSRRF3D(LiquidEngine):
             image_interpolated = interpolate_3d(image[f], _magnification_xy, _magnification_z)
             n_slices_mag, n_rows_mag, n_cols_mag = image_interpolated.shape[0], image_interpolated.shape[1], image_interpolated.shape[2]
 
-            gradients_c = np.zeros((n_slices*Gx_Gy_Gz_MAGNIFICATION+2, n_rows*Gx_Gy_Gz_MAGNIFICATION+2, n_cols*Gx_Gy_Gz_MAGNIFICATION+2), dtype=np.float32)
-            gradients_r = np.zeros((n_slices*Gx_Gy_Gz_MAGNIFICATION+2, n_rows*Gx_Gy_Gz_MAGNIFICATION+2, n_cols*Gx_Gy_Gz_MAGNIFICATION+2), dtype=np.float32)
-            gradients_s = np.zeros((n_slices*Gx_Gy_Gz_MAGNIFICATION+2, n_rows*Gx_Gy_Gz_MAGNIFICATION+2, n_cols*Gx_Gy_Gz_MAGNIFICATION+2), dtype=np.float32)
+            gradients_c = np.zeros((n_slices*Gx_Gy_Gz_MAGNIFICATION+1, n_rows*Gx_Gy_Gz_MAGNIFICATION+1, n_cols*Gx_Gy_Gz_MAGNIFICATION+1), dtype=np.float32)
+            gradients_r = np.zeros((n_slices*Gx_Gy_Gz_MAGNIFICATION+1, n_rows*Gx_Gy_Gz_MAGNIFICATION+1, n_cols*Gx_Gy_Gz_MAGNIFICATION+1), dtype=np.float32)
+            gradients_s = np.zeros((n_slices*Gx_Gy_Gz_MAGNIFICATION+1, n_rows*Gx_Gy_Gz_MAGNIFICATION+1, n_cols*Gx_Gy_Gz_MAGNIFICATION+1), dtype=np.float32)
 
-            padded = np.pad(interpolate_3d(image[f], Gx_Gy_Gz_MAGNIFICATION, Gx_Gy_Gz_MAGNIFICATION), ((1,1), (1,1), (1,1)), 'edge')
+            padded = np.pad(interpolate_3d(image[f], Gx_Gy_Gz_MAGNIFICATION, Gx_Gy_Gz_MAGNIFICATION), ((0,1), (0,1), (0,1)), 'edge')
 
             with nogil:
-                _c_gradient_3d(&padded[0, 0, 0], &gradients_c[0, 0, 0], &gradients_r[0, 0, 0], &gradients_s[0, 0, 0], n_slices*Gx_Gy_Gz_MAGNIFICATION+2, n_rows*Gx_Gy_Gz_MAGNIFICATION+2, n_cols*Gx_Gy_Gz_MAGNIFICATION+2)
+                _c_gradient_3d(&padded[0, 0, 0], &gradients_c[0, 0, 0], &gradients_r[0, 0, 0], &gradients_s[0, 0, 0], n_slices*Gx_Gy_Gz_MAGNIFICATION+1, n_rows*Gx_Gy_Gz_MAGNIFICATION+1, n_cols*Gx_Gy_Gz_MAGNIFICATION+1)
 
-            gradients_s_interpolated = interpolate_3d(gradients_s[1:1+n_slices*Gx_Gy_Gz_MAGNIFICATION, 1:1+n_rows*Gx_Gy_Gz_MAGNIFICATION , 1:1+n_cols*Gx_Gy_Gz_MAGNIFICATION].copy(), _magnification_xy, _magnification_z)
-            gradients_r_interpolated = interpolate_3d(gradients_r[1:1+n_slices*Gx_Gy_Gz_MAGNIFICATION, 1:1+n_rows*Gx_Gy_Gz_MAGNIFICATION , 1:1+n_cols*Gx_Gy_Gz_MAGNIFICATION].copy(), _magnification_xy, _magnification_z)
-            gradients_c_interpolated = interpolate_3d(gradients_c[1:1+n_slices*Gx_Gy_Gz_MAGNIFICATION, 1:1+n_rows*Gx_Gy_Gz_MAGNIFICATION , 1:1+n_cols*Gx_Gy_Gz_MAGNIFICATION].copy(), _magnification_xy, _magnification_z)
+            gradients_s_interpolated = interpolate_3d(gradients_s[0:n_slices*Gx_Gy_Gz_MAGNIFICATION, 0:n_rows*Gx_Gy_Gz_MAGNIFICATION , 0:n_cols*Gx_Gy_Gz_MAGNIFICATION].copy(), _magnification_xy, _magnification_z)
+            gradients_r_interpolated = interpolate_3d(gradients_r[0:n_slices*Gx_Gy_Gz_MAGNIFICATION, 0:n_rows*Gx_Gy_Gz_MAGNIFICATION , 0:n_cols*Gx_Gy_Gz_MAGNIFICATION].copy(), _magnification_xy, _magnification_z)
+            gradients_c_interpolated = interpolate_3d(gradients_c[0:n_slices*Gx_Gy_Gz_MAGNIFICATION, 0:n_rows*Gx_Gy_Gz_MAGNIFICATION , 0:n_cols*Gx_Gy_Gz_MAGNIFICATION].copy(), _magnification_xy, _magnification_z)
 
             with nogil:
                 for sM in range(0, n_slices_mag):
@@ -82,5 +82,5 @@ class eSRRF3D(LiquidEngine):
                             else:
                                 rgc_map[f, sM, rM, cM] = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, Gx_Gy_Gz_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
 
-        return np.asarray(image_interpolated), np.asarray(gradients_r), np.asarray(gradients_c),np.asarray(gradients_s), np.asarray(rgc_map)
+        return np.asarray(padded), np.asarray(gradients_r), np.asarray(gradients_c),np.asarray(gradients_s), np.asarray(rgc_map)
 
