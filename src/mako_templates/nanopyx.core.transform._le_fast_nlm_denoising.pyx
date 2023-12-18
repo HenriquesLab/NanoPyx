@@ -151,87 +151,82 @@ class NLMDenoising(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+
         cdef float distance_cutoff = 5.0
-        cdef float var = sigma * sigma
 
-        if patch_size % 2 == 0:
-            patch_size += 1
-        
-        cdef int n_row, n_col, t_row, t_col, row, col, row_start, row_end, row_shift, col_shift, f
-        cdef int offset = patch_size // 2
+        if patch_size%2==0:
+            patch_size+=1
+
+        cdef int offset = patch_size / 2
         cdef int pad_size = offset + patch_distance + 1
-        cdef float[:, :, :] padded = np.ascontiguousarray(
-            np.pad(
-                image,
-                ((0, 0), (pad_size, pad_size), (pad_size, pad_size)),
-                mode='reflect'
-            ).astype(np.float32))
-        cdef float[:, :, :] weights = np.zeros_like(padded)
-        cdef float[:, :, :, :] integral = np.zeros((2*patch_distance+1, patch_distance+1, padded.shape[1], padded.shape[2]), dtype=np.float32)
-        cdef float[:, :, :] result = np.zeros_like(padded)
 
-        cdef float distance, h2s2, weight, alpha
-
+        cdef float[:,:,:] padded = np.ascontiguousarray(np.pad(image,((0, 0), (pad_size, pad_size), (pad_size, pad_size)),mode='reflect').astype(np.float32))
+        cdef int n_frames, n_row, n_col
         n_frames, n_row, n_col = padded.shape[0], padded.shape[1], padded.shape[2]
-        h2s2 = patch_size * patch_size * h * h
-        var *=  2
         
+        cdef int[:,:] shifts = np.concatenate(np.dstack(np.mgrid[-patch_distance:patch_distance+1,0:patch_distance+1])).astype(np.int32)
+        cdef int n_shifts = shifts.shape[0]
+
+        cdef float[:,:,:,:] weights = np.zeros((n_shifts,n_frames,n_row,n_col)).astype(np.float32)
+        cdef float[:,:,:] weights_per_frame = np.zeros((n_frames,n_row,n_col)).astype(np.float32)
+        cdef float[:,:,:,:] integral = np.zeros((n_shifts,n_frames,n_row,n_col)).astype(np.float32)
+
+        cdef float[:,:,:,:] result = np.zeros((n_shifts,n_frames,n_row,n_col)).astype(np.float32)
+        cdef float[:,:,:] output_result = np.zeros_like(padded)
+
+        cdef float h2s2 = h*h*patch_size*patch_size
+        cdef float var = sigma*sigma*2
+
+        cdef int f, shift, t_row, t_col, row_start, row_end, row_shift, col_shift, row, col, f_row, f_col
+        cdef float alpha, distance, final_result, final_weight, weight
         with nogil:
             for f in range(n_frames):
                 % if sch=='threaded':
-                for t_row in prange(-patch_distance, patch_distance + 1):
+                for shift in prange(n_shifts):
                 % else:
-                for t_row in prange(-patch_distance, patch_distance + 1, schedule="${sch.split('_')[1]}"):
+                for shift in prange(n_shifts,schedule="${sch.split('_')[1]}"):
                 % endif
-                    row_start = max(offset, offset - t_row)
-                    row_end = min(n_row - offset, n_row - offset - t_row)
-                    # Iterate over shifts along the column axis
-                    for t_col in range(0, patch_distance + 1):
-                        # alpha is to account for patches on the same column
-                        # distance is computed twice in this case
-                        alpha = 0.5 if t_col == 0 else 1
+                    t_row = shifts[shift,0]
+                    t_col = shifts[shift,1]
 
-                        # Compute integral image of the squared difference between
-                        # padded and the same image shifted by (t_row, t_col)
-                        _c_integral_image(&padded[f, 0, 0], &integral[t_row+patch_distance, t_col, 0, 0],
-                                        n_row, n_col, t_row, t_col, var)
-
-                        # Inner loops on pixel coordinates
-                        # Iterate over rows, taking offset and shift into account
-                        for row in range(row_start, row_end):
+                    row_start = max(offset, offset-t_row)
+                    row_end = min(n_row-offset,n_row-offset-t_row)
+                    alpha = 0.5 if t_col == 0 else 1
+                    
+                    _c_integral_image(&padded[f,0,0],&integral[shift,f,0,0],n_row,n_col,t_row,t_col,var)
+                    
+                    for row in range(row_start,row_end):
+                        for col in range(offset,n_col-offset-t_col):
                             row_shift = row + t_row
-                            # Iterate over columns, taking offset and shift into account
-                            for col in range(offset, n_col - offset - t_col):
-                                # Compute squared distance between shifted patches
-                                distance = _c_integral_to_distance(
-                                    &integral[t_row+patch_distance, t_col, 0, 0], n_row, n_col, row, col, offset, h2s2)
-                                # exp of large negative numbers is close to zero
-                                if distance > distance_cutoff:
-                                    continue
-                                col_shift = col + t_col
-                                weight = alpha * exp(-distance)
-                                # Accumulate weights corresponding to different shifts
-                                weights[f,row, col] = weights[f,row,col] + weight
-                                weights[f, row_shift, col_shift] = weights[f,row_shift,col_shift] + weight
+                            col_shift = col + t_col
+                            distance = _c_integral_to_distance(&integral[shift,f,0,0],n_row,n_col,row,col,offset,h2s2)
+                            if distance > distance_cutoff:
+                                continue
+                            weight = alpha * exp(-distance)
 
-                                result[f, row, col] = result[f, row, col] + weight * padded[f, row_shift, col_shift]
-                                result[f, row_shift, col_shift] = result[f, row_shift, col_shift] + weight * padded[f, row, col]
+                            weights[shift,f,row,col] = weights[shift,f,row,col] + weight
+                            weights[shift,f,row_shift,col_shift] = weights[shift,f,row_shift,col_shift] + weight
 
-                # Normalize pixel values using sum of weights of contributing patches
-                for row in range(pad_size, n_row - pad_size):
+                            result[shift,f,row,col] = result[shift,f,row,col] + weight * padded[f,row_shift,col_shift]
+                            result[shift,f,row_shift,col_shift] = result[shift,f,row_shift,col_shift] + weight * padded[f,row,col]
+                    
+                for f_row in range(pad_size, n_row - pad_size):
                     % if sch=='threaded':
-                    for col in prange(pad_size, n_col - pad_size):
+                    for f_col in prange(pad_size, n_col - pad_size):
                     % else:
-                    for col in prange(pad_size, n_col - pad_size, schedule="${sch.split('_')[1]}"):
+                    for f_col in prange(pad_size, n_col - pad_size, schedule="${sch.split('_')[1]}"):
                     % endif
+                        final_result = 0
+                        final_weight = 0
+                        for shift in range(n_shifts):
+                            final_result = final_result + result[shift,f,f_row,f_col]
+                            final_weight = final_weight + weights[shift,f,f_row,f_col]
                         # No risk of division by zero, since the contribution
                         # of a null shift is strictly positive
-                        result[f, row, col] = result[f,row,col] / weights[f, row, col]
-
-        # Return cropped result, undoing padding
-        return np.asarray(weights).astype(np.float32) #np.squeeze(np.asarray(result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
-
-        %endfor
+                        output_result[f, f_row, f_col] = final_result / final_weight
+                        
+        return np.squeeze(np.asarray(output_result[:, pad_size: -pad_size,pad_size: -pad_size]).astype(np.float32))
+    %endfor
     
         
     def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device) -> np.ndarray:
