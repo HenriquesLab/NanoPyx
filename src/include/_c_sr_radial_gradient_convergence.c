@@ -120,7 +120,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
         vz = (int)(Gz_MAGNIFICATION * zc) + k;
         vz /= Gz_MAGNIFICATION;
 
-        if (0 < vz && vz <= slicesM - 1) {
+        if (0 < vz && vz <= slicesM - 2) {
             for (int j = _start; j < _end; j++) {
                 vy = (int)(Gx_Gy_MAGNIFICATION * yc) + j;
                 vy /= Gx_Gy_MAGNIFICATION;
