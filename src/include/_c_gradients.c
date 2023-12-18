@@ -1,3 +1,4 @@
+#include <math.h>
 
 void _c_gradient_radiality(float* image, float* imGc, float* imGr, int rows,
                           int cols) {
@@ -89,6 +90,24 @@ void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int sli
             (ip2 + ip3 + ip6 + ip7 - ip0 - ip1 - ip4 - ip5) / 4;
         imGs[z_i * rows* cols + y_i * cols + x_i] =
             (ip4 + ip5 + ip6 + ip7 - ip0 - ip1 - ip2 - ip3) / 4;
+      }
+    }
+  }
+}
+
+void _c_gradient_2_point_3d(float* image, float* imGc, float* imGr, float* imGs, int slices, int rows, int cols) {
+  int s_i, y_i, x_i, s0, y0, x0;
+
+  for (s_i=0; s_i<slices; s_i++) {
+    for (y_i=0; y_i<rows; y_i++) {
+      for (x_i=0; x_i<cols; x_i++) {
+        s0 = s_i > 0 ? s_i - 1 : 0;
+        y0 = y_i > 0 ? y_i - 1 : 0;
+        x0 = x_i > 0 ? x_i - 1 : 0;
+        imGc[s_i*rows*cols + y_i*cols + x_i] = image[s_i*rows*cols + y_i*cols + x_i] - image[s_i*rows*cols + y_i*cols + x0];
+        imGr[s_i*rows*cols + y_i*cols + x_i] = image[s_i*rows*cols + y_i*cols + x_i] - image[s_i*rows*cols + y0*cols + x_i];
+        imGs[s_i*rows*cols + y_i*cols + x_i] = image[s_i*rows*cols + y_i*cols + x_i] - image[s0*rows*cols + y_i*cols + x_i];
+
       }
     }
   }

@@ -12,4 +12,6 @@ void _c_gradient_roberts_cross(float* image, float* imGc, float* imGr, int rows,
 void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slices,
                  int rows, int cols);
 
+void _c_gradient_2_point_3d(float* image, float* imGc, float* imGr, float* imGs, int slices, int rows, int cols);
+
 #endif

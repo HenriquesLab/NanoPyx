@@ -1,4 +1,5 @@
 #include <math.h>
+#include <stdio.h>
 
 double _c_calculate_dw(double distance, double tSS) {
   return pow((distance * exp((-distance * distance) / tSS)), 4);
@@ -174,4 +175,103 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
     }
 
     return RGC;
+}
+
+float _c_get_bound_value(float* im, int slices, int rows, int cols, int s, int r, int c){
+    int _s = s > 0 ? s : 0;
+    _s = _s < slices - 1 ? _s : slices - 1;
+    int _r = r > 0 ? r : 0;
+    _r = _r < rows - 1 ? _r : rows - 1;
+    int _c = c > 0 ? c : 0;
+    _c = _c < cols - 1 ? _c : cols - 1;
+
+    return im[_s * rows * cols + _r * cols + _c];
+}
+
+float _c_calculate_dk_3d(float dx, float dy, float dz, float Gx, float Gy, float Gz, float Gmag, float distance) {
+    float G1 = dy*Gz - dz*Gy;
+    float G2 = dz*Gx - dx*Gz;
+    float G3 = dx*Gy - dy*Gx;
+    float cross_product = sqrt(G1*G1 + G2*G2 + G3*G3)/Gmag;
+
+    if (isnan(cross_product)) {
+        cross_product = distance;
+    }
+
+    cross_product = 1 - cross_product / distance;
+
+    return cross_product;
+}
+
+float _c_calculate_rgc_3d(int cM, int rM, int sM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float Gx_Gy_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSS, float sensitivity) {
+    float xc = (cM + 0.5) / magnification_xy;
+    float yc = (rM + 0.5) / magnification_xy;
+    float zc = (sM + 0.5) / magnification_z;
+
+    float RGC = 0;
+    float distanceWeightSum = 0;
+
+    float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, distance, distanceWeight, GdotR, Gmag, Dk;
+
+    int xy_start = -(int) ((float) Gx_Gy_MAGNIFICATION * (float) fwhm);
+    int xy_end = (int)((float) Gx_Gy_MAGNIFICATION*(float) fwhm+1);
+
+    int z_start = - (int) fwhm_z;
+    int z_end = (int) fwhm_z +1;
+
+    float vxy_offset = 0.5;
+    int vxy_ArrayShift = 1;
+
+
+    for (int j=xy_start; j<=xy_end;j++) {
+        vy = ((float) ((int) (Gx_Gy_MAGNIFICATION*yc)) + j)/(float) Gx_Gy_MAGNIFICATION;
+        if (vy > 0 && vy < rowsM) {
+            for (int i=xy_start; i<=xy_end;i++) {
+                vx = ((float) ((int) (Gx_Gy_MAGNIFICATION*xc)) + i)/(float) Gx_Gy_MAGNIFICATION;
+                if (vx > 0 && vx < colsM) {
+                    for (int k=z_start; k<=z_end;k++) {
+                        vz = ((float) ((int) (zc)) + k);
+                        if (vz > 0 && vz < slicesM) {
+                            dx = vx - xc;
+                            dy = vy - yc;
+                            dz = vz - zc;
+                            distance = sqrt(dx * dx + dy * dy + dz * dz);
+
+                            if (distance != 0 && distance <= tSO) {
+                                
+                                Gx = _c_get_bound_value(imIntGx, slicesM, rowsM, colsM, Gx_Gy_MAGNIFICATION*(vx - vxy_offset) + vxy_ArrayShift, Gx_Gy_MAGNIFICATION*(vy - vxy_offset), vz);
+                                Gy = _c_get_bound_value(imIntGy, slicesM, rowsM, colsM, Gx_Gy_MAGNIFICATION*(vx - vxy_offset), Gx_Gy_MAGNIFICATION*(vy - vxy_offset) + vxy_ArrayShift, vz);
+                                Gz = _c_get_bound_value(imIntGz, slicesM, rowsM, colsM, Gx_Gy_MAGNIFICATION*(vx - vxy_offset), Gx_Gy_MAGNIFICATION*(vy - vxy_offset), vz);
+
+                                distanceWeight = distance * exp(-(distance*distance)/(float) tSS);
+                                distanceWeight = distanceWeight * distanceWeight * distanceWeight * distanceWeight;
+                                distanceWeightSum += distanceWeight;
+                                GdotR = (Gx*dx + Gy*dy + Gz*dz);
+
+                                if (GdotR < 0) {
+                                    Gmag = sqrt(Gx*Gx + Gy*Gy + Gz*Gz);
+                                    Dk = _c_calculate_dk_3d(dx, dy, dz, Gx, Gy, Gz, Gmag, distance);
+                                    RGC += Dk * distanceWeight;
+                                }
+
+                            }
+                        }
+                    }
+                }
+            
+            }
+        
+        }
+    }
+
+    RGC = RGC / distanceWeightSum;
+
+    if (RGC >= 0) {
+        RGC = pow(RGC, sensitivity);
+    } else {
+        RGC = 0;
+    }
+
+    return RGC;
+
 }
