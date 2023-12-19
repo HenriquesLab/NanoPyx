@@ -1,6 +1,8 @@
 import numpy as np
+import math
 
 cimport numpy as np
+from libc.math cimport floor
 
 from ._interpolation import interpolate_3d
 from ._le_interpolation_catmull_rom import ShiftAndMagnify
@@ -56,11 +58,13 @@ class eSRRF3D(LiquidEngine):
         cdef float[:, :, :, :] rgc_map = np.zeros((n_frames, n_slices*magnification_z, n_rows*magnification_xy, n_cols*magnification_xy), dtype=np.float32)
         cdef float[:, :, :] image_interpolated, gradients_s, gradients_r, gradients_c, gradients_s_interpolated, gradients_r_interpolated, gradients_c_interpolated, padded
 
-        cdef int f, n_slices_mag, n_rows_mag, n_cols_mag, sM, rM, cM
+        cdef int f, n_slices_mag, n_rows_mag, n_cols_mag, sM, rM, cM, z0
+
+        cdef float rgc_val, zcof
 
         for f in range(n_frames):
 
-            image_interpolated = interpolator.run(image[f], 0, 0, magnification_xy, magnification_xy)
+            image_interpolated = interpolator.run(image[f], 0, 0, _magnification_xy, _magnification_xy)
             n_slices_mag, n_rows_mag, n_cols_mag = image_interpolated.shape[0], image_interpolated.shape[1], image_interpolated.shape[2]
 
             gradients_c = np.zeros((n_slices, n_rows, n_cols), dtype=np.float32)
@@ -80,9 +84,27 @@ class eSRRF3D(LiquidEngine):
                     for rM in range(0, n_rows_mag):
                         for cM in range(0, n_cols_mag):
                             if _doIntensityWeighting:
-                                rgc_map[f, sM, rM, cM] = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity) * image_interpolated[sM, rM, cM]
+                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                zcof = (sM + 0.5) / _magnification_z
+                                if (zcof < 0):
+                                    z0 = 0
+                                elif (zcof >= n_slices-1):
+                                    z0 = n_slices-2
+                                else:
+                                    z0 = <int> floor(zcof)
+                                z0 = z0 * _magnification_z
+                                rgc_map[f, z0, rM, cM] = rgc_val * image_interpolated[z0, rM, cM]
                             else:
-                                rgc_map[f, sM, rM, cM] = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                zcof = (sM + 0.5) / _magnification_z
+                                if (zcof < 0):
+                                    z0 = 0
+                                elif (zcof >= n_slices-1):
+                                    z0 = n_slices-2
+                                else:
+                                    z0 = <int> floor(zcof)
+                                z0 = z0 * _magnification_z
+                                rgc_map[f, z0, rM, cM] = rgc_val
 
-        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s), np.asarray(rgc_map)
+        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated), np.asarray(rgc_map)
 
