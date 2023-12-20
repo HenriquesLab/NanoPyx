@@ -85,26 +85,26 @@ class eSRRF3D(LiquidEngine):
                         for cM in range(0, n_cols_mag):
                             if _doIntensityWeighting:
                                 rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
-                                zcof = (sM + 0.5) / _magnification_z
+                                zcof = (sM) / _magnification_z
                                 if (zcof < 0):
                                     z0 = 0
                                 elif (zcof >= n_slices-1):
-                                    z0 = n_slices-2
+                                    z0 = n_slices-1
                                 else:
                                     z0 = <int> floor(zcof)
                                 z0 = z0 * _magnification_z
                                 rgc_map[f, z0, rM, cM] = rgc_val * image_interpolated[z0, rM, cM]
                             else:
                                 rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
-                                zcof = (sM + 0.5) / _magnification_z
+                                zcof = (sM) / _magnification_z
                                 if (zcof < 0):
                                     z0 = 0
                                 elif (zcof >= n_slices-1):
-                                    z0 = n_slices-2
+                                    z0 = n_slices-1
                                 else:
                                     z0 = <int> floor(zcof)
                                 z0 = z0 * _magnification_z
                                 rgc_map[f, z0, rM, cM] = rgc_val
 
-        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c),np.asarray(gradients_s), np.asarray(rgc_map)
+        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated), np.asarray(rgc_map)
 
