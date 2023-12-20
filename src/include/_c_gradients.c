@@ -71,19 +71,23 @@ void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int sli
                  int rows, int cols) {
   float ip0, ip1, ip2, ip3, ip4, ip5, ip6, ip7;
 
-  int z_i, y_i, x_i;
+  int z_i, y_i, x_i, z_1, y_1, x_1;
 
-  for (z_i = 0; z_i < slices - 1; z_i++) {
-    for (y_i = 0; y_i < rows - 1; y_i++) {
-      for (x_i = 0; x_i < cols - 1; x_i++) {
+  for (z_i = 0; z_i < slices; z_i++) {
+    for (y_i = 0; y_i < rows; y_i++) {
+      for (x_i = 0; x_i < cols; x_i++) {
+
+        z_1 = z_i >= slices - 1 ? slices - 1 : z_i + 1;
+        y_1 = y_i >= rows - 1 ? rows - 1 : y_i + 1;
+        x_1 = x_i >= cols - 1 ? cols - 1 : x_i + 1;
         ip0 = image[z_i * rows * cols + y_i * cols + x_i];
-        ip1 = image[z_i * rows * cols + y_i * cols + x_i + 1];
-        ip2 = image[z_i * rows * cols + (y_i + 1) * cols + x_i];
-        ip3 = image[z_i * rows * cols + (y_i + 1) * cols + x_i + 1];
-        ip4 = image[(z_i + 1) * rows * cols + y_i * cols + x_i];
-        ip5 = image[(z_i + 1) * rows * cols + y_i * cols + x_i + 1];
-        ip6 = image[(z_i + 1) * rows * cols + (y_i + 1) * cols + x_i];
-        ip7 = image[(z_i + 1) * rows * cols + (y_i + 1) * cols + x_i + 1];
+        ip1 = image[z_i * rows * cols + y_i * cols + x_1];
+        ip2 = image[z_i * rows * cols + y_1 * cols + x_i];
+        ip3 = image[z_i * rows * cols + y_1 * cols + x_1];
+        ip4 = image[z_1 * rows * cols + y_i * cols + x_i];
+        ip5 = image[z_1 * rows * cols + y_i * cols + x_1];
+        ip6 = image[z_1 * rows * cols + y_1 * cols + x_i];
+        ip7 = image[z_1 * rows * cols + y_1 * cols + x_1];
         imGc[z_i * rows* cols + y_i * cols + x_i] =
             (ip1 + ip3 + ip5 + ip7 - ip0 - ip2 - ip4 - ip6) / 4;
         imGr[z_i * rows* cols + y_i * cols + x_i] =
