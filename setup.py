@@ -208,9 +208,13 @@ def collect_extensions():
         if 'base' in template_:
             continue
         path2out = os.path.join(path,template_.replace('.',os.sep,template_.count('.')-1))
-        template_obj = lookup.get_template(template_)
-        with open(path2out,'w') as outfile:
-            outfile.write(template_obj.render())
+        rendered_output = lookup.get_template(template_).render_unicode()
+        with open(path2out, 'wb') as outfile:
+            outfile.write(rendered_output.encode())
+        
+        #template_obj = lookup.get_template(template_)
+        #with open(path2out,'w') as outfile:
+        #    outfile.write(template_obj.render())
     
 
     cython_files = [
