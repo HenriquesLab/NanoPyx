@@ -32,7 +32,7 @@ float _c_integral_to_distance(__global float* integral_image,int rows,int cols,i
                       integral_image[row_minus_offset * cols + col_plus_offset] -
                       integral_image[row_plus_offset * cols + col_minus_offset]);
 
-    return max(distance,0.0) / h2s2;
+    return max((float)(distance),(float)(0.0)) / h2s2;
 }
 
 
