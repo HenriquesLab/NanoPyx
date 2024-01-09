@@ -1,40 +1,26 @@
-void _c_integral_image(__global float* padded_image, __global float* integral_image, int n_row, int n_col, int t_row, int t_col, float var_diff);
-void _c_integral_image(__global float* padded_image, __global float* integral_image, int n_row, int n_col, int t_row, int t_col, float var_diff) {
-    int row, col;
-    int row_start = (int)(1 > -t_row ? 1 : -t_row);
-    int row_end = (int)(n_row < n_row - t_row ? n_row : n_row - t_row);
-    float t, distance;
+<%!
+from src.scripts.c2cl import extract_batch_code
 
-    for (row = row_start; row < row_end; ++row) {
-        for (col = 1; col < n_col - t_col; ++col) {
-            distance = 0;
-            t = (padded_image[row * n_col + col] -
-                    padded_image[(row + t_row) * n_col + (col + t_col)]);
-            distance += t * t;
-            distance -= var_diff;
-            integral_image[row * n_col + col] = (distance +
-                                           integral_image[(row - 1) * n_col + col] +
-                                           integral_image[row * n_col + col - 1] -
-                                           integral_image[(row - 1) * n_col + col - 1]);
-        }
-    }
-}
+c_function_names = [('_c_integral_image.c','_c_integral_image'),('_c_integral_to_distance.c','_c_integral_to_distance')]
 
-float _c_integral_to_distance(__global float* integral_image,int rows,int cols,int row,int col,int offset,float h2s2);
-float _c_integral_to_distance(__global float* integral_image,int rows,int cols,int row,int col,int offset,float h2s2){
-    int row_plus_offset = (int)(row + offset);
-    int row_minus_offset = (int)(row - offset);
-    int col_plus_offset = (int)(col + offset);
-    int col_minus_offset = (int)(col - offset);
+headers, functions = extract_batch_code(c_function_names)
 
-    float distance = (integral_image[row_plus_offset * cols + col_plus_offset] +
-                      integral_image[row_minus_offset * cols + col_minus_offset] -
-                      integral_image[row_minus_offset * cols + col_plus_offset] -
-                      integral_image[row_plus_offset * cols + col_minus_offset]);
+defines = []
 
-    return max((float)(distance),(float)(0.0)) / h2s2;
-}
+%>
 
+% for h in self.attr.headers:
+${h}
+% endfor
+
+% for d in self.attr.defines:
+#define ${d[0]} ${d[1]}
+% endfor
+
+% for f in self.attr.functions:
+${f}
+
+% endfor
 
 __kernel void nlm_denoising(__global float *padded,__global int *shifts, __global float *weights, __global float *integral,__global float *result,int n_row, int n_col, int patch_size, int patch_distance, float h2s2, float var) {
 
