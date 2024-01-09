@@ -5,6 +5,7 @@ requires = [
     "build>=0.10.0",
     "cython>=0.29.0",
     "numpy>=1.19.0",
+    "mako",
 ]
 
 build-backend = "setuptools.build_meta"
