@@ -8,6 +8,8 @@ from functools import partial
 from itertools import combinations
 from pathlib import Path
 
+from importlib_resources import files
+
 import numpy as np
 
 # This will in the future come from the Agent
@@ -121,6 +123,13 @@ class LiquidEngine:
         self._last_time = None
 
         self.Agent = Agent
+
+        # load defaults
+        try:
+            self._default_benchmarks = yaml.safe_load(files(f'liquid_benchmarks.{inspect.getmodule(self.__class__).__name__.split(".")[-1]}').joinpath(self.__class__.__name__ + ".yml").read_text())
+        except:
+            self._default_benchmarks = []
+        
 
     def _run(self, *args, run_type=None, **kwargs):
         """
