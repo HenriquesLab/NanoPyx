@@ -1,0 +1,24 @@
+OpenCL_Apple M1 Pro:
+  (['shape(3, 64, 32)', 'number(5.0)', 'number(5.0)', 'number(4.0)', 'number(4.0)'], {}):
+  - 2457600.0
+  - 0.053241832996718585
+Threaded:
+  (['shape(3, 64, 32)', 'number(5.0)', 'number(5.0)', 'number(4.0)', 'number(4.0)'], {}):
+  - 2457600.0
+  - 0.0009072080138139427
+Threaded_dynamic:
+  (['shape(3, 64, 32)', 'number(5.0)', 'number(5.0)', 'number(4.0)', 'number(4.0)'], {}):
+  - 2457600.0
+  - 0.0007270420319400728
+Threaded_guided:
+  (['shape(3, 64, 32)', 'number(5.0)', 'number(5.0)', 'number(4.0)', 'number(4.0)'], {}):
+  - 2457600.0
+  - 0.000685208011418581
+Threaded_static:
+  (['shape(3, 64, 32)', 'number(5.0)', 'number(5.0)', 'number(4.0)', 'number(4.0)'], {}):
+  - 2457600.0
+  - 0.0008815840119495988
+Unthreaded:
+  (['shape(3, 64, 32)', 'number(5.0)', 'number(5.0)', 'number(4.0)', 'number(4.0)'], {}):
+  - 2457600.0
+  - 0.002030374947935343
