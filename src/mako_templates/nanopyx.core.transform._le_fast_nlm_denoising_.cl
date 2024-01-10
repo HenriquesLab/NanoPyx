@@ -1,4 +1,8 @@
 <%!
+import sys
+import os
+
+sys.path.append(os.getcwd())
 from src.scripts.c2cl import extract_batch_code
 
 c_function_names = [('_c_integral_image.c','_c_integral_image'),('_c_integral_to_distance.c','_c_integral_to_distance')]
