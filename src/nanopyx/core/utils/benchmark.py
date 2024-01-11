@@ -46,24 +46,39 @@ def benchmark_all_le_methods(
 
     for i in range(n_benchmark_runs):
         bicubic_sm.benchmark(img, shift, shift, magnification, magnification)
+    for i in range(n_benchmark_runs):
         cr_sm.benchmark(img, shift, shift, magnification, magnification)
+    for i in range(n_benchmark_runs):
         l_sm.benchmark(img, shift, shift, magnification, magnification)
+    for i in range(n_benchmark_runs):
         nn_sm.benchmark(img, shift, shift, magnification, magnification)
 
+    for i in range(n_benchmark_runs):
         bicubic_ssr.benchmark(img, shift, shift, magnification, magnification, rotation)
+    for i in range(n_benchmark_runs):
         cr_ssr.benchmark(img, shift, shift, magnification, magnification, rotation)
+    for i in range(n_benchmark_runs):
         l_ssr.benchmark(img, shift, shift, magnification, magnification, rotation)
+    for i in range(n_benchmark_runs):
         nn_ssr.benchmark(img, shift, shift, magnification, magnification, rotation)
 
+    for i in range(n_benchmark_runs):
         nn_pt.benchmark(img, (img_dims, img_dims), "log")
 
+    for i in range(n_benchmark_runs):
         conv2d.benchmark(img, kernel)
 
+    for i in range(n_benchmark_runs):
         rad.benchmark(img, img_int)
+    for i in range(n_benchmark_runs):
         rc.benchmark(img)
+    for i in range(n_benchmark_runs):
         rgc.benchmark(img_int, img_int, img_int)
 
+    for i in range(n_benchmark_runs):
         esrrf.benchmark(img)
 
+    for i in range(n_benchmark_runs):
         fast_nlm.benchmark(img)
+    for i in range(n_benchmark_runs):
         nlm.benchmark(img)
