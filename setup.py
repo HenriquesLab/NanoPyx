@@ -209,8 +209,27 @@ def collect_extensions():
             continue
         path2out = os.path.join(path,template_.replace('.',os.sep,template_.count('.')-1))
         rendered_output = lookup.get_template(template_).render_unicode()
-        with open(path2out, 'wb') as outfile:
-            outfile.write(rendered_output.encode())
+        enconded_rendered_output = rendered_output.encode()
+        try:
+            with open(path2out, 'r+b') as outfile:
+                current_content = outfile.read()
+
+                if current_content != enconded_rendered_output:
+                    print(f"Updating {template_}!")
+                    outfile.seek(0)
+                    outfile.write(enconded_rendered_output)
+                    outfile.truncate()
+                else:
+                    print(f"Using cached {template_}")
+                    continue
+
+        except FileNotFoundError:
+            # If the file doesn't exist, create it with the new content
+            with open(path2out, 'wb') as outfile:
+                outfile.write(enconded_rendered_output)
+
+        #with open(path2out, 'wb') as outfile:
+        #    outfile.write(rendered_output.encode())
         
         #template_obj = lookup.get_template(template_)
         #with open(path2out,'w') as outfile:
