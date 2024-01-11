@@ -43,7 +43,7 @@ class GradientRobertsCross(LiquidEngine):
         return gradient_col, gradient_row
     
     % for sch in schedulers:
-    def _run_threaded(self, float[:,:,:] image):
+    def _run_${sch}(self, float[:,:,:] image):
 
         cdef int nFrames = image.shape[0]
         cdef float [:,:,:] gradient_col = np.zeros_like(image) 
