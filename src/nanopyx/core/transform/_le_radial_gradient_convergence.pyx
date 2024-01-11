@@ -24,9 +24,6 @@ class RadialGradientConvergence(LiquidEngine):
                         unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
 
-        
-        self._default_benchmarks = {'OpenCL': {"(['shape(100, 100, 100)', 'shape(100, 100, 100)', 'shape(100, 200, 200)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [3e+19, 0.016602458999841474, 0.014774957999634353, 0.014550083000358427], "(['shape(100, 300, 300)', 'shape(100, 300, 300)', 'shape(100, 600, 600)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [2.187e+22, 0.061947042000156216, 0.05570804199987833, 0.05627254199998788]}, 'Threaded': {"(['shape(100, 100, 100)', 'shape(100, 100, 100)', 'shape(100, 200, 200)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [3e+19, 0.01809087499987072, 0.018405166999855282, 0.020630749999781983], "(['shape(100, 300, 300)', 'shape(100, 300, 300)', 'shape(100, 600, 600)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [2.187e+22, 0.1779053750001367, 0.17156229100010023, 0.16890108300003703]}, 'Threaded_dynamic': {"(['shape(100, 100, 100)', 'shape(100, 100, 100)', 'shape(100, 200, 200)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [3e+19, 0.01563541699988491, 0.016560666999794194, 0.016359334000298986], "(['shape(100, 300, 300)', 'shape(100, 300, 300)', 'shape(100, 600, 600)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [2.187e+22, 0.1260679170000003, 0.1298676249998607, 0.12453404200005025]}, 'Threaded_guided': {"(['shape(100, 100, 100)', 'shape(100, 100, 100)', 'shape(100, 200, 200)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [3e+19, 0.016395916999954352, 0.016721625000172935, 0.01623758400000952], "(['shape(100, 300, 300)', 'shape(100, 300, 300)', 'shape(100, 600, 600)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [2.187e+22, 0.13648262499964403, 0.13698016699981963, 0.12756820799995694]}, 'Threaded_static': {"(['shape(100, 100, 100)', 'shape(100, 100, 100)', 'shape(100, 200, 200)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [3e+19, 0.021419832999981736, 0.019069041999955516, 0.01931129200011128], "(['shape(100, 300, 300)', 'shape(100, 300, 300)', 'shape(100, 600, 600)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [2.187e+22, 0.18173866699999053, 0.1682213750000301, 0.16703279200010002]}, 'Unthreaded': {"(['shape(100, 100, 100)', 'shape(100, 100, 100)', 'shape(100, 200, 200)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [3e+19, 0.03560816600020189, 0.03549925000015719, 0.03543366600024456], "(['shape(100, 300, 300)', 'shape(100, 300, 300)', 'shape(100, 600, 600)', 'number(5)', 'number(1.5)', 'number(1.0)', True], {})": [2.187e+22, 0.6588103340000089, 0.6491647500001818, 0.6530582079999476]}}
-
 
     def run(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, run_type = None): 
         gradient_col_interp = check_image(gradient_col_interp)
@@ -41,8 +38,6 @@ class RadialGradientConvergence(LiquidEngine):
         image_interp = check_image(image_interp)
         return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting)
 
-
-    # tag-start: _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
 
         cdef float sigma = radius / 2.355
@@ -71,9 +66,7 @@ class RadialGradientConvergence(LiquidEngine):
                                 rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
 
         return np.asarray(rgc_map,dtype=np.float32)
-        # tag-end
 
-    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(_magnification*2, rowsM - _magnification*2)", "prange(_magnification*2, rowsM - _magnification*2)")
     def _run_threaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
 
         cdef float sigma = radius / 2.355
@@ -94,76 +87,13 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for rM in prange(_magnification*2, rowsM - _magnification*2): 
-                        for cM in range(_magnification*2, colsM - _magnification*2):
-                            if _doIntensityWeighting:
-                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
-                            else:
-                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+                for rM in prange(_magnification*2, rowsM - _magnification*2):
+                    for cM in range(_magnification*2, colsM - _magnification*2):
+                        if _doIntensityWeighting:
+                            rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
+                        else:
+                            rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
         return np.asarray(rgc_map,dtype=np.float32)
-        # tag-end
-
-    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(_magnification*2, rowsM - _magnification*2)", 'prange(_magnification*2, rowsM - _magnification*2, schedule="static")')
-    def _run_threaded_static(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
-        cdef float sigma = radius / 2.355
-        cdef float fwhm = radius
-        cdef float tSS = 2 * sigma * sigma
-        cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 2.0
-        cdef int _magnification = magnification
-        cdef float _sensitivity = sensitivity
-        cdef int _doIntensityWeighting = doIntensityWeighting
-
-        cdef int nFrames = gradient_col_interp.shape[0]
-        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
-        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
-
-        cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
-
-        cdef int f, rM, cM
-        with nogil:
-            for f in range(nFrames):
-                    for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="static"): 
-                        for cM in range(_magnification*2, colsM - _magnification*2):
-                            if _doIntensityWeighting:
-                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
-                            else:
-                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
-        return np.asarray(rgc_map,dtype=np.float32)
-        # tag-end
-
-    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(_magnification*2, rowsM - _magnification*2)", 'prange(_magnification*2, rowsM - _magnification*2, schedule="dynamic")')
-    def _run_threaded_dynamic(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
-        cdef float sigma = radius / 2.355
-        cdef float fwhm = radius
-        cdef float tSS = 2 * sigma * sigma
-        cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 2.0
-        cdef int _magnification = magnification
-        cdef float _sensitivity = sensitivity
-        cdef int _doIntensityWeighting = doIntensityWeighting
-
-        cdef int nFrames = gradient_col_interp.shape[0]
-        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
-        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
-
-        cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
-
-        cdef int f, rM, cM
-        with nogil:
-            for f in range(nFrames):
-                    for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="dynamic"): 
-                        for cM in range(_magnification*2, colsM - _magnification*2):
-                            if _doIntensityWeighting:
-                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
-                            else:
-                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
-        return np.asarray(rgc_map,dtype=np.float32)
-        # tag-end
-
-    # tag-copy:  _le_radial_gradient_convergence.RadialGradientConvergence._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(_magnification*2, rowsM - _magnification*2)", 'prange(_magnification*2, rowsM - _magnification*2, schedule="guided")')
     def _run_threaded_guided(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
 
         cdef float sigma = radius / 2.355
@@ -184,14 +114,67 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="guided"): 
-                        for cM in range(_magnification*2, colsM - _magnification*2):
-                            if _doIntensityWeighting:
-                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
-                            else:
-                                rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+                for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="guided"):
+                    for cM in range(_magnification*2, colsM - _magnification*2):
+                        if _doIntensityWeighting:
+                            rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
+                        else:
+                            rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
         return np.asarray(rgc_map,dtype=np.float32)
-        # tag-end
+    def _run_threaded_dynamic(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+
+        cdef float sigma = radius / 2.355
+        cdef float fwhm = radius
+        cdef float tSS = 2 * sigma * sigma
+        cdef float tSO = 2 * sigma + 1
+        cdef float Gx_Gy_MAGNIFICATION = 2.0
+        cdef int _magnification = magnification
+        cdef float _sensitivity = sensitivity
+        cdef int _doIntensityWeighting = doIntensityWeighting
+
+        cdef int nFrames = gradient_col_interp.shape[0]
+        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
+        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+
+        cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
+
+        cdef int f, rM, cM
+        with nogil:
+            for f in range(nFrames):
+                for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="dynamic"):
+                    for cM in range(_magnification*2, colsM - _magnification*2):
+                        if _doIntensityWeighting:
+                            rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
+                        else:
+                            rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+        return np.asarray(rgc_map,dtype=np.float32)
+    def _run_threaded_static(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+
+        cdef float sigma = radius / 2.355
+        cdef float fwhm = radius
+        cdef float tSS = 2 * sigma * sigma
+        cdef float tSO = 2 * sigma + 1
+        cdef float Gx_Gy_MAGNIFICATION = 2.0
+        cdef int _magnification = magnification
+        cdef float _sensitivity = sensitivity
+        cdef int _doIntensityWeighting = doIntensityWeighting
+
+        cdef int nFrames = gradient_col_interp.shape[0]
+        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
+        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+
+        cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
+
+        cdef int f, rM, cM
+        with nogil:
+            for f in range(nFrames):
+                for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="static"):
+                    for cM in range(_magnification*2, colsM - _magnification*2):
+                        if _doIntensityWeighting:
+                            rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity) * image_interp[f, rM, cM] 
+                        else:
+                            rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
+        return np.asarray(rgc_map,dtype=np.float32)
 
     
     def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, int mem_div=1):
@@ -287,8 +270,3 @@ class RadialGradientConvergence(LiquidEngine):
 
         
         return rgc_map
-        
-
-
-
-
