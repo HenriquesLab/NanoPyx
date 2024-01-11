@@ -20,7 +20,7 @@ def benchmark_all_le_methods(
     """
 
     img = np.random.random((img_dims, img_dims)).astype(np.float32)
-    img_int = np.random.random((img_dims*magnification, img_dims*magnification)).astype(np.float32)
+    img_int = np.random.random((img_dims * magnification, img_dims * magnification)).astype(np.float32)
     kernel = np.ones((conv_kernel_dims, conv_kernel_dims)).astype(np.float32)
 
     bicubic_sm = nanopyx.core.transform._le_interpolation_bicubic.ShiftAndMagnify()
