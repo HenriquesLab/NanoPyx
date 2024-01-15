@@ -41,7 +41,9 @@ def benchmark_all_le_methods(
 
     esrrf = nanopyx.core.transform._le_esrrf.eSRRF()
 
-    fast_nlm = nanopyx.core.transform._le_fast_nlm_denoising.NLMDenoising()
+    patch_nlm = nanopyx.core.transform._le_patch_nlm_denoising.NLMDenoising()
+    pixel_nlm = nanopyx.core.transform._le_pixel_nlm_denoising.NLMDenoising()
+
     nlm = nanopyx.core.transform._le_nlm_denoising.NLMDenoising()
 
     for i in range(n_benchmark_runs):
@@ -79,6 +81,8 @@ def benchmark_all_le_methods(
         esrrf.benchmark(img)
 
     for i in range(n_benchmark_runs):
-        fast_nlm.benchmark(img)
+        patch_nlm.benchmark(img)
+    for i in range(n_benchmark_runs):
+        pixel_nlm.benchmark(img)
     for i in range(n_benchmark_runs):
         nlm.benchmark(img)
