@@ -21,7 +21,7 @@ jobs:
               python3 -c "txt=open('repo-activity.log').read();txt=txt.replace('Bruno Manuel Santos Saraiva', 'Bruno Saraiva').replace('inesmcunha', 'Inês Cunha').replace('antmsbrito', 'António Brito');open('repo-activity.log', 'w').write(txt)"
               xvfb-run gource --highlight-dirs --highlight-users repo-activity.log -1280x720 --max-user-speed 100 --seconds-per-day 0.1 --auto-skip-seconds 1 -o - | ffmpeg -y -r 60 -f image2pipe -vcodec ppm -i - -pix_fmt yuv420p gource.mp4
           - name: Archive generated movie
-            uses: actions/upload-artifact@v3
+            uses: actions/upload-artifact@v4
             with:
               name: gource-movie
               path: gource.mp4
