@@ -1,6 +1,6 @@
 float _c_interpolate(__global float *image, float row, float col, int rows, int cols);
 
-// c2cl-function: _c_interpolate from _c_interpolation_nearest_neighbor.c
+
 float _c_interpolate(__global float *image, float row, float col, int rows, int cols) {
   int r = (int)row;
   int c = (int)col;
@@ -10,11 +10,11 @@ float _c_interpolate(__global float *image, float row, float col, int rows, int 
   return image[r * cols + c];
 }
 
-// tag-start: _le_interpolation_*.cl
+
 __kernel void
 shiftAndMagnify(__global float *image_in, __global float *image_out,
                  float shift_row,  float shift_col,
-                float magnification_row, float magnification_col) {
+                float magnification_row, float magnification_col) { 
 
   int f = get_global_id(0);
   int rM = get_global_id(1);
@@ -68,9 +68,7 @@ __kernel void shiftScaleRotate(__global float *image_in,
   image_out[f * nPixels + rM * cols + cM] =
       _c_interpolate(&image_in[f * nPixels], row, col, rows, cols);
 }
-// tag-end
 
-// tag-start: _le_interpolation_nearest_neighbor_.cl.PolarTransform
 __kernel void PolarTransform(__global float *image_in,
                                __global float *image_out, 
                                int og_row, int og_col, int scale) {
@@ -106,4 +104,4 @@ __kernel void PolarTransform(__global float *image_in,
   image_out[f * rows * cols + rM * cols + cM] =
       _c_interpolate(&image_in[f * og_col*og_row], row, col, og_row, og_col);
 }
-// tag-end
+

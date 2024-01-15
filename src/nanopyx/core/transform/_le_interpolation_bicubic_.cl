@@ -1,6 +1,6 @@
 float _c_interpolate(__global float *image, float r, float c, int rows, int cols);
 
-// c2cl-function: _c_interpolate from _c_interpolation_bicubic.c
+
 float _c_interpolate(__global float *image, float r, float c, int rows, int cols) {
   // return 0 if x OR y positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
@@ -59,11 +59,11 @@ float _c_interpolate(__global float *image, float r, float c, int rows, int cols
   return v_interpolated / weight_sum;
 }
 
-// tag-copy: _le_interpolation_*.cl
+
 __kernel void
 shiftAndMagnify(__global float *image_in, __global float *image_out,
                  float shift_row,  float shift_col,
-                float magnification_row, float magnification_col) {
+                float magnification_row, float magnification_col) { 
 
   int f = get_global_id(0);
   int rM = get_global_id(1);
@@ -84,9 +84,9 @@ shiftAndMagnify(__global float *image_in, __global float *image_out,
 
 __kernel void shiftScaleRotate(__global float *image_in,
                                __global float *image_out,
-                               float shift_row,
-                               float shift_col, float scale_row,
-                               float scale_col, float angle) {
+                              float shift_row,
+                              float shift_col, float scale_row,
+                              float scale_col, float angle) {
   // these are the indexes of the loop
   int f = get_global_id(0);
   int rM = get_global_id(1);
@@ -117,4 +117,40 @@ __kernel void shiftScaleRotate(__global float *image_in,
   image_out[f * nPixels + rM * cols + cM] =
       _c_interpolate(&image_in[f * nPixels], row, col, rows, cols);
 }
-// tag-end
+
+__kernel void PolarTransform(__global float *image_in,
+                               __global float *image_out, 
+                               int og_row, int og_col, int scale) {
+                                
+  // these are the indexes of the loop we are in
+  int f = get_global_id(0);
+  int rM = get_global_id(1);
+  int cM = get_global_id(2);
+
+  // these are the sizes of the output array
+  // int nFrames = get_global_size(0);
+  int rows = get_global_size(1);
+  int cols = get_global_size(2);
+
+  float center_col = og_col / 2;
+  float center_row = og_row / 2;
+
+  float max_radius = hypot(center_row, center_col);
+  float pi = 4 * atan((float)(1.0));
+  
+  float angle =  rM * 2 * pi  / (rows-1);
+
+  float radius;
+  if (scale==1) {
+    radius = exp(cM*log(max_radius)/(cols-1));
+  } else {
+    radius = cM * max_radius / (cols-1);
+  }
+
+  float col = radius * cos(angle) + center_col;
+  float row = radius * sin(angle) + center_row;
+
+  image_out[f * rows * cols + rM * cols + cM] =
+      _c_interpolate(&image_in[f * og_col*og_row], row, col, og_row, og_col);
+}
+

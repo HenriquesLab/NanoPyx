@@ -4,6 +4,7 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
+from mako.lookup import TemplateLookup
 
 from Cython.Build import cythonize
 from Cython.Compiler import Options
@@ -201,6 +202,40 @@ def collect_extensions():
 
     path = os.path.join("src")
 
+    # Compile mako template(s)
+    lookup = TemplateLookup(directories = ['src/mako_templates'])
+    for template_ in os.listdir('src/mako_templates'):
+        if 'base' in template_:
+            continue
+        path2out = os.path.join(path,template_.replace('.',os.sep,template_.count('.')-1))
+        rendered_output = lookup.get_template(template_).render_unicode()
+        enconded_rendered_output = rendered_output.encode()
+        try:
+            with open(path2out, 'r+b') as outfile:
+                current_content = outfile.read()
+
+                if current_content != enconded_rendered_output:
+                    print(f"Updating {template_}!")
+                    outfile.seek(0)
+                    outfile.write(enconded_rendered_output)
+                    outfile.truncate()
+                else:
+                    print(f"Using cached {template_}")
+                    continue
+
+        except FileNotFoundError:
+            # If the file doesn't exist, create it with the new content
+            with open(path2out, 'wb') as outfile:
+                outfile.write(enconded_rendered_output)
+
+        #with open(path2out, 'wb') as outfile:
+        #    outfile.write(rendered_output.encode())
+        
+        #template_obj = lookup.get_template(template_)
+        #with open(path2out,'w') as outfile:
+        #    outfile.write(template_obj.render())
+    
+
     cython_files = [
         os.path.join(dir, file)
         for (dir, dirs, files) in os.walk(path)
@@ -208,6 +243,9 @@ def collect_extensions():
         if file.endswith(".pyx")
         or (file.endswith(".py") and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read())
     ]
+    
+    # remove mako templates
+    cython_files = [c for c in cython_files if 'mako' not in c]
 
     cython_extensions = []
     extra_c_files = []

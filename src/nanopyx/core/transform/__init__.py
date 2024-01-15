@@ -18,6 +18,10 @@ from ._le_roberts_cross_gradients import GradientRobertsCross
 from ._le_esrrf import eSRRF as eSRRF_ST
 from ._le_convolution import Convolution as Convolution2D
 
+from ._le_fast_nlm_denoising import NLMDenoising as FastNLMDenoising
+from ._le_nlm_denoising import NLMDenoising
+
 from ._interpolation import cr_interpolate
 
 from .error_map import ErrorMap
+

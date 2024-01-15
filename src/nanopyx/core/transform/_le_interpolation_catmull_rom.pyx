@@ -1,21 +1,14 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
-
 cimport numpy as np
-
 from cython.parallel import parallel, prange
-
-from libc.math cimport cos, sin
+from libc.math cimport cos, sin, pi, hypot, exp, log
 
 from .__interpolation_tools__ import check_image, value2array
 from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 
-from ._le_interpolation_catmull_rom_ import \
-    njit_shift_magnify as _njit_shift_magnify
-from ._le_interpolation_catmull_rom_ import \
-    shift_magnify as _py_shift_magnify
 
 cdef extern from "_c_interpolation_catmull_rom.h":
     float _c_interpolate(float *image, float row, float col, int rows, int cols) nogil
@@ -27,22 +20,19 @@ class ShiftAndMagnify(LiquidEngine):
     """
 
     def __init__(self, clear_benchmarks=False, testing=False):
-        self._designation = "ShiftMagnify_CR"
+        self._designation = "ShiftMagnify_catmull_rom"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True, python_=True, njit_=True)
+                        threaded_dynamic_=True, threaded_guided_=True)
 
-        self._default_benchmarks = {'Numba': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.1870073339996452, 0.043537417000152345, 0.043714207999983046], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.3215678749993458, 0.3253799590002018, 0.32294445800016547]}, 'OpenCL': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.02356370799952856, 0.016226208000261977, 0.015988750000360596], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.0370106250002209, 0.045146042000851594, 0.04553649999979825]}, 'Python': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 63.37451237500045, 63.10504716699961, 63.11900620799952], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 569.1941062080004, 567.8427670000001, 568.8268513340008]}, 'Threaded': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.04279016700002103, 0.04217579200030741, 0.04144937499950174], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.3156377909999719, 0.3050229999998919, 0.30736125000021275]}, 'Threaded_dynamic': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.036927834000380244, 0.037345290999837744, 0.036939124999662454], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.23315270799957943, 0.23548262500025885, 0.23372695799935173]}, 'Threaded_guided': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.03418854200026544, 0.03363912500026345, 0.0336961249995511], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.24899391600047238, 0.26036370800011355, 0.24373120899963396]}, 'Threaded_static': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.0424661670003843, 0.04156329099987488, 0.04186825000033423], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.31180666700038273, 0.30542558300021483, 0.30452662500010774]}, 'Unthreaded': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [40000000000.0, 0.10576324999965436, 0.1028390829997079, 0.10284191600021586], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)'], {})": [360000000000.0, 0.9415007090001382, 0.9382833330000722, 0.938642749999417]}}
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.run; replace("Nearest-Neighbor", "Catmull-Rom")
     def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
         """
-        Shift and magnify an image using Catmull-Rom interpolation
+        Shift and magnify an image using catmull_rom interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray or memoryview
         :param shift_row: The number of rows to shift the image
         :type shift_row: int or float or np.ndarray
-        :param shift_col: The number of columns to shift the image
+        :param shift_col: The number of columns to shift the image«
         :type shift_col: int or float or np.ndarray
         :param magnification_row: The magnification factor for the rows
         :type magnification_row: float
@@ -52,9 +42,7 @@ class ShiftAndMagnify(LiquidEngine):
         """
         image = check_image(image)
         return self._run(image, shift_row, shift_col, magnification_row, magnification_col, run_type=run_type)
-    # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify.benchmark
     def benchmark(self, image, shift_row, shift_col, float magnification_row, float magnification_col):
         """
         Benchmark the ShiftAndMagnify run function in multiple run types
@@ -73,9 +61,7 @@ class ShiftAndMagnify(LiquidEngine):
         """
         image = check_image(image)
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
-    # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_opencl; replace("nearest_neighbor", "catmull_rom")
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col, dict device, int mem_div=1) -> np.ndarray:
 
         # QUEUE AND CONTEXT
@@ -103,7 +89,6 @@ class ShiftAndMagnify(LiquidEngine):
                 n_slices = max_slices
             else:
                 n_slices = image.shape[0] - i
-            #TODO check that magnification_row and magnification_col are correct
             knl(cl_queue,
                 (n_slices, int(image.shape[1]*magnification_row), int(image.shape[2]*magnification_col)), 
                 self.get_work_group(dc, (n_slices, image.shape[1]*magnification_row, image.shape[2]*magnification_col)), 
@@ -124,9 +109,7 @@ class ShiftAndMagnify(LiquidEngine):
         output_opencl.release()
         
         return image_out
-    # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -150,9 +133,7 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
-    # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(colsM)", "prange(colsM)")
     def _run_threaded(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -176,61 +157,7 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
-    # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(colsM)", 'prange(colsM, schedule="static")')
-    def _run_threaded_static(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
-        cdef int nFrames = image.shape[0]
-        cdef int rows = image.shape[1]
-        cdef int cols = image.shape[2]
-        cdef int rowsM = <int>(rows * magnification_row)
-        cdef int colsM = <int>(cols * magnification_col)
-
-        image_out = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
-        cdef float[:,:,:] _image_out = image_out
-        cdef float[:,:,:] _image_in = image
-
-        cdef int f, i, j
-        cdef float row, col
-
-        with nogil:
-            for f in range(nFrames):
-                for j in prange(colsM, schedule="static"):
-                    col = j / magnification_col - shift_col
-                    for i in range(rowsM):
-                        row = i / magnification_row - shift_row
-                        _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
-
-        return image_out
-    # tag-end
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(colsM)", 'prange(colsM, schedule="dynamic")')
-    def _run_threaded_dynamic(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
-        cdef int nFrames = image.shape[0]
-        cdef int rows = image.shape[1]
-        cdef int cols = image.shape[2]
-        cdef int rowsM = <int>(rows * magnification_row)
-        cdef int colsM = <int>(cols * magnification_col)
-
-        image_out = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
-        cdef float[:,:,:] _image_out = image_out
-        cdef float[:,:,:] _image_in = image
-
-        cdef int f, i, j
-        cdef float row, col
-
-        with nogil:
-            for f in range(nFrames):
-                for j in prange(colsM, schedule="dynamic"):
-                    col = j / magnification_col - shift_col
-                    for i in range(rowsM):
-                        row = i / magnification_row - shift_row
-                        _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
-
-        return image_out
-    # tag-end
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftAndMagnify._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(colsM)", 'prange(colsM, schedule="guided")')
     def _run_threaded_guided(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -254,15 +181,56 @@ class ShiftAndMagnify(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
-    # tag-end
 
-    def _run_python(self, image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
-        image_out = _py_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
+    def _run_threaded_dynamic(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+        cdef int rowsM = <int>(rows * magnification_row)
+        cdef int colsM = <int>(cols * magnification_col)
+
+        image_out = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+
+        cdef int f, i, j
+        cdef float row, col
+
+        with nogil:
+            for f in range(nFrames):
+                for j in prange(colsM, schedule="dynamic"):
+                    col = j / magnification_col - shift_col
+                    for i in range(rowsM):
+                        row = i / magnification_row - shift_row
+                        _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
         return image_out
 
-    def _run_njit(self,image, shift_row, shift_col, magnification_row, magnification_col) -> np.ndarray:
-        image_out = _njit_shift_magnify(image, shift_row, shift_col, magnification_row, magnification_col)
+    def _run_threaded_static(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+        cdef int rowsM = <int>(rows * magnification_row)
+        cdef int colsM = <int>(cols * magnification_col)
+
+        image_out = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+
+        cdef int f, i, j
+        cdef float row, col
+
+        with nogil:
+            for f in range(nFrames):
+                for j in prange(colsM, schedule="static"):
+                    col = j / magnification_col - shift_col
+                    for i in range(rowsM):
+                        row = i / magnification_row - shift_row
+                        _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
         return image_out
+
+
 
 class ShiftScaleRotate(LiquidEngine):
     """
@@ -270,16 +238,14 @@ class ShiftScaleRotate(LiquidEngine):
     """
 
     def __init__(self, clear_benchmarks=False, testing=False):
-        self._designation = "ShiftScaleRotate_CR"
+        self._designation = "ShiftScaleRotate_catmull_rom"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
                         threaded_dynamic_=True, threaded_guided_=True)
-        self._default_benchmarks = {'OpenCL': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.024225791999924695, 0.015266458000041894, 0.01464179200002036], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.07034941599999911, 0.0705873330000486, 0.07121533300005467]}, 'Threaded': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.0313536670000758, 0.03125320799995279, 0.030536375000110638], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.2773344160000306, 0.27500416700013375, 0.27467649999994137]}, 'Threaded_dynamic': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.031138250000140033, 0.030626333000100203, 0.030349666000120123], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.2753899580000052, 0.2755273750001379, 0.2762422920000063]}, 'Threaded_guided': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.030728082999985418, 0.030637290999948164, 0.03038945799994508], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.2746326249998674, 0.27517950000014935, 0.276212624999971]}, 'Threaded_static': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.031082333000085782, 0.03091154200001256, 0.030331541000123252], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.27434850000008737, 0.27468212500002664, 0.2748947920001683]}, 'Unthreaded': {"(['shape(100, 100, 100)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [40000000000.0, 0.03117249999991145, 0.030513165999991543, 0.030640624999932697], "(['shape(100, 300, 300)', 'shape(100,)', 'shape(100,)', 'number(2.0)', 'number(2.0)', 'number(0.0)'], {})": [360000000000.0, 0.2742584170000555, 0.272540625000147, 0.2739061249999395]}}
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.run; replace("Nearest-Neighbor", "Catmull-Rom")
+        
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:
         """
-        Shift and scale an image using Catmull-Rom interpolation
+        Shift and scale an image using catmull_rom interpolation
         :param image: The image to shift and magnify
         :type image: np.ndarray
         :param shift_row: The number of rows to shift the image
@@ -296,9 +262,7 @@ class ShiftScaleRotate(LiquidEngine):
         """
         image = check_image(image)
         return self._run(image, shift_row, shift_col, scale_row, scale_col, angle, run_type=run_type)
-    # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate.benchmark
     def benchmark(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle):
         """
         Benchmark the ShiftMagnifyScale run function in multiple run types
@@ -319,9 +283,7 @@ class ShiftScaleRotate(LiquidEngine):
         """
         image = check_image(image)
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
-    # tag-end
 
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_opencl; replace("nearest_neighbor", "catmull_rom")
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, dict device, int mem_div=1) -> np.ndarray:
 
         # QUEUE AND CONTEXT
@@ -373,9 +335,6 @@ class ShiftScaleRotate(LiquidEngine):
 
         return image_out
 
-    # tag-end
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded
     def _run_unthreaded(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -409,9 +368,7 @@ class ShiftScaleRotate(LiquidEngine):
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
-    # tag-end
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded"); replace("range(colsM)", "prange(colsM)")
+        
     def _run_threaded(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -438,88 +395,14 @@ class ShiftScaleRotate(LiquidEngine):
 
         with nogil:
             for f in range(nFrames):
-                for j in range(cols):
+                for j in prange(cols):
                     for i in range(rows):
                         col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
                         row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
-    # tag-end
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_static"); replace("range(colsM)", 'prange(colsM, schedule="static")')
-    def _run_threaded_static(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
-        cdef int nFrames = image.shape[0]
-        cdef int rows = image.shape[1]
-        cdef int cols = image.shape[2]
-
-        image_out = np.zeros((nFrames, rows, cols), dtype=np.float32)
-        cdef float[:,:,:] _image_out = image_out
-        cdef float[:,:,:] _image_in = image
-
-        cdef int f, i, j
-        cdef float row, col
-
-        cdef float center_col = cols/2
-        cdef float center_row = rows/2
-
-        # cdef float center_rowM = (rows * scale_row) / 2
-        # cdef float center_colM = (cols * scale_col) / 2
-
-        cdef float a,b,c,d
-        a = cos(angle)/scale_col
-        b = -sin(angle)/scale_col
-        c = sin(angle)/scale_row
-        d = cos(angle)/scale_row
-
-        with nogil:
-            for f in range(nFrames):
-                for j in range(cols):
-                    for i in range(rows):
-                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
-                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
-                        _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
-
-        return image_out
-    # tag-end
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_dynamic"); replace("range(colsM)", 'prange(colsM, schedule="dynamic")')
-    def _run_threaded_dynamic(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
-        cdef int nFrames = image.shape[0]
-        cdef int rows = image.shape[1]
-        cdef int cols = image.shape[2]
-
-        image_out = np.zeros((nFrames, rows, cols), dtype=np.float32)
-        cdef float[:,:,:] _image_out = image_out
-        cdef float[:,:,:] _image_in = image
-
-        cdef int f, i, j
-        cdef float row, col
-
-        cdef float center_col = cols/2
-        cdef float center_row = rows/2
-
-        # cdef float center_rowM = (rows * scale_row) / 2
-        # cdef float center_colM = (cols * scale_col) / 2
-
-        cdef float a,b,c,d
-        a = cos(angle)/scale_col
-        b = -sin(angle)/scale_col
-        c = sin(angle)/scale_row
-        d = cos(angle)/scale_row
-
-        with nogil:
-            for f in range(nFrames):
-                for j in range(cols):
-                    for i in range(rows):
-                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
-                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
-                        _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
-
-        return image_out
-    # tag-end
-
-    # tag-copy: _le_interpolation_nearest_neighbor.ShiftScaleRotate._run_unthreaded; replace("_run_unthreaded", "_run_threaded_guided"); replace("range(colsM)", 'prange(colsM, schedule="guided")')
+        
     def _run_threaded_guided(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
@@ -546,11 +429,351 @@ class ShiftScaleRotate(LiquidEngine):
 
         with nogil:
             for f in range(nFrames):
-                for j in range(cols):
+                for j in prange(cols, schedule="guided"):
                     for i in range(rows):
                         col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
                         row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
                         _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
 
         return image_out
-    # tag-end
+        
+    def _run_threaded_dynamic(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        image_out = np.zeros((nFrames, rows, cols), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+
+        cdef int f, i, j
+        cdef float row, col
+
+        cdef float center_col = cols/2
+        cdef float center_row = rows/2
+
+        # cdef float center_rowM = (rows * scale_row) / 2
+        # cdef float center_colM = (cols * scale_col) / 2
+
+        cdef float a,b,c,d
+        a = cos(angle)/scale_col
+        b = -sin(angle)/scale_col
+        c = sin(angle)/scale_row
+        d = cos(angle)/scale_row
+
+        with nogil:
+            for f in range(nFrames):
+                for j in prange(cols, schedule="dynamic"):
+                    for i in range(rows):
+                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
+                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
+                        _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+        
+    def _run_threaded_static(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        image_out = np.zeros((nFrames, rows, cols), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+
+        cdef int f, i, j
+        cdef float row, col
+
+        cdef float center_col = cols/2
+        cdef float center_row = rows/2
+
+        # cdef float center_rowM = (rows * scale_row) / 2
+        # cdef float center_colM = (cols * scale_col) / 2
+
+        cdef float a,b,c,d
+        a = cos(angle)/scale_col
+        b = -sin(angle)/scale_col
+        c = sin(angle)/scale_row
+        d = cos(angle)/scale_row
+
+        with nogil:
+            for f in range(nFrames):
+                for j in prange(cols, schedule="static"):
+                    for i in range(rows):
+                        col = (a*(j-center_col-shift_col)+b*(i-center_row-shift_row)) + center_col
+                        row = (c*(j-center_col-shift_col)+d*(i-center_row-shift_row)) + center_row
+                        _image_out[f, i, j] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+        
+
+class PolarTransform(LiquidEngine):
+    """
+    Polar Transformations using the NanoPyx Liquid Engine
+    """
+    
+    def __init__(self, clear_benchmarks=False, testing=False):
+        self._designation = "PolarTransform_catmull_rom"
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
+                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
+                        threaded_dynamic_=True, threaded_guided_=True)
+
+    def run(self, image, tuple out_shape, str scale, run_type=None) -> np.ndarray:
+        """
+        Polar Transform an image using catmull_rom interpolation
+        :param image: The image to transform
+        :type image: np.ndarray or memoryview
+        :param out_shape: Desired shape for the output image
+        :type out_shape: tuple (n_row, n_col)
+        :param scale: Linear or Log transform
+        :type scale: str, either 'log' or 'linear'
+        :return: The transformed image in polar coordinates
+        """
+        image = check_image(image)
+        nrow, ncol = out_shape
+        if scale not in ['linear', 'log']:
+            scale = 'linear'
+        return self._run(image, nrow, ncol, scale, run_type=run_type)
+
+    def benchmark(self, image, tuple out_shape, str scale):
+        """
+        Benchmark the PolarTransform run function in multiple run types
+        :param image: The image to transform
+        :type image: np.ndarray or memoryview
+        :param out_shape: Desired shape for the output image
+        :type out_shape: tuple (n_row, n_col)
+        :param scale: Linear or Log transform
+        :type scale: str, either 'log' or 'linear'
+        :return: The benchmark results
+        :rtype: [[run_time, run_type_name, return_value], ...]
+        """
+        image = check_image(image)
+        nrow, ncol = out_shape
+        if scale not in ['linear', 'log']:
+            scale = 'linear'
+        return super().benchmark(image, nrow, ncol, scale)
+
+    def _run_opencl(self, image, int nrow, int ncol, str scale, dict device, int mem_div=1):
+
+        # QUEUE AND CONTEXT
+        cl_ctx = cl.Context([device['device']])
+        cl_queue = cl.CommandQueue(cl_ctx)
+
+        cdef int nFrames = image.shape[0]
+        cdef int nRows = image.shape[1]
+        cdef int nCols = image.shape[2]
+
+        output = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+
+        max_slices = int((device["device"].global_mem_size // (output[0,:,:].nbytes + image[0,:,:].nbytes))/mem_div)
+        max_slices = self._check_max_slices(image, max_slices)
+        image_in = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY, self._check_max_buffer_size(image[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        image_out = cl.Buffer(cl_ctx, cl.mem_flags.WRITE_ONLY, self._check_max_buffer_size(output[0:max_slices,:,:].nbytes, device['device'], max_slices))
+        cl.enqueue_copy(cl_queue, image_in, image[0:max_slices,:,:]).wait()
+        
+        cdef int scale_int = 0
+        if scale == 'log':
+            scale_int = 1
+
+        # Create the program        
+        code = self._get_cl_code("_le_interpolation_catmull_rom_.cl", device['DP'])
+        prg = cl.Program(cl_ctx, code).build()
+        knl = prg.PolarTransform
+
+        for i in range(0, image.shape[0], max_slices):
+            if image.shape[0] - i >= max_slices:
+                n_slices = max_slices
+            else:
+                n_slices = image.shape[0] - i
+
+            knl(
+                cl_queue,
+                (n_slices, nrow, ncol),
+                self.get_work_group(device["device"], (n_slices, nrow, ncol)),
+                image_in,
+                image_out,
+                np.int32(nRows),
+                np.int32(nCols),
+                np.int32(scale_int)
+            )
+
+            cl.enqueue_copy(cl_queue, output[i:i+n_slices,:,:], image_out).wait()
+            if i+n_slices<image.shape[0]:
+                cl.enqueue_copy(cl_queue, image_in, image[i+n_slices:i+2*n_slices,:,:]).wait()
+
+            cl_queue.finish()
+
+        image_in.release()
+        image_out.release()
+
+        return output
+        
+    def _run_unthreaded(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in range(ncol):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    def _run_threaded(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in prange(ncol):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    def _run_threaded_guided(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in prange(ncol, schedule="guided"):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    def _run_threaded_dynamic(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in prange(ncol, schedule="dynamic"):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out
+    def _run_threaded_static(self, float[:,:,:] image, int nrow, int ncol, str scale):
+        
+        cdef int nFrames = image.shape[0]
+        cdef int rows = image.shape[1]
+        cdef int cols = image.shape[2]
+
+        cdef float c_rows = rows / 2
+        cdef float c_cols = cols / 2
+
+        # angle on rows, radius on cols
+        image_out = np.zeros((nFrames, nrow, ncol), dtype=np.float32)
+        cdef float[:,:,:] _image_out = image_out
+        cdef float[:,:,:] _image_in = image
+        
+        # max_angle = 2*pi
+        cdef float max_radius = hypot(c_rows, c_cols)
+
+        cdef int f,i,j
+        cdef float angle, radius, col, row
+
+        with nogil:
+            for f in range(nFrames):
+                for i in prange(ncol, schedule="static"):
+                    for j in range(nrow):
+                        angle = j * 2 * pi  / (nrow-1)
+                        if scale=='log':
+                            radius = exp(i*log(max_radius)/(ncol-1))
+                        else:
+                            radius = i * max_radius / (ncol-1)
+                        col = radius * cos(angle) + c_cols
+                        row = radius * sin(angle) + c_rows
+                        _image_out[f, j, i] = _c_interpolate(&_image_in[f, 0, 0], row, col, rows, cols)
+
+        return image_out

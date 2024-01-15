@@ -101,75 +101,6 @@ class Convolution(LiquidEngine):
                     _conv_out[r,c] = acc
 
         return conv_out
-
-    def _run_threaded_static(self, float[:,:] image, float[:,:] kernel):
-
-        cdef int nRows = image.shape[0]
-        cdef int nCols = image.shape[1]
-
-        cdef int nRows_kernel = kernel.shape[0]
-        cdef int nCols_kernel = kernel.shape[1]
-
-        cdef int center_r = (nRows_kernel-1) // 2
-        cdef int center_c = (nCols_kernel-1) // 2
-
-        cdef int r,c
-        cdef int kr,kc
-
-        cdef int local_row, local_col
-
-        cdef float acc = 0
-
-        conv_out = np.zeros((nRows, nCols), dtype=np.float32)
-        cdef float[:,:] _conv_out = conv_out
-
-        with nogil:
-            for r in prange(nRows, schedule="static"):
-                for c in prange(nCols, schedule="static"):
-                    acc = 0
-                    for kr in range(nRows_kernel):
-                        for kc in range(nCols_kernel):
-                            local_row = min(max(r+(kr-center_r),0),nRows-1)
-                            local_col = min(max(c+(kc-center_c),0),nCols-1)
-                            acc = acc + kernel[kr,kc] * image[local_row, local_col]
-                    _conv_out[r,c] = acc
-
-        return conv_out
-
-    def _run_threaded_dynamic(self, float[:,:] image, float[:,:] kernel):
-
-        cdef int nRows = image.shape[0]
-        cdef int nCols = image.shape[1]
-
-        cdef int nRows_kernel = kernel.shape[0]
-        cdef int nCols_kernel = kernel.shape[1]
-
-        cdef int center_r = (nRows_kernel-1) // 2
-        cdef int center_c = (nCols_kernel-1) // 2
-
-        cdef int r,c
-        cdef int kr,kc
-
-        cdef int local_row, local_col
-
-        cdef float acc = 0
-
-        conv_out = np.zeros((nRows, nCols), dtype=np.float32)
-        cdef float[:,:] _conv_out = conv_out
-
-        with nogil:
-            for r in prange(nRows, schedule="dynamic"):
-                for c in prange(nCols, schedule="dynamic"):
-                    acc = 0
-                    for kr in range(nRows_kernel):
-                        for kc in range(nCols_kernel):
-                            local_row = min(max(r+(kr-center_r),0),nRows-1)
-                            local_col = min(max(c+(kc-center_c),0),nCols-1)
-                            acc = acc + kernel[kr,kc] * image[local_row, local_col]
-                    _conv_out[r,c] = acc
-
-        return conv_out
-
     def _run_threaded_guided(self, float[:,:] image, float[:,:] kernel):
 
         cdef int nRows = image.shape[0]
@@ -192,8 +123,8 @@ class Convolution(LiquidEngine):
         cdef float[:,:] _conv_out = conv_out
 
         with nogil:
-            for r in prange(nRows, schedule="guided"):
-                for c in prange(nCols, schedule="guided"):
+            for r in prange(nRows,schedule="guided"):
+                for c in prange(nCols,schedule="guided"):
                     acc = 0
                     for kr in range(nRows_kernel):
                         for kc in range(nCols_kernel):
@@ -203,7 +134,72 @@ class Convolution(LiquidEngine):
                     _conv_out[r,c] = acc
 
         return conv_out
+    def _run_threaded_dynamic(self, float[:,:] image, float[:,:] kernel):
 
+        cdef int nRows = image.shape[0]
+        cdef int nCols = image.shape[1]
+
+        cdef int nRows_kernel = kernel.shape[0]
+        cdef int nCols_kernel = kernel.shape[1]
+
+        cdef int center_r = (nRows_kernel-1) // 2
+        cdef int center_c = (nCols_kernel-1) // 2
+
+        cdef int r,c
+        cdef int kr,kc
+
+        cdef int local_row, local_col
+
+        cdef float acc = 0
+
+        conv_out = np.zeros((nRows, nCols), dtype=np.float32)
+        cdef float[:,:] _conv_out = conv_out
+
+        with nogil:
+            for r in prange(nRows,schedule="dynamic"):
+                for c in prange(nCols,schedule="dynamic"):
+                    acc = 0
+                    for kr in range(nRows_kernel):
+                        for kc in range(nCols_kernel):
+                            local_row = min(max(r+(kr-center_r),0),nRows-1)
+                            local_col = min(max(c+(kc-center_c),0),nCols-1)
+                            acc = acc + kernel[kr,kc] * image[local_row, local_col]
+                    _conv_out[r,c] = acc
+
+        return conv_out
+    def _run_threaded_static(self, float[:,:] image, float[:,:] kernel):
+
+        cdef int nRows = image.shape[0]
+        cdef int nCols = image.shape[1]
+
+        cdef int nRows_kernel = kernel.shape[0]
+        cdef int nCols_kernel = kernel.shape[1]
+
+        cdef int center_r = (nRows_kernel-1) // 2
+        cdef int center_c = (nCols_kernel-1) // 2
+
+        cdef int r,c
+        cdef int kr,kc
+
+        cdef int local_row, local_col
+
+        cdef float acc = 0
+
+        conv_out = np.zeros((nRows, nCols), dtype=np.float32)
+        cdef float[:,:] _conv_out = conv_out
+
+        with nogil:
+            for r in prange(nRows,schedule="static"):
+                for c in prange(nCols,schedule="static"):
+                    acc = 0
+                    for kr in range(nRows_kernel):
+                        for kc in range(nCols_kernel):
+                            local_row = min(max(r+(kr-center_r),0),nRows-1)
+                            local_col = min(max(c+(kc-center_c),0),nCols-1)
+                            acc = acc + kernel[kr,kc] * image[local_row, local_col]
+                    _conv_out[r,c] = acc
+
+        return conv_out
 
     def _run_opencl(self, image, kernel, device):
         

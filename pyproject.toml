@@ -5,6 +5,7 @@ requires = [
     "build>=0.10.0",
     "cython>=0.29.0",
     "numpy>=1.19.0",
+    "mako",
 ]
 
 build-backend = "setuptools.build_meta"
@@ -52,6 +53,7 @@ dependencies = [
     "scikit-learn>=1.1.0",
     "statsmodels>=0.14.0",
     "matplotlib>=3.5",
+    "importlib-resources",
 ]
 dynamic = ["version"] # changed in setup.py
 
@@ -101,8 +103,11 @@ repository = "https://github.com/HenriquesLab/NanoPyx"
 #changelog = "https://github.com/me/spam/blob/master/CHANGELOG.md"
 bug_tracker = "https://github.com/HenriquesLab/NanoPyx/issues"
 
-[tool.setuptools.package-data]
-"*" = ["*.yaml", "*.jpg", "*.cl"]
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.black]
 exclude = '''
