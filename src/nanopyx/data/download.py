@@ -100,7 +100,7 @@ class ExampleDataManager:
         for dataset in self._datasets:
             if dataset_name in (dataset["label"], dataset["nickname"]):
                 return dataset
-        raise ValueError(f"{dataset_name} not found in example datasets {self._datasets}, {self._base_path}, {os.listdir(self._base_path)}")
+        raise ValueError(f"{dataset_name} not found in example datasets")
 
     def _download(self, url, file_path, download_type=None, unzip=False):
         if os.path.exists(file_path):  # or os.path.exists(os.path.splitext(file_path)[0]):
