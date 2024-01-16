@@ -51,7 +51,6 @@ jobs:
           AGENT_TOOLS_DIRECTORY: /
 
   test_on_windows:
-    runs-on: [self-hosted, Windows]
     runs-on: [self-hosted, Ubuntu, Docker]
     steps:
       - uses: actions/checkout@v4
