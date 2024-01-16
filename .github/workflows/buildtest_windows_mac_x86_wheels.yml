@@ -1,4 +1,4 @@
-name: Build and Test wheels
+name: Build and Test Windows and Mac x86 wheels
 
 on: workflow_dispatch
 
