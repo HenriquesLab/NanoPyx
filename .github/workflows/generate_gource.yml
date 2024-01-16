@@ -5,7 +5,7 @@ on: workflow_dispatch
 
 jobs:
     generate_movie:
-        runs-on: [self-hosted, deepthought]
+        runs-on: [self-hosted, Ubuntu]
         steps:
           - name: Checkout
             uses: actions/checkout@v4

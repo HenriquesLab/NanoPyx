@@ -98,7 +98,7 @@ jobs:
           AGENT_TOOLS_DIRECTORY: /
 
   generate_movie:
-    runs-on: [self-hosted, Linux, deepthought]
+    runs-on: [self-hosted, Ubuntu]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
