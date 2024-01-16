@@ -96,6 +96,7 @@ class ExampleDataManager:
         :type dataset_name: str
         :return: dictionary with information about the dataset
         """
+        print(self._datasets)
         for dataset in self._datasets:
             if dataset_name in (dataset["label"], dataset["nickname"]):
                 return dataset
