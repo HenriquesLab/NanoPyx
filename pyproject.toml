@@ -43,7 +43,7 @@ dependencies = [
     "scikit-image>=0.19.2",
     "pyyaml>=6.0",
     "onedrivedownloader>=1.1.3",
-    "gdown>=4.6.0,<=4.6.3",
+    "gdown>=4.6.0,<=4.7.1",
     "tqdm>=4.64.1",
     "lmfit>=1.1.0",
     "opencv-python>=4.7.0.68",
