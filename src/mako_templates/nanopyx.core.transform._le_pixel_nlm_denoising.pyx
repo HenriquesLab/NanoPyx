@@ -165,7 +165,7 @@ class NLMDenoising(LiquidEngine):
 
         var = 2 * sigma * sigma
 
-        code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
+        code = self._get_cl_code("_le_pixel_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl = prg.nlm_denoising
 
