@@ -3,6 +3,8 @@
 import numpy as np
 cimport numpy as np
 
+from itertools import product
+
 from skimage.restoration import denoise_nl_means
 
 from libc.math cimport exp, isnan, fmax
@@ -12,6 +14,9 @@ from .__interpolation_tools__ import check_image
 from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 
+import os
+os.environ['PYOPENCL_NO_CACHE']='1'
+os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
 
 cdef extern from "_c_integral_image.h":
     void _c_integral_image(float* image, float* integral, int n_row, int n_col, int t_row, int r_col, float var_diff) nogil
@@ -431,11 +436,11 @@ class NLMDenoising(LiquidEngine):
             patch_size = patch_size + 1
 
         nframes, nrow, ncol = image.shape
-        offset = patch_size // 2
+        offset = patch_size // 2 
 
         padded = np.ascontiguousarray(np.pad(image, ((0,0), (offset, offset), (offset, offset)), mode='reflect'))
-        result = np.empty_like(image)
-        result_per_frame = np.empty_like(result[0,:,:])
+        result = np.zeros_like(image)
+        result_per_frame = np.zeros_like(result[0,:,:])
 
         A = ((patch_size - 1.) / 4.)
         range_vals = np.arange(-offset, offset + 1, dtype=np.float32)
@@ -446,27 +451,29 @@ class NLMDenoising(LiquidEngine):
         var = 2 * sigma * sigma
 
         code = self._get_cl_code("_le_nlm_denoising_.cl", device['DP'])
-        prg = cl.Program(cl_ctx, code).build()
+        prg = cl.Program(cl_ctx, code).build(options="-cl-opt-disable -Werror -g")
         knl = prg.nlm_denoising
 
-        padded_cl = cl.image_from_array(cl_ctx, padded[0,:,:], mode='r')
-        result_cl = cl.image_from_array(cl_ctx, result_per_frame, mode='w')
-        w_cl = cl.image_from_array(cl_ctx, w, mode='r')
+        padded_cl = cl.image_from_array(cl_ctx, np.asarray(padded[0,:,:],order='C', dtype=np.float32), mode='r')
+        result_cl = cl.image_from_array(cl_ctx, np.asarray(result_per_frame,order='C', dtype=np.float32), mode='w')
+        w_cl = cl.image_from_array(cl_ctx, np.asarray(w,order='C',dtype=np.float32), mode='r')
         cl_queue.finish()
 
 
         for f in range(nframes):
-            
-            knl(cl_queue,
-                (nrow,ncol),
-                None,
-                padded_cl,
-                result_cl,
-                w_cl,
-                np.int32(patch_distance),
-                np.int32(patch_size),
-                np.int32(offset),
-                np.float32(var)).wait()
+            for bl in product([0,1],[0,1]):
+                knl(cl_queue,
+                    (nrow//2,ncol//2),
+                    (1,1),
+                    padded_cl,
+                    result_cl,
+                    w_cl,
+                    np.int32(patch_distance),
+                    np.int32(patch_size),
+                    np.int32(offset),
+                    np.float32(var),
+                    np.int32(bl[0]),
+                    np.int32(bl[1]))
 
             cl.enqueue_copy(cl_queue, result_per_frame, result_cl, origin=(0,0), region=(nrow,ncol)).wait()
             result[f,:,:] = result_per_frame

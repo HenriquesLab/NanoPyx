@@ -466,7 +466,7 @@ class NLMDenoising(LiquidEngine):
         h2s2 = h*h*patch_size*patch_size
         var = sigma*sigma*2
 
-        code = self._get_cl_code("_le_fast_nlm_denoising_.cl", device['DP'])
+        code = self._get_cl_code("_le_patch_nlm_denoising_.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
         knl_denoising = prg.nlm_denoising
         knl_normalization = prg.nlm_normalizer
