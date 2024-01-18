@@ -1,12 +1,12 @@
 __constant sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_NONE | CLK_FILTER_NEAREST;
 
-__kernel void nlm_denoising(__read_only image2d_t padded, __write_only image2d_t result, __read_only image2d_t w, int patch_distance, int patch_size, int offset, float var, int bl_x, int bl_y) {
+__kernel void nlm_denoising(__read_only image2d_t padded, __write_only image2d_t result, __read_only image2d_t w, int patch_distance, int patch_size, int offset, float var) {
 
-    int row = get_global_id(0)+bl_x*(int)get_global_size(0);
-    int col = get_global_id(1)+bl_y*(int)get_global_size(1);
+    int row = get_global_id(0);
+    int col = get_global_id(1);
 
-    int n_row = (int)get_global_size(0)*2;
-    int n_col = (int)get_global_size(1)*2;
+    int n_row = (int)get_global_size(0);
+    int n_col = (int)get_global_size(1);
 
     int i_start = row - min(patch_distance, row);
     int i_end = row + min(patch_distance+1, n_row-row);
