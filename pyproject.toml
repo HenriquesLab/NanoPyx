@@ -62,7 +62,7 @@ dynamic = ["version"] # changed in setup.py
 # nanopyx-c2cl = "scripts.c2cl:main"
 
 [project.optional-dependencies]
-all = ["nanopyx[developer,test,jupyter,doc]"]
+all = ["nanopyx[developer,test,jupyter,doc, optional]"]
 developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
 test = [
     "nox>=2022.11.21",
@@ -76,8 +76,10 @@ test = [
     "pytest-sugar>=0.9.6",
     "pytest-cython>=0.2.0",
     "nanopyx[jupyter]",
-    "numba"
+    "nanopyx[optional]",
 ]
+optional=["numba", "dask", "transonic"]
+cuda = ["cupy"] # should be manually installed by users according to their CUDA version https://docs.cupy.dev/en/stable/install.html
 jupyter = [
     "nbformat>=4.2.0",
     "seaborn>=0.12.1",
