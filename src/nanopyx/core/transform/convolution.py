@@ -1,11 +1,33 @@
-import transonic
-import cupy as cp
 import numpy as np
-import dask.array as da
-from cupyx.scipy.signal import convolve2d as cupyx_convolve
-from dask_image.ndfilters import convolve as dask_convolve
-from numba import njit
-from transonic import jit, boost
+
+
+try:
+    import transonic
+    from transonic import jit
+except ImportError:
+    print("Transonic is not installed")
+
+try:
+    from numba import njit
+except ImportError:
+    print("Numba is not installed")
+
+try:
+    import cupy as cp
+    from cupyx.scipy.signal import convolve2d as cupyx_convolve
+except ImportError:
+    print("Cupy is not installed")
+
+try:
+    import dask.array as da
+
+except ImportError:
+    print("Dask is not installed")
+
+try:
+    from dask_image.ndfilters import convolve as dask_convolve
+except ImportError:
+    print("Dask_image is not installed")
 
 
 def check_array(image: np.ndarray):
@@ -60,7 +82,7 @@ def convolution2D_python(image: np.ndarray, kernel: np.ndarray):
 
 
 @jit(backend="numba")
-def convolution2D_transonic(image: "float[]", kernel: "float[]"):
+def convolution2D_transonic(image, kernel):
     nRows = image.shape[0]
     nCols = image.shape[1]
 
