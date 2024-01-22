@@ -47,7 +47,7 @@ class eSRRF3D(LiquidEngine):
         cdef float fwhm_z = radius_z
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
-        cdef int Gx_Gy_Gz_MAGNIFICATION = 2
+        cdef int Gx_Gy_MAGNIFICATION = 2
         cdef int _magnification_xy = magnification_xy
         cdef int _magnification_z = magnification_z
         cdef int _doIntensityWeighting = doIntensityWeighting
@@ -64,29 +64,35 @@ class eSRRF3D(LiquidEngine):
 
         for f in range(n_frames):
 
-            image_interpolated = interpolator.run(image[f], 0, 0, _magnification_xy, _magnification_xy)
+            # image_interpolated = interpolator.run(image[f], 0, 0, _magnification_xy, _magnification_xy)
+            image_interpolated = interpolate_3d(image[f], _magnification_xy, _magnification_z)
             n_slices_mag, n_rows_mag, n_cols_mag = image_interpolated.shape[0], image_interpolated.shape[1], image_interpolated.shape[2]
 
-            gradients_c = np.zeros((n_slices, n_rows*Gx_Gy_Gz_MAGNIFICATION, n_cols*Gx_Gy_Gz_MAGNIFICATION), dtype=np.float32)
-            gradients_r = np.zeros((n_slices, n_rows*Gx_Gy_Gz_MAGNIFICATION, n_cols*Gx_Gy_Gz_MAGNIFICATION), dtype=np.float32)
-            gradients_s = np.zeros((n_slices, n_rows*Gx_Gy_Gz_MAGNIFICATION, n_cols*Gx_Gy_Gz_MAGNIFICATION), dtype=np.float32)
+            gradients_c = np.zeros((n_slices, n_rows*Gx_Gy_MAGNIFICATION, n_cols*Gx_Gy_MAGNIFICATION), dtype=np.float32)
+            gradients_r = np.zeros((n_slices, n_rows*Gx_Gy_MAGNIFICATION, n_cols*Gx_Gy_MAGNIFICATION), dtype=np.float32)
+            gradients_s = np.zeros((n_slices, n_rows*Gx_Gy_MAGNIFICATION, n_cols*Gx_Gy_MAGNIFICATION), dtype=np.float32)
 
-            img_dum = interpolator.run(image[f], 0, 0, Gx_Gy_Gz_MAGNIFICATION, Gx_Gy_Gz_MAGNIFICATION)
+            img_dum = interpolator.run(image[f], 0, 0, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION)
+            # img_dum = interpolate_3d(image[f], Gx_Gy_MAGNIFICATION, _magnification_z)
             n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum = img_dum.shape[0], img_dum.shape[1], img_dum.shape[2]
 
             with nogil:
                 _c_gradient_3d(&img_dum[0, 0, 0], &gradients_c[0, 0, 0], &gradients_r[0, 0, 0], &gradients_s[0, 0, 0], n_slices, n_rows_mag_dum, n_cols_mag_dum)
 
-            gradients_s_interpolated = interpolator.run(gradients_s, 0, 0, _magnification_xy, _magnification_xy)
-            gradients_r_interpolated = interpolator.run(gradients_r, 0, 0, _magnification_xy, _magnification_xy)
-            gradients_c_interpolated = interpolator.run(gradients_c, 0, 0, _magnification_xy, _magnification_xy)
+            # gradients_s_interpolated = interpolator.run(gradients_s, 0, 0, _magnification_xy, _magnification_xy)
+            # gradients_r_interpolated = interpolator.run(gradients_r, 0, 0, _magnification_xy, _magnification_xy)
+            # gradients_c_interpolated = interpolator.run(gradients_c, 0, 0, _magnification_xy, _magnification_xy)
+
+            gradients_s_interpolated = interpolate_3d(gradients_s, _magnification_xy, _magnification_z)
+            gradients_r_interpolated = interpolate_3d(gradients_r, _magnification_xy, _magnification_z)
+            gradients_c_interpolated = interpolate_3d(gradients_c, _magnification_xy, _magnification_z)
 
             with nogil:
                 for sM in range(0, n_slices_mag):
                     for rM in range(0, n_rows_mag):
                         for cM in range(0, n_cols_mag):
                             if _doIntensityWeighting:
-                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 # zcof = (sM) / _magnification_z
                                 # if (zcof < 0):
                                 #     z0 = 0
@@ -97,7 +103,7 @@ class eSRRF3D(LiquidEngine):
                                 # z0 = z0 * _magnification_z
                                 rgc_map[f, sM, rM, cM] = rgc_val * image_interpolated[sM, rM, cM]
                             else:
-                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_Gz_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 # zcof = (sM) / _magnification_z
                                 # if (zcof < 0):
                                 #     z0 = 0
