@@ -81,9 +81,12 @@ class Agent_:
                         best_repr_args = repr_args_
                 # What happens if there are no benchmarks for this runtype?
                 if best_repr_args is None:
-                    run_info = [None]
+                    run_info = [0]
                 else:
                     run_info = fn._benchmarks[run_type][best_repr_args][1:]
+
+            if None in run_info: # yamls null are read into None python objects
+                continue
 
             if len(run_info) < 2:
                 # Fall back to default values

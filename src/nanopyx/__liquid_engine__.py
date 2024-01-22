@@ -4,7 +4,7 @@ import yaml
 import datetime
 import inspect
 import warnings
-from functools import partial
+from functools import partial, reduce
 from itertools import combinations
 from pathlib import Path
 
@@ -241,6 +241,7 @@ class LiquidEngine:
         print(f"Slowest run type: {speed_sort[-1][1]}")
 
         # Compare each run type against each other, sorted by speed
+        different_runtypes = []
         for pair in combinations(speed_sort, 2):
             print(f"{pair[0][1]} is {pair[1][0]/pair[0][0]:.2f}x faster than {pair[1][1]}")
             if self.testing:
@@ -248,6 +249,16 @@ class LiquidEngine:
                     print(f"{pair[0][1]} and {pair[1][1]} have similar outputs!")
                 else:
                     warnings.warn(f"WARNING: outputs of {pair[0][1]} and {pair[1][1]} don't match!")
+                    different_runtypes.append(set([pair[0][1],pair[1][1]]))
+        if len(different_runtypes)<=len(self._run_types)-1:
+            try:
+                common_runtype = reduce(lambda a,b: a&b,different_runtypes)
+            except(TypeError):
+                common_runtype = {} 
+            if common_runtype:
+                warnings.warn(f"WARNING: disabling {list(common_runtype)[0]} for this set of arguments!")
+                arg_repr, arg_score = self._get_args_repr_score(*args, **kwargs)
+                self._store_results(arg_repr, arg_score, list(common_runtype)[0], None) # None saves to null in yamls
 
         return speed_sort
 
