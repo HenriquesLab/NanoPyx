@@ -14,6 +14,9 @@ import numpy as np
 
 # This will in the future come from the Agent
 from .__njit__ import njit_works
+from .__dask__ import dask_works
+from .__transonic__ import transonic_works
+from .__cuda__ import cuda_works
 from .__opencl__ import opencl_works, devices, cl
 
 __home_folder__ = os.path.expanduser("~")
@@ -44,6 +47,9 @@ class LiquidEngine:
         threaded_guided_: bool = False,
         python_: bool = False,
         njit_: bool = False,
+        dask_: bool = False,
+        transonic_: bool = False,
+        cuda_: bool = False,
         clear_benchmarks: bool = False,
     ) -> None:
         """
@@ -93,6 +99,12 @@ class LiquidEngine:
                 self._run_njit()
             except TypeError:
                 print("Consider adding default arguments to the njit implementation to trigger early compilation")
+        if dask_ and dask_works():
+            self._run_types["Dask"] = self._run_dask
+        if transonic_ and transonic_works():
+            self._run_types["Transonic"] = self._run_transonic
+        if cuda_ and cuda_works():
+            self._run_types["Cuda"] = self._run_cuda
 
         self.testing = testing
         self.mem_div = 1
@@ -479,6 +491,27 @@ class LiquidEngine:
     def _run_njit(*args, **kwargs):
         """
         Runs the njit version of the function
+        Should be overridden by the any class that inherits from this class
+        """
+        pass
+
+    def _run_dask(*args, **kwargs):
+        """
+        Runs the dask version of the function
+        Should be overridden by the any class that inherits from this class
+        """
+        pass
+
+    def _run_transonic(*args, **kwargs):
+        """
+        Runs the transonic version of the function
+        Should be overridden by the any class that inherits from this class
+        """
+        pass
+
+    def _run_cuda(*args, **kwargs):
+        """
+        Runs the cuda version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass

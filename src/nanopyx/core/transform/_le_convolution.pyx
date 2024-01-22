@@ -11,6 +11,7 @@ from cython.parallel import parallel, prange
 from libc.math cimport cos, sin
 
 from .__interpolation_tools__ import check_image, value2array
+from .convolution import check_array, convolution2D_cuda, convolution2D_dask, convolution2D_numba, convolution2D_python, convolution2D_transonic
 from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 
@@ -24,10 +25,12 @@ class Convolution(LiquidEngine):
         self._designation = "Conv2D"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True)
+                        threaded_dynamic_=True, threaded_guided_=True,
+                        njit_=True, python_=True, transonic_=True, cuda_=True, dask_=True)
         self._default_benchmarks = {'OpenCL': {"(['shape(100, 100)', 'shape(5, 5)'], {})": [250000, 0.009790166019229218, 0.003298707975773141, 0.003652999992482364], "(['shape(500, 500)', 'shape(11, 11)'], {})": [30250000, 0.007485667010769248, 0.007351625012233853, 0.007932541979243979]}, 'Threaded': {"(['shape(100, 100)', 'shape(5, 5)'], {})": [250000, 0.00022562500089406967, 0.00018245799583382905, 0.00017095799557864666], "(['shape(500, 500)', 'shape(11, 11)'], {})": [30250000, 0.007719500019447878, 0.0060990000201854855, 0.008289082994451746]}, 'Threaded_dynamic': {"(['shape(100, 100)', 'shape(5, 5)'], {})": [250000, 0.0001590839819982648, 0.0001595419889781624, 0.00020799998310394585], "(['shape(500, 500)', 'shape(11, 11)'], {})": [30250000, 0.005388707999372855, 0.005681082984665409, 0.005188624985748902]}, 'Threaded_guided': {"(['shape(100, 100)', 'shape(5, 5)'], {})": [250000, 0.00018945799092762172, 0.0001723750028759241, 0.00017620899598114192], "(['shape(500, 500)', 'shape(11, 11)'], {})": [30250000, 0.005136792024131864, 0.005925459001446143, 0.005063916993094608]}, 'Threaded_static': {"(['shape(100, 100)', 'shape(5, 5)'], {})": [250000, 0.00018066700431518257, 0.0001790839887689799, 0.00020249999943189323], "(['shape(500, 500)', 'shape(11, 11)'], {})": [30250000, 0.005990457982989028, 0.006161083991173655, 0.006471291999332607]}, 'Unthreaded': {"(['shape(100, 100)', 'shape(5, 5)'], {})": [250000, 0.00021341597312130034, 0.00020179100101813674, 0.00020345899974927306], "(['shape(500, 500)', 'shape(11, 11)'], {})": [30250000, 0.031798416981473565, 0.031586291996063665, 0.031558375019812956]}}
 
     def run(self, image, kernel, run_type=None):
+        image = check_array(image)
         return self._run(image, kernel, run_type=run_type)
 
     def benchmark(self, image, kernel):
@@ -231,3 +234,18 @@ class Convolution(LiquidEngine):
 
         cl_queue.finish()
         return image_out
+
+    def _run_python(self, image, kernel):
+        return convolution2D_python(image, kernel).astype(np.float32)
+
+    def _run_transonic(self, image, kernel):
+        return convolution2D_transonic(image, kernel).astype(np.float32)
+
+    def _run_dask(self, image, kernel):
+        return convolution2D_dask(image, kernel).astype(np.float32)
+
+    def _run_cuda(self, image, kernel):
+        return convolution2D_cuda(image, kernel).astype(np.float32)
+
+    def _run_njit(self, image, kernel):
+        return convolution2D_numba(image, kernel).astype(np.float32)
