@@ -32,4 +32,5 @@ jobs:
         
       - uses: actions/upload-artifact@v4
         with:
+          name: wheel-macOS-ARM64
           path: ./wheelhouse/*.whl
