@@ -13,7 +13,7 @@ from cython.parallel import parallel, prange
 from libc.math cimport cos, sin
 
 from .__interpolation_tools__ import check_image, value2array
-from .convolution import *
+from .convolution import check_array, convolution2D_cuda, convolution2D_dask, convolution2D_numba, convolution2D_python, convolution2D_transonic
 from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 
