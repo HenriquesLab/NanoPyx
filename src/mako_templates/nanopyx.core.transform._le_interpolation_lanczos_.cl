@@ -9,7 +9,7 @@ c_function_names = [('_c_interpolation_lanczos.c','_c_lanczos_kernel'),('_c_inte
 
 headers, functions = extract_batch_code(c_function_names)
 
-defines = [('TAPS',4),('HALF_TAPS',2)]
+defines = [('TAPS',4),('HALF_TAPS',2),('M_PI','3.14159265359f')]
 
 %>
 

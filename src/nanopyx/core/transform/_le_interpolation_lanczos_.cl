@@ -3,6 +3,7 @@ float _c_interpolate(__global float *image, float r, float c, int rows, int cols
 
 #define TAPS 4
 #define HALF_TAPS 2
+#define M_PI 3.14159265359f
 
 double _c_lanczos_kernel(double v) {
   if (v == 0) {
