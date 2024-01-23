@@ -1,4 +1,4 @@
-name: Build and Test Windows x86 wheels
+name: (self-hosted) Build and Test Windows x86 wheels
 
 on: workflow_dispatch
 

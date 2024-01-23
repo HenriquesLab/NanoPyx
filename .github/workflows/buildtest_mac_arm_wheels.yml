@@ -1,4 +1,4 @@
-name: Build and Test Apple Silicon wheels
+name: (self-hosted) Build and Test Apple Silicon wheels
 
 on: workflow_dispatch
 

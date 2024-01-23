@@ -1,4 +1,4 @@
-name: Build and Test manylinux wheels
+name: (self-hosted) Build and Test manylinux wheels
 
 on: workflow_dispatch
 

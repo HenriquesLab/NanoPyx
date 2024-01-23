@@ -1,4 +1,4 @@
-name: Build and Deploy Docs
+name: (self-hosted) Build and Deploy Docs
 
 on:
   release:
