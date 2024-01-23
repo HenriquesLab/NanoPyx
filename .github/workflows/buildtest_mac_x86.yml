@@ -1,4 +1,4 @@
-name: Build and Test Mac x86 wheels
+name: (cloud) Build and Test Mac x86 wheels
 
 on: workflow_dispatch
 
