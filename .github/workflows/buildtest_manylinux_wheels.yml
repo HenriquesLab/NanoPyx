@@ -4,11 +4,8 @@ on: workflow_dispatch
 
 jobs:
     build_wheels:
-      name: Build wheels on ${{ matrix.os }}
-      runs-on: ${{ matrix.os }}
-      strategy:
-        matrix:
-          os: [ubuntu-20.04]
+      name: Build wheels on manylinux
+      runs-on: [self-hosted, deepthought]
   
       steps:
         - uses: actions/checkout@v4
@@ -29,5 +26,5 @@ jobs:
   
         - uses: actions/upload-artifact@v4
           with:
-            name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+            name: wheel-manylinux
             path: ./wheelhouse/*.whl
