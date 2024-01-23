@@ -84,9 +84,6 @@ def convolution2D_transonic(image, kernel):
     except ImportError:
         print("Transonic is not installed, defaulting to Python")
         return convolution2D_python(image, kernel)
-    except ModuleNotFoundError:
-        print("Transonic is not installed, defaulting to Python")
-        return convolution2D_python(image, kernel)
 
 
 @njit(cache=True, parallel=True)
