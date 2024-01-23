@@ -93,7 +93,7 @@ class ShiftAndMagnify(LiquidEngine):
                 n_slices = image.shape[0] - i
             knl(cl_queue,
                 (n_slices, int(image.shape[1]*magnification_row), int(image.shape[2]*magnification_col)), 
-                self.get_work_group(dc, (n_slices, image.shape[1]*magnification_row, image.shape[2]*magnification_col)), 
+                None, #self.get_work_group(dc, (n_slices, image.shape[1]*magnification_row, image.shape[2]*magnification_col)), 
                 input_opencl, 
                 output_opencl, 
                 np.float32(shift_row), 
@@ -228,7 +228,7 @@ class ShiftScaleRotate(LiquidEngine):
             knl(
                 cl_queue,
                 (n_slices, int(image.shape[1]), int(image.shape[2])),
-                self.get_work_group(dc, (n_slices, image.shape[1], image.shape[2])),
+                None,#self.get_work_group(dc, (n_slices, image.shape[1], image.shape[2])),
                 input_opencl,
                 output_opencl,
                 np.float32(shift_row), 
@@ -374,7 +374,7 @@ class PolarTransform(LiquidEngine):
             knl(
                 cl_queue,
                 (n_slices, nrow, ncol),
-                self.get_work_group(device["device"], (n_slices, nrow, ncol)),
+                None,#self.get_work_group(device["device"], (n_slices, nrow, ncol)),
                 image_in,
                 image_out,
                 np.int32(nRows),
