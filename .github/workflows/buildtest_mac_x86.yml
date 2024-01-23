@@ -39,5 +39,5 @@ jobs:
     
         - uses: actions/upload-artifact@v4
           with:
-            name: wheel-manylinux
+            name: wheel-mac-x86
             path: ./wheelhouse/*.whl
