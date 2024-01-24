@@ -48,11 +48,8 @@ dependencies = [
     "tqdm>=4.64.1",
     "lmfit>=1.1.0",
     "opencv-python>=4.7.0.68",
-    "mastodon.py>=1.8.0",
-    "pandas>=1.5.3",
     "pyopencl>=2022.3.1",
     "scikit-learn>=1.1.0",
-    "statsmodels>=0.14.0",
     "matplotlib>=3.5",
     "importlib-resources",
 ]
