@@ -1,29 +1,35 @@
+import warnings
 import numpy as np
-
-from ._transonic import convolution2D
 
 
 try:
     from numba import njit
 except ImportError:
-    print("Numba is not installed")
+    print("Optional dependency Numba is not installed. Numba implementations will be ignored.")
+
+    def njit(*args, **kwargs):
+        def wrapper(func):
+            warnings.warn(f"Numba is not installed. Using pure python for {func.__name__}")
+            return func
+
+        return wrapper
 
 try:
     import cupy as cp
     from cupyx.scipy.signal import convolve2d as cupyx_convolve
 except ImportError:
-    print("Cupy is not installed")
+    print("Optional dependency Cupy is not installed. Cupy implementations will be ignored.")
 
 try:
     import dask.array as da
 
 except ImportError:
-    print("Dask is not installed")
+    print("Optional dependency Dask is not installed. Dask implementations will be ignored.")
 
 try:
     from dask_image.ndfilters import convolve as dask_convolve
 except ImportError:
-    print("Dask_image is not installed")
+    print("Optional dependecy Dask_image is not installed. Implementations using it will be ignored.")
 
 
 def check_array(image: np.ndarray):
@@ -80,7 +86,11 @@ def convolution2D_python(image: np.ndarray, kernel: np.ndarray):
 def convolution2D_transonic(image, kernel):
     try:
         import transonic
+        from ._transonic import convolution2D
         return convolution2D(image, kernel)
+    except ModuleNotFoundError:
+        print("Transonic is not installed, defaulting to Python")
+        return convolution2D_python(image, kernel)
     except ImportError:
         print("Transonic is not installed, defaulting to Python")
         return convolution2D_python(image, kernel)
