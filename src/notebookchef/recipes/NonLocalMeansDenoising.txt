@@ -1,0 +1,23 @@
+$markdown
+# NanoPyx "Codeless" Jupyter Notebook
+
+This notebook allows you to perform denoising on either 2 or 3 dimensional arrays.
+
+$include: notebook_intro.txt
+$include: citations/nlm_denoising.txt
+__cellbreak__
+$code
+$include: opencl_colab_fix.py
+__cellbreak__
+$code
+$include: notebook_setup.py
+__cellbreak__
+$code
+$include: image_loading.py
+__cellbreak__
+$markdown
+# Use Non-local means denoising on selected data
+$include: parameters/nlm_denoising.txt
+__cellbreak__
+$code
+$include: methods/nlm_denoising.py

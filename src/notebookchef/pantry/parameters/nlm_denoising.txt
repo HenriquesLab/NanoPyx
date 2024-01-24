@@ -1,0 +1,6 @@
+# NLM Denoising Parameters:
+
+- **Patch size:** Size of patches used for denoising.
+- **Patch distance:** Maximal pixel distance to search patches used for denoising.
+- **h:** Cut-off distance (in gray levels). A higher h results in a smoother image, at the expense of blurring features. For a Gaussian noise of standard deviation sigma, a rule of thumb is to choose the value of h to be sigma of slightly less.
+- **sigma:** The standard deviation of the Gaussian noise.
