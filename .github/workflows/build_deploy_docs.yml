@@ -38,7 +38,7 @@ jobs:
           python -m pipx run nox --sessions generate_docs
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: NanoPyx/docs/
+          path: "C:\\Users\\Actions\\ctions-runner\\_work\\NanoPyx\\NanoPyx\\docs"
 
   deploy_doc:
     needs: build_doc
