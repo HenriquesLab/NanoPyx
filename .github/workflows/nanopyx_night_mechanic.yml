@@ -117,8 +117,8 @@ jobs:
           python-version: "3.10"      
       - name: Install requirements
         run: |
-          sudo apt-get install xvfb
-          sudo apt-get install gource
+          sudo apt-get install xvfb -y
+          sudo apt-get install gource -y
       - name: Generate movie
         run: |
           xvfb-run gource --output-custom-log repo-activity.log
