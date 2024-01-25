@@ -1,4 +1,4 @@
-name: (self-hosted) Build and Deploy Docs
+name: (cloud) Build and Deploy Docs
 
 on:
   release:
@@ -19,7 +19,7 @@ on:
 
 jobs:
   build_doc:
-    runs-on: [self-hosted, Windows]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -38,13 +38,13 @@ jobs:
           python -m pipx run nox --sessions generate_docs
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: "C:\\Users\\Actions\\ctions-runner\\_work\\NanoPyx\\NanoPyx\\docs"
+          path: docs/
 
   deploy_doc:
     needs: build_doc
     # only run if main branch
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, Windows]
+    runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
