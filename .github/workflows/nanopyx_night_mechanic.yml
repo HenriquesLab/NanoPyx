@@ -105,7 +105,7 @@ jobs:
           AGENT_TOOLS_DIRECTORY: /
 
   generate_movie:
-    runs-on: [self-hosted, Ubuntu]
+    runs-on: [self-hosted, Ubuntu, deepthought]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -114,7 +114,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.10"
+          python-version: "3.10"      
       - name: Generate movie
         run: |
           xvfb-run gource --output-custom-log repo-activity.log
