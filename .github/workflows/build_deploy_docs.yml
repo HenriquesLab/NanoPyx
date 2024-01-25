@@ -19,7 +19,7 @@ on:
 
 jobs:
   build_doc:
-    runs-on: [self-hosted, deepthought]
+    runs-on: [self-hosted, Windows]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
     needs: build_doc
     # only run if main branch
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, deepthought]
+    runs-on: [self-hosted, Windows]
     permissions:
       pages: write
       id-token: write
