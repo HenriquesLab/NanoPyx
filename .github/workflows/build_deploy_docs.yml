@@ -38,7 +38,7 @@ jobs:
           python -m pipx run nox --sessions generate_docs
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/
+          path: NanoPyx/docs/
 
   deploy_doc:
     needs: build_doc
@@ -50,9 +50,7 @@ jobs:
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: "${{ steps.deployment.outputs.page_url }}"
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
       - id: deployment
         uses: actions/deploy-pages@v4
