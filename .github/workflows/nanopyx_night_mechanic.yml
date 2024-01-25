@@ -120,6 +120,7 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install xvfb -y
           sudo apt-get install gource -y
+          sudo apt-get install ffmpeg -y
       - name: Generate movie
         run: |
           xvfb-run gource --output-custom-log repo-activity.log
