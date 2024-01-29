@@ -1,4 +1,4 @@
-name: (self-hosted) Build and Deploy Docs
+name: (cloud) Build and Deploy Docs
 
 on:
   release:
@@ -19,15 +19,23 @@ on:
 
 jobs:
   build_doc:
-    runs-on: [self-hosted, deepthought]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Install requirements
+        run: |
+          python -m pip install pipx
+          python -m pip install nox
       - name: Run Nox - generate_docs
         run: |
-          pipx run nox --sessions generate_docs
+          python -m pipx run nox --sessions generate_docs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/
@@ -36,13 +44,13 @@ jobs:
     needs: build_doc
     # only run if main branch
     if: github.ref == 'refs/heads/main'
-    runs-on: [self-hosted, deepthought]
+    runs-on: ubuntu-latest
     permissions:
       pages: write
       id-token: write
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: "${{ steps.deployment.outputs.page_url }}"
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4

@@ -1,4 +1,7 @@
-![Logo](https://user-images.githubusercontent.com/7071808/259983552-ef7aa814-16ba-4947-a69f-1f096d70370e.png)
+<html>
+<img src="https://user-images.githubusercontent.com/7071808/259983552-ef7aa814-16ba-4947-a69f-1f096d70370e.png" alt="logo" width="400"/>
+</html>
+
 # Actively being developed with stable releases
 [![PyPI](https://img.shields.io/pypi/v/nanopyx.svg?color=green)](https://pypi.org/project/nanopyx)
 [![Python Version](https://img.shields.io/pypi/pyversions/nanopyx.svg?color=green)](https://python.org)
@@ -40,12 +43,13 @@ if you found this work useful, please cite: [preprint](https://www.biorxiv.org/c
 
 | Category | Method | Last test | Notebook | Colab Link |
 | --- | --- | --- | --- | --- |
-| Registration | Channel Registration |  ✅ by ADB (13/08/23) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) |
-| Registration | Drift Correction | ✅ by ADB (13/08/23) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) |
-| Quality Control | Image fidelity and resolution metrics | ✅ by ADB (13/08/23) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) |
-| Super-resolution | SRRF | ✅ by ADB (13/08/23) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) |
-| Super-resolution | eSRRF | ✅ by BMS (11/08/23) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/eSRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/eSRRFandQC.ipynb) |
-| Tutorial | Notebook with Example Dataset | ✅ by ADB (13/08/23) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=fflat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/NanoPyxExampleTutorial.ipynb) |
+| Denoising | Non-local Means |  ✅ by ADB (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/NonLocalMeansDenoising.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/NonLocalMeansDenoising.ipynb) |
+| Registration | Channel Registration |  ✅ by ADB (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ChannelRegistration.ipynb) |
+| Registration | Drift Correction | ✅ by ADB (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/DriftCorrection.ipynb) |
+| Quality Control | Image fidelity and resolution metrics | ✅ by ADB (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRMetrics.ipynb) |
+| Super-resolution | SRRF | ✅ by ADB (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/SRRFandQC.ipynb) |
+| Super-resolution | eSRRF | ✅ by BMS (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/eSRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/eSRRFandQC.ipynb) |
+| Tutorial | Notebook with Example Dataset | ✅ by ADB (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=fflat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/NanoPyxExampleTutorial.ipynb) |
 
 ## napari plugin
 
@@ -73,6 +77,12 @@ or if you want to install with all optional dependencies:
 
 ```shell
 pip install nanopyx[all]
+```
+
+if you want access to the cupy implementation of 2D convolution you need to install the package version corresponding to your local CUDA installation. Please check the official documentation of cupy for further details. As an example if you wanted to install cupy for CUDA v12.X
+
+```shell
+pip install cupy-cuda12x
 ```
 
 To install latest development version:
@@ -105,8 +115,12 @@ Depending on your preferences and coding proficiency you might be using NanoPyx 
 - If you are using Jupyter Notebooks or Google Colab notebooks check out our [video tutorial](https://youtu.be/KD0RzolFnd4)
 - If you are using our [napari plugin](https://github.com/HenriquesLab/NanoPyx#napari-plugin) check out the official [napari tutorial](https://napari.org/stable/tutorials/index.html) and stay tuned for more!
 - If you prefer to use the Python library and take full advantage of the Liquid Engine flexibility, check out our Liquid Engine templates and our [official documentation](https://henriqueslab.github.io/NanoPyx/nanopyx.html).
-    - Simple Liquid Engine templates [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/liquid/_le_template_simple.pyx) and [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/liquid/_le_template_simple_.py)
-    - Fully fledged Liquid Engine templates [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/liquid/_le_template_advanced.pyx) and [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/liquid/_le_template_advanced.cl)
+    - Simple Liquid Engine templates [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/core/templates/_le_template_simple.pyx) and [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/core/templates/_le_template_simple_.py)
+    - Fully fledged Liquid Engine templates [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/core/templates/_le_template_advanced.pyx) and [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/core/templates/_le_template_advanced.cl)
+
+## Wiki
+
+If you want more in depth instructions on how to use nanopyx and its Liquid Engine please refer to our [wiki](https://github.com/HenriquesLab/NanoPyx/wiki). In the wiki you can find step by step tutorials describing how each methods works and how to implement your own Liquid Engine methods.
 
 ## Contributing
 

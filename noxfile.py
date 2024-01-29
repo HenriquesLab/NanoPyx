@@ -156,5 +156,5 @@ def generate_docs(session: nox.Session) -> None:
     """
     Generate the docs
     """
-    session.run("pip", "install", "-e", ".[doc]")
+    session.run("pip", "install", "-e", ".[doc, optional]")
     session.run("pdoc", DIR / "src" / "nanopyx", "-o", DIR / "docs")
