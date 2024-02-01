@@ -88,6 +88,7 @@ class Convolution(LiquidEngine):
 
         cdef float acc = 0
 
+
         conv_out = np.zeros((nRows, nCols), dtype=np.float32)
         cdef float[:,:] _conv_out = conv_out
 
@@ -103,6 +104,7 @@ class Convolution(LiquidEngine):
                     _conv_out[r,c] = acc
 
         return conv_out
+
     def _run_threaded_guided(self, float[:,:] image, float[:,:] kernel):
 
         cdef int nRows = image.shape[0]
@@ -121,6 +123,7 @@ class Convolution(LiquidEngine):
 
         cdef float acc = 0
 
+
         conv_out = np.zeros((nRows, nCols), dtype=np.float32)
         cdef float[:,:] _conv_out = conv_out
 
@@ -136,6 +139,7 @@ class Convolution(LiquidEngine):
                     _conv_out[r,c] = acc
 
         return conv_out
+
     def _run_threaded_dynamic(self, float[:,:] image, float[:,:] kernel):
 
         cdef int nRows = image.shape[0]
@@ -154,6 +158,7 @@ class Convolution(LiquidEngine):
 
         cdef float acc = 0
 
+
         conv_out = np.zeros((nRows, nCols), dtype=np.float32)
         cdef float[:,:] _conv_out = conv_out
 
@@ -169,6 +174,7 @@ class Convolution(LiquidEngine):
                     _conv_out[r,c] = acc
 
         return conv_out
+
     def _run_threaded_static(self, float[:,:] image, float[:,:] kernel):
 
         cdef int nRows = image.shape[0]
@@ -187,6 +193,7 @@ class Convolution(LiquidEngine):
 
         cdef float acc = 0
 
+
         conv_out = np.zeros((nRows, nCols), dtype=np.float32)
         cdef float[:,:] _conv_out = conv_out
 
@@ -202,6 +209,7 @@ class Convolution(LiquidEngine):
                     _conv_out[r,c] = acc
 
         return conv_out
+
 
     def _run_opencl(self, image, kernel, device):
         
