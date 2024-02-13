@@ -172,7 +172,8 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                                 if (GdotR < 0) {
                                     Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, dz, distance);
                                     // RGC += Dk * (distanceWeightSum_xy + distanceWeightSum_z) / 2;
-                                    RGC += (Dk * distanceWeightSum);
+                                    // RGC += (Dk * distanceWeightSum); // test
+                                    RGC += (Dk * distanceWeight);
                                 }
                             }
                         }
