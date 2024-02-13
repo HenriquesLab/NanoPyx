@@ -36,7 +36,7 @@ class eSRRF3D(LiquidEngine):
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
             return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
     
-    def _run_unthreaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Unthreaded"):
+    def _run_unthreaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, sensitivity: float = 1, framewindow: float = 10,rollingoverlap: float = 5, doIntensityWeighting: bool = True, doRollingAvg: bool = True, run_type="Unthreaded"):
 
         interpolator = ShiftAndMagnify()
 
@@ -52,14 +52,19 @@ class eSRRF3D(LiquidEngine):
         cdef int _magnification_xy = magnification_xy
         cdef int _magnification_z = magnification_z
         cdef int _doIntensityWeighting = doIntensityWeighting
+        cdef int _doRollingAvg = doRollingAvg
 
         cdef int n_frames, n_slices, n_rows, n_cols, n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum
         n_frames, n_slices, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2], image.shape[3]
 
         cdef float[:, :, :, :] rgc_map = np.zeros((n_frames, n_slices*magnification_z, n_rows*magnification_xy, n_cols*magnification_xy), dtype=np.float32)
+
+        cdef float[:, :, :, :] avg_rgc_map = np.zeros((n_frames, n_slices*magnification_z, n_rows*magnification_xy, n_cols*magnification_xy), dtype=np.float32)
+        
         cdef float[:, :, :] image_interpolated, gradients_s, gradients_r, gradients_c, gradients_s_interpolated, gradients_r_interpolated, gradients_c_interpolated, padded, img_dum
 
         cdef int f, n_slices_mag, n_rows_mag, n_cols_mag, sM, rM, cM, z0
+        cdef int w, n_windows, start_frame, end_frame
 
         cdef float rgc_val, zcof
 
@@ -115,7 +120,21 @@ class eSRRF3D(LiquidEngine):
                                 # z0 = z0 * _magnification_z
                                 rgc_map[f, sM, rM, cM] = rgc_val
 
-        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated), np.asarray(rgc_map)
+        if _doRollingAvg:
+
+            if rollingoverlap > 0:
+                n_windows = int((n_frames - framewindow) / rollingoverlap) + 1
+            else:
+                n_windows = int(n_frames / framewindow)         
+
+            for w in range(n_windows):
+
+                start_frame = w * (int(framewindow) - int(rollingoverlap))
+                end_frame = start_frame + int(framewindow)
+                # do average in the first dimension of rgc_map[start_frame:end_frame ,:,:,:] with numpy
+                avg_rgc_map[w ,:,:,:] = np.average(rgc_map[start_frame:end_frame ,:,:,:], 0)
+
+        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated), np.asarray(rgc_map), np.asarray(avg_rgc_map)
 
 class eSRRF3D_dev(LiquidEngine):
     """
