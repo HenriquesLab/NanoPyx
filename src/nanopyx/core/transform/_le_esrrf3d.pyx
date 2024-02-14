@@ -4,6 +4,8 @@ import math
 cimport numpy as np
 from libc.math cimport floor
 
+from cython.parallel import prange
+
 from ._interpolation import interpolate_3d
 from ._le_interpolation_catmull_rom import ShiftAndMagnify
 from ...__liquid_engine__ import LiquidEngine
@@ -141,6 +143,93 @@ class eSRRF3D(LiquidEngine):
                 avg_rgc_map[w,:,:,:] = np.average(rgc_map[start_frame:end_frame,:,:,:], 0)
 
         return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated), np.asarray(rgc_map), np.asarray(avg_rgc_map)
+
+    def _run_threaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, sensitivity: float = 1, framewindow: float = 10,rollingoverlap: float = 5, doIntensityWeighting: bool = True, doRollingAvg: bool = True, run_type="Threaded"):
+
+        interpolator = ShiftAndMagnify()
+
+        cdef float sigma = radius / 2.355
+        cdef float fwhm = radius
+        cdef float tSS = 2 * sigma * sigma
+        cdef float tSO = 2 * sigma + 1
+        cdef float sigma_z = radius_z / 2.355
+        cdef float fwhm_z = radius_z
+        cdef float tSS_z = 2 * sigma_z * sigma_z
+        cdef float tSO_z = 2 * sigma_z + 1
+        cdef int Gx_Gy_MAGNIFICATION = 2
+        cdef int _magnification_xy = magnification_xy
+        cdef int _magnification_z = magnification_z
+        cdef int _doIntensityWeighting = doIntensityWeighting
+        cdef int _doRollingAvg = doRollingAvg
+
+        cdef int n_frames, n_slices, n_rows, n_cols, n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum
+        n_frames, n_slices, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2], image.shape[3]
+
+        cdef float[:, :, :, :] rgc_map = np.zeros((n_frames, n_slices*magnification_z, n_rows*magnification_xy, n_cols*magnification_xy), dtype=np.float32)
+        
+        cdef float[:, :, :] image_interpolated, gradients_s, gradients_r, gradients_c, gradients_s_interpolated, gradients_r_interpolated, gradients_c_interpolated, padded, img_dum
+
+        cdef int f, n_slices_mag, n_rows_mag, n_cols_mag, sM, rM, cM, z0
+        cdef int w, n_windows, start_frame, end_frame
+
+        cdef float rgc_val, zcof
+
+        for f in range(n_frames):
+
+            # image_interpolated = interpolator.run(image[f], 0, 0, _magnification_xy, _magnification_xy)
+            image_interpolated = interpolate_3d(image[f], _magnification_xy, _magnification_z)
+            n_slices_mag, n_rows_mag, n_cols_mag = image_interpolated.shape[0], image_interpolated.shape[1], image_interpolated.shape[2]
+
+            gradients_c = np.zeros((n_slices, n_rows*Gx_Gy_MAGNIFICATION, n_cols*Gx_Gy_MAGNIFICATION), dtype=np.float32)
+            gradients_r = np.zeros((n_slices, n_rows*Gx_Gy_MAGNIFICATION, n_cols*Gx_Gy_MAGNIFICATION), dtype=np.float32)
+            gradients_s = np.zeros((n_slices, n_rows*Gx_Gy_MAGNIFICATION, n_cols*Gx_Gy_MAGNIFICATION), dtype=np.float32)
+
+            img_dum = interpolator.run(image[f], 0, 0, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION)
+            # img_dum = interpolate_3d(image[f], Gx_Gy_MAGNIFICATION, _magnification_z)
+            n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum = img_dum.shape[0], img_dum.shape[1], img_dum.shape[2]
+
+            with nogil:
+                _c_gradient_3d(&img_dum[0, 0, 0], &gradients_c[0, 0, 0], &gradients_r[0, 0, 0], &gradients_s[0, 0, 0], n_slices, n_rows_mag_dum, n_cols_mag_dum)
+
+            # gradients_s_interpolated = interpolator.run(gradients_s, 0, 0, _magnification_xy, _magnification_xy)
+            # gradients_r_interpolated = interpolator.run(gradients_r, 0, 0, _magnification_xy, _magnification_xy)
+            # gradients_c_interpolated = interpolator.run(gradients_c, 0, 0, _magnification_xy, _magnification_xy)
+
+            gradients_s_interpolated = interpolate_3d(gradients_s, _magnification_xy, _magnification_z)
+            gradients_r_interpolated = interpolate_3d(gradients_r, _magnification_xy, _magnification_z)
+            gradients_c_interpolated = interpolate_3d(gradients_c, _magnification_xy, _magnification_z)
+
+            if self.keep_gradients:
+                self._gradients_c_interpolated = gradients_c_interpolated.copy()
+
+            with nogil:
+                for sM in range(0, n_slices_mag):
+                    for rM in prange(0, n_rows_mag):
+                        for cM in range(0, n_cols_mag):
+                            if _doIntensityWeighting:
+                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                # zcof = (sM) / _magnification_z
+                                # if (zcof < 0):
+                                #     z0 = 0
+                                # elif (zcof >= n_slices-1):
+                                #     z0 = n_slices-1
+                                # else:
+                                #     z0 = <int> floor(zcof)
+                                # z0 = z0 * _magnification_z
+                                rgc_map[f, sM, rM, cM] = rgc_val * image_interpolated[sM, rM, cM]
+                            else:
+                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, Gx_Gy_MAGNIFICATION, 1, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                # zcof = (sM) / _magnification_z
+                                # if (zcof < 0):
+                                #     z0 = 0
+                                # elif (zcof >= n_slices-1):
+                                #     z0 = n_slices-1
+                                # else:
+                                #     z0 = <int> floor(zcof)
+                                # z0 = z0 * _magnification_z
+                                rgc_map[f, sM, rM, cM] = rgc_val
+
+        return rgc_map
 
     def get_gradients(self):
         if self._gradients_c_interpolated is None:
