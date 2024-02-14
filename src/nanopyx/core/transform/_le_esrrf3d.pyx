@@ -217,7 +217,7 @@ class eSRRF3D(LiquidEngine):
 
         return np.asarray(rgc_map)
 
-    def time_analysis(float[:,:,:,:] rgc_map, correlation: str = "AVG", framewindow: float = 10, rollingoverlap: float = 5):
+    def time_analysis(self, float[:,:,:,:] rgc_map, correlation: str = "AVG", framewindow: float = 5, rollingoverlap: float = 2):
         # correlation (str): Type of correlation to calculate. Should be "AVG", "VAR", or "TAC2"
         n_frames, n_slices, n_rows, n_cols = rgc_map.shape[0], rgc_map.shape[1], rgc_map.shape[2], rgc_map.shape[3]
 
