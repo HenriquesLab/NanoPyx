@@ -132,7 +132,7 @@ class eSRRF3D(LiquidEngine):
                 start_frame = w * (int(framewindow) - int(rollingoverlap))
                 end_frame = start_frame + int(framewindow)
                 # do average in the first dimension of rgc_map[start_frame:end_frame ,:,:,:] with numpy
-                avg_rgc_map[w ,:,:,:] = np.average(rgc_map[start_frame:end_frame ,:,:,:], 0)
+                avg_rgc_map[w,:,:,:] = np.average(rgc_map[start_frame:end_frame,:,:,:], 0)
 
         return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated), np.asarray(rgc_map), np.asarray(avg_rgc_map)
 
