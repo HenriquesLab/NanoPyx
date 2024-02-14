@@ -33,6 +33,8 @@ class eSRRF3D(LiquidEngine):
         self._gradients_r_interpolated = None
         self._gradients_c_interpolated = None
         self.keep_gradients = False
+        self.keep_interpolated = False
+        self._img_interpolated = None
 
     def run(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None, keep_gradients=False):
         self.keep_gradients = keep_gradients
@@ -101,7 +103,10 @@ class eSRRF3D(LiquidEngine):
                 self._gradients_s_interpolated = gradients_s_interpolated.copy()
                 self._gradients_r_interpolated = gradients_r_interpolated.copy()
                 self._gradients_c_interpolated = gradients_c_interpolated.copy()
-
+            
+            if self.keep_interpolated:
+                self._img_interpolated = img_dum.copy()
+            
             with nogil:
                 for sM in range(0, n_slices_mag):
                     for rM in range(0, n_rows_mag):
@@ -188,6 +193,9 @@ class eSRRF3D(LiquidEngine):
                 self._gradients_r_interpolated = gradients_r_interpolated.copy()
                 self._gradients_c_interpolated = gradients_c_interpolated.copy()
 
+            if self.keep_interpolated:
+                self._img_interpolated = img_dum.copy()
+
             with nogil:
                 for sM in range(0, n_slices_mag):
                     for rM in prange(0, n_rows_mag):
@@ -241,3 +249,6 @@ class eSRRF3D(LiquidEngine):
             print("Gradients not yet calculated")
         else:
             return self._gradients_c_interpolated, self._gradients_r_interpolated, self._gradients_s_interpolated
+
+    def get_interpolated_image(self):
+        return self._img_interpolated
