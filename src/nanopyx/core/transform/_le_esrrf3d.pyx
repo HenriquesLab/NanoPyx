@@ -65,13 +65,10 @@ class eSRRF3D(LiquidEngine):
         n_frames, n_slices, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2], image.shape[3]
 
         cdef float[:, :, :, :] rgc_map = np.zeros((n_frames, n_slices*magnification_z, n_rows*magnification_xy, n_cols*magnification_xy), dtype=np.float32)
-
-        cdef float[:, :, :, :] avg_rgc_map = np.zeros((n_frames, n_slices*magnification_z, n_rows*magnification_xy, n_cols*magnification_xy), dtype=np.float32)
         
         cdef float[:, :, :] image_interpolated, gradients_s, gradients_r, gradients_c, gradients_s_interpolated, gradients_r_interpolated, gradients_c_interpolated, padded, img_dum
 
         cdef int f, n_slices_mag, n_rows_mag, n_cols_mag, sM, rM, cM, z0
-        cdef int w, n_windows, start_frame, end_frame
 
         cdef float rgc_val, zcof
 
@@ -132,7 +129,7 @@ class eSRRF3D(LiquidEngine):
                                 # z0 = z0 * _magnification_z
                                 rgc_map[f, sM, rM, cM] = rgc_val
 
-        return np.asarray(image_interpolated), np.asarray(gradients_r_interpolated), np.asarray(gradients_c_interpolated),np.asarray(gradients_s_interpolated), np.asarray(rgc_map), np.asarray(avg_rgc_map)
+        return np.asarray(rgc_map)
 
     def _run_threaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Threaded"):
 
@@ -159,12 +156,10 @@ class eSRRF3D(LiquidEngine):
         cdef float[:, :, :] image_interpolated, gradients_s, gradients_r, gradients_c, gradients_s_interpolated, gradients_r_interpolated, gradients_c_interpolated, padded, img_dum
 
         cdef int f, n_slices_mag, n_rows_mag, n_cols_mag, sM, rM, cM, z0
-        cdef int w, n_windows, start_frame, end_frame
 
         cdef float rgc_val, zcof
 
         for f in range(n_frames):
-
             # image_interpolated = interpolator.run(image[f], 0, 0, _magnification_xy, _magnification_xy)
             image_interpolated = interpolate_3d(image[f], _magnification_xy, _magnification_z)
             n_slices_mag, n_rows_mag, n_cols_mag = image_interpolated.shape[0], image_interpolated.shape[1], image_interpolated.shape[2]
@@ -220,7 +215,7 @@ class eSRRF3D(LiquidEngine):
                                 # z0 = z0 * _magnification_z
                                 rgc_map[f, sM, rM, cM] = rgc_val
 
-        return rgc_map
+        return np.asarray(rgc_map)
 
     def time_analysis(float[:,:,:,:] rgc_map, correlation: str = "AVG", framewindow: float = 10, rollingoverlap: float = 5):
         # correlation (str): Type of correlation to calculate. Should be "AVG", "VAR", or "TAC2"
