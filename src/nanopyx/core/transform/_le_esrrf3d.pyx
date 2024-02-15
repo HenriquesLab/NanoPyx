@@ -225,27 +225,8 @@ class eSRRF3D(LiquidEngine):
 
         return np.asarray(rgc_map)
 
-    def time_analysis(self, float[:,:,:,:] rgc_map, correlation: str = "AVG", framewindow: float = 5, rollingoverlap: float = 2):
-        # correlation (str): Type of correlation to calculate. Should be "AVG", "VAR", or "TAC2"
-        n_frames, n_slices, n_rows, n_cols = rgc_map.shape[0], rgc_map.shape[1], rgc_map.shape[2], rgc_map.shape[3]
-
-        if rollingoverlap:
-            n_windows = int((n_frames - framewindow) / rollingoverlap) + 1
-        else:
-            n_windows = int(n_frames / framewindow)       
-
-        cdef float[:, :, :, :] avg_rgc_map = np.zeros((n_windows, n_slices, n_rows, n_cols), dtype=np.float32)
-
-        for w in range(n_windows):
-            start_frame = w * (int(framewindow) - int(rollingoverlap))
-            end_frame = start_frame + int(framewindow)
-            # do average in the first dimension of rgc_map[start_frame:end_frame ,:,:,:] with numpy
-            avg_rgc_map[w,:,:,:] = calculate_eSRRF_temporal_correlations(rgc_map[start_frame:end_frame,:,:,:], correlation)
-
-        return avg_rgc_map        
-
     def get_gradients(self):
-        if self._gradients_c_interpolated is None:
+        if self._gradients_c_interpolated is None or self._gradients_r_interpolated is None or self._gradients_s_interpolated is None:
             print("Gradients not yet calculated")
         else:
             return self._gradients_c_interpolated, self._gradients_r_interpolated, self._gradients_s_interpolated
