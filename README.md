@@ -41,6 +41,8 @@ if you found this work useful, please cite: [preprint](https://www.biorxiv.org/c
 |:-:|:-:|
 | [![](https://user-images.githubusercontent.com/7071808/259985020-b629a570-f131-4666-aadb-ba62ac7dbea2.png)](https://youtu.be/iAdgusBAU0Q) | [![](https://user-images.githubusercontent.com/7071808/259985779-4403d895-76a8-4050-bfd7-9317516a8f3e.png)](https://youtu.be/KD0RzolFnd4) |
 
+### More specific tutorials [here](https://www.youtube.com/playlist?list=PLk5I3_KOhE7sdP2OBfD9ewoXm1cXon88R)!
+
 ## Codeless jupyter notebooks available:
 
 | Category | Method | Last test | Notebook | Colab Link |
@@ -114,9 +116,10 @@ docker run --name nanopyx1 -p 8888:8888 henriqueslab/nanopyx:latest
 
 Depending on your preferences and coding proficiency you might be using NanoPyx differently. 
 
-- If you are using Jupyter Notebooks or Google Colab notebooks check out our [video tutorial](https://youtu.be/KD0RzolFnd4)
+- If you are using Jupyter Notebooks or Google Colab notebooks check out our video tutorial [here](https://youtu.be/KD0RzolFnd4) and [here](https://www.youtube.com/watch?v=Dx2lHoRB044)
 - If you are using our [napari plugin](https://github.com/HenriquesLab/NanoPyx#napari-plugin) check out the official [napari tutorial](https://napari.org/stable/tutorials/index.html) and stay tuned for more!
-- If you prefer to use the Python library and take full advantage of the Liquid Engine flexibility, check out our Liquid Engine templates and our [official documentation](https://henriqueslab.github.io/NanoPyx/nanopyx.html).
+- If you prefer to use the Python library and take full advantage of the Liquid Engine flexibility check out our [wiki](https://github.com/HenriquesLab/NanoPyx/wiki), our [cookiecutter](https://github.com/HenriquesLab/LiquidEngineCookieCutter) and our video tutorials [here](https://youtu.be/gRGEjdT8opY?si=o0ovP5B-235BM0hu) and [here](https://youtu.be/s2SY6IlsWQI?si=5goo0ZQ1Ynyz3yTF).
+- Liquid engine template files for a simple example:
     - Simple Liquid Engine templates [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/core/templates/_le_template_simple.pyx) and [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/core/templates/_le_template_simple_.py)
     - Fully fledged Liquid Engine templates [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/core/templates/_le_template_advanced.pyx) and [here](https://github.com/HenriquesLab/NanoPyx/blob/main/src/nanopyx/core/templates/_le_template_advanced.cl)
 
