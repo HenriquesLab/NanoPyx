@@ -30,6 +30,8 @@ You can read more about NanoPyx in our [preprint](https://www.biorxiv.org/conten
 
 Currently it implements the following approaches:
 - A reimplementation of the NanoJ image registration, SRRF and Super Resolution metrics
+- eSRRF
+- Non-local means denoising
 - More to come soon™
 
 if you found this work useful, please cite: [preprint](https://www.biorxiv.org/content/10.1101/2023.08.13.553080v1) and  [![DOI](https://zenodo.org/badge/505388398.svg)](https://zenodo.org/badge/latestdoi/505388398)
