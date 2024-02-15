@@ -36,8 +36,9 @@ class eSRRF3D(LiquidEngine):
         self.keep_interpolated = False
         self._img_interpolated = None
 
-    def run(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None, keep_gradients=False):
+    def run(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None, keep_gradients=False, keep_interpolated = False):
         self.keep_gradients = keep_gradients
+        self.keep_interpolated = keep_interpolated
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
