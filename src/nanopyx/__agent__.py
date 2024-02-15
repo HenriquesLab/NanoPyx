@@ -54,7 +54,7 @@ class Agent_:
         self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
 
     def _get_ordered_run_types(self, fn, args, kwargs):
-        """
+        """@public
         Retrieves an ordered list of run_types for the given args and kwargs
         """
 
@@ -118,7 +118,7 @@ class Agent_:
         return fast_avg_speed, fast_std_speed, slow_avg_speed, slow_std_speed
 
     def _calculate_prob_of_delay(self, runtimes_history, avg, std):
-        """
+        """@public
         Calculates the probability that the given run_type is still delayed using historical data
         """
 
@@ -131,7 +131,7 @@ class Agent_:
         return model.predict_proba([[True]])[:, model.classes_.tolist().index(True)][0]
 
     def _check_delay(self, run_type, runtime, runtimes_history):
-        """
+        """@public
         Checks if the given run_type ran delayed in the previous run when compared with historical data
         If delayed:
             1. Calculates a probability that this delay is maintained
@@ -179,7 +179,7 @@ class Agent_:
                 self.delayed_runtypes[run_type] = (delay_factor, delay_prob)
 
     def _adjust_times(self, fast_device_times, slow_device_times):
-        """
+        """@public
         Adjusts the historic avg time of a run_type if it was delayed in previous runs
         """
         adjusted_times = fast_device_times.copy()
@@ -222,7 +222,7 @@ class Agent_:
             return sorted(fast_avg, key=fast_avg.get)[0]
 
     def _inform(self, fn):
-        """
+        """@public
         Informs the Agent that a LE object finished running
         """
 

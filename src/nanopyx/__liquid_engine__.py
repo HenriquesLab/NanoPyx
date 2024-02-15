@@ -31,7 +31,7 @@ from .core.analysis.pearson_correlation import pearson_correlation
 
 class LiquidEngine:
 
-    """
+    """@public
     Base class for parts of the Nanopyx Liquid Engine
     Vroom Vroom
     """
@@ -52,7 +52,7 @@ class LiquidEngine:
         cuda_: bool = False,
         clear_benchmarks: bool = False,
     ) -> None:
-        """
+        """@public
         Initialize the Liquid Engine
         The Liquid Engine base class is inherited by children classes that implement specific methods
 
@@ -144,7 +144,7 @@ class LiquidEngine:
         
 
     def _run(self, *args, run_type=None, **kwargs):
-        """
+        """@public
         Runs the function with the given args and kwargs
 
         The code above does the following:
@@ -275,6 +275,8 @@ class LiquidEngine:
         return speed_sort
 
     def _compare_runs(self, output_1, output_2):
+        """@public
+        """
         if output_1.ndim > 2:
             pcc = 0
             for i in range(output_1.shape[0]):
@@ -307,7 +309,7 @@ class LiquidEngine:
         return kernel_str
 
     def _store_results(self, arg_repr, arg_score, run_type, t2run):
-        """
+        """@public
         Stores the results of a run
         """
 
@@ -328,12 +330,14 @@ class LiquidEngine:
     def _dump_run_times(
         self,
     ):
+        """@public
+        """
         # TODO We might need to wrap this into a multiprocessing.Queue if we find it blocking 
         with open(self._benchmark_filepath, "w") as f:
             yaml.dump(self._benchmarks, f)
 
     def _get_args_repr_score(self, *args, **kwargs):
-        """
+        """@public
         Get a string representation of the args and kwargs and corresponding 'score' / 'norm'
         The idea is that similar args have closer 'score'. Fuzzy logic
 
@@ -405,7 +409,7 @@ class LiquidEngine:
         return (one, two, three)
     
     def _check_max_slices(self, input, number_of_max_slices):
-        """
+        """@public
         Checks if number of maximum slices is greater than 0
         """
         if number_of_max_slices < 1:
@@ -416,7 +420,7 @@ class LiquidEngine:
             return number_of_max_slices
 
     def _check_max_buffer_size(self, size, device, n_slices):
-        """
+        """@public
         Checks if buffer size is larger than device maximum memory allocation size and n_slices is 1 and raises appropriate errors that are handled in the _run function.
         """
         if size > device.max_mem_alloc_size and n_slices == 1:
@@ -440,77 +444,77 @@ class LiquidEngine:
         return self._run(*args, **kwargs)
 
     def _run_opencl(*args, **kwargs):
-        """
+        """@public
         Runs the OpenCL version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_unthreaded(*args, **kwargs):
-        """
+        """@public
         Runs the cython unthreaded version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_threaded(*args, **kwargs):
-        """
+        """@public
         Runs the cython threaded version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_threaded_static(*args, **kwargs):
-        """
+        """@public
         Runs the cython threaded static version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_threaded_dynamic(*args, **kwargs):
-        """
+        """@public
         Runs the cython threaded dynamic version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_threaded_guided(*args, **kwargs):
-        """
+        """@public
         Runs the cython threaded guided version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_python(*args, **kwargs):
-        """
+        """@public
         Runs the python version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_njit(*args, **kwargs):
-        """
+        """@public
         Runs the njit version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_dask(*args, **kwargs):
-        """
+        """@public
         Runs the dask version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_transonic(*args, **kwargs):
-        """
+        """@public
         Runs the transonic version of the function
         Should be overridden by the any class that inherits from this class
         """
         pass
 
     def _run_cuda(*args, **kwargs):
-        """
+        """@public
         Runs the cuda version of the function
         Should be overridden by the any class that inherits from this class
         """
