@@ -18,6 +18,7 @@ def on_button_register(b):
                                                                             max_shift,
                                                                             n_blocks,
                                                                             min_sim,
+                                                                            algorithm="weight",
                                                                             save_translation_masks=False,
                                                                             save_ccms=False,
                                                                             apply=True)
