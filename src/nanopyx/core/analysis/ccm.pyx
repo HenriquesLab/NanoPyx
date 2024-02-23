@@ -3,6 +3,8 @@
 import numpy as np
 cimport numpy as np
 
+import scipy as sp
+
 import cython
 from libc.math cimport pi
 
@@ -82,7 +84,7 @@ cdef float[:, :, :] _calculate_ccm_from_ref(float[:, :, :] img_stack, float[:, :
 
 
 cdef float[:, :] _calculate_slice_ccm(float[:, :] img_ref, float[:, :] img_slice):
-    cdef float[:, :] ccm_slice = np.fft.fftshift(np.fft.ifft2(np.fft.fft2(img_ref) * np.fft.fft2(img_slice).conj())).real.astype(np.float32)
+    cdef float[:, :] ccm_slice = sp.fft.fftshift(sp.fft.ifft2(sp.fft.fft2(img_ref) * sp.fft.fft2(img_slice).conj())).real.astype(np.float32)
     ccm_slice = ccm_slice[::-1, ::-1]
     _normalize_ccm(img_ref, img_slice, ccm_slice)
 
