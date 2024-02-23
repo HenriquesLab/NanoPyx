@@ -6,6 +6,7 @@ cimport numpy as np
 import scipy as sp
 
 import cython
+from cython.parallel import prange
 from libc.math cimport pi
 
 from .ccm_helper_functions cimport _check_even_square, _make_even_square
@@ -100,7 +101,7 @@ def calculate_slice_ccm(np.ndarray img_ref, np.ndarray img_slice):
     """
     return np.array(_calculate_slice_ccm(img_ref, img_slice))
 
-cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :] ccm_slice) nogil:
+cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :] ccm_slice):
     """
     Function used to normalize the cross correlation matrix.
 
@@ -113,25 +114,24 @@ cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :]
     cdef int w = ccm_slice.shape[1]
     cdef int h = ccm_slice.shape[0]
 
-    cdef float min_value = ccm_slice[0, 0]
-    cdef float max_value = ccm_slice[0, 0]
-    cdef int x_max = 0
-    cdef int y_max = 0
-    cdef int x_min = 0
-    cdef int y_min = 0
-    cdef float v
+    # print(np.min(ccm_slice), np.max(ccm_slice))
 
-    for j in range(h):
-        for i in range(w):
-            v = ccm_slice[j, i]
-            if v < min_value:
-                min_value = v
-                x_min = i
-                y_min = j
-            if v > max_value:
-                max_value = v
-                x_max = i
-                y_max = j
+    cdef float min_value = np.min(ccm_slice)
+    cdef float max_value = np.max(ccm_slice)
+    cdef int x_max
+    cdef int y_max
+    cdef int x_min
+    cdef int y_min
+
+    coords = np.unravel_index(np.argmax(ccm_slice), (w, h))
+    y_max = coords[0]
+    x_max = coords[1]
+
+    coords = np.unravel_index(np.argmin(ccm_slice), (w, h))
+    y_min = coords[0]
+    x_min = coords[1]
+
+    cdef int j, i
 
     cdef int shift_x_max = x_max - w // 2
     cdef int shift_y_max = y_max - h // 2
@@ -145,11 +145,12 @@ cdef void _normalize_ccm(float[:, :] img_ref, float[:, :] img_slice, float[:, :]
     cdef float value
     cdef float delta_ppmcc = max_ppmcc - min_ppmcc
 
-    for j in range(h):
-        for i in range(w):
-            value = (ccm_slice[j, i] - min_value) / delta_v
-            value = value * delta_ppmcc + min_ppmcc
-            ccm_slice[j, i] = value
+    with nogil:
+        for j in prange(h):
+            for i in range(w):
+                value = (ccm_slice[j, i] - min_value) / delta_v
+                value = value * delta_ppmcc + min_ppmcc
+                ccm_slice[j, i] = value
 
 
 # TODO finish reimplementing using LE methods
