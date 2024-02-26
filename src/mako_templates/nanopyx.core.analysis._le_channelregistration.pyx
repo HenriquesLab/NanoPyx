@@ -110,7 +110,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
         cdef float[:,:] img_slice 
         cdef float[:,:] slice_crop, ref_crop, slice_ccm
 
-        cdef float[:,:] flow_arrows = np.zeros((blocks_per_axis**2,4)).astype(np.float32)
+        cdef float[:,:] flow_arrows
         cdef int n_flow_arrows = 0
 
         cdef int max_coords_r, max_coords_c
@@ -131,6 +131,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
         for channel in range(nChannels):
             img_slice = img_stack[channel,:,:]
             n_flow_arrows = 0
+            flow_arrows = np.zeros((blocks_per_axis**2,4)).astype(np.float32)
             for row_i in range(blocks_per_axis):
                 for col_i in range(blocks_per_axis):
                     row_start = row_i * block_nRows
@@ -155,6 +156,13 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
                     print(max_idx,max_coords_r,max_coords_c)
                     print(slice_ccm[max_idx[0],max_idx[1]], ccm_max_value)
+                    
+
+                    # TODO
+                    max_coords_r = max_idx[0]
+                    max_coords_c = max_idx[1]
+                    ccm_max_value = slice_ccm[max_idx[0],max_idx[1]]
+                    # TODO
 
                     ccm_cols = slice_ccm.shape[1]
                     ccm_rows = slice_ccm.shape[0]
@@ -211,8 +219,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
                     _translation_matrix_r[j, i] = dy
 
             if blocks_per_axis > 1:
-                translation_matrix_c = gaussian(translation_matrix_c, sigma=max(block_nCols, block_nRows / 2.0))
-                translation_matrix_r = gaussian(translation_matrix_r, sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_c = gaussian(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
