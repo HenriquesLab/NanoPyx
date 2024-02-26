@@ -13,6 +13,8 @@ from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 from .ccm cimport _calculate_slice_ccm
 
+from ..transform import BCShiftAndMagnify
+
 cdef bint _check_even_square(float[:, :] image_arr) nogil:
     cdef int r = image_arr.shape[0]
     cdef int c = image_arr.shape[1]
@@ -90,6 +92,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] img_stack, float[:,:] img_ref, int max_shift, int blocks_per_axis, float min_similarity):
+
+        crsm = BCShiftAndMagnify()
         
         cdef int nChannels =  img_stack.shape[0]    
         cdef int nRows =  img_stack.shape[1]
@@ -109,7 +113,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
         cdef float[:,:] flow_arrows = np.zeros((blocks_per_axis**2,4)).astype(np.float32)
         cdef int n_flow_arrows = 0
 
-        cdef float[:] max_coords
+        cdef int max_coords_1, max_coords_2
+        cdef float[:,:] upscaled_ccm_slice
         cdef float vector_c, vector_r, ccm_max_value
 
         cdef int ccm_cols, ccm_rows
@@ -122,8 +127,6 @@ class ChannelRegistrationEstimator(LiquidEngine):
         cdef float dx,dy,w_sum,max_distance,all_distances
         cdef float[:] distances 
         cdef float d, first_term, second_term, weight
-
-        cdef int max_idx
 
         for channel in range(nChannels):
             img_slice = img_stack[channel,:,:]
@@ -142,29 +145,22 @@ class ChannelRegistrationEstimator(LiquidEngine):
                         ccm_row_start = slice_ccm.shape[0] // 2 - max_shift
                         slice_ccm = slice_ccm[ccm_row_start:ccm_row_start+(max_shift*2), ccm_col_start:ccm_col_start + (max_shift * 2)]
 
+                    max_idx = np.unravel_index(np.argmax(slice_ccm), np.array(slice_ccm).shape)
+                    # Upscale 10x around max_idx                     
+                    upscaled_ccm_slice = crsm.run(np.ascontiguousarray(slice_ccm),0,0,10,10)[0]                    
+                    max_idx_upscaled = np.unravel_index(np.argmax(upscaled_ccm_slice), np.array(upscaled_ccm_slice).shape)
+                    max_coords_1 = (max_idx_upscaled[0]//10)-1
+                    max_coords_2 = (max_idx_upscaled[1]//10)-1
+                    ccm_max_value = upscaled_ccm_slice[max_idx_upscaled[0],max_idx_upscaled[1]]
 
-                    max_idx = np.unravel_index(np.argmax(slice_ccm),slice_ccm.shape)
-                    # TODO FINISH THIS CALCULATION
-                    # CALCULATE CCM_MAX_VALUE HERE 
-                    """
-                    if method == "subpixel":
-                        optimizer = GetMaxOptimizer(slice_ccm)
-                        max_coords = optimizer.get_max()
-                        ccm_max_value = -optimizer.get_interpolated_px_value(max_coords)
-                    else:
-                        max_coords = np.unravel_index(slice_ccm.argmax(), slice_ccm.shape)
-                        ccm_max_value = slice_ccm[max_coords[0], max_coords[1]]
-                    """
-                    ###
-
-                    max_coords = np.zeros(2).astype(np.float32)
-                    ccm_max_value = 10
+                    print(max_idx,max_coords_1,max_coords_2)
+                    print(slice_ccm[max_idx[0],max_idx[1]], ccm_max_value)
 
                     ccm_cols = slice_ccm.shape[1]
                     ccm_rows = slice_ccm.shape[0]
                     if ccm_max_value >= min_similarity:
-                        vector_c = ccm_cols / 2.0 - max_coords[1] - 1 
-                        vector_r = ccm_rows / 2.0 - max_coords[0] - 1
+                        vector_c = ccm_cols / 2.0 - max_coords_2 - 1 
+                        vector_r = ccm_rows / 2.0 - max_coords_1 - 1
                         flow_arrows[n_flow_arrows,0] = col_start+block_nCols/2.0
                         flow_arrows[n_flow_arrows,1] = row_start+block_nRows/2.0
                         flow_arrows[n_flow_arrows,2] = vector_c
@@ -221,7 +217,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
             translation_masks[channel,:,:nCols] = _translation_matrix_r
             translation_masks[channel,:, nCols:] = _translation_matrix_c
 
-        return translation_masks
+        return np.array(translation_masks)
 
     % endfor
 
