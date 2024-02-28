@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=True, nonecheck=True, boundscheck=True, cdivision=True, language_level=3, profile=False, autogen_pxd=False
+# cython: infer_types=False, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 import time
 import scipy
 import numpy as np
@@ -12,13 +12,14 @@ from ...__liquid_engine__ import LiquidEngine
 from .ccm cimport _calculate_ccm
 from ..transform._le_interpolation_bicubic import ShiftAndMagnify
 from .estimate_shift import GetMaxOptimizer
+from .ccm_helper_functions cimport _check_even_square, _make_even_square
 
 
 class DriftEstimator(LiquidEngine):
     """@public
-    Drift estimator class for estimating and correcting drift in image stacks.
+    Drift estimator class for estimating drift in image stacks.
 
-    This class provides methods for estimating and correcting drift in image stacks using cross-correlation.
+    This class provides methods for estimating drift in image stacks using cross-correlation.
     """
 
     def __init__(self, clear_benchmarks=False, testing=False):
@@ -36,16 +37,14 @@ class DriftEstimator(LiquidEngine):
         return super().benchmark(image, time_averaging=time_averaging, max_drift=max_drift, ref_option=ref_option)
 
     def _run_unthreaded(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-        _runtype = "unthreaded".capitalize()
+
+        if not _check_even_square(image):
+            image = _make_even_square(image)
 
         # get image dimensions, should already be an even square
         cdef int n_slices = image.shape[0]
         cdef int n_rows = image.shape[1]
         cdef int n_cols = image.shape[2]
-
-        # ensures max drift is within bounds, if not assigns maximum drift possible
-        if max_drift < 1 or max_drift*2 > n_rows:
-            max_drift = (n_rows - 1) // 2
 
         # ensures time averaging has an acceptable value
         if time_averaging < 1:
@@ -64,20 +63,15 @@ class DriftEstimator(LiquidEngine):
             for idx in range(n_blocks):
                 averaged[idx, :, :] = np.mean(image[idx*time_averaging:(idx+1)*time_averaging, :, :], axis=0)
 
-        # create buffer for ccm
-        cdef float[:, :, :] ccm = np.zeros((n_blocks, max_drift*2, max_drift*2), dtype=np.float32)
+        cdef float[:, :, :] ccm
         cdef int row_start
         cdef int col_start
         if max_drift > 0 and max_drift * 2 + 1 < n_rows and max_drift * 2 + 1 < n_cols:
             row_start = int(n_rows / 2 - max_drift)
             col_start = int(n_cols / 2 - max_drift)
             ccm = _calculate_ccm(averaged, ref_option)[:, row_start : row_start + (max_drift * 2), col_start : col_start + (max_drift * 2)]
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
         else:
             ccm = _calculate_ccm(averaged, ref_option)
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
-
-        interpolator = ShiftAndMagnify()
 
         cdef float[:, :] drift_table = np.zeros((n_blocks, 2), dtype=np.float32)
         
@@ -90,7 +84,7 @@ class DriftEstimator(LiquidEngine):
         cdef int i
         for i in range(n_blocks):
 
-            optimizer = GetMaxOptimizer(np.asarray(ccm[i], dtype=np.float32))
+            optimizer = GetMaxOptimizer(np.ascontiguousarray(ccm[i], dtype=np.float32))
             shift_y, shift_x = optimizer.get_max()
 
             drift_table[i, 0] = round((ccm.shape[1]/2) - shift_y - 0.5, 3)
@@ -132,16 +126,14 @@ class DriftEstimator(LiquidEngine):
 
         return np.asarray(output).astype(np.float32)
     def _run_threaded(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-        _runtype = "threaded".capitalize()
+
+        if not _check_even_square(image):
+            image = _make_even_square(image)
 
         # get image dimensions, should already be an even square
         cdef int n_slices = image.shape[0]
         cdef int n_rows = image.shape[1]
         cdef int n_cols = image.shape[2]
-
-        # ensures max drift is within bounds, if not assigns maximum drift possible
-        if max_drift < 1 or max_drift*2 > n_rows:
-            max_drift = (n_rows - 1) // 2
 
         # ensures time averaging has an acceptable value
         if time_averaging < 1:
@@ -160,20 +152,15 @@ class DriftEstimator(LiquidEngine):
             for idx in range(n_blocks):
                 averaged[idx, :, :] = np.mean(image[idx*time_averaging:(idx+1)*time_averaging, :, :], axis=0)
 
-        # create buffer for ccm
-        cdef float[:, :, :] ccm = np.zeros((n_blocks, max_drift*2, max_drift*2), dtype=np.float32)
+        cdef float[:, :, :] ccm
         cdef int row_start
         cdef int col_start
         if max_drift > 0 and max_drift * 2 + 1 < n_rows and max_drift * 2 + 1 < n_cols:
             row_start = int(n_rows / 2 - max_drift)
             col_start = int(n_cols / 2 - max_drift)
             ccm = _calculate_ccm(averaged, ref_option)[:, row_start : row_start + (max_drift * 2), col_start : col_start + (max_drift * 2)]
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
         else:
             ccm = _calculate_ccm(averaged, ref_option)
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
-
-        interpolator = ShiftAndMagnify()
 
         cdef float[:, :] drift_table = np.zeros((n_blocks, 2), dtype=np.float32)
         
@@ -186,7 +173,7 @@ class DriftEstimator(LiquidEngine):
         cdef int i
         for i in range(n_blocks):
 
-            optimizer = GetMaxOptimizer(np.asarray(ccm[i], dtype=np.float32))
+            optimizer = GetMaxOptimizer(np.ascontiguousarray(ccm[i], dtype=np.float32))
             shift_y, shift_x = optimizer.get_max()
 
             drift_table[i, 0] = round((ccm.shape[1]/2) - shift_y - 0.5, 3)
@@ -228,16 +215,14 @@ class DriftEstimator(LiquidEngine):
 
         return np.asarray(output).astype(np.float32)
     def _run_threaded_guided(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-        _runtype = "threaded_guided".capitalize()
+
+        if not _check_even_square(image):
+            image = _make_even_square(image)
 
         # get image dimensions, should already be an even square
         cdef int n_slices = image.shape[0]
         cdef int n_rows = image.shape[1]
         cdef int n_cols = image.shape[2]
-
-        # ensures max drift is within bounds, if not assigns maximum drift possible
-        if max_drift < 1 or max_drift*2 > n_rows:
-            max_drift = (n_rows - 1) // 2
 
         # ensures time averaging has an acceptable value
         if time_averaging < 1:
@@ -256,20 +241,15 @@ class DriftEstimator(LiquidEngine):
             for idx in range(n_blocks):
                 averaged[idx, :, :] = np.mean(image[idx*time_averaging:(idx+1)*time_averaging, :, :], axis=0)
 
-        # create buffer for ccm
-        cdef float[:, :, :] ccm = np.zeros((n_blocks, max_drift*2, max_drift*2), dtype=np.float32)
+        cdef float[:, :, :] ccm
         cdef int row_start
         cdef int col_start
         if max_drift > 0 and max_drift * 2 + 1 < n_rows and max_drift * 2 + 1 < n_cols:
             row_start = int(n_rows / 2 - max_drift)
             col_start = int(n_cols / 2 - max_drift)
             ccm = _calculate_ccm(averaged, ref_option)[:, row_start : row_start + (max_drift * 2), col_start : col_start + (max_drift * 2)]
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
         else:
             ccm = _calculate_ccm(averaged, ref_option)
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
-
-        interpolator = ShiftAndMagnify()
 
         cdef float[:, :] drift_table = np.zeros((n_blocks, 2), dtype=np.float32)
         
@@ -282,7 +262,7 @@ class DriftEstimator(LiquidEngine):
         cdef int i
         for i in range(n_blocks):
 
-            optimizer = GetMaxOptimizer(np.asarray(ccm[i], dtype=np.float32))
+            optimizer = GetMaxOptimizer(np.ascontiguousarray(ccm[i], dtype=np.float32))
             shift_y, shift_x = optimizer.get_max()
 
             drift_table[i, 0] = round((ccm.shape[1]/2) - shift_y - 0.5, 3)
@@ -324,16 +304,14 @@ class DriftEstimator(LiquidEngine):
 
         return np.asarray(output).astype(np.float32)
     def _run_threaded_dynamic(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-        _runtype = "threaded_dynamic".capitalize()
+
+        if not _check_even_square(image):
+            image = _make_even_square(image)
 
         # get image dimensions, should already be an even square
         cdef int n_slices = image.shape[0]
         cdef int n_rows = image.shape[1]
         cdef int n_cols = image.shape[2]
-
-        # ensures max drift is within bounds, if not assigns maximum drift possible
-        if max_drift < 1 or max_drift*2 > n_rows:
-            max_drift = (n_rows - 1) // 2
 
         # ensures time averaging has an acceptable value
         if time_averaging < 1:
@@ -352,20 +330,15 @@ class DriftEstimator(LiquidEngine):
             for idx in range(n_blocks):
                 averaged[idx, :, :] = np.mean(image[idx*time_averaging:(idx+1)*time_averaging, :, :], axis=0)
 
-        # create buffer for ccm
-        cdef float[:, :, :] ccm = np.zeros((n_blocks, max_drift*2, max_drift*2), dtype=np.float32)
+        cdef float[:, :, :] ccm
         cdef int row_start
         cdef int col_start
         if max_drift > 0 and max_drift * 2 + 1 < n_rows and max_drift * 2 + 1 < n_cols:
             row_start = int(n_rows / 2 - max_drift)
             col_start = int(n_cols / 2 - max_drift)
             ccm = _calculate_ccm(averaged, ref_option)[:, row_start : row_start + (max_drift * 2), col_start : col_start + (max_drift * 2)]
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
         else:
             ccm = _calculate_ccm(averaged, ref_option)
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
-
-        interpolator = ShiftAndMagnify()
 
         cdef float[:, :] drift_table = np.zeros((n_blocks, 2), dtype=np.float32)
         
@@ -378,7 +351,7 @@ class DriftEstimator(LiquidEngine):
         cdef int i
         for i in range(n_blocks):
 
-            optimizer = GetMaxOptimizer(np.asarray(ccm[i], dtype=np.float32))
+            optimizer = GetMaxOptimizer(np.ascontiguousarray(ccm[i], dtype=np.float32))
             shift_y, shift_x = optimizer.get_max()
 
             drift_table[i, 0] = round((ccm.shape[1]/2) - shift_y - 0.5, 3)
@@ -420,16 +393,14 @@ class DriftEstimator(LiquidEngine):
 
         return np.asarray(output).astype(np.float32)
     def _run_threaded_static(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-        _runtype = "threaded_static".capitalize()
+
+        if not _check_even_square(image):
+            image = _make_even_square(image)
 
         # get image dimensions, should already be an even square
         cdef int n_slices = image.shape[0]
         cdef int n_rows = image.shape[1]
         cdef int n_cols = image.shape[2]
-
-        # ensures max drift is within bounds, if not assigns maximum drift possible
-        if max_drift < 1 or max_drift*2 > n_rows:
-            max_drift = (n_rows - 1) // 2
 
         # ensures time averaging has an acceptable value
         if time_averaging < 1:
@@ -448,20 +419,15 @@ class DriftEstimator(LiquidEngine):
             for idx in range(n_blocks):
                 averaged[idx, :, :] = np.mean(image[idx*time_averaging:(idx+1)*time_averaging, :, :], axis=0)
 
-        # create buffer for ccm
-        cdef float[:, :, :] ccm = np.zeros((n_blocks, max_drift*2, max_drift*2), dtype=np.float32)
+        cdef float[:, :, :] ccm
         cdef int row_start
         cdef int col_start
         if max_drift > 0 and max_drift * 2 + 1 < n_rows and max_drift * 2 + 1 < n_cols:
             row_start = int(n_rows / 2 - max_drift)
             col_start = int(n_cols / 2 - max_drift)
             ccm = _calculate_ccm(averaged, ref_option)[:, row_start : row_start + (max_drift * 2), col_start : col_start + (max_drift * 2)]
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
         else:
             ccm = _calculate_ccm(averaged, ref_option)
-            print(ccm[0, ccm.shape[1]/2, ccm.shape[2]/2])
-
-        interpolator = ShiftAndMagnify()
 
         cdef float[:, :] drift_table = np.zeros((n_blocks, 2), dtype=np.float32)
         
@@ -474,7 +440,7 @@ class DriftEstimator(LiquidEngine):
         cdef int i
         for i in range(n_blocks):
 
-            optimizer = GetMaxOptimizer(np.asarray(ccm[i], dtype=np.float32))
+            optimizer = GetMaxOptimizer(np.ascontiguousarray(ccm[i], dtype=np.float32))
             shift_y, shift_x = optimizer.get_max()
 
             drift_table[i, 0] = round((ccm.shape[1]/2) - shift_y - 0.5, 3)
