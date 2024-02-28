@@ -3,6 +3,7 @@ from skimage.io import imread
 
 # TODO recheck values
 from ...core.transform import cr_interpolate
+from ...core.transform.align_channels import align_channels as new_align_channels
 
 
 class ChannelRegistrationCorrector(object):
@@ -105,11 +106,13 @@ class ChannelRegistrationCorrector(object):
             if np.sum(translation_mask) == 0:
                 self.aligned_stack[channel] = img_slice
             else:
-                for y_i in range(height):
-                    for x_i in range(width):
-                        dx = translation_mask[y_i, x_i]
-                        dy = translation_mask[y_i, x_i + width]
-                        value = cr_interpolate(img_slice, y_i - dy, x_i - dx)
-                        self.aligned_stack[channel][y_i, x_i] = value
+                print("Run")
+                # for y_i in range(height):
+                #     for x_i in range(width):
+                #         dx = translation_mask[y_i, x_i]
+                #         dy = translation_mask[y_i, x_i + width]
+                #         value = cr_interpolate(img_slice, y_i - dy, x_i - dx)
+                #         self.aligned_stack[channel][y_i, x_i] = value
+                self.aligned_stack[channel] = new_align_channels(np.ascontiguousarray(img_slice.reshape((1, height, width))), translation_masks[channel])
 
         return self.aligned_stack.astype(input_d_type)
