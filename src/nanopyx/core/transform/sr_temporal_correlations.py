@@ -224,10 +224,14 @@ def calculate_eSRRF3d_temporal_correlations(rgc_map, correlation: str = "AVG", f
     # correlation (str): Type of correlation to calculate. Should be "AVG", "VAR", or "TAC2"
     n_frames, n_slices, n_rows, n_cols = rgc_map.shape[0], rgc_map.shape[1], rgc_map.shape[2], rgc_map.shape[3]
 
-    if rollingoverlap:
-        n_windows = int((n_frames - framewindow) / rollingoverlap) + 1
+    if framewindow != 0:
+        if rollingoverlap:
+            n_windows = int((n_frames - framewindow) / rollingoverlap) + 1
+        else:
+            n_windows = int(n_frames / framewindow)  
     else:
-        n_windows = int(n_frames / framewindow)       
+        n_windows = 1     
+        framewindow = n_frames - 1
 
     avg_rgc_map = np.zeros((n_windows, n_slices, n_rows, n_cols), dtype=np.float32)
 
