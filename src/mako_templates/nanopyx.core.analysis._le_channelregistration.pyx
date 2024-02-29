@@ -3,8 +3,6 @@ schedulers = ['unthreaded','threaded','threaded_guided','threaded_dynamic','thre
 %># cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
-#from skimage.filters import gaussian
-from scipy.ndimage import gaussian_filter as gaussian
 
 cimport numpy as np
 from cython.parallel import parallel, prange
@@ -15,6 +13,7 @@ from ...__opencl__ import cl, cl_array
 from .ccm cimport _calculate_slice_ccm
 
 from ..transform._le_interpolation_catmull_rom import ShiftAndMagnify
+from ..transform import Convolution2D
 
 cdef bint _check_even_square(float[:, :] image_arr) nogil:
     cdef int r = image_arr.shape[0]
@@ -74,6 +73,21 @@ cdef float[:, :] _calculate_ccm_from_ref(float[:, :] img_stack, float[:, :] img_
     cdef float[:,:] ccm = _calculate_slice_ccm(img_ref, img_stack)
 
     return ccm
+
+def _gaussian_filter(inpimg, sigma):
+    
+    conv = Convolution2D(verbose=False) 
+
+    radius = np.round(sigma*4)
+    x1 = np.arange(-radius, radius+1)
+    knl1 = np.exp(-0.5 / (sigma*sigma) * x1 ** 2)
+    knl1 = knl1 / knl1.sum()
+    knl1 = knl1.astype(np.float32)
+
+    img1 = conv.run(inpimg,knl1[:,np.newaxis],run_type="Threaded")
+    img2 = conv.run(img1,knl1[np.newaxis,:],run_type="Threaded")
+
+    return img2
 
 class ChannelRegistrationEstimator(LiquidEngine):
     """
@@ -217,8 +231,9 @@ class ChannelRegistrationEstimator(LiquidEngine):
                         _translation_matrix_r[j, i] = dy
 
             if blocks_per_axis > 1:
-                _translation_matrix_c = gaussian(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+
+                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
