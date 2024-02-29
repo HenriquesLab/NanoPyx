@@ -23,12 +23,14 @@ class Convolution(LiquidEngine):
     2D convolution
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False):
+    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "Conv2D"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True,
-                        njit_=True, python_=True, transonic_=True, cuda_=True, dask_=True)
+        super().__init__(
+            clear_benchmarks=clear_benchmarks, testing=testing, 
+            opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
+            threaded_dynamic_=True, threaded_guided_=True,
+            njit_=True, python_=True, transonic_=True, cuda_=True, dask_=True,
+            verbose=verbose)
         
     def run(self, image, kernel, run_type=None):
         image = check_array(image)

@@ -25,4 +25,4 @@ cdef float[:, :, :] _align_channels(float[:, :, :] img, float[:, :] translation_
                 d_row = translation_mask[row, col + n_cols]
                 out[0, row, col] = _c_interpolate(&img[0, 0, 0], row-d_row, col-d_col, n_rows, n_cols)
 
-    return out
+    return np.asarray(out, dtype=np.float32)

@@ -221,7 +221,7 @@ class Agent_:
         else:
             return sorted(fast_avg, key=fast_avg.get)[0]
 
-    def _inform(self, fn):
+    def _inform(self, fn, verbose=True):
         """@public
         Informs the Agent that a LE object finished running
         """
@@ -233,7 +233,8 @@ class Agent_:
 
         assert historical_data[-1] == fn._last_time, "Historical data is not consistent with the last runtime"
 
-        print(f"Agent: {fn._designation} using {run_type} ran in {fn._last_time} seconds")
+        if verbose:
+            print(f"Agent: {fn._designation} using {run_type} ran in {fn._last_time} seconds")
 
         if len(historical_data) > 19:
             self._check_delay(run_type, historical_data[-1], historical_data[:-1])

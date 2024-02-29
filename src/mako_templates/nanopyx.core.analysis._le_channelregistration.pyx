@@ -3,7 +3,8 @@ schedulers = ['unthreaded','threaded','threaded_guided','threaded_dynamic','thre
 %># cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
-from skimage.filters import gaussian
+#from skimage.filters import gaussian
+from scipy.ndimage import gaussian_filter as gaussian
 
 cimport numpy as np
 from cython.parallel import parallel, prange
@@ -13,7 +14,7 @@ from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 from .ccm cimport _calculate_slice_ccm
 
-from ..transform import CRShiftAndMagnify
+from ..transform._le_interpolation_catmull_rom import ShiftAndMagnify
 
 cdef bint _check_even_square(float[:, :] image_arr) nogil:
     cdef int r = image_arr.shape[0]
@@ -79,10 +80,11 @@ class ChannelRegistrationEstimator(LiquidEngine):
     Channel Registration Estimator
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False):
+    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "ChannelRegistrationEstimator"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                         unthreaded_=True, threaded_=True, threaded_static_=True, threaded_dynamic_=True, threaded_guided_=True)
+        super().__init__(
+            clear_benchmarks=clear_benchmarks, testing=testing, 
+            unthreaded_=True, threaded_=True, threaded_static_=True, threaded_dynamic_=True, threaded_guided_=True, verbose=verbose)
         
     def run(self, img_stack, img_ref, max_shift, blocks_per_axis, min_similarity, run_type=None):
         return self._run(img_stack, img_ref, max_shift, blocks_per_axis, min_similarity, run_type=run_type)
@@ -93,7 +95,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] img_stack, float[:,:] img_ref, int max_shift, int blocks_per_axis, float min_similarity):
 
-        crsm = CRShiftAndMagnify()
+        crsm = ShiftAndMagnify(verbose=False)
         
         cdef int nChannels =  img_stack.shape[0]    
         cdef int nRows =  img_stack.shape[1]

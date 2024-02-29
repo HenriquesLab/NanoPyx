@@ -18,7 +18,7 @@ try:
     import cupy as cp
     from cupyx.scipy.signal import convolve2d as cupyx_convolve
 except ImportError:
-    print("Optional dependency Cupy is not installed. Cupy implementations will be ignored.")
+    print("Cupy implementation is not available. Make sure you have the right version of Cupy and CUDA installed.")
 
 try:
     import dask.array as da

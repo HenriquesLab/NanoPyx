@@ -1,7 +1,8 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 
 import numpy as np
-from skimage.filters import gaussian
+#from skimage.filters import gaussian
+from scipy.ndimage import gaussian_filter as gaussian
 
 cimport numpy as np
 from cython.parallel import parallel, prange
@@ -11,7 +12,7 @@ from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 from .ccm cimport _calculate_slice_ccm
 
-from ..transform import CRShiftAndMagnify
+from ..transform._le_interpolation_catmull_rom import ShiftAndMagnify
 
 cdef bint _check_even_square(float[:, :] image_arr) nogil:
     cdef int r = image_arr.shape[0]
@@ -77,10 +78,11 @@ class ChannelRegistrationEstimator(LiquidEngine):
     Channel Registration Estimator
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False):
+    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "ChannelRegistrationEstimator"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                         unthreaded_=True, threaded_=True, threaded_static_=True, threaded_dynamic_=True, threaded_guided_=True)
+        super().__init__(
+            clear_benchmarks=clear_benchmarks, testing=testing, 
+            unthreaded_=True, threaded_=True, threaded_static_=True, threaded_dynamic_=True, threaded_guided_=True, verbose=verbose)
         
     def run(self, img_stack, img_ref, max_shift, blocks_per_axis, min_similarity, run_type=None):
         return self._run(img_stack, img_ref, max_shift, blocks_per_axis, min_similarity, run_type=run_type)
@@ -90,7 +92,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_unthreaded(self, float[:,:,:] img_stack, float[:,:] img_ref, int max_shift, int blocks_per_axis, float min_similarity):
 
-        crsm = CRShiftAndMagnify()
+        crsm = ShiftAndMagnify(verbose=False)
         
         cdef int nChannels =  img_stack.shape[0]    
         cdef int nRows =  img_stack.shape[1]
@@ -205,9 +207,9 @@ class ChannelRegistrationEstimator(LiquidEngine):
                         _translation_matrix_c[j, i] = dx
                         _translation_matrix_r[j, i] = dy
 
-            if blocks_per_axis > 1:
+            """if blocks_per_axis > 1:
                 _translation_matrix_c = gaussian(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))"""
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
@@ -216,7 +218,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_threaded(self, float[:,:,:] img_stack, float[:,:] img_ref, int max_shift, int blocks_per_axis, float min_similarity):
 
-        crsm = CRShiftAndMagnify()
+        crsm = ShiftAndMagnify(verbose=False)
         
         cdef int nChannels =  img_stack.shape[0]    
         cdef int nRows =  img_stack.shape[1]
@@ -331,9 +333,9 @@ class ChannelRegistrationEstimator(LiquidEngine):
                         _translation_matrix_c[j, i] = dx
                         _translation_matrix_r[j, i] = dy
 
-            if blocks_per_axis > 1:
+            """if blocks_per_axis > 1:
                 _translation_matrix_c = gaussian(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))"""
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
@@ -342,7 +344,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_threaded_guided(self, float[:,:,:] img_stack, float[:,:] img_ref, int max_shift, int blocks_per_axis, float min_similarity):
 
-        crsm = CRShiftAndMagnify()
+        crsm = ShiftAndMagnify(verbose=False)
         
         cdef int nChannels =  img_stack.shape[0]    
         cdef int nRows =  img_stack.shape[1]
@@ -457,9 +459,9 @@ class ChannelRegistrationEstimator(LiquidEngine):
                         _translation_matrix_c[j, i] = dx
                         _translation_matrix_r[j, i] = dy
 
-            if blocks_per_axis > 1:
+            """if blocks_per_axis > 1:
                 _translation_matrix_c = gaussian(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))"""
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
@@ -468,7 +470,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_threaded_dynamic(self, float[:,:,:] img_stack, float[:,:] img_ref, int max_shift, int blocks_per_axis, float min_similarity):
 
-        crsm = CRShiftAndMagnify()
+        crsm = ShiftAndMagnify(verbose=False)
         
         cdef int nChannels =  img_stack.shape[0]    
         cdef int nRows =  img_stack.shape[1]
@@ -583,9 +585,9 @@ class ChannelRegistrationEstimator(LiquidEngine):
                         _translation_matrix_c[j, i] = dx
                         _translation_matrix_r[j, i] = dy
 
-            if blocks_per_axis > 1:
+            """if blocks_per_axis > 1:
                 _translation_matrix_c = gaussian(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))"""
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
@@ -594,7 +596,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_threaded_static(self, float[:,:,:] img_stack, float[:,:] img_ref, int max_shift, int blocks_per_axis, float min_similarity):
 
-        crsm = CRShiftAndMagnify()
+        crsm = ShiftAndMagnify(verbose=False)
         
         cdef int nChannels =  img_stack.shape[0]    
         cdef int nRows =  img_stack.shape[1]
@@ -709,9 +711,9 @@ class ChannelRegistrationEstimator(LiquidEngine):
                         _translation_matrix_c[j, i] = dx
                         _translation_matrix_r[j, i] = dy
 
-            if blocks_per_axis > 1:
+            """if blocks_per_axis > 1:
                 _translation_matrix_c = gaussian(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_r = gaussian(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))"""
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
