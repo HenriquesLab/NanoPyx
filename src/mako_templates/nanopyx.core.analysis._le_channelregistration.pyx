@@ -246,7 +246,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     % endfor
 
-    def _run_${sch}(self, float[:,:,:] img_stack, float[:,:] img_ref, int max_shift, int blocks_per_axis, float min_similarity):
+    def _run_opencl(self, img_stack, img_ref, max_shift, blocks_per_axis, min_similarity, device):
         _runtype = get_fastest_device_name()
         crsm = ShiftAndMagnify(verbose=False)
         
