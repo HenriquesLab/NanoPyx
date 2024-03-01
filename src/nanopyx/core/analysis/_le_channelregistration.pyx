@@ -10,6 +10,7 @@ from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 from .ccm cimport _calculate_slice_ccm
 
+from .estimate_shift import GetMaxOptimizer
 from ..transform._le_interpolation_bicubic import ShiftAndMagnify
 from ..transform import Convolution2D
 
@@ -74,7 +75,7 @@ cdef float[:, :] _calculate_ccm_from_ref(float[:, :] img_stack, float[:, :] img_
 
 def _gaussian_filter(inpimg, sigma):
     
-    conv = Convolution2D(verbose=False) 
+    conv = Convolution2D(verbose=True) 
 
     radius = np.round(sigma*4)
     x1 = np.arange(-radius, radius+1)
@@ -126,7 +127,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
         cdef float[:,:] flow_arrows
         cdef int n_flow_arrows = 0
 
-        cdef int max_coords_r, max_coords_c
+        cdef float[:] max_coords
         cdef float[:,:] upscaled_ccm_slice
         cdef float vector_c, vector_r, ccm_max_value
 
@@ -163,15 +164,17 @@ class ChannelRegistrationEstimator(LiquidEngine):
                     # Upscale 10x around max_idx                     
                     upscaled_ccm_slice = crsm.run(np.ascontiguousarray(slice_ccm),0,0,10,10,run_type='Threaded')[0]                    
                     max_idx_upscaled = np.unravel_index(np.argmax(upscaled_ccm_slice), np.array(upscaled_ccm_slice).shape)
-                    max_coords_r = (max_idx_upscaled[0]//10)
-                    max_coords_c = (max_idx_upscaled[1]//10)
+                    max_coords = np.asarray(max_idx_upscaled).astype(np.float32) // 10
                     ccm_max_value = upscaled_ccm_slice[max_idx_upscaled[0],max_idx_upscaled[1]]
+
+                    """optimizer = GetMaxOptimizer(np.asarray(slice_ccm).astype(np.float32))
+                    max_coords = np.asarray(optimizer.get_max()).astype(np.float32)"""
 
                     ccm_cols = slice_ccm.shape[1]
                     ccm_rows = slice_ccm.shape[0]
                     if ccm_max_value >= min_similarity:
-                        vector_c = ccm_cols / 2.0 - max_coords_c - 1 
-                        vector_r = ccm_rows / 2.0 - max_coords_r - 1
+                        vector_c = ccm_cols / 2.0 - max_coords[1] - 1 
+                        vector_r = ccm_rows / 2.0 - max_coords[0] - 1
                         flow_arrows[n_flow_arrows,0] = col_start+block_nCols/2.0
                         flow_arrows[n_flow_arrows,1] = row_start+block_nRows/2.0
                         flow_arrows[n_flow_arrows,2] = vector_c
@@ -253,7 +256,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
         cdef float[:,:] flow_arrows
         cdef int n_flow_arrows = 0
 
-        cdef int max_coords_r, max_coords_c
+        cdef float[:] max_coords
         cdef float[:,:] upscaled_ccm_slice
         cdef float vector_c, vector_r, ccm_max_value
 
@@ -290,15 +293,17 @@ class ChannelRegistrationEstimator(LiquidEngine):
                     # Upscale 10x around max_idx                     
                     upscaled_ccm_slice = crsm.run(np.ascontiguousarray(slice_ccm),0,0,10,10,run_type='Threaded')[0]                    
                     max_idx_upscaled = np.unravel_index(np.argmax(upscaled_ccm_slice), np.array(upscaled_ccm_slice).shape)
-                    max_coords_r = (max_idx_upscaled[0]//10)
-                    max_coords_c = (max_idx_upscaled[1]//10)
+                    max_coords = np.asarray(max_idx_upscaled).astype(np.float32) // 10
                     ccm_max_value = upscaled_ccm_slice[max_idx_upscaled[0],max_idx_upscaled[1]]
+
+                    """optimizer = GetMaxOptimizer(np.asarray(slice_ccm).astype(np.float32))
+                    max_coords = np.asarray(optimizer.get_max()).astype(np.float32)"""
 
                     ccm_cols = slice_ccm.shape[1]
                     ccm_rows = slice_ccm.shape[0]
                     if ccm_max_value >= min_similarity:
-                        vector_c = ccm_cols / 2.0 - max_coords_c - 1 
-                        vector_r = ccm_rows / 2.0 - max_coords_r - 1
+                        vector_c = ccm_cols / 2.0 - max_coords[1] - 1 
+                        vector_r = ccm_rows / 2.0 - max_coords[0] - 1
                         flow_arrows[n_flow_arrows,0] = col_start+block_nCols/2.0
                         flow_arrows[n_flow_arrows,1] = row_start+block_nRows/2.0
                         flow_arrows[n_flow_arrows,2] = vector_c
@@ -380,7 +385,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
         cdef float[:,:] flow_arrows
         cdef int n_flow_arrows = 0
 
-        cdef int max_coords_r, max_coords_c
+        cdef float[:] max_coords
         cdef float[:,:] upscaled_ccm_slice
         cdef float vector_c, vector_r, ccm_max_value
 
@@ -417,15 +422,17 @@ class ChannelRegistrationEstimator(LiquidEngine):
                     # Upscale 10x around max_idx                     
                     upscaled_ccm_slice = crsm.run(np.ascontiguousarray(slice_ccm),0,0,10,10,run_type='Threaded')[0]                    
                     max_idx_upscaled = np.unravel_index(np.argmax(upscaled_ccm_slice), np.array(upscaled_ccm_slice).shape)
-                    max_coords_r = (max_idx_upscaled[0]//10)
-                    max_coords_c = (max_idx_upscaled[1]//10)
+                    max_coords = np.asarray(max_idx_upscaled).astype(np.float32) // 10
                     ccm_max_value = upscaled_ccm_slice[max_idx_upscaled[0],max_idx_upscaled[1]]
+
+                    """optimizer = GetMaxOptimizer(np.asarray(slice_ccm).astype(np.float32))
+                    max_coords = np.asarray(optimizer.get_max()).astype(np.float32)"""
 
                     ccm_cols = slice_ccm.shape[1]
                     ccm_rows = slice_ccm.shape[0]
                     if ccm_max_value >= min_similarity:
-                        vector_c = ccm_cols / 2.0 - max_coords_c - 1 
-                        vector_r = ccm_rows / 2.0 - max_coords_r - 1
+                        vector_c = ccm_cols / 2.0 - max_coords[1] - 1 
+                        vector_r = ccm_rows / 2.0 - max_coords[0] - 1
                         flow_arrows[n_flow_arrows,0] = col_start+block_nCols/2.0
                         flow_arrows[n_flow_arrows,1] = row_start+block_nRows/2.0
                         flow_arrows[n_flow_arrows,2] = vector_c
@@ -507,7 +514,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
         cdef float[:,:] flow_arrows
         cdef int n_flow_arrows = 0
 
-        cdef int max_coords_r, max_coords_c
+        cdef float[:] max_coords
         cdef float[:,:] upscaled_ccm_slice
         cdef float vector_c, vector_r, ccm_max_value
 
@@ -544,15 +551,17 @@ class ChannelRegistrationEstimator(LiquidEngine):
                     # Upscale 10x around max_idx                     
                     upscaled_ccm_slice = crsm.run(np.ascontiguousarray(slice_ccm),0,0,10,10,run_type='Threaded')[0]                    
                     max_idx_upscaled = np.unravel_index(np.argmax(upscaled_ccm_slice), np.array(upscaled_ccm_slice).shape)
-                    max_coords_r = (max_idx_upscaled[0]//10)
-                    max_coords_c = (max_idx_upscaled[1]//10)
+                    max_coords = np.asarray(max_idx_upscaled).astype(np.float32) // 10
                     ccm_max_value = upscaled_ccm_slice[max_idx_upscaled[0],max_idx_upscaled[1]]
+
+                    """optimizer = GetMaxOptimizer(np.asarray(slice_ccm).astype(np.float32))
+                    max_coords = np.asarray(optimizer.get_max()).astype(np.float32)"""
 
                     ccm_cols = slice_ccm.shape[1]
                     ccm_rows = slice_ccm.shape[0]
                     if ccm_max_value >= min_similarity:
-                        vector_c = ccm_cols / 2.0 - max_coords_c - 1 
-                        vector_r = ccm_rows / 2.0 - max_coords_r - 1
+                        vector_c = ccm_cols / 2.0 - max_coords[1] - 1 
+                        vector_r = ccm_rows / 2.0 - max_coords[0] - 1
                         flow_arrows[n_flow_arrows,0] = col_start+block_nCols/2.0
                         flow_arrows[n_flow_arrows,1] = row_start+block_nRows/2.0
                         flow_arrows[n_flow_arrows,2] = vector_c
@@ -634,7 +643,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
         cdef float[:,:] flow_arrows
         cdef int n_flow_arrows = 0
 
-        cdef int max_coords_r, max_coords_c
+        cdef float[:] max_coords
         cdef float[:,:] upscaled_ccm_slice
         cdef float vector_c, vector_r, ccm_max_value
 
@@ -671,15 +680,17 @@ class ChannelRegistrationEstimator(LiquidEngine):
                     # Upscale 10x around max_idx                     
                     upscaled_ccm_slice = crsm.run(np.ascontiguousarray(slice_ccm),0,0,10,10,run_type='Threaded')[0]                    
                     max_idx_upscaled = np.unravel_index(np.argmax(upscaled_ccm_slice), np.array(upscaled_ccm_slice).shape)
-                    max_coords_r = (max_idx_upscaled[0]//10)
-                    max_coords_c = (max_idx_upscaled[1]//10)
+                    max_coords = np.asarray(max_idx_upscaled).astype(np.float32) // 10
                     ccm_max_value = upscaled_ccm_slice[max_idx_upscaled[0],max_idx_upscaled[1]]
+
+                    """optimizer = GetMaxOptimizer(np.asarray(slice_ccm).astype(np.float32))
+                    max_coords = np.asarray(optimizer.get_max()).astype(np.float32)"""
 
                     ccm_cols = slice_ccm.shape[1]
                     ccm_rows = slice_ccm.shape[0]
                     if ccm_max_value >= min_similarity:
-                        vector_c = ccm_cols / 2.0 - max_coords_c - 1 
-                        vector_r = ccm_rows / 2.0 - max_coords_r - 1
+                        vector_c = ccm_cols / 2.0 - max_coords[1] - 1 
+                        vector_r = ccm_rows / 2.0 - max_coords[0] - 1
                         flow_arrows[n_flow_arrows,0] = col_start+block_nCols/2.0
                         flow_arrows[n_flow_arrows,1] = row_start+block_nRows/2.0
                         flow_arrows[n_flow_arrows,2] = vector_c
