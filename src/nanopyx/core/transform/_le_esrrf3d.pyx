@@ -8,7 +8,7 @@ from cython.parallel import prange
 
 from .sr_temporal_correlations import calculate_eSRRF_temporal_correlations
 
-from ._interpolation import interpolate_3d
+from ._interpolation import interpolate_3d, interpolate_3d_zlinear
 from ._le_interpolation_catmull_rom import ShiftAndMagnify
 from ...__liquid_engine__ import LiquidEngine
 
@@ -167,7 +167,10 @@ class eSRRF3D(LiquidEngine):
 
         for f in range(n_frames):
             # image_interpolated = interpolator.run(image[f], 0, 0, _magnification_xy, _magnification_xy)
-            image_interpolated = interpolate_3d(image[f], _magnification_xy, _magnification_z)
+
+            # image_interpolated = interpolate_3d(image[f], _magnification_xy, _magnification_z)
+            image_interpolated = interpolate_3d_zlinear(image[f], _magnification_xy, _magnification_z)
+
             n_slices_mag, n_rows_mag, n_cols_mag = image_interpolated.shape[0], image_interpolated.shape[1], image_interpolated.shape[2]
 
             gradients_c = np.zeros((n_slices, n_rows*Gx_Gy_MAGNIFICATION, n_cols*Gx_Gy_MAGNIFICATION), dtype=np.float32)
@@ -185,9 +188,13 @@ class eSRRF3D(LiquidEngine):
             # gradients_r_interpolated = interpolator.run(gradients_r, 0, 0, _magnification_xy, _magnification_xy)
             # gradients_c_interpolated = interpolator.run(gradients_c, 0, 0, _magnification_xy, _magnification_xy)
 
-            gradients_s_interpolated = interpolate_3d(gradients_s, _magnification_xy, _magnification_z)
-            gradients_r_interpolated = interpolate_3d(gradients_r, _magnification_xy, _magnification_z)
-            gradients_c_interpolated = interpolate_3d(gradients_c, _magnification_xy, _magnification_z)
+            # gradients_s_interpolated = interpolate_3d(gradients_s, _magnification_xy, _magnification_z)
+            # gradients_r_interpolated = interpolate_3d(gradients_r, _magnification_xy, _magnification_z)
+            # gradients_c_interpolated = interpolate_3d(gradients_c, _magnification_xy, _magnification_z)
+
+            gradients_s_interpolated = interpolate_3d_zlinear(gradients_s, _magnification_xy, _magnification_z)
+            gradients_r_interpolated = interpolate_3d_zlinear(gradients_r, _magnification_xy, _magnification_z)
+            gradients_c_interpolated = interpolate_3d_zlinear(gradients_c, _magnification_xy, _magnification_z)
 
             if self.keep_gradients:
                 self._gradients_s_interpolated = gradients_s_interpolated.copy()
