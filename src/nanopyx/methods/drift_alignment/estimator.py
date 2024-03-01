@@ -95,7 +95,6 @@ class DriftEstimator(object):
             drift_params = {
                 "time_averaging": 2,
                 "max_expected_drift": 5,
-                "shift_calc_method": "rcc",
                 "ref_option": 0,
                 "apply": True,
             }
