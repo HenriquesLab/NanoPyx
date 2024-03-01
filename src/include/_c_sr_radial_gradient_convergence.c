@@ -146,9 +146,10 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                             dz = vz - zc;
                             distance = sqrt(dx * dx + dy * dy + dz * dz);
                             distance_xy = sqrt(dx * dx + dy * dy);
-                            distance_z = dz;
+                            distance_z = dz*4;
 
-                            if (distance != 0 && distance <= tSO ) { 
+                            // if (distance != 0 && distance <= tSO ) { 
+                            if (distance != 0 && distance_xy <= tSO && distance_z <= tSO_z) {
 
                                 // Gx = _c_get_bound_value(imIntGx, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, Gx_Gy_MAGNIFICATION * magnification_xy * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
                                 // Gy = _c_get_bound_value(imIntGy, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
