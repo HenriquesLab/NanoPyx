@@ -4,7 +4,7 @@ from skimage.io import imsave
 
 from .corrector import ChannelRegistrationCorrector
 from ...core.analysis.cross_correlation_elastic import calculate_translation_mask
-from ...core.analysis._le_channelregistration import ChannelRegistrationEstimator as leChannelRegistrationEstimator
+from ...core.analysis._le_channel_registration import ChannelRegistrationEstimator as leChannelRegistrationEstimator
 
 
 # this class assumes that the image is a numpy array with shape = [n_channels, height, width]
