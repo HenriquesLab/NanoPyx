@@ -1,5 +1,6 @@
 from .estimator_table import DriftEstimatorTable
 from ...core.utils.timeit import timeit
+from ...core.transform._le_interpolation_bicubic import ShiftAndMagnify
 
 import cv2
 import numpy as np

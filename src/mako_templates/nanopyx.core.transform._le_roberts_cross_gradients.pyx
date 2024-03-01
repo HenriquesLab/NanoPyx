@@ -15,11 +15,13 @@ cdef extern from "_c_gradients.h":
 
 class GradientRobertsCross(LiquidEngine):
 
-    def __init__(self, clear_benchmarks=False, testing=False):
+    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "GradientRobertsCross"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing,
-                        unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
+        super().__init__(
+            clear_benchmarks=clear_benchmarks, testing=testing,
+            unthreaded_=True, threaded_=True, threaded_static_=True, 
+            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
+            verbose=verbose)
 
     def run(self, image, run_type = None):
         image = check_image(image)

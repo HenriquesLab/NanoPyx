@@ -4,6 +4,7 @@ from skimage.io import imsave
 
 from .corrector import ChannelRegistrationCorrector
 from ...core.analysis.cross_correlation_elastic import calculate_translation_mask
+from ...core.analysis._le_channel_registration import ChannelRegistrationEstimator as leChannelRegistrationEstimator
 
 
 # this class assumes that the image is a numpy array with shape = [n_channels, height, width]
@@ -24,8 +25,7 @@ class ChannelRegistrationEstimator(object):
         apply_elastic_transform(img_stack): Apply elastic transformations to align channels.
         calculate_translation(channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity, algorithm, method): Calculate translation masks for channel alignment.
         save_translation_mask(path): Save translation masks to a file.
-        save_ccms(path): Save cross-correlation matrices to a file.
-        estimate(img_stack, ref_channel, max_shift, blocks_per_axis, min_similarity, method, save_translation_masks, translation_mask_save_path, save_ccms, ccms_save_path, algorithm, apply): Estimate and apply channel registration.
+        estimate(img_stack, ref_channel, max_shift, blocks_per_axis, min_similarity, method, save_translation_masks, translation_mask_save_path, algorithm, apply): Estimate and apply channel registration.
 
     Note:
         This class is designed for estimating and applying channel registration to an image stack.
@@ -37,7 +37,6 @@ class ChannelRegistrationEstimator(object):
         Initialize a ChannelRegistrationEstimator instance.
         """
         self.translation_masks = None
-        self.ccms = None
 
     def apply_elastic_transform(self, img_stack):
         """
@@ -60,53 +59,6 @@ class ChannelRegistrationEstimator(object):
         corrector = ChannelRegistrationCorrector()
         return corrector.align_channels(img_stack, translation_masks=self.translation_masks)
 
-    def calculate_translation(
-        self,
-        channel_to_align,
-        ref_channel_img,
-        max_shift,
-        blocks_per_axis,
-        min_similarity,
-        algorithm="field",
-        method="subpixel",
-    ):
-        """
-        Calculate a translation mask for aligning a channel with a reference channel image.
-
-        Args:
-            channel_to_align (numpy.ndarray): The channel to be aligned.
-            ref_channel_img (numpy.ndarray): The reference channel image.
-            max_shift (float): Maximum shift allowed for alignment.
-            blocks_per_axis (int): Number of blocks per axis for cross-correlation.
-            min_similarity (float): Minimum similarity threshold for alignment.
-            algorithm (str, optional): Translation mask interpolation algorithm to use (default is "field", "weight" is the other option).
-            method (str, optional): Subpixel method for alignment (default is "subpixel").
-
-        Returns:
-            numpy.ndarray: The calculated translation mask.
-
-        Example:
-            estimator = ChannelRegistrationEstimator()
-            translation_mask = estimator.calculate_translation(
-                channel_to_align, ref_channel_img, max_shift, blocks_per_axis, min_similarity
-            )
-
-        Note:
-            This method calculates a translation mask for aligning a channel with a reference channel image.
-            It uses the provided parameters for alignment, such as maximum shift, block configuration,
-            and minimum similarity threshold, along with optional parameters for the alignment algorithm
-            and subpixel method.
-        """
-        translation_mask = calculate_translation_mask(
-            channel_to_align,
-            ref_channel_img,
-            max_shift,
-            blocks_per_axis,
-            min_similarity,
-            algorithm=algorithm,
-            method=method,
-        )
-        return translation_mask
 
     def save_translation_mask(self, path=None):
         """
@@ -130,29 +82,6 @@ class ChannelRegistrationEstimator(object):
 
         imsave(path + "_translation_masks.tif", self.translation_masks)
 
-    def save_ccms(self, path=None):
-        """
-        Save the cross-correlation matrices (ccms) to a file.
-
-        Args:
-            path (str, optional): The file path to save the ccms.
-                If not provided, a user input prompt will be used to specify the path.
-                The default file name will be "_ccms.tif" appended to the specified path.
-
-        Example:
-            estimator = ChannelRegistrationEstimator()
-            estimator.save_ccms("ccms.tif")
-
-        Note:
-            This method saves the cross-correlation matrices (ccms) to a TIFF file.
-            If the `path` argument is not provided, it prompts the user to input a file path
-            and appends "_ccms.tif" to it as the default file name.
-        """
-        if path is None:
-            path = input("Please provide a filepath to save the ccms") + "_ccms.tif"
-
-        imsave(path + "_ccms.tif", self.ccms)
-
     def estimate(
         self,
         img_stack: array,
@@ -160,12 +89,8 @@ class ChannelRegistrationEstimator(object):
         max_shift: float,
         blocks_per_axis: int,
         min_similarity: float,
-        method: str = "subpixel",
         save_translation_masks: bool = True,
         translation_mask_save_path: str = None,
-        save_ccms: bool = False,
-        ccms_save_path: str = None,
-        algorithm: str = "field",
         apply: bool = False,
     ):
         """
@@ -177,14 +102,9 @@ class ChannelRegistrationEstimator(object):
             max_shift (float): Maximum shift allowed for alignment.
             blocks_per_axis (int): Number of blocks per axis for cross-correlation.
             min_similarity (float): Minimum similarity threshold for alignment.
-            method (str, optional): Subpixel method for alignment (default is "subpixel").
             save_translation_masks (bool, optional): Whether to save translation masks (default is True).
             translation_mask_save_path (str, optional): The file path to save translation masks.
                 If not provided, a user input prompt will be used to specify the path.
-            save_ccms (bool, optional): Whether to save cross-correlation matrices (ccms) (default is False).
-            ccms_save_path (str, optional): The file path to save ccms.
-                If not provided, a user input prompt will be used to specify the path.
-            algorithm (str, optional): Cross-correlation algorithm to use (default is "field").
             apply (bool, optional): Whether to apply elastic transformation to the image stack (default is False).
 
         Returns:
@@ -202,37 +122,16 @@ class ChannelRegistrationEstimator(object):
             The alignment is performed based on the specified parameters, and the results can be optionally saved.
             If `apply` is True, it applies elastic transformation to the image stack and returns the aligned stack.
         """
-        channels_to_align = list(range(img_stack.shape[0]))
-        channels_to_align.remove(ref_channel)
 
-        if ref_channel > img_stack.shape[1]:
+        if ref_channel > img_stack.shape[0]:
             print("Reference channel number cannot be bigger than number of channels!")
             return None
 
-        self.translation_masks = np.zeros((img_stack.shape[0], img_stack.shape[1], img_stack.shape[2] * 2))
-        self.ccms = []
-
-        for channel in channels_to_align:
-            translation_mask, ccm = self.calculate_translation(
-                img_stack[channel],
-                img_stack[ref_channel],
-                max_shift,
-                blocks_per_axis,
-                min_similarity,
-                algorithm=algorithm,
-                method=method,
-            )
-            self.translation_masks[channel] = translation_mask
-            self.ccms.append(ccm)
-
-        self.ccms.insert(ref_channel, np.zeros((len(self.ccms[0]), len(self.ccms[0][0]))))
-        self.ccms = np.array(self.ccms)
+        estimator = leChannelRegistrationEstimator()
+        self.translation_masks = estimator.run(np.asarray(img_stack, dtype=np.float32), ref_channel, max_shift, blocks_per_axis, min_similarity)
 
         if save_translation_masks:
             self.save_translation_mask(path=translation_mask_save_path)
-
-        if save_ccms:
-            self.save_ccms(path=ccms_save_path)
 
         if apply:
             return self.apply_elastic_transform(img_stack)
