@@ -10,7 +10,7 @@ from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array
 from .ccm cimport _calculate_slice_ccm
 
-from ..transform._le_interpolation_catmull_rom import ShiftAndMagnify
+from ..transform._le_interpolation_bicubic import ShiftAndMagnify
 from ..transform import Convolution2D
 
 cdef bint _check_even_square(float[:, :] image_arr) nogil:
@@ -223,8 +223,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
             if blocks_per_axis > 1:
 
-                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows) / 2.0)
+                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows) / 2.0)
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
@@ -350,8 +350,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
             if blocks_per_axis > 1:
 
-                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows) / 2.0)
+                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows) / 2.0)
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
@@ -477,8 +477,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
             if blocks_per_axis > 1:
 
-                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows) / 2.0)
+                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows) / 2.0)
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
@@ -604,8 +604,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
             if blocks_per_axis > 1:
 
-                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows) / 2.0)
+                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows) / 2.0)
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
@@ -731,8 +731,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
             if blocks_per_axis > 1:
 
-                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows / 2.0))
-                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows / 2.0))
+                _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows) / 2.0)
+                _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows) / 2.0)
 
             translation_masks[channel,:,:nCols] = _translation_matrix_c
             translation_masks[channel,:, nCols:] = _translation_matrix_r
