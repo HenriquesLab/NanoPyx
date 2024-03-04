@@ -79,3 +79,16 @@ def benchmark_all_le_methods(
 
     for i in range(n_benchmark_runs):
         nlm.benchmark(img)
+
+    channel_reg = nanopyx.core.analysis._le_channel_registration.ChannelRegistrationEstimator()
+
+    drift_reg = nanopyx.core.analysis._le_drift_calculator.DriftEstimator()
+
+    channels_img = nanopyx.core.generate.beads.generate_channel_misalignment().astype(np.float32)
+    drift_img = nanopyx.core.generate.beads.generate_timelapse_drift().astype(np.float32)
+
+    for i in range(n_benchmark_runs):
+        channel_reg.benchmark(channels_img, 0, 10, 3, 0.5)
+
+    for i in range(n_benchmark_runs):
+        drift_reg.benchmark(drift_img)
