@@ -74,11 +74,11 @@ double _c_calculate_dw3D_isotropic(double distance, double tSS) {
   return pow((distance * exp(-(distance * distance) / tSS)), 4);
 }
 
-double _c_calculate_dw3D(double distance_xy, double distance_z, double tSS, double tSS_z) {
+double _c_calculate_dw3D(double distance, double distance_xy, double distance_z,double tSS, double tSS_z) {
   float D_weight_xy, D_weight_z, D_weight;
-  D_weight_xy = (distance_xy * exp((-distance_xy * distance_xy) / tSS));
-  D_weight_z = (distance_z * exp((-distance_z * distance_z) / tSS_z));
-  D_weight = (D_weight_xy + D_weight_z) / 2;
+  D_weight_xy = (exp((-distance_xy * distance_xy) / tSS));
+  D_weight_z = (exp((-distance_z * distance_z) / tSS_z));
+  D_weight = distance * (D_weight_xy * D_weight_z);
   return pow(D_weight, 4);
 }
 
@@ -110,9 +110,9 @@ float _c_get_bound_value(float* im, int slices, int rows, int cols, int s, int r
     return im[_s * rows * cols + _r * cols + _c];
 }
 
-float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
+float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float ratio_px, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
 
-    float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, distance, distance_xy, distance_z, distanceWeight, distanceWeight_xy, distanceWeight_z, GdotR, Dk;
+    float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, dz_real, distance, distance_xy, distance_z, distanceWeight, distanceWeight_xy, distanceWeight_z, GdotR, Dk;
 
     float xc = (xM + 0.5) / magnification_xy;
     float yc = (yM + 0.5) / magnification_xy;
@@ -144,9 +144,10 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                             dx = vx - xc;
                             dy = vy - yc;
                             dz = vz - zc;
-                            distance = sqrt(dx * dx + dy * dy + dz * dz);
+                            dz_real = dz * ratio_px;
+                            distance = sqrt(dx * dx + dy * dy + dz_real * dz_real);
                             distance_xy = sqrt(dx * dx + dy * dy);
-                            distance_z = dz*4; // TODO: need to add a variable voxel aspect ratio = 4 (for instance) to multiply dz
+                            distance_z = dz_real; // TODO: need to add a variable voxel aspect ratio = 4 (for instance) to multiply dz
                                                 // TODO: check if this is correct. Need to add the real ratio and size of the voxel
                             // if (distance != 0 && distance <= tSO ) { 
                             if (distance != 0 && distance_xy <= tSO && distance_z <= tSO_z) {
@@ -163,7 +164,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                                 // Gz = imIntGz[(int)(vz * magnification_z * Gz_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION * rowsM * Gx_Gy_MAGNIFICATION) + (int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION)];
 
                                 // distanceWeight = _c_calculate_dw3D_isotropic(distance, tSS);
-                                distanceWeight = _c_calculate_dw3D(distance_xy, distance_z, tSS, tSS_z);
+                                distanceWeight = _c_calculate_dw3D(distance, distance_xy, distance_z, tSS, tSS_z);
 
                                 // distanceWeight_xy = _c_calculate_dw_xy(distance_xy, tSS); 
                                 // distanceWeight_z = _c_calculate_dw_z(distance_z, tSS_z);
@@ -171,10 +172,10 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                                 distanceWeightSum += distanceWeight;
                                 // distanceWeightSum_xy += distanceWeight_xy;
                                 // distanceWeightSum_z += distanceWeight_z;
-                                GdotR = Gx*dx + Gy*dy + Gz*dz;
+                                GdotR = Gx*dx + Gy*dy + Gz*dz_real;
 
                                 if (GdotR < 0) {
-                                    Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, dz, distance);
+                                    Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, dz_real, distance);
                                     // RGC += Dk * (distanceWeightSum_xy + distanceWeightSum_z) / 2;
                                     // RGC += (Dk * distanceWeightSum); // test
                                     RGC += (Dk * distanceWeight);
@@ -197,95 +198,6 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
 
     return RGC;
 }
-
-float _c_calculate_rgc3D_dev(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
-
-    float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, distance, distance_xy, distance_z, distanceWeight, distanceWeight_xy, distanceWeight_z, GdotR, Dk;
-
-    float xc = (xM + 0.5) / magnification_xy;
-    float yc = (yM + 0.5) / magnification_xy;
-    float zc = (sliceM) / magnification_z;
-
-    float RGC = 0;
-    float distanceWeightSum = 0;
-    float distanceWeightSum_xy = 0;
-    float distanceWeightSum_z = 0;
-
-    int _start = -(int)(Gx_Gy_MAGNIFICATION * fwhm);
-    int _end = (int)(Gx_Gy_MAGNIFICATION * fwhm + 1);
-
-    int _start_z = -(int)(Gz_MAGNIFICATION * fwhm_z);
-    int _end_z = (int)(Gz_MAGNIFICATION * fwhm_z + 1);
-    
-    for (int j = _start; j <= _end; j++) {
-        vy = ((float) ((int) (Gx_Gy_MAGNIFICATION*yc)) + j)/(float) Gx_Gy_MAGNIFICATION;
-
-        if (0 < vy && vy < rowsM - 1) {
-            for (int i = _start; i <= _end; i++) {
-                vx = ((float) ((int) (Gx_Gy_MAGNIFICATION*xc)) + i)/(float) Gx_Gy_MAGNIFICATION;
-
-                if (0 < vx && vx < colsM - 1) {
-                    for (int k = _start_z; k <= _end_z; k++) {
-                        vz = ((float) ((int) (zc)) + k);
-
-                        if (0 < vz && vz < slicesM - 1) {
-                            dx = vx - xc;
-                            dy = vy - yc;
-                            dz = vz - zc;
-                            distance = sqrt(dx * dx + dy * dy + dz * dz);
-                            distance_xy = sqrt(dx * dx + dy * dy);
-                            distance_z = dz;
-
-                            if (distance != 0 && distance <= tSO ) { 
-
-                                // Gx = _c_get_bound_value(imIntGx, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, Gx_Gy_MAGNIFICATION * magnification_xy * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
-                                // Gy = _c_get_bound_value(imIntGy, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
-                                // Gz = _c_get_bound_value(imIntGz, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, magnification_xy * vz * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
-                                
-                                Gx = _c_get_bound_value(imIntGx, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
-                                Gy = _c_get_bound_value(imIntGy, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
-                                Gz = _c_get_bound_value(imIntGz, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
-                                // Gx = imIntGx[(int)(vz * magnification_z * Gz_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION * rowsM * Gx_Gy_MAGNIFICATION) + (int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION)];
-                                // Gy = imIntGy[(int)(vz * magnification_z * Gz_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION * rowsM * Gx_Gy_MAGNIFICATION) + (int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION)];
-                                // Gz = imIntGz[(int)(vz * magnification_z * Gz_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION * rowsM * Gx_Gy_MAGNIFICATION) + (int)(vy * magnification_xy * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification_xy * Gx_Gy_MAGNIFICATION)];
-
-                                distanceWeight = _c_calculate_dw3D_isotropic(distance, tSS);
-
-                                // distanceWeight_xy = _c_calculate_dw_xy(distance_xy, tSS); 
-                                // distanceWeight_z = _c_calculate_dw_z(distance_z, tSS_z);
-                                
-                                distanceWeightSum += distanceWeight;
-                                // distanceWeightSum_xy += distanceWeight_xy;
-                                // distanceWeightSum_z += distanceWeight_z;
-                                GdotR = Gx*dx + Gy*dy + Gz*dz;
-
-                                if (GdotR < 0) {
-                                    Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, dz, distance);
-                                    // RGC += Dk * (distanceWeightSum_xy + distanceWeightSum_z) / 2;
-                                    // RGC += (Dk * distanceWeightSum); // test
-                                    RGC += (Dk * distanceWeight);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    RGC /= distanceWeightSum;
-
-    if (RGC >= 0) {
-        RGC = pow(RGC, sensitivity);
-    } else {
-        RGC = 0;
-    }
-
-    return RGC;
-}
-
-
-
 
 float _c_calculate_dk_3d(float dx, float dy, float dz, float Gx, float Gy, float Gz, float Gmag, float distance) {
     float G1 = dy*Gz - dz*Gy;
