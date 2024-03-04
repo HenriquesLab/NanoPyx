@@ -65,7 +65,7 @@ def change_cython_profiler_flag(base_path: str, flag: bool):
 def main(mode=None):
     options = {
         "List nox sessions": "nox -l",
-        "Run nox with test source": "NPX_PYTEST_ARGS='-n=auto' nox --session test_source",
+        "Run nox with test source": "NPX_PYTEST_ARGS='' nox --session test_source",
         "Run nox with build wheels": "nox --session clear_wheelhouse build_wheel build_sdist",
         "Run nox with test wheels": "nox --session test_wheel",
         "Run nox with build and test wheels": "nox --session clear_wheelhouse build_wheel build_sdist test_wheel",

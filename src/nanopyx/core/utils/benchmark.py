@@ -4,7 +4,7 @@ import numpy as np
 
 
 def benchmark_all_le_methods(
-    n_benchmark_runs=3, img_dims=100, shift=2, magnification=5, rotation=math.radians(15), conv_kernel_dims=23
+    n_benchmark_runs=3, img_dims=100, shift=1, magnification=2, rotation=math.radians(15), conv_kernel_dims=5
 ):
     """
     Runs benchmark tests for all LE methods.
