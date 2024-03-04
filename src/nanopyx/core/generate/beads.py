@@ -89,7 +89,7 @@ def generate_timelapse_drift(
 
             img[i + 1] = warp(img[i], transformation_matrix.inverse, order=3, preserve_range=True)
 
-    return img
+    return img.astype(np.float32)
 
 
 def generate_channel_misalignment():
@@ -140,4 +140,4 @@ def generate_channel_misalignment():
     misaligned_channel = assemble_frame_from_blocks(np.array(misaligned_blocks), 3, 3)
     misaligned_channel_2 = assemble_frame_from_blocks(np.array(misaligned_blocks_2), 3, 3)
 
-    return np.array([ref_channel, misaligned_channel, misaligned_channel_2]).astype(np.float16)
+    return np.array([ref_channel, misaligned_channel, misaligned_channel_2]).astype(np.float32)
