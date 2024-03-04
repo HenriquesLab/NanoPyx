@@ -21,7 +21,7 @@ on:
 jobs:
 
   test_on_ubuntu_container:
-    runs-on: [self-hosted, Ubuntu, Docker]
+    runs-on: ubuntu-latest # [self-hosted, Ubuntu, Docker]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,7 +48,7 @@ jobs:
           verbose: true # optional (default = false)
 
   test_on_windows:
-    runs-on: [self-hosted, Windows, X64]
+    runs-on: windows-latest # [self-hosted, Windows, X64]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -75,7 +75,7 @@ jobs:
           verbose: true # optional (default = false)
 
   test_on_macos:
-    runs-on: [self-hosted, macOS]
+    runs-on: macos-latest # [self-hosted, macOS]
     steps:
       - uses: actions/checkout@v4
         with:
