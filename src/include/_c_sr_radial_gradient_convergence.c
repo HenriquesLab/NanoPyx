@@ -143,8 +143,8 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                         if (0 < vz && vz < slicesM - 1) {
                             dx = vx - xc;
                             dy = vy - yc;
-                            dz = vz - zc;
-                            dz_real = dz * ratio_px;
+                            dz = vz - zc; 
+                            dz_real = dz * ratio_px; // This has been already divigy by magnification_z
                             distance = sqrt(dx * dx + dy * dy + dz_real * dz_real);
                             distance_xy = sqrt(dx * dx + dy * dy);
                             distance_z = dz_real;
