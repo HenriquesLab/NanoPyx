@@ -147,8 +147,8 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                             dz_real = dz * ratio_px;
                             distance = sqrt(dx * dx + dy * dy + dz_real * dz_real);
                             distance_xy = sqrt(dx * dx + dy * dy);
-                            distance_z = dz_real; // TODO: need to add a variable voxel aspect ratio = 4 (for instance) to multiply dz
-                                                // TODO: check if this is correct. Need to add the real ratio and size of the voxel
+                            distance_z = dz_real;
+                            
                             // if (distance != 0 && distance <= tSO ) { 
                             if (distance != 0 && distance_xy <= tSO && distance_z <= tSO_z) {
 
