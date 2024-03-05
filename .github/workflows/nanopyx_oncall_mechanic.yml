@@ -30,7 +30,7 @@ on:
 
 jobs:
   test_on_ubuntu_container:
-    runs-on: [self-hosted, deepthought]
+    runs-on: [self-hosted, Ubuntu]
     steps:
       - uses: actions/checkout@v4
         with:
