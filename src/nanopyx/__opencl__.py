@@ -24,7 +24,7 @@ try:
 
 
 except (ImportError, OSError, Exception) as e:
-    print(e)
+    print("This exception is what's causing cl equals None:", e)
     cl = None
     cl_array = None
     devices = None
