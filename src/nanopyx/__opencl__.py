@@ -12,7 +12,7 @@ try:
         if "Microsoft" in platform.vendor:  # TODO this takes out integrated graphics
             continue
         for dev in platform.get_devices():
-            check if the device is a GPU
+            # check if the device is a GPU
             if "GPU" not in cl.device_type.to_string(dev.type):
                 continue
             if "cl_khr_fp64" in dev.extensions.strip().split(" "):
