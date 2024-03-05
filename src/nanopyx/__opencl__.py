@@ -23,8 +23,8 @@ try:
             devices.append({"device": dev, "DP": cl_dp})
 
 
-except (ImportError, OSError, Exception):
-    os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
+except (ImportError, OSError, Exception) as e:
+    print(e)
     cl = None
     cl_array = None
     devices = None
