@@ -3,30 +3,31 @@ import warnings
 
 os.environ["PYOPENCL_COMPILER_OUTPUT"] = "1"
 
-# try:
-import pyopencl as cl
-import pyopencl.array as cl_array
+try:
+    import pyopencl as cl
+    import pyopencl.array as cl_array
 
-devices = []
-for platform in cl.get_platforms():
-    if "Microsoft" in platform.vendor:  # TODO this takes out integrated graphics
-        continue
-    for dev in platform.get_devices():
-        # check if the device is a GPU
-        if "GPU" not in cl.device_type.to_string(dev.type):
+    devices = []
+    for platform in cl.get_platforms():
+        if "Microsoft" in platform.vendor:  # TODO this takes out integrated graphics
             continue
-        if "cl_khr_fp64" in dev.extensions.strip().split(" "):
-            cl_dp = False
-        else:
-            cl_dp = False
+        for dev in platform.get_devices():
+            check if the device is a GPU
+            if "GPU" not in cl.device_type.to_string(dev.type):
+                continue
+            if "cl_khr_fp64" in dev.extensions.strip().split(" "):
+                cl_dp = False
+            else:
+                cl_dp = False
 
-        devices.append({"device": dev, "DP": cl_dp})
+            devices.append({"device": dev, "DP": cl_dp})
 
 
-# except (ImportError, OSError, Exception):
-#     cl = None
-#     cl_array = None
-#     devices = None
+except (ImportError, OSError, Exception):
+    os.environ["NANOPYX_DISABLE_OPENCL"] = "1"
+    cl = None
+    cl_array = None
+    devices = None
 
 
 def print_opencl_info():
