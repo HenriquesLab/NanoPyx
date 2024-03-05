@@ -1,4 +1,4 @@
-name: Test - Nightly
+name: Ubuntu 3.11 Testing
 # does a massive check, every night
 
 on:
