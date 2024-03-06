@@ -139,9 +139,8 @@ reportUndefinedVariable = false
 reportMissingImports = false
 
 [tool.pytest.ini_options]
-addopts = "--cov=nanopyx --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks"
+addopts = "--cov=nanopyx --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks"
 timeout = 6001
-plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 # Filters are standard python warning filters as described here:
@@ -176,7 +175,7 @@ build-verbosity = 0
 # repair-wheel-command = ""
 
 test-command = "pytest {project}/tests"
-test-requires = ["nanopyx[all]"]
+test-requires = ["nanopyx[test]"]
 # test-extras = []
 
 [tool.cibuildwheel.linux]
@@ -189,7 +188,7 @@ manylinux-x86_64-image = "manylinux2014"
 [tool.cibuildwheel.macos]
 archs = ["x86_64", "arm64"]
 before-all = ["brew install llvm libomp"]
-test-requires = ["nanopyx[all]"]
+test-requires = ["nanopyx[test]"]
 #test-command = "pytest -n=1 --timeout=1200 {project}/tests"
 # #repair-wheel-command = "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}"
 # repair-wheel-command = "delocate-wheel -w {dest_dir} -v {wheel}"
@@ -203,7 +202,7 @@ test-requires = ["nanopyx[all]"]
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
-test-requires = ["nanopyx[all]"]
+test-requires = ["nanopyx[test]"]
 #test-command = "pytest -n=0 --timeout=1200 {project}\\tests"
 # before-build = "pip install delvewheel"
 # repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel}"

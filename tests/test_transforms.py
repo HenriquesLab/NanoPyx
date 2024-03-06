@@ -6,7 +6,7 @@ from nanopyx.core.transform import LZShiftAndMagnify, LZShiftScaleRotate, NNShif
 
 
 # tag-start: test_interpolation_nearest_neighbor_ShiftAndMagnify
-def test_interpolation_nearest_neighbor_ShiftAndMagnify(plt):
+def test_interpolation_nearest_neighbor_ShiftAndMagnify():
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
@@ -45,7 +45,7 @@ def test_interpolation_nearest_neighbor_ShiftAndMagnify(plt):
 
 
 # tag-copy: test_interpolation_nearest_neighbor_ShiftAndMagnify; replace("nearest_neighbor", "bicubic"); replace("NNShiftAndMagnify", "BCShiftAndMagnify")
-def test_interpolation_bicubic_ShiftAndMagnify(plt):
+def test_interpolation_bicubic_ShiftAndMagnify():
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
@@ -84,7 +84,7 @@ def test_interpolation_bicubic_ShiftAndMagnify(plt):
 
 
 # tag-copy: test_interpolation_nearest_neighbor_ShiftAndMagnify; replace("nearest_neighbor", "catmull_rom"); replace("NNShiftAndMagnify", "CRShiftAndMagnify")
-def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
+def test_interpolation_catmull_rom_ShiftAndMagnify():
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
@@ -123,7 +123,7 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
 
 
 # tag-copy: test_interpolation_nearest_neighbor_ShiftAndMagnify; replace("nearest_neighbor", "lanczos"); replace("NNShiftAndMagnify", "LZShiftAndMagnify")
-def test_interpolation_lanczos_ShiftAndMagnify(plt):
+def test_interpolation_lanczos_ShiftAndMagnify():
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
