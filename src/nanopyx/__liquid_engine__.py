@@ -51,6 +51,7 @@ class LiquidEngine:
         transonic_: bool = False,
         cuda_: bool = False,
         clear_benchmarks: bool = False,
+        verbose: bool = True,
     ) -> None:
         """@public
         Initialize the Liquid Engine
@@ -141,6 +142,8 @@ class LiquidEngine:
             self._default_benchmarks = yaml.safe_load(files(f'liquid_benchmarks.{inspect.getmodule(self.__class__).__name__.split(".")[-1]}').joinpath(self.__class__.__name__ + ".yml").read_text())
         except:
             self._default_benchmarks = []
+
+        self.verbose = verbose
         
 
     def _run(self, *args, run_type=None, **kwargs):
@@ -182,7 +185,7 @@ class LiquidEngine:
             self._last_args = arg_repr
             self._last_runtype = run_type
 
-            self.Agent._inform(self)
+            self.Agent._inform(self, verbose=self.verbose)
 
         except (cl.MemoryError, cl.LogicError) as e:
             print("Found: ", e)

@@ -31,12 +31,13 @@ class Radiality(LiquidEngine):
     Radial gradient convergence using the NanoPyx Liquid Engine
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False):
+    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "Radiality"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
             unthreaded_=False, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
+            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
+            verbose=verbose)
 
     def run(self, image, image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
         image = check_image(image)

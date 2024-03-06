@@ -22,13 +22,13 @@ class DriftEstimator(LiquidEngine):
     This class provides methods for estimating drift in image stacks using cross-correlation.
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False):
+    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "DriftEstimator"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
             opencl_=False, unthreaded_=True, threaded_=True, threaded_static_=False, 
             threaded_dynamic_=False, threaded_guided_=False,
-            njit_=False, python_=False, transonic_=False, cuda_=False, dask_=False)
+            njit_=False, python_=False, transonic_=False, cuda_=False, dask_=False, verbose=verbose)
 
     def run(self, image, time_averaging: int = 2, max_drift: int = 5, ref_option: int = 0, run_type=None):
         return self._run(np.asarray(image).astype(np.float32), time_averaging=time_averaging, max_drift=max_drift, ref_option=ref_option, run_type=run_type)
