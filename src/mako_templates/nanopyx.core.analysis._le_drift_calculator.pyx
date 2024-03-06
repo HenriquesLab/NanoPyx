@@ -1,6 +1,6 @@
 <%!
 schedulers = ['unthreaded','threaded','threaded_guided','threaded_dynamic','threaded_static']
-%># cython: infer_types=False, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
+%># cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 import time
 import scipy
 import numpy as np
