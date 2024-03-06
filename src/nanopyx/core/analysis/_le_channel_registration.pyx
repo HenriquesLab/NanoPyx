@@ -76,7 +76,7 @@ cdef float[:, :] _calculate_ccm_from_ref(float[:, :] img_stack, float[:, :] img_
 
 def _gaussian_filter(inpimg, _runtype, sigma):
     
-    conv = Convolution2D(verbose=True) 
+    conv = Convolution2D() 
 
     radius = np.round(sigma*4)
     x1 = np.arange(-radius, radius+1)
@@ -94,11 +94,11 @@ class ChannelRegistrationEstimator(LiquidEngine):
     Channel Registration Estimator
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
+    def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "ChannelRegistrationEstimator"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing, 
-            unthreaded_=True, threaded_=True, threaded_static_=True, threaded_dynamic_=True, threaded_guided_=True, opencl_=True, verbose=verbose)
+            unthreaded_=True, threaded_=True, threaded_static_=True, threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
         
     def run(self, img_stack, img_ref, max_shift, blocks_per_axis, min_similarity, run_type=None):
         return self._run(img_stack, img_ref, max_shift, blocks_per_axis, min_similarity, run_type=run_type)
@@ -108,7 +108,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_unthreaded(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
         _runtype = "unthreaded".capitalize()
-        crsm = ShiftAndMagnify(verbose=False)
+        crsm = ShiftAndMagnify()
 
         cdef float[:, :] img_ref = np.asarray(img_stack[ref_index], dtype=np.float32)
         
@@ -242,7 +242,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_threaded(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
         _runtype = "threaded".capitalize()
-        crsm = ShiftAndMagnify(verbose=False)
+        crsm = ShiftAndMagnify()
 
         cdef float[:, :] img_ref = np.asarray(img_stack[ref_index], dtype=np.float32)
         
@@ -376,7 +376,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_threaded_guided(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
         _runtype = "threaded_guided".capitalize()
-        crsm = ShiftAndMagnify(verbose=False)
+        crsm = ShiftAndMagnify()
 
         cdef float[:, :] img_ref = np.asarray(img_stack[ref_index], dtype=np.float32)
         
@@ -510,7 +510,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_threaded_dynamic(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
         _runtype = "threaded_dynamic".capitalize()
-        crsm = ShiftAndMagnify(verbose=False)
+        crsm = ShiftAndMagnify()
 
         cdef float[:, :] img_ref = np.asarray(img_stack[ref_index], dtype=np.float32)
         
@@ -644,7 +644,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_threaded_static(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
         _runtype = "threaded_static".capitalize()
-        crsm = ShiftAndMagnify(verbose=False)
+        crsm = ShiftAndMagnify()
 
         cdef float[:, :] img_ref = np.asarray(img_stack[ref_index], dtype=np.float32)
         
@@ -779,7 +779,7 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     def _run_opencl(self, float[:,:,:] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity, device):
         _runtype = "OpenCL_" + device["device"].name
-        crsm = ShiftAndMagnify(verbose=False)
+        crsm = ShiftAndMagnify()
 
         cdef float[:, :] img_ref = np.asarray(img_stack[ref_index], dtype=np.float32)
         

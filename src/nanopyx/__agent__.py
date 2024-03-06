@@ -130,7 +130,7 @@ class Agent_:
 
         return model.predict_proba([[True]])[:, model.classes_.tolist().index(True)][0]
 
-    def _check_delay(self, run_type, runtime, runtimes_history, verbose=True):
+    def _check_delay(self, run_type, runtime, runtimes_history):
         """@public
         Checks if the given run_type ran delayed in the previous run when compared with historical data
         If delayed:
@@ -168,10 +168,9 @@ class Agent_:
                 delay_prob = self._calculate_prob_of_delay(runtimes_history, fast_avg_speed, fast_std_speed)
             except ValueError:
                 delay_prob = 0.01
-            if verbose:
-                print(
-                    f"Run type {run_type} was delayed in the previous run. Delay factor: {delay_factor}, Delay probability: {delay_prob}"
-                )
+            print(
+                f"Run type {run_type} was delayed in the previous run. Delay factor: {delay_factor}, Delay probability: {delay_prob}"
+            )
 
             if "Threaded" in run_type:
                 for threaded_run_type in threaded_runtypes:
@@ -222,7 +221,7 @@ class Agent_:
         else:
             return sorted(fast_avg, key=fast_avg.get)[0]
 
-    def _inform(self, fn, verbose=True):
+    def _inform(self, fn):
         """@public
         Informs the Agent that a LE object finished running
         """
@@ -234,11 +233,10 @@ class Agent_:
 
         assert historical_data[-1] == fn._last_time, "Historical data is not consistent with the last runtime"
 
-        if verbose:
-            print(f"Agent: {fn._designation} using {run_type} ran in {fn._last_time} seconds")
+        print(f"Agent: {fn._designation} using {run_type} ran in {fn._last_time} seconds")
 
         if len(historical_data) > 19:
-            self._check_delay(run_type, historical_data[-1], historical_data[:-1], verbose=verbose)
+            self._check_delay(run_type, historical_data[-1], historical_data[:-1])
 
 
 Agent = Agent_()

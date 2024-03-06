@@ -32,14 +32,12 @@ class NLMDenoising(LiquidEngine):
     Non-local means Denoising using the NanoPyx Liquid Engine
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
+    def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "NLMDenoising"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
             unthreaded_=True, threaded_=True, threaded_static_=True,
-            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
-            python_=True,
-            verbose=verbose)
+            threaded_dynamic_=True, threaded_guided_=True, opencl_=True)
 
     def run(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0, run_type=None) -> np.ndarray:
         """

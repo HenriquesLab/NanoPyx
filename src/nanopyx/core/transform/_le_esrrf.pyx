@@ -22,12 +22,11 @@ class eSRRF(LiquidEngine):
     eSRRF using the NanoPyx Liquid Engine and running as a single task.
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
+    def __init__(self, clear_benchmarks=False, testing=False):
         self._designation = "eSRRF_ST"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
                         opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True,
-                        verbose=verbose)
+                        threaded_dynamic_=True, threaded_guided_=True)
 
     def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
         image = check_image(image)
