@@ -2,6 +2,7 @@ import math
 import nanopyx
 import numpy as np
 
+from ..generate.beads import generate_channel_misalignment, generate_timelapse_drift
 
 def benchmark_all_le_methods(
     n_benchmark_runs=3, img_dims=100, shift=1, magnification=2, rotation=math.radians(15), conv_kernel_dims=5
@@ -84,8 +85,8 @@ def benchmark_all_le_methods(
 
     drift_reg = nanopyx.core.analysis._le_drift_calculator.DriftEstimator()
 
-    channels_img = nanopyx.core.generate.beads.generate_channel_misalignment().astype(np.float32)
-    drift_img = nanopyx.core.generate.beads.generate_timelapse_drift().astype(np.float32)
+    channels_img = generate_channel_misalignment().astype(np.float32)
+    drift_img = generate_timelapse_drift().astype(np.float32)
 
     for i in range(n_benchmark_runs):
         channel_reg.benchmark(channels_img, 0, 10, 3, 0.5)
