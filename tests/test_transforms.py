@@ -1,8 +1,8 @@
-# import numpy as np
+import numpy as np
 
-# from nanopyx.core.generate.noise_add_simplex import get_simplex_noise
-# from nanopyx.core.transform import BCShiftAndMagnify, BCShiftScaleRotate, CRShiftAndMagnify, CRShiftScaleRotate
-# from nanopyx.core.transform import LZShiftAndMagnify, LZShiftScaleRotate, NNShiftAndMagnify, NNShiftScaleRotate
+from nanopyx.core.generate.noise_add_simplex import get_simplex_noise
+from nanopyx.core.transform import BCShiftAndMagnify, BCShiftScaleRotate, CRShiftAndMagnify, CRShiftScaleRotate
+from nanopyx.core.transform import LZShiftAndMagnify, LZShiftScaleRotate, NNShiftAndMagnify, NNShiftScaleRotate
 
 
 # # tag-start: test_interpolation_nearest_neighbor_ShiftAndMagnify
