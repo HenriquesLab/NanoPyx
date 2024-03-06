@@ -1,7 +1,7 @@
 from nanopyx.core.utils import MandelbrotBenchmark
 
 # flake8: noqa: E501
-def test_mandelbrot_benchmark(plt):
+def test_mandelbrot_benchmark():
     mb = MandelbrotBenchmark(testing=True,clear_benchmarks=True)
     values = mb.benchmark(128)
 
