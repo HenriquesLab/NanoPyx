@@ -64,7 +64,7 @@ all = ["nanopyx[developer,test,jupyter,doc, optional]"]
 developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
 test = [
     "nox>=2022.11.21",
-    "pytest==7.2", # required to work with pytest-cython (https://github.com/lgpage/pytest-cython/issues/58)
+    "pytest==8.0.2", # required to work with pytest-cython (https://github.com/lgpage/pytest-cython/issues/58)
     "pytest-cov>= 4.0.0",
     "pytest-icdiff>=0.6",    # https://github.com/hjwp/pytest-icdiff
     "pytest-clarity>=1.0.1", # https://pypi.org/project/pytest-clarity/
