@@ -6,8 +6,7 @@ from nanopyx.core.transform import NNPolarTransform
 from skimage.transform import warp_polar
 
 
-# tag-start: test_interpolation_nearest_neighbor_PolarTransform_linear
-def test_interpolation_nearest_neighbor_PolarTransform_linear(): #(plt,compare):
+def test_interpolation_nearest_neighbor_PolarTransform_linear(plt,compare): 
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 64, frames=nFrames, amplitude=1000)
@@ -26,25 +25,24 @@ def test_interpolation_nearest_neighbor_PolarTransform_linear(): #(plt,compare):
         titles.append(title)
         images.append(image)
 
-    # # ensure images are similar
-    # for i in range(len(images)):
-    #     for j in range(i + 1, len(images)):
-    #         assert compare(images[i], images[j])
+    # ensure images are similar
+    for i in range(len(images)):
+        for j in range(i + 1, len(images)):
+            assert compare(images[i], images[j])
             
-    # nFrames = images[0].shape[0]
-    # # show images
-    # fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 15))
-    # for i in range(nFrames):
-    #     for j in range(len(images)):
-    #         if i == 0:
-    #             axes[i, j].set_title(titles[j])
-    #         axes[i, j].imshow(images[j][i], cmap="hot")
-    #         axes[i, j].axis("off")
+    nFrames = images[0].shape[0]
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 15))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
 
-# tag-end
 
-# tag-start: test_interpolation_nearest_neighbor_PolarTransform_linear
-def test_interpolation_nearest_neighbor_PolarTransform_log(): #(plt,compare):
+
+def test_interpolation_nearest_neighbor_PolarTransform_log(plt,compare): 
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 64, frames=nFrames, amplitude=1000)
@@ -63,19 +61,18 @@ def test_interpolation_nearest_neighbor_PolarTransform_log(): #(plt,compare):
         titles.append(title)
         images.append(image)
 
-    # ensure images are similar
-    # for i in range(len(images)):
-    #     for j in range(i + 1, len(images)):
-    #         assert compare(images[i], images[j])
+    #ensure images are similar
+    for i in range(len(images)):
+        for j in range(i + 1, len(images)):
+            assert compare(images[i], images[j])
 
-    # nFrames = images[0].shape[0]
-    # # show images
-    # fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 15))
-    # for i in range(nFrames):
-    #     for j in range(len(images)):
-    #         if i == 0:
-    #             axes[i, j].set_title(titles[j])
-    #         axes[i, j].imshow(images[j][i], cmap="hot")
-    #         axes[i, j].axis("off")
+    nFrames = images[0].shape[0]
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 15))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
 
-# tag-end

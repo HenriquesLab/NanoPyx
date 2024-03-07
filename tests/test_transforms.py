@@ -4,7 +4,7 @@ from nanopyx.core.generate.noise_add_simplex import get_simplex_noise
 from nanopyx.core.transform import BCShiftAndMagnify, BCShiftScaleRotate, CRShiftAndMagnify, CRShiftScaleRotate
 from nanopyx.core.transform import NNShiftAndMagnify, NNShiftScaleRotate
 
-def test_interpolation_nearest_neighbor_ShiftAndMagnify():
+def test_interpolation_nearest_neighbor_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
@@ -28,18 +28,18 @@ def test_interpolation_nearest_neighbor_ShiftAndMagnify():
         for j in range(i + 1, len(images)):
             np.testing.assert_allclose(images[i], images[j], rtol=1e1)
 
-    # nFrames = images[0].shape[0]
-    # # show images
-    # fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
-    # for i in range(nFrames):
-    #     for j in range(len(images)):
-    #         if i == 0:
-    #             axes[i, j].set_title(titles[j])
-    #         axes[i, j].imshow(images[j][i], cmap="hot")
-    #         axes[i, j].axis("off")
+    nFrames = images[0].shape[0]
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
 
 
-def test_interpolation_bicubic_ShiftAndMagnify():
+def test_interpolation_bicubic_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
@@ -63,15 +63,15 @@ def test_interpolation_bicubic_ShiftAndMagnify():
         for j in range(i + 1, len(images)):
             np.testing.assert_allclose(images[i], images[j], rtol=1e1)
 
-    # nFrames = images[0].shape[0]
-    # # show images
-    # fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
-    # for i in range(nFrames):
-    #     for j in range(len(images)):
-    #         if i == 0:
-    #             axes[i, j].set_title(titles[j])
-    #         axes[i, j].imshow(images[j][i], cmap="hot")
-    #         axes[i, j].axis("off")
+    nFrames = images[0].shape[0]
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
 
 
 def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
@@ -98,15 +98,15 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
         for j in range(i + 1, len(images)):
             np.testing.assert_allclose(images[i], images[j], rtol=1e1)
 
-    # nFrames = images[0].shape[0]
-    # # show images
-    # fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
-    # for i in range(nFrames):
-    #     for j in range(len(images)):
-    #         if i == 0:
-    #             axes[i, j].set_title(titles[j])
-    #         axes[i, j].imshow(images[j][i], cmap="hot")
-    #         axes[i, j].axis("off")
+    nFrames = images[0].shape[0]
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
 
 
 
@@ -146,7 +146,7 @@ def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
 
 
 
-def test_interpolation_nearest_neighbor_ShiftScaleRotate(): 
+def test_interpolation_nearest_neighbor_ShiftScaleRotate(plt): 
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
@@ -171,17 +171,17 @@ def test_interpolation_nearest_neighbor_ShiftScaleRotate():
         for j in range(i + 1, len(images)):
             np.testing.assert_allclose(images[i], images[j], rtol=1e1)
 
-    # # show images
-    # fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
-    # for i in range(nFrames):
-    #     for j in range(len(images)):
-    #         if i == 0:
-    #             axes[i, j].set_title(titles[j])
-    #         axes[i, j].imshow(images[j][i], cmap="hot")
-    #         axes[i, j].axis("off")
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
 
 
-def test_interpolation_bicubic_ShiftScaleRotate(): 
+def test_interpolation_bicubic_ShiftScaleRotate(plt): 
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
@@ -206,18 +206,18 @@ def test_interpolation_bicubic_ShiftScaleRotate():
         for j in range(i + 1, len(images)):
             np.testing.assert_allclose(images[i], images[j], rtol=1e1)
 
-    # # show images
-    # fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
-    # for i in range(nFrames):
-    #     for j in range(len(images)):
-    #         if i == 0:
-    #             axes[i, j].set_title(titles[j])
-    #         axes[i, j].imshow(images[j][i], cmap="hot")
-    #         axes[i, j].axis("off")
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
 
 
 
-def test_interpolation_catmull_rom_ShiftScaleRotate(): 
+def test_interpolation_catmull_rom_ShiftScaleRotate(plt): 
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
@@ -242,14 +242,14 @@ def test_interpolation_catmull_rom_ShiftScaleRotate():
         for j in range(i + 1, len(images)):
             np.testing.assert_allclose(images[i], images[j], rtol=1e1)
 
-    # # show images
-    # fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
-    # for i in range(nFrames):
-    #     for j in range(len(images)):
-    #         if i == 0:
-    #             axes[i, j].set_title(titles[j])
-    #         axes[i, j].imshow(images[j][i], cmap="hot")
-    #         axes[i, j].axis("off")
+    # show images
+    fig, axes = plt.subplots(nFrames, len(images), figsize=(20, 10))
+    for i in range(nFrames):
+        for j in range(len(images)):
+            if i == 0:
+                axes[i, j].set_title(titles[j])
+            axes[i, j].imshow(images[j][i], cmap="hot")
+            axes[i, j].axis("off")
 
 
 # def test_interpolation_lanzcos_ShiftScaleRotate(): 

@@ -45,19 +45,19 @@ def random_channel_misalignment():
 def downloader():
     return ExampleDataManager()
 
-# @pytest.fixture
-# def compare():
-#     def compare_imgs(output_1, output_2):
-#         if output_1.ndim > 2:
-#             pcc = 0
-#             for i in range(output_1.shape[0]):
-#                 pcc += pearson_correlation(output_1[i, :, :], output_2[i, :, :])
-#             pcc /= output_1.shape[0]
-#         else:
-#             pcc = pearson_correlation(output_1, output_2)
+@pytest.fixture
+def compare():
+    def compare_imgs(output_1, output_2):
+        if output_1.ndim > 2:
+            pcc = 0
+            for i in range(output_1.shape[0]):
+                pcc += pearson_correlation(output_1[i, :, :], output_2[i, :, :])
+            pcc /= output_1.shape[0]
+        else:
+            pcc = pearson_correlation(output_1, output_2)
 
-#         if pcc > 0.8:
-#             return True
-#         else:
-#             return False
-#     return compare_imgs
+        if pcc > 0.8:
+            return True
+        else:
+            return False
+    return compare_imgs

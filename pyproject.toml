@@ -139,8 +139,9 @@ reportUndefinedVariable = false
 reportMissingImports = false
 
 [tool.pytest.ini_options]
-addopts = "--cov=nanopyx --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks"
+addopts = "--cov=nanopyx --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks"
 timeout = 6001
+plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
 doctest_optionflags = "NORMALIZE_WHITESPACE ELLIPSIS"
 # Filters are standard python warning filters as described here:
