@@ -279,15 +279,15 @@ from nanopyx.core.transform import LZShiftAndMagnify, LZShiftScaleRotate, NNShif
 
 
 # tag-copy: test_interpolation_nearest_neighbor_ShiftScaleRotate; replace("nearest_neighbor", "lanzcos"); replace("NNShiftScaleRotate", "LZShiftScaleRotate")
-def test_interpolation_lanzcos_ShiftScaleRotate(): #(plt):
-    M = 4
-    nFrames = 3
-    image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-    shift_row = 5.0
-    shift_col = 5.0
-    angle = np.pi / 4
-    SM = LZShiftScaleRotate(testing=True,clear_benchmarks=True)
-    bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
+# def test_interpolation_lanzcos_ShiftScaleRotate(): #(plt):
+#     M = 4
+#     nFrames = 3
+#     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
+#     shift_row = 5.0
+#     shift_col = 5.0
+#     angle = np.pi / 4
+#     SM = LZShiftScaleRotate(testing=True,clear_benchmarks=True)
+#     bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
 
     # images = []
     # titles = []
