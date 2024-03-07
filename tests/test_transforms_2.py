@@ -2,6 +2,7 @@ import numpy as np
 
 from nanopyx.core.generate.noise_add_simplex import get_simplex_noise
 from nanopyx.core.transform import NNPolarTransform
+from nanopyx.core.transform import LZShiftScaleRotate
 
 from skimage.transform import warp_polar
 
@@ -79,3 +80,13 @@ def test_interpolation_nearest_neighbor_PolarTransform_log(): #(plt,compare):
     #         axes[i, j].axis("off")
 
 # tag-end
+
+def test_interpolation_lanzcos_ShiftScaleRotate(): #(plt):
+    M = 4
+    nFrames = 3
+    image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
+    shift_row = 5.0
+    shift_col = 5.0
+    angle = np.pi / 4
+    SM = LZShiftScaleRotate(testing=True,clear_benchmarks=True)
+    bench_values = SM.benchmark(image, shift_row, shift_col, M, M, angle)
