@@ -6,14 +6,14 @@ from nanopyx.core.transform import LZShiftAndMagnify, LZShiftScaleRotate, NNShif
 
 
 # # tag-start: test_interpolation_nearest_neighbor_ShiftAndMagnify
-# def test_interpolation_nearest_neighbor_ShiftAndMagnify():
-#     M = 4
-#     nFrames = 3
-#     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
-#     shift_row = 5.0
-#     shift_col = 5.0
-#     SM = NNShiftAndMagnify(testing=True, clear_benchmarks=True)
-#     bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
+def test_interpolation_nearest_neighbor_ShiftAndMagnify():
+    M = 4
+    nFrames = 3
+    image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
+    shift_row = 5.0
+    shift_col = 5.0
+    SM = NNShiftAndMagnify(testing=True, clear_benchmarks=True)
+    bench_values = SM.benchmark(image, shift_row, shift_col, M, M)
 
 #     # images = []
 #     # titles = []
