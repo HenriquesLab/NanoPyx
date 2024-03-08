@@ -57,7 +57,7 @@ if you found this work useful, please cite: [preprint](https://www.biorxiv.org/c
 
 ## napari plugin
 
-NanoPyx is also available as a napari plugin, which can be installed via pip:
+NanoPyx is also available as a [napari plugin](https://github.com/HenriquesLab/napari-nanopyx), which can be installed via pip:
 
 ```pip install napari-nanopyx```
 
