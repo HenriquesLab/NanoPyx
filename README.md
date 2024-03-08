@@ -1,5 +1,5 @@
 <html>
-<img src="https://github.com/HenriquesLab/NanoPyx/assets/108281775/41b3f5f4-3b8b-45cc-b9db-41f54b0a978c.png" alt="logo" width="400"/>
+<img src="https://github.com/HenriquesLab/NanoPyx/assets/108281775/f92ff31a-b4a0-4bda-ada9-d254e9df8dd2.png" alt="logo" width="400"/>
 </html>
 
 # Actively being developed with stable releases
