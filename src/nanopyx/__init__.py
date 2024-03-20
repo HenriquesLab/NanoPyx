@@ -26,3 +26,12 @@ from .__opencl__ import cl, cl_array, opencl_works, print_opencl_info, devices
 from .core.utils.benchmark import benchmark_all_le_methods as benchmark
 
 __all__ = ["core", "data", "methods","__liquid_engine__","__agent__","__cuda__","__dask__","__njit__","__transonic__","__opencl__"]
+
+# Section for imports of high-level functions
+from .core.utils.benchmark import benchmark_all_le_methods as benchmark
+from .methods import non_local_means_denoising
+from .methods import eSRRF
+from .methods import SRRF
+from .methods import calculate_frc, calculate_decorr_analysis, calculate_error_map
+from .methods import estimate_drift_alignment, apply_drift_alignment
+from .methods import estimate_channel_registration, apply_channel_registration
