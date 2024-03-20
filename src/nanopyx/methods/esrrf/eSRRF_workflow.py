@@ -43,7 +43,7 @@ def eSRRF(
 
     _eSRRF = Workflow(
         (
-            eSRRF_ST(),
+            eSRRF_ST(verbose=False),
             (image,),
             {
                 "magnification": magnification,

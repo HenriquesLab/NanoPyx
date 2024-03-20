@@ -45,9 +45,9 @@ def SRRF(
     """
 
     _SRRF = Workflow(
-        (CRShiftAndMagnify(), (image, 0, 0, magnification, magnification), {}),
+        (CRShiftAndMagnify(verbose=False), (image, 0, 0, magnification, magnification), {}),
         (
-            Radiality(),
+            Radiality(verbose=False),
             (image, "PREV_RETURN_VALUE_0_0"),
             {
                 "magnification": magnification,
