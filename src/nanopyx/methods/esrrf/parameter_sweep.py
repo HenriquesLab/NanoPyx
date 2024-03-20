@@ -22,7 +22,9 @@ def run_esrrf_parameter_sweep(img: np.ndarray, magnification: int = 2, sensitivi
     Returns
     -------
     np.ndarray
-        An array with QnR value for each combination of sensitivities and radii.
+        An array with QnR value for each combination of sensitivities and radii. Indices of dimension 0 corresponds to indices of sensitivities list and dimension 1 to radii list.
+        Suggestion: sensitivity_index, radius_index = np.argmax(run_esrrf_parameter_sweep())
+        Optimal parameters will then correspond to: sensitivities[sensitivity_index] and radii[radius_index]
 
     Notes
     -----
