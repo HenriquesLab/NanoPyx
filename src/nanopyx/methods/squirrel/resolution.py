@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
-from nanopyx.core.analysis.decorr import DecorrAnalysis
-from nanopyx.core.analysis.frc import FIRECalculator
+from ...core.analysis.decorr import DecorrAnalysis
+from ...core.analysis.frc import FIRECalculator
 
 
 def calculate_frc(frame_1: np.ndarray, frame_2: np.ndarray, pixel_size: float = 1, units: str = "pixel", plot_frc_curve: bool = False):

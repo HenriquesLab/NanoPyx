@@ -1,5 +1,5 @@
 import numpy as np
-from nanopyx.core.transform.error_map import ErrorMap
+from ...core.transform.error_map import ErrorMap
 
 
 def calculate_error_map(img_ref: np.ndarray, img_sr: np.ndarray):
