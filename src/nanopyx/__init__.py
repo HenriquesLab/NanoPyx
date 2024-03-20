@@ -30,7 +30,7 @@ __all__ = ["core", "data", "methods","__liquid_engine__","__agent__","__cuda__",
 # Section for imports of high-level functions
 from .core.utils.benchmark import benchmark_all_le_methods as benchmark
 from .methods import non_local_means_denoising
-from .methods import eSRRF
+from .methods import eSRRF, run_esrrf_parameter_sweep
 from .methods import SRRF
 from .methods import calculate_frc, calculate_decorr_analysis, calculate_error_map
 from .methods import estimate_drift_alignment, apply_drift_alignment
