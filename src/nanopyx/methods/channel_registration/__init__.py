@@ -3,7 +3,6 @@ from .corrector import ChannelRegistrationCorrector
 from ...core.utils.timeit import timeit
 
 
-@timeit
 def estimate_channel_registration(
     image_array,
     ref_channel,
@@ -45,7 +44,6 @@ def estimate_channel_registration(
         pass
 
 
-@timeit
 def apply_channel_registration(image_array, translation_masks=None):
     """
     Function used to align different color channels of an image based on cross correlation.
