@@ -3,7 +3,6 @@ from numpy import array
 from skimage.io import imsave
 
 from .corrector import ChannelRegistrationCorrector
-from ...core.analysis.cross_correlation_elastic import calculate_translation_mask
 from ...core.analysis._le_channel_registration import ChannelRegistrationEstimator as leChannelRegistrationEstimator
 
 

@@ -2,7 +2,6 @@ import numpy as np
 from skimage.io import imread
 
 # TODO recheck values
-from ...core.transform import cr_interpolate
 from ...core.transform.align_channels import align_channels as new_align_channels
 
 
