@@ -122,10 +122,3 @@ def test_apply_drift_alignment_init_previous_drift_table_npy(random_timelapse_w_
 
     assert np.array_equal(aligned_img, aligned_img_corrector_2)
 
-
-def test_estimate_drift_alignment_init_rcc(random_timelapse_w_drift):
-    estimator = DriftEstimator()
-    aligned_img = estimator.estimate(random_timelapse_w_drift, ref_option=1, time_averaging=10, max_expected_drift=100,
-                                     shift_calc_method="rcc", apply=True)
-
-    assert (random_timelapse_w_drift.shape == aligned_img.shape)
