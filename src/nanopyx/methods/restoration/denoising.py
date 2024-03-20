@@ -1,3 +1,4 @@
+import numpy as np
 from ...core.transform._le_nlm_denoising import NLMDenoising
 
 
