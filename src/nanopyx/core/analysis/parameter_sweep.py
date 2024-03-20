@@ -12,7 +12,7 @@ class ParameterSweep:
         self.doFRCMapping = doFRCMapping
 
     # check for image dimensions in the method
-    def run(self, im: np.array, magnification: int, sensitivity_array: np.array, radius_array: np.array, temporal_correlation: str = "AVG"):
+    def run(self, im: np.array, magnification: int, sensitivity_array: list, radius_array: list, temporal_correlation: str = "AVG"):
         RSP_map = np.zeros((len(sensitivity_array), len(radius_array)))
         FRC_map = np.zeros((len(sensitivity_array), len(radius_array)))
         s_size = len(sensitivity_array)
