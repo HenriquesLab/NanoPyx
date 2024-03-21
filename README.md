@@ -1,3 +1,6 @@
+# NanoPyx
+
+<img src="https://github.com/HenriquesLab/NanoPyx/blob/main/.github/logo.png" align="right" width="230"/>
 
 [![PyPI](https://img.shields.io/pypi/v/nanopyx.svg?color=green)](https://pypi.org/project/nanopyx)
 [![Python Version](https://img.shields.io/pypi/pyversions/nanopyx.svg?color=green)](https://python.org)
@@ -9,10 +12,6 @@
 [![GitHub stars](https://img.shields.io/github/stars/HenriquesLab/NanoPyx?style=social)](https://github.com/HenriquesLab/NanoPyx/)
 [![GitHub forks](https://img.shields.io/github/forks/HenriquesLab/NanoPyx?style=social)](https://github.com/HenriquesLab/NanoPyx/)
 [![DOI](https://zenodo.org/badge/505388398.svg)](https://zenodo.org/badge/latestdoi/505388398)
-
-<img src="https://github.com/HenriquesLab/NanoPyx/blob/main/.github/logo.png" align="right" width="400"/>
-
-# NanoPyx
 
 Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging
 
