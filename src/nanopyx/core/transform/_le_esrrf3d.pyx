@@ -169,7 +169,7 @@ class eSRRF3D(LiquidEngine):
         cdef int f, n_slices_mag, n_rows_mag, n_cols_mag, sM, rM, cM, z0
 
         cdef float rgc_val, zcof
-
+        
         for f in range(n_frames):
             # image_interpolated = interpolator.run(image[f], 0, 0, _magnification_xy, _magnification_xy)
 
@@ -178,16 +178,15 @@ class eSRRF3D(LiquidEngine):
 
             n_slices_mag, n_rows_mag, n_cols_mag = image_interpolated.shape[0], image_interpolated.shape[1], image_interpolated.shape[2]
 
-            img_dum = interpolator.run(image[f], 0, 0, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION)
+            # img_dum = interpolator.run(image[f], 0, 0, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION)
             # img_dum = interpolate_3d(image[f], Gx_Gy_MAGNIFICATION, _magnification_z)
-            # img_dum = interpolate_3d_zlinear(image[f], Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION)
+            img_dum = interpolate_3d_zlinear(image[f], Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION) 
             
             n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum = img_dum.shape[0], img_dum.shape[1], img_dum.shape[2]
 
             gradients_c = np.zeros((n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum), dtype=np.float32)
             gradients_r = np.zeros((n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum), dtype=np.float32)
             gradients_s = np.zeros((n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum), dtype=np.float32)
-
             with nogil:
                 _c_gradient_3d(&img_dum[0, 0, 0], &gradients_c[0, 0, 0], &gradients_r[0, 0, 0], &gradients_s[0, 0, 0], n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum)
 
@@ -237,7 +236,7 @@ class eSRRF3D(LiquidEngine):
                                 #     z0 = <int> floor(zcof)
                                 # z0 = z0 * _magnification_z
                                 rgc_map[f, sM, rM, cM] = rgc_val
-
+        
         return np.asarray(rgc_map) #, np.asarray(gradients_s_interpolated), np.asarray(gradients_r_interpolated), np.asarray(image_interpolated) # debug
 
     def get_gradients(self):
