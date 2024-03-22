@@ -1,0 +1,36 @@
+Threaded:
+  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
+  : - 600000.0
+    - 3.009124042
+    - 3.0523655000000005
+    - 3.0673777499999986
+Threaded_dynamic:
+  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
+  : - 600000.0
+    - 2.9377308749999997
+    - 3.038488291
+    - 2.9445285420000076
+    - 3.01370875
+Threaded_guided:
+  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
+  : - 600000.0
+    - 2.9383910419999992
+    - 3.179585459000002
+    - 2.9465658749999903
+Threaded_static:
+  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
+  : - 600000.0
+    - 3.0556022499999997
+    - 3.011091624999999
+    - 3.0389940410000023
+Unthreaded:
+  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
+  : - 600000.0
+    - 10.075773250000001
+    - 10.147714
+    - 10.096515416999999
