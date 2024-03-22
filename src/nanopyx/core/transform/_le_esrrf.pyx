@@ -149,9 +149,9 @@ class eSRRF(LiquidEngine):
 
     def _run_threaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "threaded".capitalize()
-        crsm = ShiftAndMagnify()
-        rbc = GradientRobertsCross()
-        rgc = RadialGradientConvergence()
+        crsm = ShiftAndMagnify(verbose=False)
+        rbc = GradientRobertsCross(verbose=False)
+        rgc = RadialGradientConvergence(verbose=False)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
@@ -162,9 +162,9 @@ class eSRRF(LiquidEngine):
         return radial_gradients
     def _run_threaded_guided(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "threaded_guided".capitalize()
-        crsm = ShiftAndMagnify()
-        rbc = GradientRobertsCross()
-        rgc = RadialGradientConvergence()
+        crsm = ShiftAndMagnify(verbose=False)
+        rbc = GradientRobertsCross(verbose=False)
+        rgc = RadialGradientConvergence(verbose=False)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
@@ -175,9 +175,9 @@ class eSRRF(LiquidEngine):
         return radial_gradients
     def _run_threaded_dynamic(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "threaded_dynamic".capitalize()
-        crsm = ShiftAndMagnify()
-        rbc = GradientRobertsCross()
-        rgc = RadialGradientConvergence()
+        crsm = ShiftAndMagnify(verbose=False)
+        rbc = GradientRobertsCross(verbose=False)
+        rgc = RadialGradientConvergence(verbose=False)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
@@ -188,9 +188,9 @@ class eSRRF(LiquidEngine):
         return radial_gradients
     def _run_threaded_static(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "threaded_static".capitalize()
-        crsm = ShiftAndMagnify()
-        rbc = GradientRobertsCross()
-        rgc = RadialGradientConvergence()
+        crsm = ShiftAndMagnify(verbose=False)
+        rbc = GradientRobertsCross(verbose=False)
+        rgc = RadialGradientConvergence(verbose=False)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
@@ -202,9 +202,9 @@ class eSRRF(LiquidEngine):
 
     def _run_unthreaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "Unthreaded"
-        crsm = ShiftAndMagnify()
-        rbc = GradientRobertsCross()
-        rgc = RadialGradientConvergence()
+        crsm = ShiftAndMagnify(verbose=False)
+        rbc = GradientRobertsCross(verbose=False)
+        rgc = RadialGradientConvergence(verbose=False)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
