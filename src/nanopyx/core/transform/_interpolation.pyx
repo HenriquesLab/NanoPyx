@@ -35,14 +35,13 @@ def linear_interpolation_1D_z(image, magnification):
 
     image_interpolated = np.zeros((image.shape[0] * magnification, image.shape[1], image.shape[2]), dtype=np.float32)
 
-    # for s in range(image.shape[0]):
-    #     for r in range(image.shape[1]):
-    #         for c in range(image.shape[2]):
-    #             image_interpolated[s*magnification:(s+1)*magnification, r, c] = np.linspace(image[s, r, c], image[s+1, r, c], magnification)
+    z_coords = np.linspace(0, image.shape[0], image.shape[0])
+    new_z_coords = np.linspace(0, image.shape[0], image.shape[0] * magnification)
 
-    # run over all the planes
-    for s in range(image.shape[0]-1):
-        image_interpolated[s*magnification:(s+1)*magnification, :,:] = np.linspace(image[s, :,:], image[s+1, :,:], magnification)
+    for r in image.shape[1]:
+        for c in image.shape[2]:
+            slc = image[:, r, c]
+            image_interpolated[:, r, c] = np.interp(new_z_coords, z_coords, slc)
 
     return image_interpolated
 
