@@ -50,7 +50,7 @@ def linear_interpolation_1D_z(image, magnification):
 def interpolate_3d_zlinear(image, magnification_xy: int = 5, magnification_z: int = 5):
     interpolator_xy = ShiftMagnify_CR()
 
-    xy_interpolated = interpolator_xy.run(image, 0, 0, magnification_xy, magnification_xy)
+    xy_interpolated = interpolator_xy.run(np.ascontiguousarray(image), 0, 0, magnification_xy, magnification_xy)
     z_interpolated = linear_interpolation_1D_z(xy_interpolated, magnification_z)
 
     return z_interpolated
