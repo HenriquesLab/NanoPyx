@@ -39,7 +39,7 @@ cdef class ErrorMap:
         self.img_ref = img_ref
         self.img_sr = img_sr
 
-        cdef object interpolator = ShiftAndMagnify()
+        cdef object interpolator = ShiftAndMagnify(verbose=False)
 
         cdef int magnification = <int>(img_sr.shape[0] / img_ref.shape[0])
         assert magnification == int(img_sr.shape[1] / img_ref.shape[1])
