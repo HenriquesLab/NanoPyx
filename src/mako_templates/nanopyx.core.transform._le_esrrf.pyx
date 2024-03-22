@@ -152,9 +152,9 @@ class eSRRF(LiquidEngine):
     % for sch in schedulers:
     def _run_${sch}(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "${sch}".capitalize()
-        crsm = ShiftAndMagnify()
-        rbc = GradientRobertsCross()
-        rgc = RadialGradientConvergence()
+        crsm = ShiftAndMagnify(verbose=False)
+        rbc = GradientRobertsCross(verbose=False)
+        rgc = RadialGradientConvergence(verbose=False)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
@@ -167,9 +167,9 @@ class eSRRF(LiquidEngine):
 
     def _run_unthreaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         runtype = "Unthreaded"
-        crsm = ShiftAndMagnify()
-        rbc = GradientRobertsCross()
-        rgc = RadialGradientConvergence()
+        crsm = ShiftAndMagnify(verbose=False)
+        rbc = GradientRobertsCross(verbose=False)
+        rgc = RadialGradientConvergence(verbose=False)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
