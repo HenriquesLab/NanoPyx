@@ -1,8 +1,16 @@
 import numpy as np
+from matplotlib import pyplot as plt
 from ...core.analysis.parameter_sweep import ParameterSweep
 
 
-def run_esrrf_parameter_sweep(img: np.ndarray, magnification: int = 2, sensitivities: list = [1, 2], radii: list = [1, 1.5], temporal_correlation: str = "AVG"):
+def run_esrrf_parameter_sweep(
+    img: np.ndarray,
+    magnification: int = 2,
+    sensitivities: list = [1, 2],
+    radii: list = [1, 1.5],
+    temporal_correlation: str = "AVG",
+    plot_sweep=False,
+):
     """
     Conducts a parameter sweep for enhanced Super-Resolution Radial Fluctuations (eSRRF) analysis on an image.
 
@@ -31,4 +39,28 @@ def run_esrrf_parameter_sweep(img: np.ndarray, magnification: int = 2, sensitivi
     This function performs a parameter sweep for the ESRRF method, which is used for super-resolution imaging analysis. It varies sensitivity and radius to find optimal settings for image enhancement.
     """
     ps = ParameterSweep()
-    return ps.run(img, magnification, sensitivity_array=sensitivities, radius_array=radii, temporal_correlation=temporal_correlation)
+    out = ps.run(
+        img,
+        magnification,
+        sensitivity_array=sensitivities,
+        radius_array=radii,
+        temporal_correlation=temporal_correlation,
+    )
+
+    if plot_sweep:
+        fig, ax = plt.subplots()
+        ax.imshow(out, cmap="plasma")
+        ax.set_xticks(np.arange(len(radii)), labels=radii)
+        ax.set_yticks(np.arange(len(sensitivities)), labels=sensitivities)
+        print(range(len(sensitivities)), range(len(radii)))
+        for i in range(len(sensitivities)):
+            for j in range(len(radii)):
+                ax.text(j, i, round(out[i, j], 2), ha="center", va="center", color="w")
+        ax.set_title("Parameter Sweep QnR")
+        ax.set_xlabel("Radii")
+        ax.set_ylabel("Sensitivities")
+        fig.tight_layout()
+        plt.show()
+
+    sens_idx, rad_idx = np.unravel_index(np.argmax(out), out.shape)
+    return sensitivities[sens_idx], radii[rad_idx]
