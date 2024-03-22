@@ -30,7 +30,6 @@ from .core.analysis.pearson_correlation import pearson_correlation
 
 
 class LiquidEngine:
-
     """@public
     Base class for parts of the Nanopyx Liquid Engine
     Vroom Vroom
@@ -139,12 +138,15 @@ class LiquidEngine:
 
         # load defaults
         try:
-            self._default_benchmarks = yaml.safe_load(files(f'liquid_benchmarks.{inspect.getmodule(self.__class__).__name__.split(".")[-1]}').joinpath(self.__class__.__name__ + ".yml").read_text())
+            self._default_benchmarks = yaml.safe_load(
+                files(f'liquid_benchmarks.{inspect.getmodule(self.__class__).__name__.split(".")[-1]}')
+                .joinpath(self.__class__.__name__ + ".yml")
+                .read_text()
+            )
         except:
             self._default_benchmarks = []
 
         self.verbose = verbose
-        
 
     def _run(self, *args, run_type=None, **kwargs):
         """@public
@@ -169,12 +171,14 @@ class LiquidEngine:
             print(f"Unexpected run type {run_type}")
             print("Querying the Agent...")
             run_type = self.Agent.get_run_type(self, args, kwargs)
-            print(f"Agent chose:{run_type}") 
+            print(f"Agent chose:{run_type}")
 
         # try to run
         try:
             if self.mem_div > 999:
-                raise ValueError(f"Maxmimum memory division factor achieved, can not try any longer with {run_type}. Use a smaller input or a different run_type")
+                raise ValueError(
+                    f"Maxmimum memory division factor achieved, can not try any longer with {run_type}. Use a smaller input or a different run_type"
+                )
             t_start = timeit.default_timer()
             result = self._run_types[run_type](*args, **kwargs)
             t2run = timeit.default_timer() - t_start
@@ -264,22 +268,21 @@ class LiquidEngine:
                     print(f"{pair[0][1]} and {pair[1][1]} have similar outputs!")
                 else:
                     warnings.warn(f"WARNING: outputs of {pair[0][1]} and {pair[1][1]} don't match!")
-                    different_runtypes.append(set([pair[0][1],pair[1][1]]))
-        if len(different_runtypes)<=len(self._run_types)-1:
+                    different_runtypes.append(set([pair[0][1], pair[1][1]]))
+        if len(different_runtypes) <= len(self._run_types) - 1:
             try:
-                common_runtype = reduce(lambda a,b: a&b,different_runtypes)
-            except(TypeError):
-                common_runtype = {} 
+                common_runtype = reduce(lambda a, b: a & b, different_runtypes)
+            except TypeError:
+                common_runtype = {}
             if common_runtype:
                 warnings.warn(f"WARNING: disabling {list(common_runtype)[0]} for this set of arguments!")
                 arg_repr, arg_score = self._get_args_repr_score(*args, **kwargs)
-                self._store_results(arg_repr, arg_score, list(common_runtype)[0], None) # None saves to null in yamls
+                self._store_results(arg_repr, arg_score, list(common_runtype)[0], None)  # None saves to null in yamls
 
         return speed_sort
 
     def _compare_runs(self, output_1, output_2):
-        """@public
-        """
+        """@public"""
         if output_1.ndim > 2:
             pcc = 0
             for i in range(output_1.shape[0]):
@@ -325,7 +328,7 @@ class LiquidEngine:
         c = run_type_benchs[arg_repr]
 
         assert c[0] == arg_score, "arg_score mismatch"
-        
+
         c.append(t2run)
 
         self._dump_run_times()
@@ -333,9 +336,8 @@ class LiquidEngine:
     def _dump_run_times(
         self,
     ):
-        """@public
-        """
-        # TODO We might need to wrap this into a multiprocessing.Queue if we find it blocking 
+        """@public"""
+        # TODO We might need to wrap this into a multiprocessing.Queue if we find it blocking
         with open(self._benchmark_filepath, "w") as f:
             yaml.dump(self._benchmarks, f)
 
@@ -410,7 +412,7 @@ class LiquidEngine:
         two = self.get_highest_divisor(shape[1], max_two)
         one = 1
         return (one, two, three)
-    
+
     def _check_max_slices(self, input, number_of_max_slices):
         """@public
         Checks if number of maximum slices is greater than 0
@@ -427,7 +429,9 @@ class LiquidEngine:
         Checks if buffer size is larger than device maximum memory allocation size and n_slices is 1 and raises appropriate errors that are handled in the _run function.
         """
         if size > device.max_mem_alloc_size and n_slices == 1:
-            raise ValueError("This device cannot handle this input size with these parameters, try using a smaller input or other parameters")
+            raise ValueError(
+                "This device cannot handle this input size with these parameters, try using a smaller input or other parameters"
+            )
 
         if size > device.max_mem_alloc_size:
             raise cl.Error("Buffer size is larger than device maximum memory allocation size")
