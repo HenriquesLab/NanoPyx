@@ -138,7 +138,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
 
                 if (0 < vx && vx < colsM - 1) {
                     for (int k = _start_z; k <= _end_z; k++) {
-                        vz = ((float) ((int) (zc)) + k);
+                        vz = ((float) ((int) (Gz_MAGNIFICATION*zc)) + k)/(float) Gz_MAGNIFICATION;
 
                         if (0 < vz && vz < slicesM - 1) {
                             dx = vx - xc;
