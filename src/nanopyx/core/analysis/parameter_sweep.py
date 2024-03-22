@@ -1,8 +1,9 @@
+import numpy as np
+from tqdm import tqdm
 from nanopyx.core.transform.error_map import ErrorMap
 from nanopyx.core.analysis.frc import FIRECalculator
 from nanopyx.core.transform._le_esrrf import eSRRF
 from nanopyx.core.transform.sr_temporal_correlations import calculate_eSRRF_temporal_correlations
-import numpy as np
 
 
 # TODO double check this implementation and confirm that this gives the same results as NanoJ-eSRRF
@@ -12,25 +13,37 @@ class ParameterSweep:
         self.doFRCMapping = doFRCMapping
 
     # check for image dimensions in the method
-    def run(self, im: np.array, magnification: int, sensitivity_array: list, radius_array: list, temporal_correlation: str = "AVG"):
+    def run(
+        self,
+        im: np.array,
+        magnification: int,
+        sensitivity_array: list,
+        radius_array: list,
+        temporal_correlation: str = "AVG",
+    ):
         RSP_map = np.zeros((len(sensitivity_array), len(radius_array)))
         FRC_map = np.zeros((len(sensitivity_array), len(radius_array)))
         s_size = len(sensitivity_array)
         r_size = len(radius_array)
 
-        for s in range(s_size):
-            for r in range(r_size):
-                rgc_map = eSRRF().run(im, magnification=magnification, radius=radius_array[r], sensitivity=sensitivity_array[s])
-                if self.doErrorMapping:
-                    
-                    reconstruction = calculate_eSRRF_temporal_correlations(rgc_map, temporal_correlation)
-                    RSP_map[s, r] = self.calculate_rsp(im, reconstruction)
-                if self.doFRCMapping:
-                    rgc_map_odd = rgc_map[1::2, :, :]
-                    rgc_map_even = rgc_map[::2, :, :]
-                    reconstruction_odd = calculate_eSRRF_temporal_correlations(rgc_map_odd, temporal_correlation)
-                    reconstruction_even = calculate_eSRRF_temporal_correlations(rgc_map_even, temporal_correlation)
-                    FRC_map[s, r] = self.calculate_frc(reconstruction_odd, reconstruction_even)
+        with tqdm(total=s_size*r_size, desc="Parameters pairs", unit="pairs") as progress_bar:
+            for s in range(s_size):
+                for r in range(r_size):
+                    rgc_map = eSRRF(verbose=True).run(
+                        im, magnification=magnification, radius=radius_array[r], sensitivity=sensitivity_array[s]
+                    )
+                    if self.doErrorMapping:
+
+                        reconstruction = calculate_eSRRF_temporal_correlations(rgc_map, temporal_correlation)
+                        RSP_map[s, r] = self.calculate_rsp(im, reconstruction)
+                    if self.doFRCMapping:
+                        rgc_map_odd = rgc_map[1::2, :, :]
+                        rgc_map_even = rgc_map[::2, :, :]
+                        reconstruction_odd = calculate_eSRRF_temporal_correlations(rgc_map_odd, temporal_correlation)
+                        reconstruction_even = calculate_eSRRF_temporal_correlations(rgc_map_even, temporal_correlation)
+                        FRC_map[s, r] = self.calculate_frc(reconstruction_odd, reconstruction_even)
+
+                    progress_bar.update()
 
         QnR = self.calculate_qnr_score(RSP_map, FRC_map)
 
