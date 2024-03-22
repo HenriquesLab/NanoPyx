@@ -116,7 +116,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
 
     float xc = (xM + 0.5) / magnification_xy;
     float yc = (yM + 0.5) / magnification_xy;
-    float zc = (sliceM + 1) / magnification_z;
+    float zc = (sliceM) / magnification_z;
 
     float RGC = 0;
     float distanceWeightSum = 0;
