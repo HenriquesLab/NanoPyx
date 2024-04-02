@@ -21,6 +21,19 @@ class ParameterSweep:
         radius_array: list,
         temporal_correlation: str = "AVG",
     ):
+        """
+        Run the analysis on the given image with the given magnification and parameter arrays.
+
+        Parameters:
+            im (np.array): The input image.
+            magnification (int): The magnification factor.
+            sensitivity_array (list): The array of sensitivity values.
+            radius_array (list): The array of radius values.
+            temporal_correlation (str, optional): The temporal correlation method. Defaults to "AVG".
+
+        Returns:
+            The QnR score.
+        """
         RSP_map = np.zeros((len(sensitivity_array), len(radius_array)))
         FRC_map = np.zeros((len(sensitivity_array), len(radius_array)))
         s_size = len(sensitivity_array)
