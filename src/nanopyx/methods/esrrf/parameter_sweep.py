@@ -9,6 +9,7 @@ def run_esrrf_parameter_sweep(
     sensitivities: list = [1, 2],
     radii: list = [1, 1.5],
     temporal_correlation: str = "AVG",
+    use_decorr: bool = False,
     plot_sweep=False,
     return_qnr=False,
 ):
@@ -51,6 +52,7 @@ def run_esrrf_parameter_sweep(
         sensitivity_array=sensitivities,
         radius_array=radii,
         temporal_correlation=temporal_correlation,
+        use_decorr=use_decorr,
     )
 
     if plot_sweep:

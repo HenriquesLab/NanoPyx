@@ -2,6 +2,7 @@ import numpy as np
 from tqdm import tqdm
 from nanopyx.core.transform.error_map import ErrorMap
 from nanopyx.core.analysis.frc import FIRECalculator
+from nanopyx.core.analysis.decorr import DecorrAnalysis
 from nanopyx.core.transform._le_esrrf import eSRRF
 from nanopyx.core.transform.sr_temporal_correlations import calculate_eSRRF_temporal_correlations
 
@@ -20,6 +21,7 @@ class ParameterSweep:
         sensitivity_array: list,
         radius_array: list,
         temporal_correlation: str = "AVG",
+        use_decorr: bool = False,
     ):
         """
         Run the analysis on the given image with the given magnification and parameter arrays.
@@ -50,11 +52,16 @@ class ParameterSweep:
                         reconstruction = calculate_eSRRF_temporal_correlations(rgc_map, temporal_correlation)
                         RSP_map[s, r] = self.calculate_rsp(im, reconstruction)
                     if self.doFRCMapping:
-                        rgc_map_odd = rgc_map[1::2, :, :]
-                        rgc_map_even = rgc_map[::2, :, :]
-                        reconstruction_odd = calculate_eSRRF_temporal_correlations(rgc_map_odd, temporal_correlation)
-                        reconstruction_even = calculate_eSRRF_temporal_correlations(rgc_map_even, temporal_correlation)
-                        FRC_map[s, r] = self.calculate_frc(reconstruction_odd, reconstruction_even)
+                        if use_decorr:
+                            decorr = DecorrAnalysis()
+                            decorr.run_analysis(calculate_eSRRF_temporal_correlations(rgc_map, temporal_correlation))
+                            FRC_map[s, r] = decorr.resolution
+                        else:
+                            rgc_map_odd = rgc_map[1::2, :, :]
+                            rgc_map_even = rgc_map[::2, :, :]
+                            reconstruction_odd = calculate_eSRRF_temporal_correlations(rgc_map_odd, temporal_correlation)
+                            reconstruction_even = calculate_eSRRF_temporal_correlations(rgc_map_even, temporal_correlation)
+                            FRC_map[s, r] = self.calculate_frc(reconstruction_odd, reconstruction_even)
 
                     progress_bar.update()
 

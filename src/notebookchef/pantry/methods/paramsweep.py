@@ -12,6 +12,7 @@ def run_param_sweep(b):
     global global_mag
     global_mag = gui_param_sweep["magnification"].value
     temp_corr = gui_param_sweep["temp_corr"].value
+    use_decorr = gui_param_sweep["use_decorr"].value
 
     global g_temp_corr
     if temp_corr == "AVG":
@@ -25,7 +26,7 @@ def run_param_sweep(b):
     gui_param_sweep["run"].description = "Running..."
 
     param_sweep_out = run_esrrf_parameter_sweep(
-        dataset_original, magnification=global_mag, sensitivities=sensitivities, radii=radii, temporal_correlation=temp_corr, plot_sweep=True, return_qnr=True
+        dataset_original, magnification=global_mag, sensitivities=sensitivities, radii=radii, temporal_correlation=temp_corr, plot_sweep=True, return_qnr=True, use_decorr=use_decorr
     )
 
     sens_idx, rad_idx = np.unravel_index(np.argmax(param_sweep_out), param_sweep_out.shape)
@@ -42,7 +43,7 @@ gui_param_sweep.add_text("raddi", description="List of radii (comma-separated):"
 gui_param_sweep.add_dropdown(
     "temp_corr", description="Temperature Correction:", options=["AVG", "VAR", "TAC2"], value="AVG"
 )
-gui_param_sweep.add_checkbox("save", description="Save Output", value=True)
+gui_param_sweep.add_checkbox("use_decorr", description="Use Decorrelation instead of FRC", value=False)
 gui_param_sweep.add_button("run", description="Run")
 gui_param_sweep.add_dropdown(
     "cmaps", description="Colormap:", options=sorted(list(mpl.colormaps)), value="viridis", remember_value=True
