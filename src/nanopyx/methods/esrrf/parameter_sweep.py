@@ -10,6 +10,7 @@ def run_esrrf_parameter_sweep(
     radii: list = [1, 1.5],
     temporal_correlation: str = "AVG",
     plot_sweep=False,
+    return_qnr=False,
 ):
     """
     Conducts a parameter sweep for enhanced Super-Resolution Radial Fluctuations (eSRRF) analysis on an image.
@@ -26,13 +27,18 @@ def run_esrrf_parameter_sweep(
         A list of radii values to be used in the parameter sweep. Default is [1, 1.5].
     temporal_correlation : str, optional
         The method of temporal correlation to be used. Default is "AVG".
+    return_qnr : bool, optional
+        If True, return an array with QnR value for each combination of sensitivities and radii. 
+        If False, return a tuple of optimal sensitivity and radius values.
+
 
     Returns
     -------
-    np.ndarray
-        An array with QnR value for each combination of sensitivities and radii. Indices of dimension 0 corresponds to indices of sensitivities list and dimension 1 to radii list.
+    np.ndarray or tuple
+        If return_qnr is True, returns an array with QnR value for each combination of sensitivities and radii. Indices of dimension 0 corresponds to indices of sensitivities list and dimension 1 to radii list.
         Suggestion: sensitivity_index, radius_index = np.argmax(run_esrrf_parameter_sweep())
         Optimal parameters will then correspond to: sensitivities[sensitivity_index] and radii[radius_index]
+        If return_qnr is False, returns a tuple of optimal sensitivity and radius values.
 
     Notes
     -----
@@ -62,5 +68,8 @@ def run_esrrf_parameter_sweep(
         fig.tight_layout()
         plt.show()
 
-    sens_idx, rad_idx = np.unravel_index(np.argmax(out), out.shape)
-    return sensitivities[sens_idx], radii[rad_idx]
+    if return_qnr:
+        return out
+    else:
+        sens_idx, rad_idx = np.unravel_index(np.argmax(out), out.shape)
+        return sensitivities[sens_idx], radii[rad_idx]
