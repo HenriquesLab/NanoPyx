@@ -164,14 +164,17 @@ class LiquidEngine:
         :return: the result and time taken
         """
 
-        if run_type is None:
+        if run_type is None and self.verbose:
             print("Querying the Agent...")
+            run_type = self.Agent.get_run_type(self, args, kwargs)
+            print(f"Agent chose: {run_type}")
+        elif run_type is None:
             run_type = self.Agent.get_run_type(self, args, kwargs)
         elif run_type not in self._run_types:
             print(f"Unexpected run type {run_type}")
             print("Querying the Agent...")
             run_type = self.Agent.get_run_type(self, args, kwargs)
-            print(f"Agent chose:{run_type}")
+            print(f"Agent chose: {run_type}")
 
         # try to run
         try:
