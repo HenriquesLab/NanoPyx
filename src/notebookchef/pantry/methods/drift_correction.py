@@ -1,5 +1,5 @@
 #@title Create drift correction GUI
-from nanopyx.methods import drift_alignment
+from nanopyx.methods.drift_alignment.estimator import DriftEstimator
 
 gui_drift = EasyGui("Drift Correction")
 
@@ -15,20 +15,31 @@ def on_button_align(b):
     global dataset_aligned
     gui_drift["align"].disabled = True
     gui_drift["align"].description = "Aligning..."
-    dataset_aligned = drift_alignment.estimate_drift_alignment(dataset_original,
-                                                               save_drift_table_path="",
-                                                               time_averaging=avg,
-                                                               max_expected_drift=max_drift,
-                                                               ref_option=ref_option,
-                                                               apply=True)
+    
+    estimator = DriftEstimator()
+    dataset_aligned = estimator.estimate(
+        dataset_original,
+        time_averaging=avg,
+        max_expected_drift=max_drift,
+        ref_option=ref_option,
+        apply=True)
+    
     if gui_drift["save"].value:
         if own_data:
             path = gui_data["upload"].selected_path
             name = gui_data["upload"].selected_filename.split(".")[0]
-            tiff.imwrite(path + os.sep + name + "_aligned.tif", dataset_aligned)
+            drift_table_path = path + os.sep + name
+            save_path = path + os.sep + name + "_aligned.tif"
         else:
             name = gui_data["data_source"].value.replace("Example dataset: ", "")
-            tiff.imwrite(name + "_aligned.tif", dataset_aligned)
+            drift_table_path = path + os.sep + name
+            save_path = name + "_aligned.tif"
+        tiff.imwrite(save_path, dataset_aligned)
+        tmp = []
+        for key in estimator.estimator_table.params.keys():
+            tmp.append(((key, estimator.estimator_table.params[key])))
+        tmp.append(estimator.estimator_table.drift_table)
+        np.save(drift_table_path + "_drift_table.npy", tmp)
     gui_drift["align"].disabled = False
     gui_drift["align"].description = "Align"
     gui_drift._main_display.children = gui_drift._main_display.children + (stackview.slice(dataset_aligned, colormap=gui_drift["cmaps"].value, continuous_update=True),)

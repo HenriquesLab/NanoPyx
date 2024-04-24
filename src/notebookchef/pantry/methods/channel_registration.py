@@ -13,21 +13,30 @@ def on_button_register(b):
     global dataset_registered
     gui_reg["register"].disabled = True
     gui_reg["register"].description = "Aligning..."
+    if gui_reg["save"].value:
+        save_translation_masks = True
+        if own_data:
+            path = gui_data["upload"].selected_path
+            name = gui_data["upload"].selected_filename.split(".")[0]
+            save_path = path + os.sep + name + "_registered.tif"
+            translation_mask_path = path + os.sep + name
+        else:
+            name = gui_data["data_source"].value.replace("Example dataset: ", "")
+            save_path = name + "_registered.tif"
+            translation_mask_path = name
+    else:
+        save_translation_masks = False
+        translation_mask_path = ""
     dataset_registered = channel_registration.estimate_channel_registration(dataset_original,
                                                                             ref_channel,
                                                                             max_shift,
                                                                             n_blocks,
                                                                             min_sim,
-                                                                            save_translation_masks=False,
+                                                                            save_translation_masks=save_translation_masks,
+                                                                            translation_mask_save_path=translation_mask_path,
                                                                             apply=True)
     if gui_reg["save"].value:
-        if own_data:
-            path = gui_data["upload"].selected_path
-            name = gui_data["upload"].selected_filename.split(".")[0]
-            tiff.imwrite(path + os.sep + name + "_registered.tif", dataset_registered)
-        else:
-            name = gui_data["data_source"].value.replace("Example dataset: ", "")
-            tiff.imwrite(name + "_registered.tif", dataset_registered)
+        tiff.imwrite(save_path, dataset_registered)
     gui_reg["register"].disabled = False
     gui_reg["register"].description = "Align"
     gui_reg._main_display.children = gui_reg._main_display.children + (stackview.slice(dataset_registered, colormap=gui_reg["cmaps"].value, continuous_update=True),)

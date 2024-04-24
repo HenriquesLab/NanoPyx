@@ -17,3 +17,9 @@ $include: parameters/channel_registration.txt
 __cellbreak__
 $code
 $include: methods/channel_registration.py
+__cellbreak__
+$markdown
+## Use the following cell only if you have a previously calculated translation mask
+__cellbreak__
+$code
+$include: methods/channel_registration_apply.py

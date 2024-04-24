@@ -17,3 +17,9 @@ $include: parameters/drift_correction.txt
 __cellbreak__
 $code
 $include: methods/drift_correction.py
+__cellbreak__
+$markdown
+## Use the following cell only if you have a previously calculated drift table
+__cellbreak__
+$code
+$include: methods/drift_correction_apply.py
