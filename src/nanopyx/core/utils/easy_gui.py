@@ -195,7 +195,7 @@ class EasyGui:
             kwargs["value"] = self.cfg[tag]
         self._widgets[tag] = widgets.Dropdown(*args, **kwargs, layout=self._layout, style=self._style)
 
-    def add_file_upload(self, tag, *args, accept="*", multiple=False, **kwargs):
+    def add_file_upload(self, tag, *args, accept=None, multiple=False, **kwargs):
         """
         Add a file upload widget to the container.
         :param tag: tag to identify the widget
@@ -205,6 +205,8 @@ class EasyGui:
         :param kwargs: kwargs for the widget
         """
         self._widgets[tag] = FileChooser()
+        if accept is not None:
+            self._widgets[tag].filter_pattern = accept
 
     def save_settings(self):
         # remember widget values for next time and store them in a config file
