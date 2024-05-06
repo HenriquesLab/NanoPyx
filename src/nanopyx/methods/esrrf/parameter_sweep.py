@@ -12,6 +12,7 @@ def run_esrrf_parameter_sweep(
     use_decorr: bool = False,
     plot_sweep=False,
     return_qnr=False,
+    n_frames=None,
 ):
     """
     Conducts a parameter sweep for enhanced Super-Resolution Radial Fluctuations (eSRRF) analysis on an image.
@@ -31,6 +32,8 @@ def run_esrrf_parameter_sweep(
     return_qnr : bool, optional
         If True, return an array with QnR value for each combination of sensitivities and radii. 
         If False, return a tuple of optimal sensitivity and radius values.
+    n_frames : int, optional
+        if None, uses all frames, otherwise splits the data into batches with size = n_frames.
 
 
     Returns
@@ -53,6 +56,7 @@ def run_esrrf_parameter_sweep(
         radius_array=radii,
         temporal_correlation=temporal_correlation,
         use_decorr=use_decorr,
+        n_frames=n_frames
     )
 
     if plot_sweep:
