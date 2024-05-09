@@ -45,10 +45,10 @@ class eSRRF3D(LiquidEngine):
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
+            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, ratio_px=ratio_px, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
         elif len(image.shape) == 3:
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
+            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, ratio_px=ratio_px, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
     def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
         if image.dtype != np.float32:
