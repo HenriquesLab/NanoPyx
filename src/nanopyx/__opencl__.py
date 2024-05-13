@@ -8,8 +8,11 @@ try:
     import pyopencl.array as cl_array
 
     devices = []
+    _fastest_device = None
+    max_perf = 0
+
     for platform in cl.get_platforms():
-        if "Microsoft" in platform.vendor:  # TODO this takes out integrated graphics
+        if "Microsoft" in platform.vendor:  # TODO this takes out emulated GPUs
             continue
         for dev in platform.get_devices():
             # check if the device is a GPU
@@ -19,7 +22,11 @@ try:
                 cl_dp = False
             else:
                 cl_dp = False
-
+            
+            perf = dev.max_compute_units * dev.max_clock_frequency
+            if perf>max_perf:
+                max_perf = perf
+                _fastest_device = {"device": dev, "DP": cl_dp}
             devices.append({"device": dev, "DP": cl_dp})
 
 
@@ -28,6 +35,7 @@ except (ImportError, OSError, Exception) as e:
     cl = None
     cl_array = None
     devices = None
+    _fastest_device = None
 
 
 def print_opencl_info():
