@@ -137,7 +137,7 @@ class Agent_:
             1. Calculates a probability that this delay is maintained
             2. Stores the delay factor and the probability
         """
-
+        # TODO test 
         threaded_runtypes = ["threaded", "threaded_static", "threaded_dynamic", "threaded_guided"]
 
         runtimes_history = np.array(runtimes_history)
