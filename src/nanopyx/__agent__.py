@@ -90,8 +90,8 @@ class Agent_:
 
             if len(run_info) < 2:
                 # Fall back to default values
-                if "OpenCL" in run_type:
-                    rt = "OpenCL"
+                if "opencl" in run_type:
+                    rt = "opencl"
                 else:
                     rt = run_type
 
@@ -138,7 +138,7 @@ class Agent_:
             2. Stores the delay factor and the probability
         """
 
-        threaded_runtypes = ["Threaded", "Threaded_static", "Threaded_dynamic", "Threaded_guided"]
+        threaded_runtypes = ["threaded", "threaded_static", "threaded_dynamic", "threaded_guided"]
 
         runtimes_history = np.array(runtimes_history)
         if len(runtimes_history) > 50:
@@ -153,7 +153,7 @@ class Agent_:
 
         if run_type in self.delayed_runtypes:
             if runtime < (slow_avg_speed - slow_std_speed) or runtime < (fast_avg_speed + fast_std_speed):
-                if "Threaded" in run_type:
+                if "threaded" in run_type:
                     for threaded_run_type in threaded_runtypes:
                         self.delayed_runtypes.pop(threaded_run_type, None)
                 else:
@@ -173,7 +173,7 @@ class Agent_:
                     f"Run type {run_type} was delayed in the previous run. Delay factor: {delay_factor}, Delay probability: {delay_prob}"
                 )
 
-            if "Threaded" in run_type:
+            if "threaded" in run_type:
                 for threaded_run_type in threaded_runtypes:
                     self.delayed_runtypes[threaded_run_type] = (delay_factor, delay_prob)
             else:

@@ -38,17 +38,6 @@ class LiquidEngine:
     def __init__(
         self,
         testing: bool = False,
-        opencl_: bool = False,
-        unthreaded_: bool = False,
-        threaded_: bool = False,
-        threaded_static_: bool = False,
-        threaded_dynamic_: bool = False,
-        threaded_guided_: bool = False,
-        python_: bool = False,
-        njit_: bool = False,
-        dask_: bool = False,
-        transonic_: bool = False,
-        cuda_: bool = False,
         clear_benchmarks: bool = False,
         verbose: bool = True,
     ) -> None:
@@ -77,34 +66,22 @@ class LiquidEngine:
 
         # Start by checking available run types
         self._run_types = {}
-        if opencl_ and opencl_works():
-            for d in devices:
-                self._run_types[f"OpenCL_{d['device'].name}"] = partial(self._run_opencl, device=d)
-        if threaded_:
-            self._run_types["Threaded"] = self._run_threaded
-        if unthreaded_:
-            self._run_types["Unthreaded"] = self._run_unthreaded
-        if threaded_static_:
-            self._run_types["Threaded_static"] = self._run_threaded_static
-        if threaded_dynamic_:
-            self._run_types["Threaded_dynamic"] = self._run_threaded_dynamic
-        if threaded_guided_:
-            self._run_types["Threaded_guided"] = self._run_threaded_guided
-        if python_:
-            self._run_types["Python"] = self._run_python
-        if njit_ and njit_works():
-            self._run_types["Numba"] = self._run_njit
-            # Try to trigger early compilation
-            try:
-                self._run_njit()
-            except TypeError:
-                print("Consider adding default arguments to the njit implementation to trigger early compilation")
-        if dask_ and dask_works():
-            self._run_types["Dask"] = self._run_dask
-        if transonic_ and transonic_works():
-            self._run_types["Transonic"] = self._run_transonic
-        if cuda_ and cuda_works():
-            self._run_types["Cuda"] = self._run_cuda
+        for rt in inspect.getmembers(self,inspect.ismethod):
+            if rt[0].startswith('_run_'):
+                runtypename = '_'.join(rt[0].split('_')[2:]).lower()
+                # TODO Recheck this logic TODO
+                if 'numba' in runtypename and not njit_works:
+                    continue
+                elif 'dask' in runtypename and not dask_works:
+                    continue
+                elif 'transonic' in runtypename and not transonic_works:
+                    continue
+                elif 'cuda' in runtypename and not cuda_works:
+                    continue
+                elif 'opencl' in runtypename and not opencl_works:
+                    continue
+                else:
+                    self._run_types[runtypename] = rt[1]
 
         self.testing = testing
         self.mem_div = 1
@@ -117,14 +94,17 @@ class LiquidEngine:
         os.makedirs(base_path, exist_ok=True)
         self._benchmark_filepath = os.path.join(base_path, self.__class__.__name__ + ".yml")
 
-        # Load config file if it exists, otherwise create an empty config
+        # Load benchmark file if it exists, otherwise create an empty config
         if not clear_benchmarks and os.path.exists(self._benchmark_filepath):
             with open(self._benchmark_filepath) as f:
                 self._benchmarks = yaml.load(f, Loader=yaml.FullLoader)
         else:
             self._benchmarks = {}
 
-        # check if the cfg dictionary has a key for every available run type
+        # Lowercase everything for backwards compatibility
+        self._benchmarks =  {k.lower(): v for k, v in self._benchmarks.items()}
+
+        # check if the benchmark dictionary has a key for every available run type
         for run_type_designation in self._run_types.keys():
             if run_type_designation not in self._benchmarks:
                 self._benchmarks[run_type_designation] = {}
@@ -143,6 +123,8 @@ class LiquidEngine:
                 .joinpath(self.__class__.__name__ + ".yml")
                 .read_text()
             )
+            # Lowercase everything for backwards compatibility
+            self._default_benchmarks =  {k.lower(): v for k, v in self._default_benchmarks.items()}
         except:
             self._default_benchmarks = []
 
@@ -163,6 +145,8 @@ class LiquidEngine:
         :param kwargs: kwargs for the function
         :return: the result and time taken
         """
+
+        run_type = run_type.lower()
 
         if run_type is None and self.verbose:
             print("Querying the Agent...")
@@ -452,80 +436,3 @@ class LiquidEngine:
         Should be overridden by the any class that inherits from this class
         """
         return self._run(*args, **kwargs)
-
-    def _run_opencl(*args, **kwargs):
-        """@public
-        Runs the OpenCL version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_unthreaded(*args, **kwargs):
-        """@public
-        Runs the cython unthreaded version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_threaded(*args, **kwargs):
-        """@public
-        Runs the cython threaded version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_threaded_static(*args, **kwargs):
-        """@public
-        Runs the cython threaded static version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_threaded_dynamic(*args, **kwargs):
-        """@public
-        Runs the cython threaded dynamic version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_threaded_guided(*args, **kwargs):
-        """@public
-        Runs the cython threaded guided version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_python(*args, **kwargs):
-        """@public
-        Runs the python version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_njit(*args, **kwargs):
-        """@public
-        Runs the njit version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_dask(*args, **kwargs):
-        """@public
-        Runs the dask version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_transonic(*args, **kwargs):
-        """@public
-        Runs the transonic version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
-
-    def _run_cuda(*args, **kwargs):
-        """@public
-        Runs the cuda version of the function
-        Should be overridden by the any class that inherits from this class
-        """
-        pass
