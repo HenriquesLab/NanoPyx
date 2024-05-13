@@ -15,7 +15,7 @@ from libc.math cimport cos, sin
 from .__interpolation_tools__ import check_image, value2array
 from .convolution import check_array, convolution2D_cuda, convolution2D_dask, convolution2D_numba, convolution2D_python, convolution2D_transonic
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 
 
 class Convolution(LiquidEngine):
@@ -26,11 +26,7 @@ class Convolution(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "Conv2D"
         super().__init__(
-            clear_benchmarks=clear_benchmarks, testing=testing, 
-            opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True,
-            njit_=True, python_=True, transonic_=True, cuda_=True, dask_=True,
-            verbose=verbose)
+            clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
         
     def run(self, image, kernel, run_type=None):
         image = check_array(image)
@@ -85,8 +81,11 @@ class Convolution(LiquidEngine):
 
     % endfor
 
-    def _run_opencl(self, image, kernel, device):
+    def _run_opencl(self, image, kernel, device=None):
         
+        if device is None:
+            device = _fastest_device
+
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
