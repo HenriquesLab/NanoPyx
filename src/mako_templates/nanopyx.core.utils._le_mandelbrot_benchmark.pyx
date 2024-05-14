@@ -9,7 +9,7 @@ cimport numpy as np
 from cython.parallel import prange
 
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 from ._le_mandelbrot_benchmark_ import njit_mandelbrot as _njit_mandelbrot
 
@@ -25,9 +25,7 @@ class MandelbrotBenchmark(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "Mandelbrot_Benchmark"
         super().__init__(
-            clear_benchmarks=clear_benchmarks, testing=testing, 
-            opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True, python_=True, njit_=True,
+            clear_benchmarks=clear_benchmarks, testing=testing,
             verbose=verbose)
 
     def run(self, int size=1000, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1, run_type=None) -> np.ndarray:
@@ -45,7 +43,10 @@ class MandelbrotBenchmark(LiquidEngine):
     def benchmark(self, int size, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1):
         return super().benchmark(size, r_start, r_end, c_start, c_end)
 
-    def _run_opencl(self, int size, float r_start, float r_end, float c_start, float c_end, dict device) -> np.ndarray:
+    def _run_opencl(self, int size, float r_start, float r_end, float c_start, float c_end, dict device=None) -> np.ndarray:
+
+        if device is None:
+            device = _fastest_device
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])

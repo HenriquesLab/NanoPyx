@@ -70,15 +70,15 @@ class LiquidEngine:
             if rt[0].startswith('_run_'):
                 runtypename = '_'.join(rt[0].split('_')[2:]).lower()
                 # TODO Recheck this logic TODO
-                if 'numba' in runtypename and not njit_works:
+                if 'numba' in runtypename and not njit_works():
                     continue
-                elif 'dask' in runtypename and not dask_works:
+                elif 'dask' in runtypename and not dask_works():
                     continue
-                elif 'transonic' in runtypename and not transonic_works:
+                elif 'transonic' in runtypename and not transonic_works():
                     continue
-                elif 'cuda' in runtypename and not cuda_works:
+                elif 'cuda' in runtypename and not cuda_works():
                     continue
-                elif 'opencl' in runtypename and not opencl_works:
+                elif 'opencl' in runtypename and not opencl_works():
                     continue
                 else:
                     self._run_types[runtypename] = rt[1]
@@ -103,6 +103,7 @@ class LiquidEngine:
 
         # Lowercase everything for backwards compatibility
         self._benchmarks =  {k.lower(): v for k, v in self._benchmarks.items()}
+        print(self._benchmarks.keys())
 
         # check if the benchmark dictionary has a key for every available run type
         for run_type_designation in self._run_types.keys():
@@ -125,6 +126,7 @@ class LiquidEngine:
             )
             # Lowercase everything for backwards compatibility
             self._default_benchmarks =  {k.lower(): v for k, v in self._default_benchmarks.items()}
+            print(self._default_benchmarks.keys())
         except:
             self._default_benchmarks = []
 
@@ -146,7 +148,8 @@ class LiquidEngine:
         :return: the result and time taken
         """
 
-        run_type = run_type.lower()
+        if run_type is not None:
+            run_type = run_type.lower()
 
         if run_type is None and self.verbose:
             print("Querying the Agent...")

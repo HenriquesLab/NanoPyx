@@ -2,7 +2,7 @@
 
 import numpy as np
 cimport numpy as np
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 from ...__liquid_engine__ import LiquidEngine
 
 from cython.parallel import prange
@@ -17,8 +17,6 @@ class GradientRobertsCross(LiquidEngine):
         self._designation = "GradientRobertsCross"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
-            unthreaded_=True, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
             verbose=verbose)
 
     def run(self, image, run_type = None):
@@ -91,7 +89,10 @@ class GradientRobertsCross(LiquidEngine):
         
         return gradient_col, gradient_row
 
-    def _run_opencl(self, float[:,:,:] image, dict device, int mem_div=1):
+    def _run_opencl(self, float[:,:,:] image, dict device=None, int mem_div=1):
+
+        if device is None:
+            device = _fastest_device
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])

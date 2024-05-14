@@ -14,7 +14,7 @@ from cython.parallel import parallel, prange
 
 from .__interpolation_tools__ import check_image
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 
 import os
 os.environ['PYOPENCL_NO_CACHE']='1'
@@ -38,9 +38,6 @@ class NLMDenoising(LiquidEngine):
         self._designation = "NLMDenoising"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
-            unthreaded_=True, threaded_=True, threaded_static_=True,
-            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
-            python_=True,
             verbose=verbose)
 
     def run(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0, run_type=None) -> np.ndarray:
@@ -227,7 +224,11 @@ class NLMDenoising(LiquidEngine):
         %endfor
     
 
-    def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device, int mem_div=1) -> np.ndarray:
+    def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device=None, int mem_div=1) -> np.ndarray:
+        
+        if device is None:
+            device = _fastest_device
+        
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)

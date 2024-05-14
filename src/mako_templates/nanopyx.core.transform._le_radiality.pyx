@@ -9,7 +9,7 @@ from cython.parallel import parallel, prange
 
 from libc.math cimport sqrt, pi, fabs, cos, sin
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 from .__interpolation_tools__ import check_image
 
 from ._le_interpolation_catmull_rom import ShiftAndMagnify as CRShiftAndMagnify
@@ -35,8 +35,6 @@ class Radiality(LiquidEngine):
         self._designation = "Radiality"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
-            unthreaded_=False, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
             verbose=verbose)
 
     def run(self, image, image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True, run_type = None): 
@@ -49,7 +47,7 @@ class Radiality(LiquidEngine):
         image_interp = check_image(image_interp)
         return super().benchmark(image, image_interp, magnification, ringRadius, border, radialityPositivityConstraint, doIntensityWeighting)
 
-    def _run_unthreaded(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
+    """def _run_unthreaded(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
 
         cdef int _magnification = magnification
         cdef int _border = border
@@ -85,7 +83,7 @@ class Radiality(LiquidEngine):
                         else:
                             imRad[f,j,i] = _c_calculate_radiality_per_subpixel(i, j, &imGx[f,0,0], &imGy[f,0,0], xRingCoordinates, yRingCoordinates, _magnification, _ringRadius, nRingCoordinates, _radialityPositivityConstraint, h, w)
 
-        return np.asarray(imRad)
+        return np.asarray(imRad)"""
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
@@ -132,6 +130,9 @@ class Radiality(LiquidEngine):
 
     
     def _run_opencl(self, image, image_interp, magnification=5, ringRadius=0.5, border=0, radialityPositivityConstraint=True, doIntensityWeighting=True, device=None, int mem_div=1):
+
+        if device is None:
+            device = _fastest_device
 
         cl_ctx = cl.Context([device['device']])
         cl_queue = cl.CommandQueue(cl_ctx)

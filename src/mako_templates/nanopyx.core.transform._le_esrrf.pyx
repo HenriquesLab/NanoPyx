@@ -12,7 +12,7 @@ from libc.math cimport cos, sin
 
 from .__interpolation_tools__ import check_image, value2array
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 
 from ._le_interpolation_catmull_rom import ShiftAndMagnify
 from ._le_roberts_cross_gradients import GradientRobertsCross
@@ -26,10 +26,7 @@ class eSRRF(LiquidEngine):
 
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "eSRRF_ST"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True,
-                        verbose=verbose)
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
     def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
         image = check_image(image)
@@ -40,6 +37,10 @@ class eSRRF(LiquidEngine):
         return super().benchmark(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
     def _run_opencl(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
+
+        if device is None:
+            device = _fastest_device
+
         # TODO doIntensityWeighting is irrelevant on gpu2
         cl_ctx = cl.Context([device['device']])
         dc = device['device']

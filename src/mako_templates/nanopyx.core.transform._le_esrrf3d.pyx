@@ -28,9 +28,7 @@ class eSRRF3D(LiquidEngine):
 
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "eSRRF_3D"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                        opencl_=False, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True, verbose=verbose)
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
         self._gradients_s_interpolated = None
         self._gradients_r_interpolated = None
         self._gradients_c_interpolated = None
