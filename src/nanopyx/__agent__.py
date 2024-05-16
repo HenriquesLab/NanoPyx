@@ -53,10 +53,13 @@ class Agent_:
 
         self.delayed_runtypes = {}  # Store runtypes as keys and their values as (delay_factor, delay_prob)
 
-    def _get_ordered_run_types(self, fn, args, kwargs):
+    def _get_ordered_run_types(self, fn, args, kwargs,_possible_runtypes=[]):
         """@public
         Retrieves an ordered list of run_types for the given args and kwargs
         """
+
+        if not _possible_runtypes:
+            _possible_runtypes = fn.run_types.keys()
 
         # str representation of the arguments and their corresponding 'norm'
         repr_args, repr_norm = fn._get_args_repr_score(*args, **kwargs)
@@ -68,6 +71,8 @@ class Agent_:
         # fn._benchmarks is a dictionary of dictionaries. The first key is the run_type, the second key is the repr_args
         # Check every run_type for the most similar args
         for run_type in fn._run_types:
+            if run_type not in _possible_runtypes:
+                continue
             if repr_args in fn._benchmarks[run_type]:
                 run_info = fn._benchmarks[run_type][repr_args][1:]
             else:
@@ -196,13 +201,13 @@ class Agent_:
 
         return adjusted_times
 
-    def get_run_type(self, fn, args, kwargs):
+    def get_run_type(self, fn, args, kwargs,_possible_runtypes=[]):
         """
         Returns the best run_type for the given args and kwargs
         """
 
         # Get list of run types
-        fast_avg, fast_std, slow_avg, slow_std = self._get_ordered_run_types(fn, args, kwargs)
+        fast_avg, fast_std, slow_avg, slow_std = self._get_ordered_run_types(fn, args, kwargs,_possible_runtypes)
 
         # Penalize the average time a run_type had if that run_type was delayed in previous runs
         if len(self.delayed_runtypes.keys()) > 0:

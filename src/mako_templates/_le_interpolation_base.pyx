@@ -63,6 +63,9 @@ class ShiftAndMagnify(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
 
     def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col, dict device=None, int mem_div=1) -> np.ndarray:
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
         # QUEUE AND CONTEXT
@@ -113,6 +116,11 @@ class ShiftAndMagnify(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]

@@ -158,10 +158,22 @@ class LiquidEngine:
         elif run_type is None:
             run_type = self.Agent.get_run_type(self, args, kwargs)
         elif run_type not in self._run_types:
-            print(f"Unexpected run type {run_type}")
-            print("Querying the Agent...")
-            run_type = self.Agent.get_run_type(self, args, kwargs)
-            print(f"Agent chose: {run_type}")
+            
+            # Check if the tags in the run_types
+            _possible_runtypes = [rt for rt in self._run_types.keys() if f"@{run_type}" in self._run_types[rt].__doc__]
+
+            if not _possible_runtypes:
+
+                print(f"Unexpected run type {run_type}")
+                print("Querying the Agent...")
+                run_type = self.Agent.get_run_type(self, args, kwargs)
+                print(f"Agent chose: {run_type}")
+            
+            else:
+
+                print(f"Choosing between all {run_type} implementations")
+                run_type = self.Agent.get_run_type(self, args, kwargs,_possible_runtypes)
+                print(f"Agent chose: {run_type}")
 
         # try to run
         try:
