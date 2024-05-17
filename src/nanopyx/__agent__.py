@@ -207,7 +207,18 @@ class Agent_:
         """
 
         # Get list of run types
-        fast_avg, fast_std, slow_avg, slow_std = self._get_ordered_run_types(fn, args, kwargs,_possible_runtypes)
+        try:
+            fast_avg, fast_std, slow_avg, slow_std = self._get_ordered_run_types(fn, args, kwargs,_possible_runtypes)
+        except TypeError:
+            print(f"There seems to be an error regarding your benchmarks. \n\
+To give full control to the agent please ensure that one of the following is true: \n\
+\t - You have at least 3 benchmarks for all runtypes using any set of args,kwargs \n\
+\t - Provide a set of default benchmarks during the Liquid Engine class creation \n\
+Otherwise explicity choose one of the following run_types:")
+            print('\t-','\n\t- '.join(fn._run_types.keys()))
+
+            print("The agent will choose a random run_type")
+            return random.choices(list(fn._run_types.keys()), k=1)[0]
 
         # Penalize the average time a run_type had if that run_type was delayed in previous runs
         if len(self.delayed_runtypes.keys()) > 0:
