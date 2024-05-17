@@ -59,7 +59,7 @@ class Agent_:
         """
 
         if not _possible_runtypes:
-            _possible_runtypes = fn.run_types.keys()
+            _possible_runtypes = fn._run_types.keys()
 
         # str representation of the arguments and their corresponding 'norm'
         repr_args, repr_norm = fn._get_args_repr_score(*args, **kwargs)
