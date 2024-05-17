@@ -109,6 +109,13 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
+        """
+        @cpu
+        % if sch!='unthreaded':
+        @threaded
+        % endif
+        @cython
+        """
         _runtype = "${sch}".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
 
@@ -251,7 +258,9 @@ class ChannelRegistrationEstimator(LiquidEngine):
     % endfor
 
     def _run_opencl(self, float[:,:,:] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity, device=None):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 

@@ -30,7 +30,10 @@ class GradientRobertsCross(LiquidEngine):
         return super().benchmark(image)
     
     def _run_unthreaded(self, float[:,:,:] image):
-
+        """
+        @cpu
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef float [:,:,:] gradient_col = np.zeros_like(image) 
         cdef float [:,:,:] gradient_row = np.zeros_like(image)
@@ -44,6 +47,11 @@ class GradientRobertsCross(LiquidEngine):
     
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] image):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
 
         cdef int nFrames = image.shape[0]
         cdef float [:,:,:] gradient_col = np.zeros_like(image) 
@@ -62,7 +70,9 @@ class GradientRobertsCross(LiquidEngine):
     % endfor
 
     def _run_opencl(self, float[:,:,:] image, dict device=None, int mem_div=1):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 

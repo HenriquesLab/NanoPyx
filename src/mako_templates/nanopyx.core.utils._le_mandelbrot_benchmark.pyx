@@ -44,7 +44,9 @@ class MandelbrotBenchmark(LiquidEngine):
         return super().benchmark(size, r_start, r_end, c_start, c_end)
 
     def _run_opencl(self, int size, float r_start, float r_end, float c_start, float c_end, dict device=None) -> np.ndarray:
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 
@@ -78,6 +80,10 @@ class MandelbrotBenchmark(LiquidEngine):
         return im_mandelbrot.get()
 
     def _run_unthreaded(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        @cython
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
 
@@ -95,6 +101,11 @@ class MandelbrotBenchmark(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
 
@@ -116,11 +127,19 @@ class MandelbrotBenchmark(LiquidEngine):
     % endfor
 
     def _run_python(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         _py_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
         return im_mandelbrot
 
     def _run_njit(self, int size=10, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @numba
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         _njit_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
         return im_mandelbrot

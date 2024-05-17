@@ -58,8 +58,14 @@ class eSRRF3D(LiquidEngine):
             return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
     % for sch in schedulers:
-    def _run_${sch}(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Threaded"):
-
+    def _run_${sch}(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
+        """
+        @cpu
+        % if sch!='unthreaded':
+        @threaded
+        % endif
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma

@@ -62,6 +62,9 @@ class NLMDenoising(LiquidEngine):
         return super().benchmark(image, patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma) 
 
     def _run_python(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        """
         out = np.zeros_like(image)
         for i in range(image.shape[0]):
             out[i] = denoise_nl_means(image[i], patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma, fast_mode=False)
@@ -69,6 +72,10 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(out)
 
     def _run_unthreaded(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        @cython
+        """
         if patch_size % 2 == 0:
             patch_size = patch_size + 1  # odd value for symmetric patch
 
@@ -129,6 +136,11 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(np.asarray(result))
 
     def _run_threaded(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         if patch_size % 2 == 0:
             patch_size = patch_size + 1  # odd value for symmetric patch
 
@@ -189,6 +201,11 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(np.asarray(result))
 
     def _run_threaded_guided(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         if patch_size % 2 == 0:
             patch_size = patch_size + 1  # odd value for symmetric patch
 
@@ -249,6 +266,11 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(np.asarray(result))
 
     def _run_threaded_dynamic(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         if patch_size % 2 == 0:
             patch_size = patch_size + 1  # odd value for symmetric patch
 
@@ -309,6 +331,11 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(np.asarray(result))
 
     def _run_threaded_static(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         if patch_size % 2 == 0:
             patch_size = patch_size + 1  # odd value for symmetric patch
 
@@ -371,6 +398,10 @@ class NLMDenoising(LiquidEngine):
     
         
     def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device=None, int mem_div=1) -> np.ndarray:
+        """
+        @gpu
+        @cython
+        """
         if device is None:
             device = _fastest_device
         cl_ctx = cl.Context([device['device']])

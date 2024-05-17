@@ -84,7 +84,11 @@ class Radiality(LiquidEngine):
         return np.asarray(imRad)"""
 
     def _run_threaded(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int _magnification = magnification
         cdef int _border = border
         cdef float _ringRadius = ringRadius * magnification
@@ -120,7 +124,11 @@ class Radiality(LiquidEngine):
 
         return np.asarray(imRad)
     def _run_threaded_guided(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int _magnification = magnification
         cdef int _border = border
         cdef float _ringRadius = ringRadius * magnification
@@ -156,7 +164,11 @@ class Radiality(LiquidEngine):
 
         return np.asarray(imRad)
     def _run_threaded_dynamic(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int _magnification = magnification
         cdef int _border = border
         cdef float _ringRadius = ringRadius * magnification
@@ -192,7 +204,11 @@ class Radiality(LiquidEngine):
 
         return np.asarray(imRad)
     def _run_threaded_static(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int _magnification = magnification
         cdef int _border = border
         cdef float _ringRadius = ringRadius * magnification
@@ -230,7 +246,9 @@ class Radiality(LiquidEngine):
 
     
     def _run_opencl(self, image, image_interp, magnification=5, ringRadius=0.5, border=0, radialityPositivityConstraint=True, doIntensityWeighting=True, device=None, int mem_div=1):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 

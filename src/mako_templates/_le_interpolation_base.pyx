@@ -118,7 +118,9 @@ class ShiftAndMagnify(LiquidEngine):
     def _run_${sch}(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
         """
         @cpu
+        % if sch!='unthreaded':
         @threaded
+        % endif
         @cython
         """
         cdef int nFrames = image.shape[0]
@@ -204,7 +206,9 @@ class ShiftScaleRotate(LiquidEngine):
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
 
     def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, dict device=None, int mem_div=1) -> np.ndarray:
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 
@@ -259,6 +263,13 @@ class ShiftScaleRotate(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        """
+        @cpu
+        % if sch!='unthreaded':
+        @threaded
+        % endif
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -345,7 +356,9 @@ class PolarTransform(LiquidEngine):
         return super().benchmark(image, nrow, ncol, scale)
 
     def _run_opencl(self, image, int nrow, int ncol, str scale, dict device=None, int mem_div=1):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 
@@ -404,7 +417,13 @@ class PolarTransform(LiquidEngine):
         
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] image, int nrow, int ncol, str scale):
-        
+        """
+        @cpu
+        % if sch!='unthreaded':
+        @threaded
+        % endif
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]

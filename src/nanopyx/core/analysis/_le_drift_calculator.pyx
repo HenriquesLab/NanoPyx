@@ -34,7 +34,10 @@ class DriftEstimator(LiquidEngine):
         return super().benchmark(image, time_averaging=time_averaging, max_drift=max_drift, ref_option=ref_option)
 
     def _run_unthreaded(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-
+        """
+        @cpu
+        @cython
+        """
         if not _check_even_square(image):
             image = _make_even_square(image)
 
@@ -123,7 +126,11 @@ class DriftEstimator(LiquidEngine):
 
         return np.asarray(output).astype(np.float32)
     def _run_threaded(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         if not _check_even_square(image):
             image = _make_even_square(image)
 

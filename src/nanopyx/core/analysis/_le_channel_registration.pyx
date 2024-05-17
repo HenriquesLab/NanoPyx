@@ -106,6 +106,10 @@ class ChannelRegistrationEstimator(LiquidEngine):
         return super().benchmark(img_stack, img_ref, max_shift, blocks_per_axis, min_similarity)
 
     def _run_unthreaded(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
+        """
+        @cpu
+        @cython
+        """
         _runtype = "unthreaded".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
 
@@ -240,6 +244,11 @@ class ChannelRegistrationEstimator(LiquidEngine):
         return np.array(translation_masks)
 
     def _run_threaded(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         _runtype = "threaded".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
 
@@ -374,6 +383,11 @@ class ChannelRegistrationEstimator(LiquidEngine):
         return np.array(translation_masks)
 
     def _run_threaded_guided(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         _runtype = "threaded_guided".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
 
@@ -508,6 +522,11 @@ class ChannelRegistrationEstimator(LiquidEngine):
         return np.array(translation_masks)
 
     def _run_threaded_dynamic(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         _runtype = "threaded_dynamic".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
 
@@ -642,6 +661,11 @@ class ChannelRegistrationEstimator(LiquidEngine):
         return np.array(translation_masks)
 
     def _run_threaded_static(self, float[:,:, :] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         _runtype = "threaded_static".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
 
@@ -777,7 +801,9 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
 
     def _run_opencl(self, float[:,:,:] img_stack, int ref_index, int max_shift, int blocks_per_axis, float min_similarity, device=None):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 

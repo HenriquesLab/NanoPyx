@@ -55,8 +55,12 @@ class eSRRF3D(LiquidEngine):
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
             return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
-    def _run_threaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Threaded"):
-
+    def _run_threaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -119,8 +123,12 @@ class eSRRF3D(LiquidEngine):
                                 rgc_map[f, sM, rM, cM] = rgc_val
         
         return np.asarray(rgc_map)
-    def _run_threaded_guided(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Threaded"):
-
+    def _run_threaded_guided(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -183,8 +191,12 @@ class eSRRF3D(LiquidEngine):
                                 rgc_map[f, sM, rM, cM] = rgc_val
         
         return np.asarray(rgc_map)
-    def _run_threaded_dynamic(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Threaded"):
-
+    def _run_threaded_dynamic(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -247,8 +259,12 @@ class eSRRF3D(LiquidEngine):
                                 rgc_map[f, sM, rM, cM] = rgc_val
         
         return np.asarray(rgc_map)
-    def _run_threaded_static(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Threaded"):
-
+    def _run_threaded_static(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -311,8 +327,11 @@ class eSRRF3D(LiquidEngine):
                                 rgc_map[f, sM, rM, cM] = rgc_val
         
         return np.asarray(rgc_map)
-    def _run_unthreaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type="Threaded"):
-
+    def _run_unthreaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
+        """
+        @cpu
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma

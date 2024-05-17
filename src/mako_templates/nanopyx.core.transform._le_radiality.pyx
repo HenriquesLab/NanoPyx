@@ -87,7 +87,11 @@ class Radiality(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] image, float[:,:,:] image_interp, magnification: int = 5, ringRadius: float = 0.5, border: int = 0, radialityPositivityConstraint: bool = True, doIntensityWeighting: bool = True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int _magnification = magnification
         cdef int _border = border
         cdef float _ringRadius = ringRadius * magnification
@@ -130,7 +134,9 @@ class Radiality(LiquidEngine):
 
     
     def _run_opencl(self, image, image_interp, magnification=5, ringRadius=0.5, border=0, radialityPositivityConstraint=True, doIntensityWeighting=True, device=None, int mem_div=1):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 

@@ -41,7 +41,10 @@ class RadialGradientConvergence(LiquidEngine):
         return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting)
 
     def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
+        """
+        @cpu
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -71,7 +74,11 @@ class RadialGradientConvergence(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -105,7 +112,9 @@ class RadialGradientConvergence(LiquidEngine):
 
     
     def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, int mem_div=1):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 

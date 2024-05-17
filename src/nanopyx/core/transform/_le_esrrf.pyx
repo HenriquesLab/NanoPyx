@@ -35,7 +35,9 @@ class eSRRF(LiquidEngine):
         return super().benchmark(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
     def _run_opencl(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 
@@ -149,6 +151,11 @@ class eSRRF(LiquidEngine):
         return output_image
 
     def _run_threaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         runtype = "threaded".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
         rbc = GradientRobertsCross(verbose=False)
@@ -162,6 +169,11 @@ class eSRRF(LiquidEngine):
 
         return radial_gradients
     def _run_threaded_guided(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         runtype = "threaded_guided".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
         rbc = GradientRobertsCross(verbose=False)
@@ -175,6 +187,11 @@ class eSRRF(LiquidEngine):
 
         return radial_gradients
     def _run_threaded_dynamic(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         runtype = "threaded_dynamic".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
         rbc = GradientRobertsCross(verbose=False)
@@ -188,6 +205,11 @@ class eSRRF(LiquidEngine):
 
         return radial_gradients
     def _run_threaded_static(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         runtype = "threaded_static".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
         rbc = GradientRobertsCross(verbose=False)
@@ -202,6 +224,10 @@ class eSRRF(LiquidEngine):
         return radial_gradients
 
     def _run_unthreaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+        """
+        @cpu
+        @cython
+        """
         runtype = "Unthreaded"
         crsm = ShiftAndMagnify(verbose=False)
         rbc = GradientRobertsCross(verbose=False)

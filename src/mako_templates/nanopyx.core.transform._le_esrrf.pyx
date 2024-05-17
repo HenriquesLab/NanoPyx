@@ -37,7 +37,9 @@ class eSRRF(LiquidEngine):
         return super().benchmark(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
     def _run_opencl(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
-
+        """
+        @gpu
+        """
         if device is None:
             device = _fastest_device
 
@@ -152,6 +154,11 @@ class eSRRF(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         runtype = "${sch}".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
         rbc = GradientRobertsCross(verbose=False)
@@ -167,6 +174,10 @@ class eSRRF(LiquidEngine):
     % endfor
 
     def _run_unthreaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+        """
+        @cpu
+        @cython
+        """
         runtype = "Unthreaded"
         crsm = ShiftAndMagnify(verbose=False)
         rbc = GradientRobertsCross(verbose=False)

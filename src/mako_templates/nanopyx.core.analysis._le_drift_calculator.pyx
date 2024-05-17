@@ -37,7 +37,13 @@ class DriftEstimator(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-
+        """
+        @cpu
+        % if sch!='unthreaded':
+        @threaded
+        % endif
+        @cython
+        """
         if not _check_even_square(image):
             image = _make_even_square(image)
 
