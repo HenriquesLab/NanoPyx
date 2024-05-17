@@ -103,7 +103,6 @@ class LiquidEngine:
 
         # Lowercase everything for backwards compatibility
         self._benchmarks =  {k.lower(): v for k, v in self._benchmarks.items()}
-        print(self._benchmarks.keys())
 
         # check if the benchmark dictionary has a key for every available run type
         for run_type_designation in self._run_types.keys():
@@ -126,7 +125,6 @@ class LiquidEngine:
             )
             # Lowercase everything for backwards compatibility
             self._default_benchmarks =  {k.lower(): v for k, v in self._default_benchmarks.items()}
-            print(self._default_benchmarks.keys())
         except:
             self._default_benchmarks = []
 
