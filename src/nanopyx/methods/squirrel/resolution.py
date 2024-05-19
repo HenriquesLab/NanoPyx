@@ -41,7 +41,7 @@ def calculate_frc(frame_1: np.ndarray, frame_2: np.ndarray, pixel_size: float = 
     
     return res
 
-def calculate_decorr_analysis(frame: np.ndarray, rmin: float = 0, rmax: float = 1, n_r: int = 50, n_g: int = 10, pixel_size: float = 1, untis: str = "pixel", roi: tuple = (0, 0, 0, 0), plot_decorr_analysis=False):
+def calculate_decorr_analysis(frame: np.ndarray, rmin: float = 0, rmax: float = 1, n_r: int = 50, n_g: int = 10, pixel_size: float = 1, units: str = "pixel", roi: tuple = (0, 0, 0, 0), plot_decorr_analysis=False):
     """
     Perform decorrelation analysis on a given image frame to estimate its resolution.
 
@@ -75,7 +75,7 @@ def calculate_decorr_analysis(frame: np.ndarray, rmin: float = 0, rmax: float = 
     -----
     Decorrelation analysis is a technique used to estimate the resolution of images by analyzing the decorrelation of intensity values over different spatial scales. It is particularly useful in microscopy and imaging where direct resolution measurement is challenging.
     """
-    decorr_calc = DecorrAnalysis()
+    decorr_calc = DecorrAnalysis(pixel_size=pixel_size, units=units, rmin=rmin, rmax=rmax, n_r=n_r, n_g=n_g)
     decorr_calc.run_analysis(frame)
 
     if plot_decorr_analysis:
