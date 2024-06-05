@@ -22,9 +22,9 @@ try:
                 cl_dp = False
             else:
                 cl_dp = False
-            
+
             perf = dev.max_compute_units * dev.max_clock_frequency
-            if perf>max_perf:
+            if perf > max_perf or len(platform.get_devices()) == 1:
                 max_perf = perf
                 _fastest_device = {"device": dev, "DP": cl_dp}
             devices.append({"device": dev, "DP": cl_dp})
