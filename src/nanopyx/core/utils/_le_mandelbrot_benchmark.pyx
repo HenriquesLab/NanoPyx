@@ -7,7 +7,7 @@ cimport numpy as np
 from cython.parallel import prange
 
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 from ._le_mandelbrot_benchmark_ import mandelbrot as _py_mandelbrot
 from ._le_mandelbrot_benchmark_ import njit_mandelbrot as _njit_mandelbrot
 
@@ -23,9 +23,7 @@ class MandelbrotBenchmark(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "Mandelbrot_Benchmark"
         super().__init__(
-            clear_benchmarks=clear_benchmarks, testing=testing, 
-            opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True, python_=True, njit_=True,
+            clear_benchmarks=clear_benchmarks, testing=testing,
             verbose=verbose)
 
     def run(self, int size=1000, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1, run_type=None) -> np.ndarray:
@@ -43,7 +41,12 @@ class MandelbrotBenchmark(LiquidEngine):
     def benchmark(self, int size, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1):
         return super().benchmark(size, r_start, r_end, c_start, c_end)
 
-    def _run_opencl(self, int size, float r_start, float r_end, float c_start, float c_end, dict device) -> np.ndarray:
+    def _run_opencl(self, int size, float r_start, float r_end, float c_start, float c_end, dict device=None) -> np.ndarray:
+        """
+        @gpu
+        """
+        if device is None:
+            device = _fastest_device
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
@@ -75,6 +78,10 @@ class MandelbrotBenchmark(LiquidEngine):
         return im_mandelbrot.get()
 
     def _run_unthreaded(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        @cython
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
 
@@ -91,6 +98,11 @@ class MandelbrotBenchmark(LiquidEngine):
         return im_mandelbrot
 
     def _run_threaded(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
 
@@ -106,6 +118,11 @@ class MandelbrotBenchmark(LiquidEngine):
 
         return im_mandelbrot
     def _run_threaded_guided(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
 
@@ -121,6 +138,11 @@ class MandelbrotBenchmark(LiquidEngine):
 
         return im_mandelbrot
     def _run_threaded_dynamic(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
 
@@ -136,6 +158,11 @@ class MandelbrotBenchmark(LiquidEngine):
 
         return im_mandelbrot
     def _run_threaded_static(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         cdef int[:,:] _im_mandelbrot = im_mandelbrot
 
@@ -152,11 +179,19 @@ class MandelbrotBenchmark(LiquidEngine):
         return im_mandelbrot
 
     def _run_python(self, int size, float r_start, float r_end, float c_start, float c_end) -> np.ndarray:
+        """
+        @cpu
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         _py_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
         return im_mandelbrot
 
     def _run_njit(self, int size=10, float r_start=-1.5, float r_end=0.5, float c_start=-1, float c_end=1) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @numba
+        """
         im_mandelbrot = np.empty((size, size), dtype=np.int32)
         _njit_mandelbrot(im_mandelbrot, r_start, r_end, c_start, c_end)
         return im_mandelbrot

@@ -4,7 +4,7 @@ schedulers = ['threaded','threaded_guided','threaded_dynamic','threaded_static']
 
 import numpy as np
 cimport numpy as np
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 from ...__liquid_engine__ import LiquidEngine
 
 from cython.parallel import prange
@@ -19,8 +19,6 @@ class GradientRobertsCross(LiquidEngine):
         self._designation = "GradientRobertsCross"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
-            unthreaded_=True, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
             verbose=verbose)
 
     def run(self, image, run_type = None):
@@ -32,7 +30,10 @@ class GradientRobertsCross(LiquidEngine):
         return super().benchmark(image)
     
     def _run_unthreaded(self, float[:,:,:] image):
-
+        """
+        @cpu
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef float [:,:,:] gradient_col = np.zeros_like(image) 
         cdef float [:,:,:] gradient_row = np.zeros_like(image)
@@ -46,6 +47,11 @@ class GradientRobertsCross(LiquidEngine):
     
     % for sch in schedulers:
     def _run_${sch}(self, float[:,:,:] image):
+        """
+        @cpu
+        @threaded
+        @cython
+        """
 
         cdef int nFrames = image.shape[0]
         cdef float [:,:,:] gradient_col = np.zeros_like(image) 
@@ -63,7 +69,12 @@ class GradientRobertsCross(LiquidEngine):
         return gradient_col, gradient_row
     % endfor
 
-    def _run_opencl(self, float[:,:,:] image, dict device, int mem_div=1):
+    def _run_opencl(self, float[:,:,:] image, dict device=None, int mem_div=1):
+        """
+        @gpu
+        """
+        if device is None:
+            device = _fastest_device
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
