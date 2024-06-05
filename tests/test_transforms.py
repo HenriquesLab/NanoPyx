@@ -4,6 +4,8 @@ from nanopyx.core.generate.noise_add_simplex import get_simplex_noise
 from nanopyx.core.transform import BCShiftAndMagnify, BCShiftScaleRotate, CRShiftAndMagnify, CRShiftScaleRotate
 from nanopyx.core.transform import NNShiftAndMagnify, NNShiftScaleRotate
 
+from nanopyx.__opencl__ import print_opencl_info
+
 def test_interpolation_nearest_neighbor_ShiftAndMagnify(plt):
     M = 4
     nFrames = 3
@@ -75,6 +77,8 @@ def test_interpolation_bicubic_ShiftAndMagnify(plt):
 
 
 def test_interpolation_catmull_rom_ShiftAndMagnify(plt):
+    print(print_opencl_info)
+    
     M = 4
     nFrames = 3
     image = get_simplex_noise(64, 32, frames=nFrames, amplitude=1000)
