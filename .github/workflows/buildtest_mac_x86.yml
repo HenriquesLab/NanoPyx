@@ -6,7 +6,7 @@ jobs:
 
   build_wheels:
     name: Build wheels on Python ${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
-    runs-on: macos-13
+    runs-on: macos-12
 
     steps:
         - uses: actions/checkout@v4
