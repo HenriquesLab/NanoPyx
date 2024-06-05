@@ -13,7 +13,7 @@ from libc.math cimport cos, sin
 from .__interpolation_tools__ import check_image, value2array
 from .convolution import check_array, convolution2D_cuda, convolution2D_dask, convolution2D_numba, convolution2D_python, convolution2D_transonic
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 
 
 class Convolution(LiquidEngine):
@@ -24,11 +24,7 @@ class Convolution(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "Conv2D"
         super().__init__(
-            clear_benchmarks=clear_benchmarks, testing=testing, 
-            opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True,
-            njit_=True, python_=True, transonic_=True, cuda_=True, dask_=True,
-            verbose=verbose)
+            clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
         
     def run(self, image, kernel, run_type=None):
         image = check_array(image)
@@ -38,7 +34,10 @@ class Convolution(LiquidEngine):
         return super().benchmark(image, kernel)
 
     def _run_unthreaded(self, float[:,:] image, float[:,:] kernel):
-
+        """
+        @cpu
+        @cython
+        """
         cdef int nRows = image.shape[0]
         cdef int nCols = image.shape[1]
 
@@ -73,7 +72,11 @@ class Convolution(LiquidEngine):
         return conv_out
 
     def _run_threaded(self, float[:,:] image, float[:,:] kernel):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nRows = image.shape[0]
         cdef int nCols = image.shape[1]
 
@@ -108,7 +111,11 @@ class Convolution(LiquidEngine):
         return conv_out
 
     def _run_threaded_guided(self, float[:,:] image, float[:,:] kernel):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nRows = image.shape[0]
         cdef int nCols = image.shape[1]
 
@@ -143,7 +150,11 @@ class Convolution(LiquidEngine):
         return conv_out
 
     def _run_threaded_dynamic(self, float[:,:] image, float[:,:] kernel):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nRows = image.shape[0]
         cdef int nCols = image.shape[1]
 
@@ -178,7 +189,11 @@ class Convolution(LiquidEngine):
         return conv_out
 
     def _run_threaded_static(self, float[:,:] image, float[:,:] kernel):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nRows = image.shape[0]
         cdef int nCols = image.shape[1]
 
@@ -213,8 +228,13 @@ class Convolution(LiquidEngine):
         return conv_out
 
 
-    def _run_opencl(self, image, kernel, device):
-        
+    def _run_opencl(self, image, kernel, device=None):
+        """
+        @gpu
+        """
+        if device is None:
+            device = _fastest_device
+
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
@@ -245,16 +265,35 @@ class Convolution(LiquidEngine):
         return image_out
 
     def _run_python(self, image, kernel):
+        """
+        @cpu
+        """
         return convolution2D_python(image, kernel).astype(np.float32)
 
     def _run_transonic(self, image, kernel):
+        """
+        @cpu
+        @threaded
+        """
         return convolution2D_transonic(image, kernel).astype(np.float32)
 
     def _run_dask(self, image, kernel):
+        """
+        @cpu
+        @threaded
+        """
         return convolution2D_dask(image, kernel).astype(np.float32)
 
     def _run_cuda(self, image, kernel):
+        """
+        @gpu
+        """
         return convolution2D_cuda(image, kernel).astype(np.float32)
 
     def _run_njit(self, image, kernel):
+        """
+        @cpu
+        @threaded
+        @numba
+        """
         return convolution2D_numba(image, kernel).astype(np.float32)

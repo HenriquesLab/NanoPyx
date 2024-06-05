@@ -14,7 +14,7 @@ from cython.parallel import parallel, prange
 
 from .__interpolation_tools__ import check_image
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 
 import os
 os.environ['PYOPENCL_NO_CACHE']='1'
@@ -38,9 +38,6 @@ class NLMDenoising(LiquidEngine):
         self._designation = "NLMDenoising"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
-            unthreaded_=True, threaded_=True, threaded_static_=True,
-            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
-            python_=True,
             verbose=verbose)
 
     def run(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0, run_type=None) -> np.ndarray:
@@ -76,6 +73,9 @@ class NLMDenoising(LiquidEngine):
 
 
     def _run_python(self, np.ndarray image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        """
         out = np.zeros_like(image)
         for i in range(image.shape[0]):
             out[i] = denoise_nl_means(image[i], patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma, fast_mode=True)
@@ -83,6 +83,10 @@ class NLMDenoising(LiquidEngine):
         return np.squeeze(out)
 
     def _run_unthreaded(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        @cython
+        """
         cdef float distance_cutoff = 5.0
         cdef float var = sigma * sigma
 
@@ -161,6 +165,11 @@ class NLMDenoising(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:, :, :] image, int patch_size=7, int patch_distance=11, float h=0.1, float sigma=0.0) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         if patch_size % 2 == 0:
             patch_size = patch_size + 1  # odd value for symmetric patch
 
@@ -227,7 +236,13 @@ class NLMDenoising(LiquidEngine):
         %endfor
     
 
-    def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device, int mem_div=1) -> np.ndarray:
+    def _run_opencl(self, image, int patch_size, int patch_distance, float h, float sigma, dict device=None, int mem_div=1) -> np.ndarray:
+        """
+        @gpu
+        """
+        if device is None:
+            device = _fastest_device
+        
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
         cl_queue = cl.CommandQueue(cl_ctx)

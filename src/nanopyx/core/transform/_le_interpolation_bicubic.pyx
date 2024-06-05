@@ -7,7 +7,7 @@ from libc.math cimport cos, sin, pi, hypot, exp, log
 
 from .__interpolation_tools__ import check_image, value2array
 from ...__liquid_engine__ import LiquidEngine
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 
 
 cdef extern from "_c_interpolation_bicubic.h":
@@ -21,10 +21,7 @@ class ShiftAndMagnify(LiquidEngine):
 
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "ShiftMagnify_bicubic"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True,
-                        verbose=verbose)
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
     def run(self, image, shift_row, shift_col, float magnification_row, float magnification_col, run_type=None) -> np.ndarray:
         """
@@ -63,8 +60,12 @@ class ShiftAndMagnify(LiquidEngine):
         image = check_image(image)
         return super().benchmark(image, shift_row, shift_col, magnification_row, magnification_col)
 
-    def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col, dict device, int mem_div=1) -> np.ndarray:
-
+    def _run_opencl(self, image, shift_row, shift_col, float magnification_row, float magnification_col, dict device=None, int mem_div=1) -> np.ndarray:
+        """
+        @gpu
+        """
+        if device is None:
+            device = _fastest_device
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
         dc = device['device']
@@ -112,6 +113,10 @@ class ShiftAndMagnify(LiquidEngine):
         return image_out
 
     def _run_unthreaded(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        """
+        @cpu
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -136,6 +141,11 @@ class ShiftAndMagnify(LiquidEngine):
         return image_out
 
     def _run_threaded(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -160,6 +170,11 @@ class ShiftAndMagnify(LiquidEngine):
         return image_out
 
     def _run_threaded_guided(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -184,6 +199,11 @@ class ShiftAndMagnify(LiquidEngine):
         return image_out
 
     def _run_threaded_dynamic(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -208,6 +228,11 @@ class ShiftAndMagnify(LiquidEngine):
         return image_out
 
     def _run_threaded_static(self, float[:,:,:] image, float shift_row, float shift_col, float magnification_row, float magnification_col) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -238,11 +263,9 @@ class ShiftScaleRotate(LiquidEngine):
     Shift, Scale and Rotate (affine transform) using the NanoPyx Liquid Engine
     """
 
-    def __init__(self, clear_benchmarks=False, testing=False):
+    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "ShiftScaleRotate_bicubic"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True)
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
         
     def run(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, run_type=None) -> np.ndarray:
         """
@@ -285,7 +308,12 @@ class ShiftScaleRotate(LiquidEngine):
         image = check_image(image)
         return super().benchmark(image, shift_row, shift_col, scale_row, scale_col, angle)
 
-    def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, dict device, int mem_div=1) -> np.ndarray:
+    def _run_opencl(self, image, shift_row, shift_col, float scale_row, float scale_col, float angle, dict device=None, int mem_div=1) -> np.ndarray:
+        """
+        @gpu
+        """
+        if device is None:
+            device = _fastest_device
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
@@ -337,6 +365,10 @@ class ShiftScaleRotate(LiquidEngine):
         return image_out
 
     def _run_unthreaded(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        """
+        @cpu
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -371,6 +403,11 @@ class ShiftScaleRotate(LiquidEngine):
         return image_out
         
     def _run_threaded(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -405,6 +442,11 @@ class ShiftScaleRotate(LiquidEngine):
         return image_out
         
     def _run_threaded_guided(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -439,6 +481,11 @@ class ShiftScaleRotate(LiquidEngine):
         return image_out
         
     def _run_threaded_dynamic(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -473,6 +520,11 @@ class ShiftScaleRotate(LiquidEngine):
         return image_out
         
     def _run_threaded_static(self, float[:,:,:] image, float shift_row, float shift_col, float scale_row, float scale_col, float angle) -> np.ndarray:
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -512,11 +564,9 @@ class PolarTransform(LiquidEngine):
     Polar Transformations using the NanoPyx Liquid Engine
     """
     
-    def __init__(self, clear_benchmarks=False, testing=False):
+    def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "PolarTransform_bicubic"
-        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, 
-                        opencl_=True, unthreaded_=True, threaded_=True, threaded_static_=True, 
-                        threaded_dynamic_=True, threaded_guided_=True)
+        super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
     def run(self, image, tuple out_shape, str scale, run_type=None) -> np.ndarray:
         """
@@ -553,7 +603,12 @@ class PolarTransform(LiquidEngine):
             scale = 'linear'
         return super().benchmark(image, nrow, ncol, scale)
 
-    def _run_opencl(self, image, int nrow, int ncol, str scale, dict device, int mem_div=1):
+    def _run_opencl(self, image, int nrow, int ncol, str scale, dict device=None, int mem_div=1):
+        """
+        @gpu
+        """
+        if device is None:
+            device = _fastest_device
 
         # QUEUE AND CONTEXT
         cl_ctx = cl.Context([device['device']])
@@ -609,7 +664,10 @@ class PolarTransform(LiquidEngine):
         return output
         
     def _run_unthreaded(self, float[:,:,:] image, int nrow, int ncol, str scale):
-        
+        """
+        @cpu
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -643,7 +701,11 @@ class PolarTransform(LiquidEngine):
 
         return image_out
     def _run_threaded(self, float[:,:,:] image, int nrow, int ncol, str scale):
-        
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -677,7 +739,11 @@ class PolarTransform(LiquidEngine):
 
         return image_out
     def _run_threaded_guided(self, float[:,:,:] image, int nrow, int ncol, str scale):
-        
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -711,7 +777,11 @@ class PolarTransform(LiquidEngine):
 
         return image_out
     def _run_threaded_dynamic(self, float[:,:,:] image, int nrow, int ncol, str scale):
-        
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]
@@ -745,7 +815,11 @@ class PolarTransform(LiquidEngine):
 
         return image_out
     def _run_threaded_static(self, float[:,:,:] image, int nrow, int ncol, str scale):
-        
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef int nFrames = image.shape[0]
         cdef int rows = image.shape[1]
         cdef int cols = image.shape[2]

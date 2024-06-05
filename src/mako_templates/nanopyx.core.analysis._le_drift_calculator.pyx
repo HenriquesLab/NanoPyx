@@ -1,5 +1,5 @@
 <%!
-schedulers = ['unthreaded','threaded','threaded_guided','threaded_dynamic','threaded_static']
+schedulers = ['unthreaded','threaded']
 %># cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 import time
 import scipy
@@ -27,10 +27,7 @@ class DriftEstimator(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "DriftEstimator"
         super().__init__(
-            clear_benchmarks=clear_benchmarks, testing=testing,
-            opencl_=False, unthreaded_=True, threaded_=True, threaded_static_=False, 
-            threaded_dynamic_=False, threaded_guided_=False,
-            njit_=False, python_=False, transonic_=False, cuda_=False, dask_=False, verbose=verbose)
+            clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
     def run(self, image, time_averaging: int = 2, max_drift: int = 5, ref_option: int = 0, run_type=None):
         return self._run(np.asarray(image).astype(np.float32), time_averaging=time_averaging, max_drift=max_drift, ref_option=ref_option, run_type=run_type)
@@ -40,7 +37,13 @@ class DriftEstimator(LiquidEngine):
 
     % for sch in schedulers:
     def _run_${sch}(self, float[:, :, :] image,  int time_averaging=2, int max_drift=5, int ref_option=0):
-
+        """
+        @cpu
+        % if sch!='unthreaded':
+        @threaded
+        % endif
+        @cython
+        """
         if not _check_even_square(image):
             image = _make_even_square(image)
 
@@ -129,19 +132,9 @@ class DriftEstimator(LiquidEngine):
             % elif sch=='threaded':
             for s in prange(n_slices):
             % else:
-            for s in prange(n_slices,schedule="${sch.split('_')[1]}"): 
+            for s in prange(n_slices): 
             %endif
                 output[s, 0] = sqrt((output[s, 1]*output[s, 1]) + (output[s, 2] * output[s, 2]))
 
         return np.asarray(output).astype(np.float32)
     %endfor
-
-
-# % if sch=='unthreaded':
-#     for i in range(n_blocks):
-#     % elif sch=='threaded':
-#     for i in prange(n_blocks):
-#     % else:
-#     for i in prange(n_blocks,schedule="${sch.split('_')[1]}"):
-#     %endif
-#         average[i] = np.mean(image[i*time_averaging:(i+1)*time_averaging, :, :], axis=0)

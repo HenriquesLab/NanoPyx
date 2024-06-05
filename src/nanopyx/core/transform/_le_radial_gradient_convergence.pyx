@@ -6,7 +6,7 @@ cimport numpy as np
 from cython.parallel import parallel, prange
 
 from libc.math cimport sqrt, pow
-from ...__opencl__ import cl, cl_array
+from ...__opencl__ import cl, cl_array, _fastest_device
 from ...__liquid_engine__ import LiquidEngine
 from .__interpolation_tools__ import check_image
 
@@ -22,8 +22,6 @@ class RadialGradientConvergence(LiquidEngine):
         self._designation = "RadialGradientConvergence"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
-            unthreaded_=True, threaded_=True, threaded_static_=True, 
-            threaded_dynamic_=True, threaded_guided_=True, opencl_=True,
             verbose=verbose)
 
 
@@ -41,7 +39,10 @@ class RadialGradientConvergence(LiquidEngine):
         return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting)
 
     def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
+        """
+        @cpu
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -70,7 +71,11 @@ class RadialGradientConvergence(LiquidEngine):
         return np.asarray(rgc_map,dtype=np.float32)
 
     def _run_threaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -97,7 +102,11 @@ class RadialGradientConvergence(LiquidEngine):
                             rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
         return np.asarray(rgc_map,dtype=np.float32)
     def _run_threaded_guided(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -124,7 +133,11 @@ class RadialGradientConvergence(LiquidEngine):
                             rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
         return np.asarray(rgc_map,dtype=np.float32)
     def _run_threaded_dynamic(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -151,7 +164,11 @@ class RadialGradientConvergence(LiquidEngine):
                             rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity)
         return np.asarray(rgc_map,dtype=np.float32)
     def _run_threaded_static(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
-
+        """
+        @cpu
+        @threaded
+        @cython
+        """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -180,6 +197,11 @@ class RadialGradientConvergence(LiquidEngine):
 
     
     def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, int mem_div=1):
+        """
+        @gpu
+        """
+        if device is None:
+            device = _fastest_device
 
         # gradient gxgymag*mag*size
         # image_interp = mag*size
