@@ -75,7 +75,7 @@ jobs:
           verbose: true # optional (default = false)
 
   test_on_macos:
-    runs-on: [self-hosted, macOS]
+    runs-on: [self-hosted, macOS, ARM64]
     steps:
       - uses: actions/checkout@v4
         with:
