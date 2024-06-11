@@ -1,16 +1,16 @@
-name: (cloud) Build and Test Mac x86 wheels
+name: (self-hosted) Build and Test Mac x86 wheels
 
 on: workflow_dispatch
 
 jobs:
 
   build_wheels:
-    name: Build wheels on Python ${{ matrix.python }}-${{ matrix.platform_id }}-${{ matrix.manylinux_image }}
-    runs-on: macos-12
+    name: Build wheels on mac x86 
+    runs-on: [self-hosted, Intel, macOS, X64]
 
     steps:
         - uses: actions/checkout@v4
-    
+
         # Used to host cibuildwheel
         - uses: actions/setup-python@v5
           with:
