@@ -231,9 +231,10 @@ def calculate_eSRRF3d_temporal_correlations(rgc_map, correlation: str = "AVG", f
     else:
         if framewindow > 0:
             if rollingoverlap:
-                n_windows = int((n_frames - framewindow) / rollingoverlap) + 1
+                n_windows = int(n_frames / (framewindow - rollingoverlap))
             else:
                 n_windows = int(n_frames / framewindow)  
+                rollingoverlap = 0
         else:
             n_windows = 1     
             framewindow = n_frames - 1
