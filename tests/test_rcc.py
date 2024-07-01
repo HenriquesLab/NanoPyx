@@ -19,7 +19,9 @@ def test_get_image_shift_no_shift():
 
 
 def test_rcc():
-    im_frames = np.random.rand(5, 10, 10)
+    im_frames = np.zeros(5, 10, 10)
+    for i in range(im_frames.shape[0]):
+        im_frames[i, :, 2+i] = 1
     shifts_x, shifts_y = rcc(im_frames, 10)
     assert isinstance(shifts_x, np.ndarray)
     assert isinstance(shifts_y, np.ndarray)
