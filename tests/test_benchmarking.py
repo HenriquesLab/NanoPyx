@@ -6,7 +6,7 @@ import numpy as np
 #random_channel_misalignment
 
 def test_benchmark():
-    pass  # nanopyx.benchmark()
+    nanopyx.benchmark(n_benchmark_runs=1, img_dims=100)
 
 def test_benchmark_interpolation_bicubic(random_image_with_ramp):
     bicubic_sm = nanopyx.core.transform._le_interpolation_bicubic.ShiftAndMagnify()
