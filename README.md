@@ -8,6 +8,7 @@
 [![Docs](https://img.shields.io/badge/documentation-link-blueviolet)](https://henriqueslab.github.io/NanoPyx)
 [![License](https://img.shields.io/github/license/HenriquesLab/NanoPyx?color=Green)](https://github.com/HenriquesLab/NanoPyx/blob/main/LICENSE.txt)
 [![Tests](https://github.com/HenriquesLab/NanoPyx/actions/workflows/nanopyx_oncall_mechanic.yml/badge.svg)](https://github.com/HenriquesLab/NanoPyx/actions/workflows/nanopyx_oncall_mechanic.yml)
+[![Coverage](https://img.shields.io/codecov/c/github/HenriquesLab/NanoPyx.svg?branch=main)](https://img.shields.io/codecov/c/github/HenriquesLab/NanoPyx?branch=main)
 [![Contributors](https://img.shields.io/github/contributors-anon/HenriquesLab/NanoPyx)](https://github.com/HenriquesLab/NanoPyx/graphs/contributors)
 [![GitHub stars](https://img.shields.io/github/stars/HenriquesLab/NanoPyx?style=social)](https://github.com/HenriquesLab/NanoPyx/)
 [![GitHub forks](https://img.shields.io/github/forks/HenriquesLab/NanoPyx?style=social)](https://github.com/HenriquesLab/NanoPyx/)
