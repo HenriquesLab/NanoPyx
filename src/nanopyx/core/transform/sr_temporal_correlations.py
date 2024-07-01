@@ -220,23 +220,26 @@ def calculate_tac2(rad_array):
 
     return out_array
 
-def calculate_eSRRF3d_temporal_correlations(rgc_map, correlation: str = "AVG", framewindow: float = 5, rollingoverlap: float = 2):
+
+def calculate_eSRRF3d_temporal_correlations(
+    rgc_map, correlation: str = "AVG", framewindow: float = 5, rollingoverlap: float = 2
+):
     # correlation (str): Type of correlation to calculate. Should be "AVG", "VAR", or "TAC2"
     n_frames, n_slices, n_rows, n_cols = rgc_map.shape[0], rgc_map.shape[1], rgc_map.shape[2], rgc_map.shape[3]
 
     if n_frames == 1:
         print("Only one frame, no temporal correlations can be calculated")
         return rgc_map
-    
+
     else:
         if framewindow > 0:
             if rollingoverlap:
                 n_windows = int(n_frames / (framewindow - rollingoverlap))
             else:
-                n_windows = int(n_frames / framewindow)  
+                n_windows = int(n_frames / framewindow)
                 rollingoverlap = 0
         else:
-            n_windows = 1     
+            n_windows = 1
             framewindow = n_frames - 1
 
         avg_rgc_map = np.zeros((n_windows, n_slices, n_rows, n_cols), dtype=np.float32)
@@ -244,6 +247,8 @@ def calculate_eSRRF3d_temporal_correlations(rgc_map, correlation: str = "AVG", f
         for w in range(n_windows):
             start_frame = w * (int(framewindow) - int(rollingoverlap))
             end_frame = start_frame + int(framewindow)
-            avg_rgc_map[w,:,:,:] = calculate_eSRRF_temporal_correlations(rgc_map[start_frame:end_frame,:,:,:], correlation)
+            avg_rgc_map[w, :, :, :] = calculate_eSRRF_temporal_correlations(
+                rgc_map[start_frame:end_frame, :, :, :], correlation
+            )
 
-        return avg_rgc_map  
+        return avg_rgc_map
