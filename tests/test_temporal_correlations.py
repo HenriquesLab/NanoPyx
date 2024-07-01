@@ -56,9 +56,11 @@ def test_esrrf3d_temporal_correlations():
     img = np.random.random((10, 10, 100, 100))
     calculate_eSRRF3d_temporal_correlations(img)
 
+
 def test_esrrf3d_temporal_correlations():
     img = np.random.random((10, 10, 100, 100))
     calculate_eSRRF3d_temporal_correlations(img)
+
 
 def test_esrrf_corr():
     img = np.random.random((10, 100, 100))
@@ -67,10 +69,13 @@ def test_esrrf_corr():
     except ValueError:
         assert True
 
+
 def test_esrrf3d_temporal_correlations_missing_dims():
     img = np.random.random((1, 10, 100, 100))
     calculate_eSRRF3d_temporal_correlations(img)
 
+
 def test_acrf():
-    img = np.random.random((10, 100, 100))
+    img = np.random.random((20, 100, 100))
     calculate_acrf_(img, 2, 1)
+    calculate_acrf_(img, 4, 1)
