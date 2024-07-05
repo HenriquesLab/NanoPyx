@@ -23,7 +23,7 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse
           # to supply options, put them in 'env', like:
         env:
-          CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64
+          CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
           CIBW_ARCHS: arm64
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_COMMAND: "pytest {project}/tests"
