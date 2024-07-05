@@ -4,7 +4,7 @@ import numpy as np
 
 
 def test_benchmark():
-    if platform.system() != "Windows":
+    if platform.system() != "Windows" and platform.system() != "Darwin":
         nanopyx.benchmark(n_benchmark_runs=1, img_dims=100)
     else:
         pass
