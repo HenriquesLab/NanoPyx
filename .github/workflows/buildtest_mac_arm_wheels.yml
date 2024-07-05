@@ -27,8 +27,6 @@ jobs:
           CIBW_ARCHS: arm64
           CIBW_BUILD_VERBOSITY: 1
           CIBW_TEST_COMMAND: "pytest {project}/tests"
-      - name: Build wheels
-        run: python -m nox --sessions test_wheel
         
       - uses: actions/upload-artifact@v4
         with:
