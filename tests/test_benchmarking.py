@@ -1,13 +1,5 @@
-import platform
 import nanopyx
 import numpy as np
-
-
-def test_benchmark():
-    if platform.system() != "Windows" and platform.system() != "Darwin":
-        nanopyx.benchmark(n_benchmark_runs=1, img_dims=100)
-    else:
-        pass
 
 
 def test_benchmark_interpolation_bicubic(random_image_with_ramp):
