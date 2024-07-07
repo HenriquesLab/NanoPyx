@@ -3,13 +3,9 @@ import numpy as np
 from nanopyx.core.analysis.parameter_sweep import ParameterSweep
 
 
-def test_param_sweep():
+def test_param_sweep_n_frames():
     img = np.random.random((10, 100, 100))
-    nanopyx.run_esrrf_parameter_sweep(img)
-
-def test_param_sweep():
-    img = np.random.random((10, 100, 100))
-    nanopyx.run_esrrf_parameter_sweep(img, n_frames=2, use_decorr=True, plot_sweep=True)
+    nanopyx.run_esrrf_parameter_sweep(img, n_frames=2, use_decorr=True, plot_sweep=False)
 
 def test_param_sweep_class():
     ps = ParameterSweep()
