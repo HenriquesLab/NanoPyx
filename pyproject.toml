@@ -140,7 +140,7 @@ reportUndefinedVariable = false
 reportMissingImports = false
 
 [tool.pytest.ini_options]
-addopts = "--cov=nanopyx --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks --cov-report term-missing"
+addopts = "--cov=nanopyx --plots --doctest-modules --doctest-cython --cov-report term-missing"
 timeout = 6001
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
@@ -155,6 +155,16 @@ filterwarnings = [
 ]
 testpaths = ["tests", "src/nanopyx"]
 
+[tool.coverage.run]
+plugins = ["Cython.Coverage"]
+source = ["src/nanopyx"]
+omit = [
+    "tests",
+    "src/nanopyx/core/utils/benchmark.py",
+    "src/nanopyx/core/templates",
+    "*__init__.py",
+    "*__*.py"
+]
 
 [tool.cibuildwheel]
 # https://cibuildwheel.readthedocs.io/en/stable/options/
