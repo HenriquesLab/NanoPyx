@@ -25,6 +25,9 @@ jobs:
         env:
           CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
           CIBW_ARCHS: arm64
+
+      - name: Test wheels
+        run: python -m nox --sessions test_wheel
         
       - uses: actions/upload-artifact@v4
         with:
