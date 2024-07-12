@@ -1,5 +1,9 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=True
 
+# DO NOT USE
+# THIS VERSION IS AN EXACT COPY OF THE IMAGEJ PLUGIN FOUND HERE: https://github.com/Ades91/ImDecorr
+# IT CONTAINS A BUG IN THE CALCULATION OF THE REFINED RMAX
+
 from math import cos, fabs, sqrt
 
 import io
@@ -362,7 +366,7 @@ cdef class DecorrAnalysis:
                 if crmax > self.rmax:
                     crmax = self.rmax
 
-                # crmax = 0.5  this was removed as it was a bug in the original imagej code
+                crmax = 0.5  # THIS IS A BUG, WE ARE ONLY KEEPING THIS VERSION FOR HISTORICAL PURPOSES
                 self.rmin2 = crmin
                 self.rmax2 = crmax
 
