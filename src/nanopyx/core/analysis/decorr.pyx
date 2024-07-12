@@ -27,10 +27,9 @@ cdef class DecorrAnalysis:
     # autogen_pxd: cdef float rmin, rmin2, rmax, rmax2, kc0, a0, kc_gm, agm, kc_max, a_max, pixel_size
     # autogen_pxd: cdef public float resolution
     # autogen_pxd: cdef int n_r, n_g, x0, x1, y0, y1
-    # autogen_pxd: cdef bint do_plot
     # autogen_pxd: cdef str units
 
-    def __init__(self, rmin:float = 0, rmax:float = 1, n_r:int = 50, n_g:int =10, pixel_size: float = 1, units: str = "pixel", roi: tuple = (0, 0, 0, 0), do_plot: bool = False):
+    def __init__(self, rmin:float = 0, rmax:float = 1, n_r:int = 50, n_g:int =10, pixel_size: float = 1, units: str = "pixel", roi: tuple = (0, 0, 0, 0)):
         """
         Class responsible for decorrelation analysis implementation 
 
@@ -42,7 +41,6 @@ cdef class DecorrAnalysis:
             pixel_size (int, optional): > 1, pixel size value in units. Defaults to 1.
             units (str, optional): string name of the units to use. Defaults to "pixel".
             roi (tuple, optional): Coordinates used to crop the image (x0, y0, x1, y1). Defaults to None.
-            do_plot (bool, optional): Defaults to False.
         """
         self.img = None
         self.img_ref = None
@@ -53,7 +51,6 @@ cdef class DecorrAnalysis:
         self.pixel_size = pixel_size
         self.units = units
         self.x0, self.x1, self.y0, self.y1 = roi
-        self.do_plot = do_plot
         self.d0 = np.zeros((self.n_r), dtype=np.float32)
         self.d = np.zeros((self.n_r, 2*self.n_g), dtype=np.float32)
         self.kc = np.zeros((2*self.n_g), dtype=np.float32)
@@ -431,9 +428,6 @@ cdef class DecorrAnalysis:
         self.d = self._compute_d()
 
         self.resolution = 2 * self.pixel_size / self.kc_max
-
-        if self.do_plot:
-            self.plot_results()
 
     def plot_results(self):
         """

@@ -7,7 +7,6 @@ cdef class DecorrAnalysis:
     cdef float rmin, rmin2, rmax, rmax2, kc0, a0, kc_gm, agm, kc_max, a_max, pixel_size
     cdef public float resolution
     cdef int n_r, n_g, x0, x1, y0, y1
-    cdef bint do_plot
     cdef str units
     cdef float[:, :] _get_preprocessed_image(self, img)
     cdef float _linmap(self, float val, float valmin, float valmax, float mapmin, float mapmax) nogil

@@ -4,7 +4,9 @@ from ...core.analysis.decorr import DecorrAnalysis
 from ...core.analysis.frc import FIRECalculator
 
 
-def calculate_frc(frame_1: np.ndarray, frame_2: np.ndarray, pixel_size: float = 1, units: str = "pixel", plot_frc_curve: bool = False):
+def calculate_frc(
+    frame_1: np.ndarray, frame_2: np.ndarray, pixel_size: float = 1, units: str = "pixel", plot_frc_curve: bool = False
+):
     """
     Calculate the Fourier Ring Correlation (FRC) between two images to estimate their resolution.
 
@@ -38,10 +40,21 @@ def calculate_frc(frame_1: np.ndarray, frame_2: np.ndarray, pixel_size: float = 
         plt.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
         plt.imshow(frc_calc.plot_frc_curve())
         plt.show()
-    
+
     return res
 
-def calculate_decorr_analysis(frame: np.ndarray, rmin: float = 0, rmax: float = 1, n_r: int = 50, n_g: int = 10, pixel_size: float = 1, units: str = "pixel", roi: tuple = (0, 0, 0, 0), plot_decorr_analysis=False):
+
+def calculate_decorr_analysis(
+    frame: np.ndarray,
+    rmin: float = 0,
+    rmax: float = 1,
+    n_r: int = 50,
+    n_g: int = 10,
+    pixel_size: float = 1,
+    units: str = "pixel",
+    roi: tuple = (0, 0, 0, 0),
+    plot_decorr_analysis=False,
+):
     """
     Perform decorrelation analysis on a given image frame to estimate its resolution.
 
@@ -75,7 +88,7 @@ def calculate_decorr_analysis(frame: np.ndarray, rmin: float = 0, rmax: float = 
     -----
     Decorrelation analysis is a technique used to estimate the resolution of images by analyzing the decorrelation of intensity values over different spatial scales. It is particularly useful in microscopy and imaging where direct resolution measurement is challenging.
     """
-    decorr_calc = DecorrAnalysis(pixel_size=pixel_size, units=units, rmin=rmin, rmax=rmax, n_r=n_r, n_g=n_g)
+    decorr_calc = DecorrAnalysis(pixel_size=pixel_size, units=units, rmin=rmin, rmax=rmax, n_r=n_r, n_g=n_g, roi=roi)
     decorr_calc.run_analysis(frame)
 
     if plot_decorr_analysis:
@@ -83,5 +96,5 @@ def calculate_decorr_analysis(frame: np.ndarray, rmin: float = 0, rmax: float = 
         plt.subplots_adjust(left=0, right=1, top=1, bottom=0, wspace=0, hspace=0)
         plt.imshow(decorr_calc.plot_results())
         plt.show()
-    
+
     return decorr_calc.resolution
