@@ -55,6 +55,14 @@ if you found this work useful, please cite: [preprint](https://www.biorxiv.org/c
 | Super-resolution | eSRRF | ✅ by BMS (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=flat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/eSRRFandQC.ipynb) | [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/eSRRFandQC.ipynb) |
 | Tutorial | Notebook with Example Dataset | ✅ by ADB (25/01/24) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=fflat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/ExampleDataSRRFandQC.ipynb) |
 
+
+## Workshop Notebooks
+
+| Event | Contents | Notebook | Colab Link | Solutions |
+| --- | --- | --- | --- | --- |
+| [I2K 2024](https://events.humantechnopole.it/event/1/overview) | NanoPyx and Liquid Engine basic usage | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=fflat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/workshops/I2K24.ipynb) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://githubtocolab.com/HenriquesLab/NanoPyx/blob/main/notebooks/workshops/I2K24.ipynb) | [![Jupyter Notebook](https://img.shields.io/badge/jupyter-blue.svg?style=fflat&logo=jupyter&logoColor=white)](https://github.com/HenriquesLab/NanoPyx/blob/main/notebooks/workshops/solutions/I2K24.ipynb) |  
+
+
 ## napari plugin
 
 NanoPyx is also available as a [napari plugin](https://github.com/HenriquesLab/napari-nanopyx), which can be installed via pip:
