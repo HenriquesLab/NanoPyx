@@ -16,7 +16,7 @@ jobs:
             python-version: 3.9
 
         - name: Hackerman
-          run: apt-get install docker # remove this line after installing docker
+          run: apt-get install docker -y # remove this line after installing docker
   
         - name: Install cibuildwheel
           run: python -m pip install cibuildwheel==2.16.2
