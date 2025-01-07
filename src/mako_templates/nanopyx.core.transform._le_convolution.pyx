@@ -149,7 +149,7 @@ class Convolution(LiquidEngine):
         """
         return convolution2D_cuda(image, kernel).astype(np.float32)
 
-    def _run_njit(self, image, kernel):
+    def _run_numba(self, image, kernel):
         """
         @cpu
         @threaded
