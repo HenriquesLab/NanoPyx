@@ -41,7 +41,19 @@ if you found this work useful, please cite: [preprint](https://www.biorxiv.org/c
 |:-:|:-:|
 | [![](https://user-images.githubusercontent.com/7071808/259985020-b629a570-f131-4666-aadb-ba62ac7dbea2.png)](https://youtu.be/iAdgusBAU0Q) | [![](https://user-images.githubusercontent.com/7071808/259985779-4403d895-76a8-4050-bfd7-9317516a8f3e.png)](https://youtu.be/KD0RzolFnd4) |
 
-### More specific tutorials [here](https://www.youtube.com/playlist?list=PLk5I3_KOhE7sdP2OBfD9ewoXm1cXon88R)!
+| How to use NanoPyx locally? | How to implement your own Liquid Engine? |
+|:-:|:-:|
+| [![](https://github.com/HenriquesLab/NanoPyx/blob/main/.github/tutorial1.png?raw=true)](https://youtu.be/Dx2lHoRB044?si=SQPbLavoMdQyCV9X) | [![](https://github.com/HenriquesLab/NanoPyx/blob/main/.github/liquidengine.png?raw=true)](https://youtu.be/gRGEjdT8opY?si=hbyQooANFz9Feasc) |
+
+| How to Create a Python Package with the Liquid Engine? | How to Build your Liquid Engine Class in 1 minute |
+|:-:|:-:|
+| [![](https://github.com/HenriquesLab/NanoPyx/blob/main/.github/lecookiecutter.png?raw=true)](https://youtu.be/s2SY6IlsWQI?si=KhhLEwYflwNq_2Zp) | [![](https://github.com/HenriquesLab/NanoPyx/blob/main/.github/buildleoneminute.png?raw=true)](https://youtu.be/QQsXrZ_jFa8?si=v_UxKjksC8jyXu8K) |
+
+|  How to Benchmark your Implementations with the Liquid Engine in 1 minute  |  |
+|:-:|:-:|
+| [![](https://github.com/HenriquesLab/NanoPyx/blob/main/.github/benchmarkle.png?raw=true)](https://youtu.be/9hF7nLtFzoo?si=7sphbtSOi4TAdqcw) | [![]()]() |
+
+
 
 ## Codeless jupyter notebooks available:
 
