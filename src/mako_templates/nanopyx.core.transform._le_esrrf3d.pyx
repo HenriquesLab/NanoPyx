@@ -19,7 +19,7 @@ cdef extern from "_c_gradients.h":
     void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slices, int rows, int cols) nogil
 
 cdef extern from "_c_sr_radial_gradient_convergence.h":
-    float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float ratio_px, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) nogil
+    float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float PSF_voxel_ratio, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) nogil
 
 class eSRRF3D(LiquidEngine):
     """
@@ -36,29 +36,29 @@ class eSRRF3D(LiquidEngine):
         self.keep_interpolated = False
         self._img_interpolated = None
 
-    def run(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, keep_gradients=False, keep_interpolated = False, run_type=None):
+    def run(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_voxel_ratio: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, keep_gradients=False, keep_interpolated = False, run_type=None):
         self.keep_gradients = keep_gradients
         self.keep_interpolated = keep_interpolated
         # TODO: complete and check _run inputs, need to complete variables?
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, ratio_px=ratio_px, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
+            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, PSF_voxel_ratio=PSF_voxel_ratio, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
         elif len(image.shape) == 3:
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, ratio_px=ratio_px, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
+            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, PSF_voxel_ratio=PSF_voxel_ratio, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
-    def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
+    def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_voxel_ratio: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
+            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, PSF_voxel_ratio=PSF_voxel_ratio,sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
         elif len(image.shape) == 3:
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
-            return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
+            return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, PSF_voxel_ratio=PSF_voxel_ratio, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
     % for sch in schedulers:
-    def _run_${sch}(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, ratio_px: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
+    def _run_${sch}(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_voxel_ratio: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
         """
         @cpu
         % if sch!='unthreaded':
@@ -70,8 +70,8 @@ class eSRRF3D(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float sigma_z = radius * ratio_px / 2.355 # Taking voxel size into account
-        cdef float fwhm_z = radius * ratio_px
+        cdef float sigma_z = radius * PSF_voxel_ratio / 2.355 # Taking voxel size into account
+        cdef float fwhm_z = radius * PSF_voxel_ratio
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
         cdef int Gx_Gy_MAGNIFICATION = 2
@@ -127,10 +127,10 @@ class eSRRF3D(LiquidEngine):
                     % endif
                         for cM in range(0, n_cols_mag):
                             if _doIntensityWeighting:
-                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, ratio_px, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, PSF_voxel_ratio, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 rgc_map[f, sM, rM, cM] = rgc_val * image_interpolated[sM, rM, cM]
                             else:
-                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, ratio_px, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                                rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, PSF_voxel_ratio, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 rgc_map[f, sM, rM, cM] = rgc_val
         
         return np.asarray(rgc_map)
