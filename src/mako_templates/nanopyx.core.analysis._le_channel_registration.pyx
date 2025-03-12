@@ -87,8 +87,8 @@ def _gaussian_filter(inpimg, _runtype, sigma):
     knl1 = knl1.astype(np.float32)
 
     img1 = conv.run(inpimg,knl1.reshape((len(x1), 1)),run_type=_runtype)
-    img2 = conv.run(img1,knl1.reshape((1, len(x1))),run_type=_runtype)
-
+    img2 = conv.run(img1,knl1.reshape((1, len(x1))),run_type=_runtype)[0]
+    
     return img2
 
 class ChannelRegistrationEstimator(LiquidEngine):
