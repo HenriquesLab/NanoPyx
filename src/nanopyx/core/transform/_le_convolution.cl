@@ -46,8 +46,8 @@ conv2d_2(__global float *image, __global float *image_out, __global float *kerne
     for (int kc = 0; kc<kernel_size; kc++) {
 
       // localrow and localcol should lie between 0 and imgsize-1
-      localrow = min(nrows,max(0,row + (kr-kernel_center)));
-      localcol = min(ncols,max(0,col + (kc-kernel_center)));
+      localrow = min(nrows-1,max(0,row + (kr-kernel_center)));
+      localcol = min(ncols-1,max(0,col + (kc-kernel_center)));
 
 
 
