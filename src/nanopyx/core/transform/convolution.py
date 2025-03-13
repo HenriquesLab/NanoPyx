@@ -129,7 +129,11 @@ def convolution2D_numba(image, kernel):
 
 
 def convolution2D_dask(image, kernel):
-    return np.asarray(dask_convolve(da.from_array(image), da.from_array(kernel.reshape(1,*kernel.shape))))
+
+    conv_out = np.zeros_like(image)
+    for i in range(image.shape[0]):
+        conv_out[i] = dask_convolve(da.from_array(image[i]), da.from_array(kernel))
+    return conv_out
 
 
 def convolution2D_cuda(image, kernel):
