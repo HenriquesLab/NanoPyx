@@ -33,6 +33,7 @@ class Convolution(LiquidEngine):
         return self._run(image, kernel, run_type=run_type)
 
     def benchmark(self, image, kernel):
+        image = check_image(image)
         return super().benchmark(image, kernel)
 
     % for sch in schedulers:
@@ -138,12 +139,12 @@ class Convolution(LiquidEngine):
         """
         return convolution2D_python(image, kernel).astype(np.float32)
 
-    # def _run_transonic(self, image, kernel):
-    #     """
-    #     @cpu
-    #     @threaded
-    #     """
-    #     return convolution2D_transonic(image, kernel).astype(np.float32)
+    def _run_transonic(self, image, kernel):
+        """
+        @cpu
+        @threaded
+        """
+        return convolution2D_transonic(image, kernel).astype(np.float32)
 
     def _run_dask(self, image, kernel):
         """
