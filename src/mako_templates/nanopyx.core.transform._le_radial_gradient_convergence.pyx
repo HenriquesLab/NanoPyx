@@ -27,20 +27,20 @@ class RadialGradientConvergence(LiquidEngine):
             verbose=verbose)
 
 
-    def run(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, xyoffset: float = 0, angle: float = 0, run_type = None): 
+    def run(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0, run_type = None): 
         gradient_col_interp = check_image(gradient_col_interp)
         gradient_row_interp = check_image(gradient_row_interp)
         image_interp = check_image(image_interp)
         return self._run(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting,xyoffset, angle, run_type=run_type)
     
 
-    def benchmark(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, xyoffset: float = 0, angle: float = 0):
+    def benchmark(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
         gradient_col_interp = check_image(gradient_col_interp)
         gradient_row_interp = check_image(gradient_row_interp)
         image_interp = check_image(image_interp)
         return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, xyoffset, angle)
 
-    def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, xyoffset=0, angle=0):
+    def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset=0, xyoffset=0, angle=0):
         """
         @cpu
         @cython
@@ -73,7 +73,7 @@ class RadialGradientConvergence(LiquidEngine):
         return np.asarray(rgc_map,dtype=np.float32)
 
     % for sch in schedulers:
-    def _run_${sch}(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, xyoffset=0, angle=0):
+    def _run_${sch}(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset=0, xyoffset=0, angle=0):
         """
         @cpu
         @threaded
@@ -111,7 +111,7 @@ class RadialGradientConvergence(LiquidEngine):
     % endfor
 
     
-    def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, xyoffset=0, angle=0, device=None, int mem_div=1):
+    def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset=0, xyoffset=0, angle=0, device=None, int mem_div=1):
         """
         @gpu
         """
@@ -135,6 +135,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
+        cdef float _offset = offset
         cdef float _xyoffset = xyoffset
         cdef float _angle = angle
 
@@ -197,6 +198,7 @@ class RadialGradientConvergence(LiquidEngine):
                 np.float32(tSS), 
                 np.float32(_sensitivity), 
                 np.int32(_doIntensityWeighting),
+                np.float32(_offset),
                 np.float32(_xyoffset),
                 np.float32(_angle)).wait()
             
