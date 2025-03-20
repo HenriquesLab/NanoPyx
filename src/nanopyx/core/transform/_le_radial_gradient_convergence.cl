@@ -21,6 +21,14 @@ double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance) {
   return Dk;
 }
 
+float2 _rotate_vector(float Gx, float Gy, float angle) {
+    float cos_angle = cos(angle);
+    float sin_angle = sin(angle);
+    float rotated_Gx = Gx * cos_angle - Gy * sin_angle;
+    float rotated_Gy = Gx * sin_angle + Gy * cos_angle;
+    return (float2)(rotated_Gx, rotated_Gy);
+}
+
 float2 _rotation_matrix(float2 point, float angle){
 
     //xcos - ysin
@@ -64,24 +72,24 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
                     distance = sqrt(dx * dx + dy * dy);
 
                     if (distance != 0 && distance <= tSO) {
-                        
+                        Gx = imIntGx[(int)((vy+xyoffset) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((vx+xyoffset) * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gy = imIntGy[(int)((vy+xyoffset) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((vx+xyoffset) * magnification * Gx_Gy_MAGNIFICATION)];
 
-                        correctedv = _rotation_matrix((float2)(dy*magnification*Gx_Gy_MAGNIFICATION,dx*magnification*Gx_Gy_MAGNIFICATION), angle);
-                        correctedv = (float2)(correctedv.x + (yc + xyoffset)*magnification*Gx_Gy_MAGNIFICATION, correctedv.y + (xc + xyoffset)*magnification*Gx_Gy_MAGNIFICATION);
-
-                        Gx = imIntGx[(int)((correctedv.x) * colsM * Gx_Gy_MAGNIFICATION) + (int)((correctedv.y))];
-                        Gy = imIntGy[(int)((correctedv.x) * colsM * Gx_Gy_MAGNIFICATION) + (int)((correctedv.y))];
+                        // Rotate the gradient components
+                        float2 rotatedG = _rotate_vector(Gx, Gy, angle);
+                        Gx = rotatedG.x;
+                        Gy = rotatedG.y;
 
                         distanceWeight = _c_calculate_dw(distance, tSS);
                         distanceWeightSum += distanceWeight;
+                        GdotR = Gx*dx + Gy*dy;
 
-                        correctedd = _rotation_matrix((float2)(dy,dx), angle);
-                        GdotR = Gx*correctedd.y + Gy*correctedd.x;
-
-                        if (GdotR < 0) {
-                            Dk = _c_calculate_dk(Gx, Gy, correctedd.y, correctedd.x, distance);
-                            RGC += Dk * distanceWeight;
-                        }
+                        // if (GdotR < 0) {
+                        //     Dk = _c_calculate_dk(Gx, Gy, dx, dy, distance);
+                        //     RGC += Dk * distanceWeight;
+                        // }
+                        Dk = _c_calculate_dk(Gx, Gy, dx, dy, distance);
+                        RGC += Dk * distanceWeight;
                     }
                 }
             }
@@ -93,7 +101,7 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     if (RGC >= 0 && sensitivity > 1) {
         RGC = pow(RGC, sensitivity);
     } else if (RGC < 0) {
-        RGC = 0;
+        RGC = RGC;
     }
 
     return RGC;
@@ -117,7 +125,7 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     col = col + magnification*2;
 
     if (doIntensityWeighting == 1) {
-        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_grad], &imIntGy[f * nPixels_grad], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity, xyoffset, angle) * imInt[f * nPixels_out + row * nCols + col];
+        image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_grad], &imIntGy[f * nPixels_grad], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity, xyoffset, angle) * fabs(imInt[f * nPixels_out + row * nCols + col]);
     }
     else {
         image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_grad], &imIntGy[f * nPixels_grad], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity, xyoffset, angle);
