@@ -230,10 +230,10 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int cols_interpolated = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
 
         # Grid size of the global work space
-        lowest_row = _magnification*2 
-        highest_row = rows_interpolated - _magnification*2
-        lowest_col = _magnification*2
-        highest_col =  cols_interpolated - _magnification*2
+        lowest_row = int(radius*2 + 1) # TODO discuss edges calculation
+        highest_row = int(rows_interpolated - radius*2 - 1)
+        lowest_col = int(radius*2 + 1)
+        highest_col =  int(cols_interpolated - radius*2 - 1)
 
         # Output 
         rgc_map = np.zeros((nFrames, rows_interpolated, cols_interpolated), dtype=np.float32)

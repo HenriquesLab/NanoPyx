@@ -54,17 +54,15 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     float RGC = 0;
     float distanceWeightSum = 0;
 
-    int _start = -(int)(Gx_Gy_MAGNIFICATION * fwhm);
-    int _end = (int)(Gx_Gy_MAGNIFICATION * fwhm + 1);
+    int _start = -(int)(2 * fwhm); //changed to have "Factor Cagança" but with properly iterating over the desired range
+    int _end = (int)(2 * fwhm + 1); // TODO discuss with Ricardo
 
     for (int j = _start; j < _end; j++) {
-        vy = (int)(Gx_Gy_MAGNIFICATION * yc) + j;
-        vy /= Gx_Gy_MAGNIFICATION;
+        vy = yc + j;
 
         if (0 < vy && vy <= (rowsM/magnification) - 1) {
             for (int i = _start; i < _end; i++) {
-                vx = (int)(Gx_Gy_MAGNIFICATION * xc) + i;
-                vx /= Gx_Gy_MAGNIFICATION;
+                vx = xc + i;
 
                 if (0 < vx && vx <= (colsM/magnification) - 1) {
                     dx = vx - xc;
@@ -119,8 +117,8 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     // gradient image dimensions
     int nPixels_grad = nRows*Gx_Gy_MAGNIFICATION * nCols*Gx_Gy_MAGNIFICATION;
 
-    row = row + magnification*Gx_Gy_MAGNIFICATION;
-    col = col + magnification*Gx_Gy_MAGNIFICATION;
+    row = row + fwhm*2 + 1;
+    col = col + fwhm*2 + 1;
 
     if (doIntensityWeighting == 1) {
         image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_grad], &imIntGy[f * nPixels_grad], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity, offset, xyoffset, angle) * imInt[f * nPixels_out + row * nCols + col];
