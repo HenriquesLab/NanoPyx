@@ -48,8 +48,8 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     float2 correctedv;
     float2 correctedd;
 
-    float xc = (xM + offset) / magnification;
-    float yc = (yM + offset) / magnification;
+    float xc = (float)xM / magnification + offset; // offset in non-magnified space
+    float yc = (float)yM / magnification + offset;
 
     float RGC = 0;
     float distanceWeightSum = 0;

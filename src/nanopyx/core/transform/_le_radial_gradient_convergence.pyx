@@ -29,14 +29,14 @@ class RadialGradientConvergence(LiquidEngine):
         gradient_col_interp = check_image(gradient_col_interp)
         gradient_row_interp = check_image(gradient_row_interp)
         image_interp = check_image(image_interp)
-        return self._run(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting,xyoffset, angle, run_type=run_type)
+        return self._run(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, offset, xyoffset, angle, run_type=run_type)
     
 
     def benchmark(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
         gradient_col_interp = check_image(gradient_col_interp)
         gradient_row_interp = check_image(gradient_row_interp)
         image_interp = check_image(image_interp)
-        return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, xyoffset, angle)
+        return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, offset, xyoffset, angle)
 
     def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset=0, xyoffset=0, angle=0):
         """
