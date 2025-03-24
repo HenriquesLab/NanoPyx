@@ -61,12 +61,12 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
         vy = (int)(Gx_Gy_MAGNIFICATION * yc) + j;
         vy /= Gx_Gy_MAGNIFICATION;
 
-        if (0 < vy && vy <= rowsM - 1) {
+        if (0 < vy && vy <= (rowsM/magnification) - 1) {
             for (int i = _start; i < _end; i++) {
                 vx = (int)(Gx_Gy_MAGNIFICATION * xc) + i;
                 vx /= Gx_Gy_MAGNIFICATION;
 
-                if (0 < vx && vx <= colsM - 1) {
+                if (0 < vx && vx <= (colsM/magnification) - 1) {
                     dx = vx - xc;
                     dy = vy - yc;
                     distance = sqrt(dx * dx + dy * dy);
