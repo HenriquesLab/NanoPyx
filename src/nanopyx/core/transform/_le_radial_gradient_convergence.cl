@@ -117,8 +117,8 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     // gradient image dimensions
     int nPixels_grad = nRows*Gx_Gy_MAGNIFICATION * nCols*Gx_Gy_MAGNIFICATION;
 
-    row = row + fwhm*2 + 1;
-    col = col + fwhm*2 + 1;
+    row = row + fwhm*2;
+    col = col + fwhm*2;
 
     if (doIntensityWeighting == 1) {
         image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_grad], &imIntGy[f * nPixels_grad], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity, offset, xyoffset, angle) * imInt[f * nPixels_out + row * nCols + col];

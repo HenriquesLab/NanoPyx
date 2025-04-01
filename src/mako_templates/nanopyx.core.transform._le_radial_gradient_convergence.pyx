@@ -47,6 +47,7 @@ class RadialGradientConvergence(LiquidEngine):
         """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
+        cdef int margin = int(fwhm*2)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float Gx_Gy_MAGNIFICATION = grad_magnification
@@ -63,8 +64,8 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
-                    for rM in range(_magnification*2, rowsM - _magnification*2): 
-                        for cM in range(_magnification*2, colsM - _magnification*2):
+                    for rM in range(margin, rowsM - margin): 
+                        for cM in range(margin, colsM - margin):
                             if _doIntensityWeighting:
                                 rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity, offset, xyoffset, angle) * image_interp[f, rM, cM] 
                             else:
@@ -81,6 +82,7 @@ class RadialGradientConvergence(LiquidEngine):
         """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
+        cdef int margin = int(fwhm*2)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float Gx_Gy_MAGNIFICATION = grad_magnification
@@ -98,11 +100,11 @@ class RadialGradientConvergence(LiquidEngine):
         with nogil:
             for f in range(nFrames):
                 % if sch=='threaded':
-                for rM in prange(_magnification*2, rowsM - _magnification*2):
+                for rM in prange(margin, rowsM - margin):
                 % else:
-                for rM in prange(_magnification*2, rowsM - _magnification*2, schedule="${sch.split('_')[1]}"):
+                for rM in prange(margin, rowsM - margin, schedule="${sch.split('_')[1]}"):
                 % endif
-                    for cM in range(_magnification*2, colsM - _magnification*2):
+                    for cM in range(margin, colsM - margin):
                         if _doIntensityWeighting:
                             rgc_map[f, rM, cM] = _c_calculate_rgc(cM, rM, &gradient_col_interp[f,0,0], &gradient_row_interp[f,0,0], colsM, rowsM, _magnification, Gx_Gy_MAGNIFICATION,  fwhm, tSO, tSS, _sensitivity, offset, xyoffset, angle) * image_interp[f, rM, cM] 
                         else:
@@ -129,6 +131,7 @@ class RadialGradientConvergence(LiquidEngine):
         # Parameters
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
+        cdef int margin = int(fwhm*2)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float Gx_Gy_MAGNIFICATION = grad_magnification
@@ -145,10 +148,10 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int cols_interpolated = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
 
         # Grid size of the global work space
-        lowest_row = int(radius*2 + 1) # TODO discuss edges calculation
-        highest_row = int(rows_interpolated - radius*2 - 1)
-        lowest_col = int(radius*2 + 1)
-        highest_col =  int(cols_interpolated - radius*2 - 1)
+        lowest_row = margin # TODO discuss edges calculation
+        highest_row = rows_interpolated - margin
+        lowest_col = margin
+        highest_col =  cols_interpolated - margin
 
         # Output 
         rgc_map = np.zeros((nFrames, rows_interpolated, cols_interpolated), dtype=np.float32)

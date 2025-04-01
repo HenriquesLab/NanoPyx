@@ -59,8 +59,8 @@ class eSRRF(LiquidEngine):
         max_slices = int((dc.global_mem_size // total_memory)/mem_div)
         max_slices = self._check_max_slices(image, max_slices)
 
-        kernely = np.array([[0, -1], [1, 0]]).astype(np.float32)
-        kernelx = np.array([[-1, 0], [0, 1]]).astype(np.float32)
+        kernelx = np.array([[0, -1], [1, 0]]).astype(np.float32)
+        kernely = np.array([[-1, 0], [0, 1]]).astype(np.float32)
 
         mf = cl.mem_flags
         input_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image[0:max_slices, :, :].nbytes, dc, max_slices))
@@ -87,6 +87,12 @@ class eSRRF(LiquidEngine):
         rgc_code = self._get_cl_code("_le_radial_gradient_convergence.cl", device['DP'])
         rgc_prg = cl.Program(cl_ctx, rgc_code).build(options=["-cl-mad-enable -cl-fast-relaxed-math"])
         rgc_knl = rgc_prg.calculate_rgc
+
+        margin = int(radius*2)
+        lowest_row = margin # TODO discuss edges calculation
+        highest_row = output_shape[1] - margin
+        lowest_col = margin
+        highest_col =  output_shape[2] - margin
 
         for i in range(0, image.shape[0], max_slices):
             if image.shape[0] - i >= max_slices:
@@ -122,7 +128,7 @@ class eSRRF(LiquidEngine):
 
             cr_knl(cl_queue,
                 (n_slices, int(image.shape[1]*magnification*2), int(image.shape[2]*magnification*2)), 
-                self.get_work_group(dc, (n_slices, image.shape[1]*magnification*2, image.shape[2]*magnification*2)), 
+                self.get_work_group(dc, (n_slices, image.shape[1]*magnification*grad_magnification, image.shape[2]*magnification*grad_magnification)), 
                 col_gradients_cl,
                 col_magnified_gradients_cl,
                 np.float32(0),
@@ -132,7 +138,7 @@ class eSRRF(LiquidEngine):
 
             cr_knl(cl_queue,
                 (n_slices, int(image.shape[1]*magnification*2), int(image.shape[2]*magnification*2)), 
-                self.get_work_group(dc, (n_slices, image.shape[1]*magnification*2, image.shape[2]*magnification*2)), 
+                self.get_work_group(dc, (n_slices, image.shape[1]*magnification*grad_magnification, image.shape[2]*magnification*grad_magnification)), 
                 row_gradients_cl,
                 row_magnified_gradients_cl,
                 np.float32(0),
@@ -141,8 +147,8 @@ class eSRRF(LiquidEngine):
                 np.float32(magnification*grad_magnification)).wait()
 
             rgc_knl(cl_queue,
-                (n_slices, (image.shape[1]*magnification-magnification*2) - magnification*2, image.shape[2]*magnification-magnification*2 - magnification*2),
-                self.get_work_group(dc, (n_slices, (image.shape[1]*magnification-magnification*2) - magnification*2, image.shape[2]*magnification-magnification*2 - magnification*2)),
+                (n_slices, highest_row - lowest_row, highest_col - lowest_col),
+                self.get_work_group(dc, (n_slices, highest_row - lowest_row, highest_col - lowest_col)),
                 col_magnified_gradients_cl,
                 row_magnified_gradients_cl,
                 magnified_cl,
@@ -150,7 +156,7 @@ class eSRRF(LiquidEngine):
                 np.int32(image.shape[2]*magnification),
                 np.int32(image.shape[1]*magnification),
                 np.int32(magnification),
-                np.float32(2),
+                np.float32(grad_magnification),
                 np.float32(radius),
                 np.float32(2 * (radius / 2.355) + 1),
                 np.float32(2 * (radius / 2.355) * (radius / 2.355)),
