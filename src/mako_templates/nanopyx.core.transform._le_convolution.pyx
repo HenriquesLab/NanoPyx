@@ -86,7 +86,7 @@ class Convolution(LiquidEngine):
                                 acc = acc + kernel[kr,kc] * image[f,local_row, local_col]
                         _conv_out[f,r,c] = acc
 
-        return conv_out
+        return np.squeeze(conv_out)
 
     % endfor
 
@@ -131,33 +131,33 @@ class Convolution(LiquidEngine):
         cl.enqueue_copy(cl_queue, image_out, output_opencl).wait() 
 
         cl_queue.finish()
-        return image_out
+        return np.squeeze(image_out)
 
     def _run_python(self, image, kernel):
         """
         @cpu
         """
-        return convolution2D_python(image, kernel).astype(np.float32)
+        return np.squeeze(convolution2D_python(image, kernel))
 
     def _run_transonic(self, image, kernel):
         """
         @cpu
         @threaded
         """
-        return convolution2D_transonic(image, kernel).astype(np.float32)
+        return np.squeeze(convolution2D_transonic(image, kernel))
 
     def _run_dask(self, image, kernel):
         """
         @cpu
         @threaded
         """
-        return convolution2D_dask(image, kernel).astype(np.float32)
+        return np.squeeze(convolution2D_dask(image, kernel))
 
     def _run_cuda(self, image, kernel):
         """
         @gpu
         """
-        return convolution2D_cuda(image, kernel).astype(np.float32)
+        return np.squeeze(convolution2D_cuda(image, kernel))
 
     def _run_numba(self, image, kernel):
         """
@@ -165,4 +165,4 @@ class Convolution(LiquidEngine):
         @threaded
         @numba
         """
-        return convolution2D_numba(image, kernel).astype(np.float32)
+        return np.squeeze(convolution2D_numba(image, kernel))

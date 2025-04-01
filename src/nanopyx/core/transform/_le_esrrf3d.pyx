@@ -1,6 +1,7 @@
 # cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=False, autogen_pxd=False
 import numpy as np
 import math
+import time
 
 cimport numpy as np
 from libc.math cimport floor
@@ -27,12 +28,6 @@ class eSRRF3D(LiquidEngine):
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
         self._designation = "eSRRF_3D"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
-        self._gradients_s_interpolated = None
-        self._gradients_r_interpolated = None
-        self._gradients_c_interpolated = None
-        self.keep_gradients = False
-        self.keep_interpolated = False
-        self._img_interpolated = None
 
     def run(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_voxel_ratio: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True, keep_gradients=False, keep_interpolated = False, run_type=None):
         self.keep_gradients = keep_gradients
@@ -61,6 +56,7 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
+        time_start = time.time()
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -74,6 +70,9 @@ class eSRRF3D(LiquidEngine):
         cdef int _magnification_z = magnification_z
         cdef int _doIntensityWeighting = doIntensityWeighting
 
+        time_1 = time.time()
+        print("Time 1", time_1 - time_start)
+
         cdef int n_frames, n_slices, n_rows, n_cols, n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum
         n_frames, n_slices, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2], image.shape[3]
 
@@ -85,6 +84,9 @@ class eSRRF3D(LiquidEngine):
 
         cdef float rgc_val, zcof
         
+        time_2 = time.time()
+        print("Time 2", time_2 - time_1)
+
         for f in range(n_frames):
             image_interpolated = interpolate_3d_zlinear(image[f,:,:,:], _magnification_xy, _magnification_z)
 
@@ -110,6 +112,9 @@ class eSRRF3D(LiquidEngine):
 
             if self.keep_interpolated:
                 self._img_interpolated = img_dum.copy()
+
+            time_3 = time.time()
+            print("Time 3", time_3 - time_2)
 
             with nogil:
                 for sM in range(0, n_slices_mag):
@@ -121,6 +126,11 @@ class eSRRF3D(LiquidEngine):
                             else:
                                 rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, PSF_voxel_ratio, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 rgc_map[f, sM, rM, cM] = rgc_val
+
+            
+            time_4 = time.time()
+            print("Time 4", time_4 - time_3)
+            time_2 = time_4
         
         return np.asarray(rgc_map)
     def _run_threaded_guided(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_voxel_ratio: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
@@ -129,6 +139,7 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
+        time_start = time.time()
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -142,6 +153,9 @@ class eSRRF3D(LiquidEngine):
         cdef int _magnification_z = magnification_z
         cdef int _doIntensityWeighting = doIntensityWeighting
 
+        time_1 = time.time()
+        print("Time 1", time_1 - time_start)
+
         cdef int n_frames, n_slices, n_rows, n_cols, n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum
         n_frames, n_slices, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2], image.shape[3]
 
@@ -153,6 +167,9 @@ class eSRRF3D(LiquidEngine):
 
         cdef float rgc_val, zcof
         
+        time_2 = time.time()
+        print("Time 2", time_2 - time_1)
+
         for f in range(n_frames):
             image_interpolated = interpolate_3d_zlinear(image[f,:,:,:], _magnification_xy, _magnification_z)
 
@@ -178,6 +195,9 @@ class eSRRF3D(LiquidEngine):
 
             if self.keep_interpolated:
                 self._img_interpolated = img_dum.copy()
+
+            time_3 = time.time()
+            print("Time 3", time_3 - time_2)
 
             with nogil:
                 for sM in range(0, n_slices_mag):
@@ -189,6 +209,11 @@ class eSRRF3D(LiquidEngine):
                             else:
                                 rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, PSF_voxel_ratio, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 rgc_map[f, sM, rM, cM] = rgc_val
+
+            
+            time_4 = time.time()
+            print("Time 4", time_4 - time_3)
+            time_2 = time_4
         
         return np.asarray(rgc_map)
     def _run_threaded_dynamic(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_voxel_ratio: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
@@ -197,6 +222,7 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
+        time_start = time.time()
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -210,6 +236,9 @@ class eSRRF3D(LiquidEngine):
         cdef int _magnification_z = magnification_z
         cdef int _doIntensityWeighting = doIntensityWeighting
 
+        time_1 = time.time()
+        print("Time 1", time_1 - time_start)
+
         cdef int n_frames, n_slices, n_rows, n_cols, n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum
         n_frames, n_slices, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2], image.shape[3]
 
@@ -221,6 +250,9 @@ class eSRRF3D(LiquidEngine):
 
         cdef float rgc_val, zcof
         
+        time_2 = time.time()
+        print("Time 2", time_2 - time_1)
+
         for f in range(n_frames):
             image_interpolated = interpolate_3d_zlinear(image[f,:,:,:], _magnification_xy, _magnification_z)
 
@@ -246,6 +278,9 @@ class eSRRF3D(LiquidEngine):
 
             if self.keep_interpolated:
                 self._img_interpolated = img_dum.copy()
+
+            time_3 = time.time()
+            print("Time 3", time_3 - time_2)
 
             with nogil:
                 for sM in range(0, n_slices_mag):
@@ -257,6 +292,11 @@ class eSRRF3D(LiquidEngine):
                             else:
                                 rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, PSF_voxel_ratio, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 rgc_map[f, sM, rM, cM] = rgc_val
+
+            
+            time_4 = time.time()
+            print("Time 4", time_4 - time_3)
+            time_2 = time_4
         
         return np.asarray(rgc_map)
     def _run_threaded_static(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_voxel_ratio: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
@@ -265,6 +305,7 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
+        time_start = time.time()
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -278,6 +319,9 @@ class eSRRF3D(LiquidEngine):
         cdef int _magnification_z = magnification_z
         cdef int _doIntensityWeighting = doIntensityWeighting
 
+        time_1 = time.time()
+        print("Time 1", time_1 - time_start)
+
         cdef int n_frames, n_slices, n_rows, n_cols, n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum
         n_frames, n_slices, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2], image.shape[3]
 
@@ -289,6 +333,9 @@ class eSRRF3D(LiquidEngine):
 
         cdef float rgc_val, zcof
         
+        time_2 = time.time()
+        print("Time 2", time_2 - time_1)
+
         for f in range(n_frames):
             image_interpolated = interpolate_3d_zlinear(image[f,:,:,:], _magnification_xy, _magnification_z)
 
@@ -314,6 +361,9 @@ class eSRRF3D(LiquidEngine):
 
             if self.keep_interpolated:
                 self._img_interpolated = img_dum.copy()
+
+            time_3 = time.time()
+            print("Time 3", time_3 - time_2)
 
             with nogil:
                 for sM in range(0, n_slices_mag):
@@ -325,6 +375,11 @@ class eSRRF3D(LiquidEngine):
                             else:
                                 rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, PSF_voxel_ratio, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 rgc_map[f, sM, rM, cM] = rgc_val
+
+            
+            time_4 = time.time()
+            print("Time 4", time_4 - time_3)
+            time_2 = time_4
         
         return np.asarray(rgc_map)
     def _run_unthreaded(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_voxel_ratio: float = 4.0, sensitivity: float = 1, doIntensityWeighting: bool = True):
@@ -332,6 +387,7 @@ class eSRRF3D(LiquidEngine):
         @cpu
         @cython
         """
+        time_start = time.time()
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
@@ -345,6 +401,9 @@ class eSRRF3D(LiquidEngine):
         cdef int _magnification_z = magnification_z
         cdef int _doIntensityWeighting = doIntensityWeighting
 
+        time_1 = time.time()
+        print("Time 1", time_1 - time_start)
+
         cdef int n_frames, n_slices, n_rows, n_cols, n_slices_mag_dum, n_rows_mag_dum, n_cols_mag_dum
         n_frames, n_slices, n_rows, n_cols = image.shape[0], image.shape[1], image.shape[2], image.shape[3]
 
@@ -356,6 +415,9 @@ class eSRRF3D(LiquidEngine):
 
         cdef float rgc_val, zcof
         
+        time_2 = time.time()
+        print("Time 2", time_2 - time_1)
+
         for f in range(n_frames):
             image_interpolated = interpolate_3d_zlinear(image[f,:,:,:], _magnification_xy, _magnification_z)
 
@@ -382,6 +444,9 @@ class eSRRF3D(LiquidEngine):
             if self.keep_interpolated:
                 self._img_interpolated = img_dum.copy()
 
+            time_3 = time.time()
+            print("Time 3", time_3 - time_2)
+
             with nogil:
                 for sM in range(0, n_slices_mag):
                     for rM in range(0, n_rows_mag):
@@ -392,6 +457,11 @@ class eSRRF3D(LiquidEngine):
                             else:
                                 rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_c_interpolated[0,0,0], &gradients_r_interpolated[0,0,0], &gradients_s_interpolated[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, PSF_voxel_ratio, Gx_Gy_MAGNIFICATION, Gx_Gy_MAGNIFICATION, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                                 rgc_map[f, sM, rM, cM] = rgc_val
+
+            
+            time_4 = time.time()
+            print("Time 4", time_4 - time_3)
+            time_2 = time_4
         
         return np.asarray(rgc_map)
 
@@ -403,3 +473,28 @@ class eSRRF3D(LiquidEngine):
 
     def get_interpolated_image(self):
         return self._img_interpolated
+
+
+# this function loads a binary mask and calculates the edges
+def load_binary_mask_and_calculate_edges(mask_path: str):
+    """
+    Loads a binary mask from the given path and calculates its edges.
+
+    Parameters:
+        mask_path (str): Path to the binary mask file.
+
+    Returns:
+        np.ndarray: An array representing the edges of the binary mask.
+    """
+    from scipy.ndimage import binary_erosion
+
+    # Load the binary mask
+    mask = np.load(mask_path)
+    if mask.dtype != np.bool_:
+        raise ValueError("The mask must be a binary (boolean) array.")
+
+    # Calculate the edges by subtracting the eroded mask from the original mask
+    eroded_mask = binary_erosion(mask)
+    edges = mask & ~eroded_mask
+
+    return edges
