@@ -12,6 +12,7 @@ from .__interpolation_tools__ import check_image, value2array
 from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array, _fastest_device
 
+from ._le_convolution import Convolution
 from ._le_interpolation_catmull_rom import ShiftAndMagnify
 from ._le_roberts_cross_gradients import GradientRobertsCross
 from ._le_radial_gradient_convergence import RadialGradientConvergence
@@ -26,15 +27,15 @@ class eSRRF(LiquidEngine):
         self._designation = "eSRRF_ST"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
-    def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0, run_type=None):
+    def run(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0, run_type=None):
         image = check_image(image)
-        return self._run(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=offset, xyoffset=xyoffset, angle=angle, run_type=run_type)
+        return self._run(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=offset, xyoffset=xyoffset, angle=angle, run_type=run_type)
 
-    def benchmark(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def benchmark(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
         image = check_image(image)
-        return super().benchmark(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=offset, xyoffset=xyoffset, angle=angle)
+        return super().benchmark(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=offset, xyoffset=xyoffset, angle=angle)
 
-    def _run_opencl(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0, device=None, mem_div=1):
+    def _run_opencl(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0, device=None, mem_div=1):
         """
         @gpu
         """
@@ -110,8 +111,8 @@ class eSRRF(LiquidEngine):
                 col_magnified_gradients_cl,
                 np.float32(0),
                 np.float32(0),
-                np.float32(magnification*2),
-                np.float32(magnification*2)).wait()
+                np.float32(magnification*grad_magnification),
+                np.float32(magnification*grad_magnification)).wait()
 
             cr_knl(cl_queue,
                 (n_slices, int(image.shape[1]*magnification*2), int(image.shape[2]*magnification*2)), 
@@ -153,7 +154,7 @@ class eSRRF(LiquidEngine):
 
         return output_image
 
-    def _run_threaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def _run_threaded(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
         """
         @cpu
         @threaded
@@ -161,17 +162,21 @@ class eSRRF(LiquidEngine):
         """
         runtype = "threaded".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
-        rbc = GradientRobertsCross(verbose=False)
+        conv = Convolution(verbose=False)
         rgc = RadialGradientConvergence(verbose=False)
+
+        kernelx = np.array([[0, -1], [1, 0]]).astype(np.float32)
+        kernely = np.array([[-1, 0], [0, 1]]).astype(np.float32)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
-        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
-        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=0, angle=0, run_type=runtype)
+        gradient_col = conv.run(image, kernely, run_type=runtype)
+        gradient_row = conv.run(image, kernelx, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=-0.5, angle=np.pi/4, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_guided(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def _run_threaded_guided(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
         """
         @cpu
         @threaded
@@ -179,17 +184,21 @@ class eSRRF(LiquidEngine):
         """
         runtype = "threaded_guided".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
-        rbc = GradientRobertsCross(verbose=False)
+        conv = Convolution(verbose=False)
         rgc = RadialGradientConvergence(verbose=False)
+
+        kernelx = np.array([[0, -1], [1, 0]]).astype(np.float32)
+        kernely = np.array([[-1, 0], [0, 1]]).astype(np.float32)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
-        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
-        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=0, angle=0, run_type=runtype)
+        gradient_col = conv.run(image, kernely, run_type=runtype)
+        gradient_row = conv.run(image, kernelx, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=-0.5, angle=np.pi/4, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_dynamic(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def _run_threaded_dynamic(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
         """
         @cpu
         @threaded
@@ -197,17 +206,21 @@ class eSRRF(LiquidEngine):
         """
         runtype = "threaded_dynamic".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
-        rbc = GradientRobertsCross(verbose=False)
+        conv = Convolution(verbose=False)
         rgc = RadialGradientConvergence(verbose=False)
+
+        kernelx = np.array([[0, -1], [1, 0]]).astype(np.float32)
+        kernely = np.array([[-1, 0], [0, 1]]).astype(np.float32)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
-        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
-        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=0, angle=0, run_type=runtype)
+        gradient_col = conv.run(image, kernely, run_type=runtype)
+        gradient_row = conv.run(image, kernelx, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=-0.5, angle=np.pi/4, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_static(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def _run_threaded_static(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
         """
         @cpu
         @threaded
@@ -215,31 +228,39 @@ class eSRRF(LiquidEngine):
         """
         runtype = "threaded_static".capitalize()
         crsm = ShiftAndMagnify(verbose=False)
-        rbc = GradientRobertsCross(verbose=False)
+        conv = Convolution(verbose=False)
         rgc = RadialGradientConvergence(verbose=False)
+
+        kernelx = np.array([[0, -1], [1, 0]]).astype(np.float32)
+        kernely = np.array([[-1, 0], [0, 1]]).astype(np.float32)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
-        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
-        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=0, angle=0, run_type=runtype)
+        gradient_col = conv.run(image, kernely, run_type=runtype)
+        gradient_row = conv.run(image, kernelx, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=-0.5, angle=np.pi/4, run_type=runtype)
 
         return radial_gradients
 
-    def _run_unthreaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def _run_unthreaded(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
         """
         @cpu
         @cython
         """
         runtype = "Unthreaded"
         crsm = ShiftAndMagnify(verbose=False)
-        rbc = GradientRobertsCross(verbose=False)
+        conv = Convolution(verbose=False)
         rgc = RadialGradientConvergence(verbose=False)
+
+        kernelx = np.array([[0, -1], [1, 0]]).astype(np.float32)
+        kernely = np.array([[-1, 0], [0, 1]]).astype(np.float32)
         
         magnified_image = crsm.run(image, 0, 0, magnification, magnification, run_type=runtype)
-        gradient_col, gradient_row = rbc.run(image, run_type=runtype)
-        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*2, magnification*2, run_type=runtype)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=0, angle=0, run_type=runtype)
+        gradient_col = conv.run(image, kernely, run_type=runtype)
+        gradient_row = conv.run(image, kernelx, run_type=runtype)
+        gradient_col_interp = crsm.run(gradient_col, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        gradient_row_interp = crsm.run(gradient_row, 0, 0, magnification*grad_magnification, magnification*grad_magnification, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=-0.5, angle=np.pi/4, run_type=runtype)
 
         return radial_gradients
