@@ -43,10 +43,10 @@ def run_srrf(b):
             tiff.imwrite(name + "_srrf.tif", dataset_srrf)
     gui_srrf._main_display.children = gui_srrf._main_display.children + (stackview.slice(dataset_srrf, colormap=gui_srrf["cmaps"].value, continuous_update=True),)
 
-gui_srrf.add_float_slider("ring_radius", description="Ring Radius:", min=0.1, max=3.0, value=0.5, remember_value=True)
+gui_srrf.add_float_slider("ring_radius", description="Ring Radius:", min=0.1, max=3.0, value=0.5)
 gui_srrf.add_int_slider("magnification", description="Magnification:", min=1, max=10, value=5)
 gui_srrf.add_int_slider("srrf_order", description="SRRF order:", min=-1, max=4, value=3)
-gui_srrf.add_label("-=-= Time-Lapse =-=-")
+gui_srrf.add_label(value="-=-= Time-Lapse =-=-")
 gui_srrf.add_int_slider("frames_per_timepoint", description="Frames per time-point (0 - auto)", min=1, max=dataset_original.shape[0], value=dataset_original.shape[0]//2)
 gui_srrf.add_checkbox("save", description="Save Output", value=True)
 gui_srrf.add_dropdown("cmaps", description="Colormap:",

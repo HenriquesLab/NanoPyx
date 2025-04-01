@@ -24,7 +24,10 @@ from PIL import Image
 from IPython.display import display, clear_output
 from matplotlib import pyplot as plt
 
-from nanopyx.core.utils.easy_gui import EasyGui
+try:
+    from ezinput import EZInput as EasyGui
+except ImportError:
+    from nanopyx.core.utils.easy_gui import EasyGui
 from nanopyx.core.utils.find_files import find_files
 from nanopyx.data.download import ExampleDataManager
 

@@ -44,7 +44,7 @@ def on_button_align(b):
     gui_drift["align"].description = "Align"
     gui_drift._main_display.children = gui_drift._main_display.children + (stackview.slice(dataset_aligned, colormap=gui_drift["cmaps"].value, continuous_update=True),)
 
-gui_drift.add_label("Drift Correction parameters:")
+gui_drift.add_label(value="Drift Correction parameters:")
 gui_drift.add_dropdown("ref", description="Reference frame", options=["First frame", "Previous frame"], value="First frame")
 gui_drift.add_int_slider("max", description="Max expected drift", min=0, max=1000, value=10)
 gui_drift.add_int_slider("time_averaging", description="Time averaging", min=1, max=dataset_original.shape[0], value=1)
