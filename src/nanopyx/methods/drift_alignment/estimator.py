@@ -8,7 +8,9 @@ from ...core.analysis.estimate_shift import GetMaxOptimizer
 from ...core.utils.timeit import timeit
 from ...core.analysis.ccm import calculate_ccm
 from ...core.analysis.rcc import rcc
-from ...core.analysis._le_drift_calculator import DriftEstimator as leDriftEstimator
+from ...core.analysis._le_drift_calculator import (
+    DriftEstimator as leDriftEstimator,
+)
 
 
 class DriftEstimator(object):
@@ -60,7 +62,7 @@ class DriftEstimator(object):
         It provides methods for estimating drift using cross-correlation and applying drift correction to an image stack.
     """
 
-    def __init__(self):
+    def __init__(self, verbose=True):
         """
         Initialize the `DriftEstimator` object.
 
@@ -73,6 +75,7 @@ class DriftEstimator(object):
         Example:
             estimator = DriftEstimator()
         """
+        self.verbose = verbose
         self.estimator_table = DriftEstimatorTable()
         self.cross_correlation_map = None
         self.drift_xy = None
@@ -109,20 +112,25 @@ class DriftEstimator(object):
 
         # x0, y0, x1, y1 correspond to the exact coordinates of the roi to be used or full image dims and should be a tuple
         if (
-            self.estimator_table.params["use_roi"] and self.estimator_table.params["roi"] is not None
+            self.estimator_table.params["use_roi"]
+            and self.estimator_table.params["roi"] is not None
         ):  # crops image to roi
-            print(self.estimator_table.params["use_roi"], self.estimator_table.params["roi"])
+            print(
+                self.estimator_table.params["use_roi"],
+                self.estimator_table.params["roi"],
+            )
             x0, y0, x1, y1 = tuple(self.estimator_table.params["roi"])
             image_arr = image_array[:, y0 : y1 + 1, x0 : x1 + 1]
         else:
             image_arr = image_array
 
-        estimator = leDriftEstimator()
+        estimator = leDriftEstimator(verbose=self.verbose)
         self.estimator_table.drift_table = estimator.run(
             np.asarray(image_arr, dtype=np.float32),
             time_averaging=self.estimator_table.params["time_averaging"],
             max_drift=self.estimator_table.params["max_expected_drift"],
-            ref_option=self.estimator_table.params["ref_option"])
+            ref_option=self.estimator_table.params["ref_option"],
+        )
 
         if self.estimator_table.params["apply"]:
             drift_corrector = DriftCorrector()

@@ -3,7 +3,9 @@ from numpy import array
 from skimage.io import imsave
 
 from .corrector import ChannelRegistrationCorrector
-from ...core.analysis._le_channel_registration import ChannelRegistrationEstimator as leChannelRegistrationEstimator
+from ...core.analysis._le_channel_registration import (
+    ChannelRegistrationEstimator as leChannelRegistrationEstimator,
+)
 
 
 # this class assumes that the image is a numpy array with shape = [n_channels, height, width]
@@ -31,10 +33,11 @@ class ChannelRegistrationEstimator(object):
         It calculates translation masks for channel alignment and provides options for saving results to files.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, verbose=True) -> None:
         """
         Initialize a ChannelRegistrationEstimator instance.
         """
+        self.verbose = verbose
         self.translation_masks = None
 
     def apply_elastic_transform(self, img_stack):
@@ -56,8 +59,9 @@ class ChannelRegistrationEstimator(object):
             for aligning the channels in the provided image stack based on the stored translation masks.
         """
         corrector = ChannelRegistrationCorrector()
-        return corrector.align_channels(img_stack, translation_masks=self.translation_masks)
-
+        return corrector.align_channels(
+            img_stack, translation_masks=self.translation_masks
+        )
 
     def save_translation_mask(self, path=None):
         """
@@ -77,7 +81,12 @@ class ChannelRegistrationEstimator(object):
             it prompts the user to input a file path and appends "_translation_masks.tif" to it as the default file name.
         """
         if path is None:
-            path = input("Please provide a filepath to save the translation masks") + "_translation_masks.tif"
+            path = (
+                input(
+                    "Please provide a filepath to save the translation masks"
+                )
+                + "_translation_masks.tif"
+            )
 
         imsave(path + "_translation_masks.tif", self.translation_masks)
 
@@ -123,11 +132,19 @@ class ChannelRegistrationEstimator(object):
         """
 
         if ref_channel > img_stack.shape[0]:
-            print("Reference channel number cannot be bigger than number of channels!")
+            print(
+                "Reference channel number cannot be bigger than number of channels!"
+            )
             return None
 
-        estimator = leChannelRegistrationEstimator()
-        self.translation_masks = estimator.run(np.asarray(img_stack, dtype=np.float32), ref_channel, max_shift, blocks_per_axis, min_similarity)
+        estimator = leChannelRegistrationEstimator(verbose=self.verbose)
+        self.translation_masks = estimator.run(
+            np.asarray(img_stack, dtype=np.float32),
+            ref_channel,
+            max_shift,
+            blocks_per_axis,
+            min_similarity,
+        )
 
         if save_translation_masks:
             self.save_translation_mask(path=translation_mask_save_path)
