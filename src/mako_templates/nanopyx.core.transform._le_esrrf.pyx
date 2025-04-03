@@ -29,15 +29,15 @@ class eSRRF(LiquidEngine):
         self._designation = "eSRRF_ST"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
-    def run(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0, run_type=None):
+    def run(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
         image = check_image(image)
-        return self._run(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=offset, xyoffset=xyoffset, angle=angle, run_type=run_type)
+        return self._run(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
-    def benchmark(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def benchmark(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
         image = check_image(image)
-        return super().benchmark(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=offset, xyoffset=xyoffset, angle=angle)
+        return super().benchmark(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
-    def _run_opencl(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0, device=None, mem_div=1):
+    def _run_opencl(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
         """
         @gpu
         """
@@ -61,6 +61,10 @@ class eSRRF(LiquidEngine):
 
         kernelx = np.array([[0, -1], [1, 0]]).astype(np.float32)
         kernely = np.array([[-1, 0], [0, 1]]).astype(np.float32)
+
+        offset = 0
+        xyoffset = -0.5
+        angle = np.pi/4
 
         mf = cl.mem_flags
         input_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image[0:max_slices, :, :].nbytes, dc, max_slices))
@@ -102,7 +106,7 @@ class eSRRF(LiquidEngine):
 
             cr_knl(cl_queue,
                 (n_slices, int(image.shape[1]*magnification), int(image.shape[2]*magnification)),
-                self.get_work_group(dc, (n_slices, image.shape[1]*magnification, image.shape[2]*magnification)), 
+                None, 
                 input_cl,
                 magnified_cl,
                 np.float32(0),
@@ -127,8 +131,8 @@ class eSRRF(LiquidEngine):
                 np.int32(2)).wait()
 
             cr_knl(cl_queue,
-                (n_slices, int(image.shape[1]*magnification*2), int(image.shape[2]*magnification*2)), 
-                self.get_work_group(dc, (n_slices, image.shape[1]*magnification*grad_magnification, image.shape[2]*magnification*grad_magnification)), 
+                (n_slices, int(image.shape[1]*magnification*grad_magnification), int(image.shape[2]*magnification*grad_magnification)), 
+                None, 
                 col_gradients_cl,
                 col_magnified_gradients_cl,
                 np.float32(0),
@@ -137,8 +141,8 @@ class eSRRF(LiquidEngine):
                 np.float32(magnification*grad_magnification)).wait()
 
             cr_knl(cl_queue,
-                (n_slices, int(image.shape[1]*magnification*2), int(image.shape[2]*magnification*2)), 
-                self.get_work_group(dc, (n_slices, image.shape[1]*magnification*grad_magnification, image.shape[2]*magnification*grad_magnification)), 
+                (n_slices, int(image.shape[1]*magnification*grad_magnification), int(image.shape[2]*magnification*grad_magnification)), 
+                None, 
                 row_gradients_cl,
                 row_magnified_gradients_cl,
                 np.float32(0),
@@ -148,18 +152,18 @@ class eSRRF(LiquidEngine):
 
             rgc_knl(cl_queue,
                 (n_slices, highest_row - lowest_row, highest_col - lowest_col),
-                self.get_work_group(dc, (n_slices, highest_row - lowest_row, highest_col - lowest_col)),
+                None,
                 col_magnified_gradients_cl,
                 row_magnified_gradients_cl,
                 magnified_cl,
                 output_cl,
-                np.int32(image.shape[2]*magnification),
-                np.int32(image.shape[1]*magnification),
+                np.int32(output_shape[2]),  # Ensure correct dimensions
+                np.int32(output_shape[1]),
                 np.int32(magnification),
                 np.float32(grad_magnification),
                 np.float32(radius),
-                np.float32(2 * (radius / 2.355) + 1),
-                np.float32(2 * (radius / 2.355) * (radius / 2.355)),
+                np.float32(2 * (radius / 2.355) + 1),  # Match sigma calculation
+                np.float32(2 * (radius / 2.355) ** 2),
                 np.float32(sensitivity),
                 np.int32(doIntensityWeighting),
                 np.float32(offset),
@@ -177,7 +181,7 @@ class eSRRF(LiquidEngine):
         return output_image
 
     % for sch in schedulers:
-    def _run_${sch}(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def _run_${sch}(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         """
         @cpu
         @threaded
@@ -201,7 +205,7 @@ class eSRRF(LiquidEngine):
         return radial_gradients
     % endfor
 
-    def _run_unthreaded(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, offset: float = 0, xyoffset: float = 0, angle: float = 0):
+    def _run_unthreaded(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         """
         @cpu
         @cython
