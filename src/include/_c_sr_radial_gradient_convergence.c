@@ -121,7 +121,7 @@ float _c_get_bound_value(float* im, int slices, int rows, int cols, int s, int r
     return im[_s * rows * cols + _r * cols + _c];
 }
 
-float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float ratio_px, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
+float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float ratio_px, float fwhm, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
 
     float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, dz_real, distance, distance_xy, distance_z, distanceWeight, distanceWeight_xy, distanceWeight_z, GdotR, Dk;
 
@@ -137,21 +137,21 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
     int _start = -(int)(2 * fwhm);
     int _end = (int)(2 * fwhm + 1);
 
-    int _start_z = -(int)(2 * fwhm_z);
-    int _end_z = (int)(2 * fwhm_z + 1);
+    int _start_z = -(int)(2 * fwhm);
+    int _end_z = (int)(2 * fwhm + 1);
     
     for (int j = _start; j <= _end; j++) {
         vy = yc + j;
 
-        if (0 < vy && vy < rowsM - 1) {
+        if (0 < vy && vy < rowsM/magnification_xy - 1) {
             for (int i = _start; i <= _end; i++) {
                 vx = xc + i;
 
-                if (0 < vx && vx < colsM - 1) {
+                if (0 < vx && vx < colsM/magnification_xy - 1) {
                     for (int k = _start_z; k <= _end_z; k++) {
                         vz = zc + k;
 
-                        if (0 < vz && vz < slicesM - 1) {
+                        if (0 < vz && vz < slicesM/magnification_z - 1) {
                             dx = vx - xc;
                             dy = vy - yc;
                             dz = vz - zc; 
@@ -161,9 +161,13 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                             distance_z = dz_real;
                             
                             if (distance != 0 && distance_xy <= tSO && distance_z <= tSO_z) {
-                                Gx = _c_get_bound_value(imIntGx, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
-                                Gy = _c_get_bound_value(imIntGy, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
-                                Gz = _c_get_bound_value(imIntGz, slicesM*Gz_MAGNIFICATION, rowsM*Gx_Gy_MAGNIFICATION, colsM*Gx_Gy_MAGNIFICATION, vz * magnification_z * Gz_MAGNIFICATION, magnification_xy * Gx_Gy_MAGNIFICATION * vy, magnification_xy * Gx_Gy_MAGNIFICATION * vx);
+                                int linear_index = (int)(vz * magnification_z) * rowsM * colsM +
+                                                   (int)(magnification_xy * vy) * colsM +
+                                                   (int)(magnification_xy * vx);
+
+                                Gx = imIntGx[linear_index];
+                                Gy = imIntGy[linear_index];
+                                Gz = imIntGz[linear_index];
 
                                 // distanceWeight = _c_calculate_dw3D_isotropic(distance, tSS);
                                 distanceWeight = _c_calculate_dw3D(distance, distance_xy, distance_z, tSS, tSS_z);
@@ -197,6 +201,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
     }
 
     return RGC;
+    //return imIntGy[(int)(zc * rowsM * colsM) + (int)(yc * colsM) + (int)(xc)];
 }
 
 float _c_calculate_dk_3d(float dx, float dy, float dz, float Gx, float Gy, float Gz, float Gmag, float distance) {
