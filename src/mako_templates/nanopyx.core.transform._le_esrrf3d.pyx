@@ -15,6 +15,7 @@ from .sr_temporal_correlations import calculate_eSRRF_temporal_correlations
 from ._interpolation import interpolate_3d, interpolate_3d_zlinear
 from ._le_interpolation_catmull_rom import ShiftAndMagnify
 from ...__liquid_engine__ import LiquidEngine
+from ...__opencl__ import cl, cl_array, _fastest_device
 
 cdef extern from "_c_gradients.h":
     void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slices, int rows, int cols) nogil
@@ -135,3 +136,156 @@ class eSRRF3D(LiquidEngine):
         else:
             return np.asarray(rgc_avg)
     % endfor
+
+    def _run_opencl(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, device=None, mem_div=1):
+        """
+        @gpu
+        """
+
+        cl_ctx = cl.Context([device['device']])
+        dc = device['device']
+        cl_queue = cl.CommandQueue(cl_ctx)
+
+        output_shape = (image.shape[1] * magnification_z, image.shape[2] * magnification_xy, image.shape[3] * magnification_xy)
+
+        output_image = np.zeros(output_shape, dtype=np.float32)
+        tmp_slice = np.zeros(output_shape, dtype=np.float32)
+
+        #max_slices = int((dc.global_mem_size - (3 * (image[0, :, :, :].nbytes) + 4 * (output_image.nbytes)) // (image[0, :, :, :].nbytes)) // mem_div)
+        #max_slices = self._check_max_slices(image, max_slices)
+
+        max_slices = 1
+
+        mf = cl.mem_flags
+
+        # create cl buffer for input image
+        input_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image[:, :, :, :].nbytes, dc, max_slices))
+        cl.enqueue_copy(cl_queue, input_cl, image[:,:,:, :]).wait()
+
+        # create magnified input image buffer
+        magnified_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(output_image.nbytes, dc, max_slices))
+
+        # create gradients buffers
+        col_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(image[0, :, :, :].nbytes, dc, max_slices))
+        row_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(image[0, :, :, :].nbytes, dc, max_slices))
+        z_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(image[0, :, :, :].nbytes, dc, max_slices))
+
+        # create magnified gradients buffers
+        col_magnified_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(output_image.nbytes, dc, max_slices))
+        row_magnified_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(output_image.nbytes, dc, max_slices))
+        z_magnified_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(output_image.nbytes, dc, max_slices))
+
+        # create the output buffer
+        output_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(output_image.nbytes, dc, max_slices))
+
+        esrrf3d_cl_code = self._get_cl_code("esrrf3d.cl", device["DP"])
+        esrrf3d_cl_prg = cl.Program(cl_ctx, esrrf3d_cl_code).build(options=["-cl-fast-relaxed-math", "-cl-mad-enable"])
+        interp_knl = esrrf3d_cl_prg.interpolate_3d
+        grads_knl = esrrf3d_cl_prg.gradients_3d
+        rgc_knl = esrrf3d_cl_prg.calculate_rgc3D
+
+        margin = int(radius*2)
+        lowest_row = margin # TODO discuss edges calculation
+        highest_row = output_shape[1] - margin
+        lowest_col = margin
+        highest_col =  output_shape[2] - margin
+
+        for f in range(image.shape[0]):
+
+            interp_knl(
+                cl_queue,
+                (image.shape[1], image.shape[2], image.shape[3]),
+                None,
+                input_cl,
+                magnified_cl,
+                np.int32(magnification_xy),
+                np.int32(magnification_z),
+                np.int32(f)
+            ).wait()
+
+
+            grads_knl(
+                cl_queue,
+                (image.shape[1], image.shape[2], image.shape[3]),
+                None,
+                input_cl,
+                col_gradients_cl,
+                row_gradients_cl,
+                z_gradients_cl,
+                np.int32(f)
+            ).wait()
+
+            interp_knl(
+                cl_queue,
+                (output_shape[0], output_shape[1], output_shape[2]),
+                None,
+                col_gradients_cl,
+                col_magnified_gradients_cl,
+                np.int32(magnification_xy),
+                np.int32(magnification_z),
+                np.int32(f)
+            ).wait()
+
+            interp_knl(
+                cl_queue,
+                (output_shape[0], output_shape[1], output_shape[2]),
+                None,
+                row_gradients_cl,
+                row_magnified_gradients_cl,
+                np.int32(magnification_xy),
+                np.int32(magnification_z),
+                np.int32(f)
+            ).wait()
+
+            interp_knl(
+                cl_queue,
+                (output_shape[0], output_shape[1], output_shape[2]),
+                None,
+                z_gradients_cl,
+                z_magnified_gradients_cl,
+                np.int32(magnification_xy),
+                np.int32(magnification_z),
+                np.int32(f)
+            ).wait()
+
+            rgc_knl(
+                cl_queue,
+                (output_shape[0], output_shape[1], output_shape[2]),
+                None,
+                col_magnified_gradients_cl,
+                row_magnified_gradients_cl,
+                z_magnified_gradients_cl,
+                magnified_cl,
+                output_cl,
+                np.int32(output_shape[1]),
+                np.int32(output_shape[2]),
+                np.int32(output_shape[0]),
+                np.int32(magnification_xy),
+                np.int32(magnification_z),
+                np.float32(voxel_ratio),
+                np.float32(radius),
+                np.float32(2 * (radius/2.355) + 1),
+                np.float32(2 * (radius*voxel_ratio/2.355) + 1),
+                np.float32(2 * (radius/2.355) * (radius/2.355)),
+                np.float32(2 * (radius*voxel_ratio/2.355) * (radius*voxel_ratio/2.355)),
+                np.int32(sensitivity),
+                np.int32(doIntensityWeighting)
+
+            ).wait()
+
+            cl.enqueue_copy(cl_queue, tmp_slice, output_cl).wait()
+
+            if mode == "average":
+                output_image = output_image + (tmp_slice - output_image) / (f + 1)
+            elif mode == "std":
+                delta = tmp_slice - output_image
+                output_image = output_image + (delta) / (f + 1)
+                delta_2 = tmp_slice - output_image
+                output_image = output_image + (delta * delta_2)
+
+
+        if mode == "std":
+            output_image = np.sqrt(np.asarray(output_image) / image.shape[0])
+            return output_image
+        else:
+            return np.asarray(output_image)
