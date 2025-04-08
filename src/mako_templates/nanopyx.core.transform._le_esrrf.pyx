@@ -92,7 +92,7 @@ class eSRRF(LiquidEngine):
         rgc_prg = cl.Program(cl_ctx, rgc_code).build(options=["-cl-mad-enable -cl-fast-relaxed-math"])
         rgc_knl = rgc_prg.calculate_rgc
 
-        margin = int(radius*2)
+        margin = int(radius*2*magnification)
         lowest_row = margin # TODO discuss edges calculation
         highest_row = output_shape[1] - margin
         lowest_col = margin

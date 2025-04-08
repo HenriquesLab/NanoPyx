@@ -1,4 +1,4 @@
-void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slices,
+void _c_gradient_3d(__global float* image, __global float* imGc, __global float* imGr, __global float* imGs, int slices,
                  int rows, int cols) {
   float ip0, ip1, ip2, ip3, ip4, ip5, ip6, ip7;
 
@@ -137,3 +137,12 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
     return RGC;
 }
 
+
+__kernel void interpolate_3d()
+
+
+__kernel void gradients_3d(__global float* image, __global float* imGc, __global float* imGr, __global float* imGs, int f, int slices, int rows, int cols) {
+  _c_gradient_3d(&image[f * slices * rows * cols], &imGc[f * slices * rows * cols], &imGr[f * slices * rows * cols], &imGs[f * slices * rows * cols], slices, rows, cols);
+}
+
+__kernel void calculate_rgc3D()

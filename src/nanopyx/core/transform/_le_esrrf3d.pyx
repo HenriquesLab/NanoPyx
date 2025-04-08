@@ -499,7 +499,10 @@ class eSRRF3D(LiquidEngine):
                 col_gradients_cl,
                 row_gradients_cl,
                 z_gradients_cl,
-                np.int32(f)
+                np.int32(f),
+                np.int32(image.shape[1]),
+                np.int32(image.shape[2]),
+                np.int32(image.shape[3]),
             ).wait()
 
             interp_knl(
@@ -543,7 +546,7 @@ class eSRRF3D(LiquidEngine):
                 row_magnified_gradients_cl,
                 z_magnified_gradients_cl,
                 magnified_cl,
-                output_cl,
+                tmp_slice,
                 np.int32(output_shape[1]),
                 np.int32(output_shape[2]),
                 np.int32(output_shape[0]),
@@ -560,16 +563,18 @@ class eSRRF3D(LiquidEngine):
 
             ).wait()
 
-            cl.enqueue_copy(cl_queue, tmp_slice, output_cl).wait()
-
+            
+            # TODO change tmp_slice to cl arrays
             if mode == "average":
-                output_image = output_image + (tmp_slice - output_image) / (f + 1)
+                output_cl = output_cl + (tmp_slice - output_cl) / (f + 1)
             elif mode == "std":
-                delta = tmp_slice - output_image
-                output_image = output_image + (delta) / (f + 1)
-                delta_2 = tmp_slice - output_image
-                output_image = output_image + (delta * delta_2)
+                delta = tmp_slice - output_cl
+                output_cl = output_cl + (delta) / (f + 1)
+                delta_2 = tmp_slice - output_cl
+                output_cl = output_cl + (delta * delta_2)
 
+
+        cl.enqueue_copy(cl_queue, output_image, output_cl).wait()
 
         if mode == "std":
             output_image = np.sqrt(np.asarray(output_image) / image.shape[0])
