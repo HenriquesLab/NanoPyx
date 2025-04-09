@@ -93,7 +93,6 @@ class RadialGradientConvergence(LiquidEngine):
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
-        print("Here 2")
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
@@ -126,7 +125,6 @@ class RadialGradientConvergence(LiquidEngine):
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
-        print("Here 2")
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
@@ -159,7 +157,6 @@ class RadialGradientConvergence(LiquidEngine):
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
-        print("Here 2")
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
@@ -192,7 +189,6 @@ class RadialGradientConvergence(LiquidEngine):
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
-        print("Here 2")
         cdef int f, rM, cM
         with nogil:
             for f in range(nFrames):
