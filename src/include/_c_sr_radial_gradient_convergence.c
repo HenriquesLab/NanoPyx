@@ -14,36 +14,47 @@ double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance) {
   return Dk;
 }
 
-float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) {
+void _rotate_vector(float* Gx, float* Gy, float angle) {
+    float cos_angle = cos(angle);
+    float sin_angle = sin(angle);
+
+    float original_Gx = *Gx;
+    float original_Gy = *Gy;
+
+    *Gx = original_Gx * cos_angle - original_Gy * sin_angle;
+    *Gy = original_Gx * sin_angle + original_Gy * cos_angle;
+}
+
+float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity, float offset, float xyoffset, float angle) {
 
     float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk;
 
-    float xc = (xM + 0.5) / magnification;
-    float yc = (yM + 0.5) / magnification;
+    float xc = (float)xM / magnification + offset; // offset in non-magnified space
+    float yc = (float)yM / magnification + offset;
 
     float RGC = 0;
     float distanceWeightSum = 0;
 
-    int _start = -(int)(Gx_Gy_MAGNIFICATION * fwhm);
-    int _end = (int)(Gx_Gy_MAGNIFICATION * fwhm + 1);
+    int _start = -(int)(2 * fwhm);
+    int _end = (int)(2 * fwhm + 1);
 
     for (int j = _start; j < _end; j++) {
-        vy = (int)(Gx_Gy_MAGNIFICATION * yc) + j;
-        vy /= Gx_Gy_MAGNIFICATION;
+        vy = yc + j;
 
-        if (0 < vy && vy <= rowsM - 1) {
+        if (0 < vy && vy <= rowsM/magnification - 1) {
             for (int i = _start; i < _end; i++) {
-                vx = (int)(Gx_Gy_MAGNIFICATION * xc) + i;
-                vx /= Gx_Gy_MAGNIFICATION;
+                vx = xc + i;
 
-                if (0 < vx && vx <= colsM - 1) {
+                if (0 < vx && vx <= colsM/magnification - 1) {
                     dx = vx - xc;
                     dy = vy - yc;
                     distance = sqrt(dx * dx + dy * dy);
 
                     if (distance != 0 && distance <= tSO) {
-                        Gx = imIntGx[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
-                        Gy = imIntGy[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gx = imIntGx[(int)((vy+xyoffset) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((vx+xyoffset) * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gy = imIntGy[(int)((vy+xyoffset) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((vx+xyoffset) * magnification * Gx_Gy_MAGNIFICATION)];
+
+                        _rotate_vector(&Gx, &Gy, angle);
 
                         distanceWeight = _c_calculate_dw(distance, tSS);
                         distanceWeightSum += distanceWeight;

@@ -25,3 +25,36 @@ conv2d(__read_only image2d_t image_in, __write_only image2d_t image_out, __read_
   write_imagef(image_out,image_coords,acc);
 }
 
+__kernel void
+conv2d_2(__global float *image, __global float *image_out, __global float *kernel_array, int kernel_size){
+
+  int frame = get_global_id(0);
+  int row = get_global_id(1);
+  int col = get_global_id(2);
+
+  int nframes = get_global_size(0);
+  int nrows = get_global_size(1);
+  int ncols = get_global_size(2);
+
+  int kernel_center = (kernel_size-1)/2;
+
+  float acc = 0;
+  int localrow;
+  int localcol;
+
+  for (int kr = 0; kr<kernel_size; kr++) {
+    for (int kc = 0; kc<kernel_size; kc++) {
+
+      // localrow and localcol should lie between 0 and imgsize-1
+      localrow = min(nrows-1,max(0,row + (kr-kernel_center)));
+      localcol = min(ncols-1,max(0,col + (kc-kernel_center)));
+
+
+
+      acc = acc + kernel_array[kr*kernel_size+kc] * image[frame*nrows*ncols+localrow*ncols+localcol];
+      }
+    }
+
+image_out[frame*nrows*ncols+row*ncols+col] = acc;
+
+}

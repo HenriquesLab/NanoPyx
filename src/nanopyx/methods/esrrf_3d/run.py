@@ -1,7 +1,12 @@
 from ...core.transform._le_esrrf3d import eSRRF3D
-from ...core.transform.sr_temporal_correlations import calculate_eSRRF3d_temporal_correlations
+from ...core.transform.sr_temporal_correlations import (
+    calculate_eSRRF3d_temporal_correlations,
+)
 
-def run_esrrf3d(img,correlation="AVG", framewindow=5, rollingoverlap=2, **kwargs):
+
+def run_esrrf3d(
+    img, correlation="AVG", framewindow=5, rollingoverlap=2, **kwargs
+):
     """
     Calculate the eSRRF3D temporal correlations for the given image.
 
@@ -24,4 +29,9 @@ def run_esrrf3d(img,correlation="AVG", framewindow=5, rollingoverlap=2, **kwargs
         The calculated eSRRF3D temporal correlations.
     """
     esrrf_calculator = eSRRF3D()
-    return calculate_eSRRF3d_temporal_correlations(esrrf_calculator.run(img, **kwargs), correlation=correlation, framewindow=framewindow, rollingoverlap=rollingoverlap)
+    return calculate_eSRRF3d_temporal_correlations(
+        esrrf_calculator.run(img, **kwargs),
+        correlation=correlation,
+        framewindow=framewindow,
+        rollingoverlap=rollingoverlap,
+    )
