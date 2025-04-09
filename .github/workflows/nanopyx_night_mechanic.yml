@@ -99,4 +99,6 @@ jobs:
         run: |
           python -m nox --sessions test_source clear_wheelhouse build_wheel build_sdist test_wheel
         env:
+          CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
+          CIBW_ARCHS: arm64
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
