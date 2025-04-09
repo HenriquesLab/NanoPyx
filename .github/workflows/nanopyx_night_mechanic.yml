@@ -37,6 +37,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade nox
+          python -m pip install cibuildwheel==2.16.2
           python -m nox --sessions test_source clear_wheelhouse build_wheel build_sdist test_wheel
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
@@ -65,6 +66,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade nox
+          python -m pip install cibuildwheel==2.16.2
           python -m pip install setuptools==73.0.1
           python -m nox --sessions test_source clear_wheelhouse build_wheel build_sdist test_wheel
         env:
@@ -94,11 +96,19 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install --upgrade nox
+          python -m pip install cibuildwheel==2.16.2
           python -m pip install setuptools==73.0.1
       - name: Run Nox Quick-Tests
         run: |
-          python -m nox --sessions test_source clear_wheelhouse build_wheel build_sdist test_wheel
+          python -m nox --sessions test_source clear_wheelhouse
+        env:
+          LOG_LEVEL: ${{ github.event.inputs.logLevel }}
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+          # to supply options, put them in 'env', like:
         env:
           CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
           CIBW_ARCHS: arm64
-          LOG_LEVEL: ${{ github.event.inputs.logLevel }}
+
+      - name: Test wheels
+        run: python -m nox --sessions test_wheel
