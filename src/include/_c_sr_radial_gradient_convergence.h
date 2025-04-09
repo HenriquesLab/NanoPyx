@@ -21,7 +21,8 @@ double _c_calculate_dw_z(double distance_z, double tSS_z);
 
 double _c_calculate_dk3D(float Gx, float Gy, float Gz, float dx, float dy, float dz, float distance);
 
-float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float ratio_px, float fwhm, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity);
+float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float ratio_px, float Gx_Gy_MAGNIFICATION, float Gz_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity);
+
 
 float _c_calculate_rgc_3d(int cM, int rM, int sM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float Gx_Gy_MAGNIFICATION, float fwhm, float fwhm_z, float tSO, float tSS, float sensitivity);
 
