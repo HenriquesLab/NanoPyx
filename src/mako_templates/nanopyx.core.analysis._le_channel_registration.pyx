@@ -17,6 +17,8 @@ from ..transform._le_interpolation_bicubic import ShiftAndMagnify
 from ..transform import Convolution2D
 from ..utils.cl_device import get_fastest_device_name
 
+from scipy.ndimage import gaussian_filter as scipy_gaussian_filter
+
 cdef bint _check_even_square(float[:, :] image_arr) nogil:
     cdef int r = image_arr.shape[0]
     cdef int c = image_arr.shape[1]
@@ -247,8 +249,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
                 if blocks_per_axis > 1:
 
-                    _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), _runtype, sigma=max(block_nCols, block_nRows) / 2.0)
-                    _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), _runtype, sigma=max(block_nCols, block_nRows) / 2.0)
+                    _translation_matrix_c = scipy_gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows) / 2.0)
+                    _translation_matrix_r = scipy_gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows) / 2.0)
 
                 translation_masks[channel,:,:nCols] = _translation_matrix_c
                 translation_masks[channel,:, nCols:] = _translation_matrix_r
