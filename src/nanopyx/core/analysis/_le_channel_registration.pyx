@@ -79,14 +79,15 @@ def _gaussian_filter(inpimg, _runtype, sigma):
     conv = Convolution2D(verbose=True) 
 
     radius = np.round(sigma*4)
-    x1 = np.arange(-radius, radius+1)
-    knl1 = np.exp(-0.5 / (sigma*sigma) * x1 ** 2)
-    knl1 = knl1 / knl1.sum()
-    knl1 = knl1.astype(np.float32)
-    img1 = conv.run(inpimg,knl1.reshape((len(x1), 1)),run_type=_runtype)
-    img1 = np.expand_dims(img1, axis=0)
-    img2 = conv.run(img1,knl1.reshape((1, len(x1))),run_type=_runtype)
-    return img2
+    y, x = np.meshgrid(np.arange(-radius, radius+1), np.arange(-radius, radius+1))
+    kernel = np.exp(-0.5 * (x**2 + y**2) / (sigma**2))
+    kernel /= kernel.sum()
+    kernel = kernel.astype(np.float32)
+
+    img1 = conv.run(inpimg,kernel,run_type=_runtype)
+   
+    return img1
+
 
 class ChannelRegistrationEstimator(LiquidEngine):
     """
