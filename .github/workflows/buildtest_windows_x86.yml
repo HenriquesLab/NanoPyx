@@ -53,9 +53,3 @@ jobs:
           with:
             name: wheels-windows
             path: ./wheelhouse/*.whl
-
-        - name: Publish package to PyPI
-          uses: pypa/gh-action-pypi-publish@release/v1
-          with:
-            password: ${{ secrets.BMS_DEPLOY_PYPI_TOKEN }}
-            packages-dir: ./wheelhouse/
