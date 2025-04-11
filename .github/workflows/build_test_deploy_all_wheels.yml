@@ -1,4 +1,4 @@
-name: Build and Publish Wheels
+name: (self-hosted) Build and Publish Wheels
 
 on: workflow_dispatch
 
