@@ -21,7 +21,7 @@ cdef extern from "_c_gradients.h":
     void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slices, int rows, int cols) nogil
 
 cdef extern from "_c_sr_radial_gradient_convergence.h":
-    float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float voxel_ratio, float fwhm, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) nogil
+    float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float voxel_ratio, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) nogil
 
 class eSRRF3D(LiquidEngine):
     """
@@ -32,27 +32,27 @@ class eSRRF3D(LiquidEngine):
         self._designation = "eSRRF_3D"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
-    def run(self, image, magnification_xy: int = 2, magnification_z: int = 2, radius: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, run_type=None):
+    def run(self, image, magnification_xy: int = 2, magnification_z: int = 2, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, run_type=None):
         # TODO: complete and check _run inputs, need to complete variables?
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
+            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
         elif len(image.shape) == 3:
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
+            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
-    def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
+    def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
-            return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, voxel_ratio=voxel_ratio,sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting)
+            return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio,sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting)
         elif len(image.shape) == 3:
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
-            return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting)
+            return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting)
 
     % for sch in schedulers:
-    def _run_${sch}(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
+    def _run_${sch}(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
         """
         @cpu
         % if sch!='unthreaded':
@@ -64,13 +64,15 @@ class eSRRF3D(LiquidEngine):
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
-        cdef float fwhm = radius
         cdef int margin = int(2 * radius)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float sigma_z = radius * voxel_ratio / 2.355 # Taking voxel size into account
+        cdef float sigma_z = radius_z * voxel_ratio / 2.355 # Taking voxel size into account
+        cdef int margin_z = int(2 * radius_z)
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
+        cdef float fwhm = radius
+        cdef float fwhm_z = radius_z
         cdef int _magnification_xy = magnification_xy
         cdef int _magnification_z = magnification_z
         cdef float _voxel_ratio = voxel_ratio
@@ -111,7 +113,7 @@ class eSRRF3D(LiquidEngine):
             gradients_col_mag = interpolate_3d_zlinear(gradients_col, _magnification_xy, _magnification_z)
 
             with nogil:
-                for sM in range(margin, n_slices_mag-margin):
+                for sM in range(margin_z, n_slices_mag-margin_z):
                     % if sch=="unthreaded":
                     for rM in range(margin, n_rows_mag-margin):
                     % elif sch=="threaded":
@@ -120,7 +122,7 @@ class eSRRF3D(LiquidEngine):
                     for rM in prange(margin, n_rows_mag-margin, schedule="${sch.split('_')[1]}"):
                     % endif
                         for cM in range(margin, n_cols_mag-margin):
-                            rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_col_mag[0,0,0], &gradients_row_mag[0,0,0], &gradients_slices_mag[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, _voxel_ratio, fwhm, tSO, tSO_z, tSS, tSS_z, sensitivity)
+                            rgc_val = _c_calculate_rgc3D(cM, rM, sM, &gradients_col_mag[0,0,0], &gradients_row_mag[0,0,0], &gradients_slices_mag[0,0,0], n_cols_mag, n_rows_mag, n_slices_mag, _magnification_xy, _magnification_z, _voxel_ratio, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity)
                             if _doIntensityWeighting:
                                 rgc_val = rgc_val * image_interpolated[sM, rM, cM]
                             if mode == "average":
@@ -137,7 +139,7 @@ class eSRRF3D(LiquidEngine):
             return np.asarray(rgc_avg)
     % endfor
 
-    def _run_opencl(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, device=None, mem_div=1):
+    def _run_opencl(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, device=None, mem_div=1):
         """
         @gpu
         """
@@ -154,8 +156,8 @@ class eSRRF3D(LiquidEngine):
         print("here before cl to array")
         tmp_slice = cl_array.to_device(cl_queue, output_image)
 
-        #max_slices = int((dc.global_mem_size - (3 * (image[0, :, :, :].nbytes) + 4 * (output_image.nbytes)) // (image[0, :, :, :].nbytes)) // mem_div)
-        #max_slices = self._check_max_slices(image, max_slices)
+        # max_slices = int((dc.global_mem_size - (3 * (image[0, :, :, :].nbytes) + 4 * (output_image.nbytes)) // (image[0, :, :, :].nbytes)) // mem_div)
+        # max_slices = self._check_max_slices(image, max_slices)
 
         max_slices = 1
 
@@ -179,7 +181,7 @@ class eSRRF3D(LiquidEngine):
         z_magnified_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(output_image.nbytes, dc, max_slices))
 
         # create the output buffer
-        #output_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(output_image.nbytes, dc, max_slices))
+        # output_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(output_image.nbytes, dc, max_slices))
         output_cl = cl_array.to_device(cl_queue, output_image)
 
         esrrf3d_cl_code = self._get_cl_code("_le_esrrf3d_.cl", device["DP"])
@@ -189,7 +191,7 @@ class eSRRF3D(LiquidEngine):
         rgc_knl = esrrf3d_cl_prg.calculate_rgc3D
 
         margin = int(radius*2) * magnification_xy
-        margin_z = int(radius*2) * magnification_z
+        margin_z = int(radius_z*2) * magnification_z
         lowest_row = margin # TODO discuss edges calculation
         highest_row = output_shape[1] - margin
         lowest_col = margin
@@ -283,17 +285,17 @@ class eSRRF3D(LiquidEngine):
                 np.int32(f)
 
             ).wait()
-
-            print("Here 10")
-            # TODO change tmp_slice to cl arrays
-            if mode == "average":
-                output_cl = output_cl + (tmp_slice - output_cl) / (f + 1)
-            elif mode == "std":
-                delta = tmp_slice - output_cl
-                output_cl = output_cl + (delta) / (f + 1)
-                delta_2 = tmp_slice - output_cl
-                output_cl = output_cl + (delta * delta_2)
-            print("Here 11")
+            # cl_queue.finish()
+            # print("Here 10")
+            # # TODO change tmp_slice to cl arrays
+            # if mode == "average":
+            #     output_cl += (tmp_slice - output_cl) / (f + 1)
+            # elif mode == "std":
+            #     delta = tmp_slice - output_cl
+            #     output_cl = output_cl + (delta) / (f + 1)
+            #     delta_2 = tmp_slice - output_cl
+            #     output_cl = output_cl + (delta * delta_2)
+            # print("Here 11")
 
         cl.enqueue_copy(cl_queue, output_image, output_cl).wait()
         print("Here 12")

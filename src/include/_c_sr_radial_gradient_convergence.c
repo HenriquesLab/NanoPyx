@@ -121,7 +121,7 @@ float _c_get_bound_value(float* im, int slices, int rows, int cols, int s, int r
     return im[_s * rows * cols + _r * cols + _c];
 }
 
-float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float ratio_px, float fwhm, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
+float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float voxel_ratio, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
 
     float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, dz_real, distance, distance_xy, distance_z, distanceWeight, distanceWeight_xy, distanceWeight_z, GdotR, Dk;
 
@@ -137,8 +137,8 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
     int _start = -(int)(2 * fwhm);
     int _end = (int)(2 * fwhm + 1);
 
-    int _start_z = -(int)(2 * fwhm);
-    int _end_z = (int)(2 * fwhm + 1);
+    int _start_z = -(int)(2 * fwhm_z);
+    int _end_z = (int)(2 * fwhm_z + 1);
     
     for (int j = _start; j <= _end; j++) {
         vy = yc + j;
@@ -155,7 +155,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                             dx = vx - xc;
                             dy = vy - yc;
                             dz = vz - zc; 
-                            dz_real = dz * ratio_px; // This has been already divided by magnification_z
+                            dz_real = dz * voxel_ratio;
                             distance = sqrt(dx * dx + dy * dy + dz_real * dz_real);
                             distance_xy = sqrt(dx * dx + dy * dy);
                             distance_z = dz_real;
