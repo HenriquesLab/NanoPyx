@@ -6,7 +6,7 @@ own_data = True
 
 def on_button_select_own(b):
     clear_output()
-    gui_data.add_label("Select data to use:")
+    gui_data.add_label(value="Select data to use:")
     gui_data.add_file_upload("upload")
     gui_data.add_dropdown("cmaps", description="Colormap:",
                           options=sorted(list(mpl.colormaps)),
@@ -17,7 +17,7 @@ def on_button_select_own(b):
 
 def on_button_select_example(b):
     clear_output()
-    gui_data.add_label("Select data to use:")
+    gui_data.add_label(value="Select data to use:")
     gui_data.add_dropdown("data_source", options=image_files,
                     value="Example dataset: "+example_datasets[4], remember_value=True)
     gui_data.add_dropdown("cmaps", description="Colormap:",

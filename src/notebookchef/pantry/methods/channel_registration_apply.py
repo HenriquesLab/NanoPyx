@@ -47,9 +47,9 @@ def on_button_apply(b):
     gui_reg_apply["Register Image"].description = "Align"
     gui_reg_apply._main_display.children = gui_reg_apply._main_display.children + (stackview.slice(aligned_image, colormap=gui_reg_apply["cmaps"].value, continuous_update=True),)
 
-gui_reg_apply.add_label("Load translation mask:")
+gui_reg_apply.add_label(value="Load translation mask:")
 gui_reg_apply.add_file_upload("upload")
-gui_reg_apply.add_label("Load image to register:")
+gui_reg_apply.add_label(value="Load image to register:")
 gui_reg_apply.add_file_upload("upload image")
 gui_reg_apply.add_dropdown("cmaps", description="Colormap:",
                       options=sorted(list(mpl.colormaps)),

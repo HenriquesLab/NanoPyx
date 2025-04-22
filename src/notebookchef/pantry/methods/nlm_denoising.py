@@ -31,8 +31,8 @@ def run_nlm(b):
             tiff.imwrite(name + "_nlm_denoised.tif", dataset_nlm)
     gui_nlm._main_display.children = gui_nlm._main_display.children + (stackview.slice(dataset_nlm, colormap=gui_nlm["cmaps"].value, continuous_update=True),)
 
-gui_nlm.add_int_slider("patch_size", description="Patch Size", min=1, max=dataset_original.shape[-1]//2, value=5,  remember_value=True)
-gui_nlm.add_int_slider("patch_distance", description="Patch Distance", min=1, max=dataset_original.shape[-1]//2, value=10, remember_value=True)
+gui_nlm.add_int_slider("patch_size", description="Patch Size", min=1, max=dataset_original.shape[-1]//2, value=5)
+gui_nlm.add_int_slider("patch_distance", description="Patch Distance", min=1, max=dataset_original.shape[-1]//2, value=10)
 gui_nlm.add_float_text("h", description="h", value=0.1, remember_value=True)
 gui_nlm.add_float_text("sigma", description="sigma", value=0.1, remember_value=True)
 gui_nlm.add_checkbox("save", description="Save Output", value=True)
