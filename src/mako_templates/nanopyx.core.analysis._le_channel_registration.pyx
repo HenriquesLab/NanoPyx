@@ -17,6 +17,8 @@ from ..transform._le_interpolation_bicubic import ShiftAndMagnify
 from ..transform import Convolution2D
 from ..utils.cl_device import get_fastest_device_name
 
+from scipy.ndimage import gaussian_filter as scipy_gaussian_filter
+
 cdef bint _check_even_square(float[:, :] image_arr) nogil:
     cdef int r = image_arr.shape[0]
     cdef int c = image_arr.shape[1]
@@ -81,14 +83,15 @@ def _gaussian_filter(inpimg, _runtype, sigma):
     conv = Convolution2D(verbose=True) 
 
     radius = np.round(sigma*4)
-    x1 = np.arange(-radius, radius+1)
-    knl1 = np.exp(-0.5 / (sigma*sigma) * x1 ** 2)
-    knl1 = knl1 / knl1.sum()
-    knl1 = knl1.astype(np.float32)
-    img1 = conv.run(inpimg,knl1.reshape((len(x1), 1)),run_type=_runtype)
-    img1 = np.expand_dims(img1, axis=0)
-    img2 = conv.run(img1,knl1.reshape((1, len(x1))),run_type=_runtype)
-    return img2
+    y, x = np.meshgrid(np.arange(-radius, radius+1), np.arange(-radius, radius+1))
+    kernel = np.exp(-0.5 * (x**2 + y**2) / (sigma**2))
+    kernel /= kernel.sum()
+    kernel = kernel.astype(np.float32)
+
+    img1 = conv.run(inpimg,kernel,run_type=_runtype)
+   
+    return img1
+
 
 class ChannelRegistrationEstimator(LiquidEngine):
     """
@@ -246,8 +249,8 @@ class ChannelRegistrationEstimator(LiquidEngine):
 
                 if blocks_per_axis > 1:
 
-                    _translation_matrix_c = _gaussian_filter(np.array(_translation_matrix_c), _runtype, sigma=max(block_nCols, block_nRows) / 2.0)
-                    _translation_matrix_r = _gaussian_filter(np.array(_translation_matrix_r), _runtype, sigma=max(block_nCols, block_nRows) / 2.0)
+                    _translation_matrix_c = scipy_gaussian_filter(np.array(_translation_matrix_c), sigma=max(block_nCols, block_nRows) / 2.0)
+                    _translation_matrix_r = scipy_gaussian_filter(np.array(_translation_matrix_r), sigma=max(block_nCols, block_nRows) / 2.0)
 
                 translation_masks[channel,:,:nCols] = _translation_matrix_c
                 translation_masks[channel,:, nCols:] = _translation_matrix_r
