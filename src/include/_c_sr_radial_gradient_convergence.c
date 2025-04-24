@@ -102,7 +102,7 @@ double _c_calculate_dw_z(double distance_z, double tSS_z) {
 }
 
 double _c_calculate_dk3D(float Gx, float Gy, float Gz, float dx, float dy, float dz, float distance) {
-  float Dk = sqrtf((Gy * dz - Gz * dy) * (Gy * dz - Gz * dy) + (Gz * dx - Gx * dz) * (Gz * dx - Gx * dz) + (Gx * dy - Gy * dx) * (Gx * dy - Gy * dx)) / sqrt(Gx * Gx + Gy * Gy + Gz * Gz);
+  float Dk = sqrt((Gy * dz - Gz * dy) * (Gy * dz - Gz * dy) + (Gz * dx - Gx * dz) * (Gz * dx - Gx * dz) + (Gx * dy - Gy * dx) * (Gx * dy - Gy * dx)) / sqrt(Gx * Gx + Gy * Gy + Gz * Gz);
   if (isnan(Dk)) {
     Dk = distance;
   }
@@ -194,14 +194,13 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
 
     RGC /= distanceWeightSum;
 
-    if (RGC >= 0) {
+    if (RGC >= 0 && sensitivity > 1) {
         RGC = pow(RGC, sensitivity);
-    } else {
+    } else if (RGC < 0) {
         RGC = 0;
     }
 
     return RGC;
-    //return imIntGy[(int)(zc * rowsM * colsM) + (int)(yc * colsM) + (int)(xc)];
 }
 
 float _c_calculate_dk_3d(float dx, float dy, float dz, float Gx, float Gy, float Gz, float Gmag, float distance) {
