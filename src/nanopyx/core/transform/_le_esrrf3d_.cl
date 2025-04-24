@@ -223,12 +223,19 @@ __kernel void time_projection_average(__global float* current_slice, __global fl
 
   int current_index = s * rows * cols + row * cols + col;
 
-  output[current_index] += current_slice[current_index];
+  // Ensure proper initialization for the first frame
+  if (frame_i == 0) {
+    output[current_index] = current_slice[current_index];
+  } else {
+    // Accumulate the average
+    output[current_index] += (current_slice[current_index] - output[current_index]) / (frame_i + 1);
+  }
 }
 
 __kernel void time_projection_std(
     __global float* current_slice, 
-    __global float* output,
+    __global float* mean_output,
+    __global float* variance_output,
     int frame_i
 ) {
     int s = get_global_id(0);
@@ -240,11 +247,16 @@ __kernel void time_projection_std(
 
     int current_index = s * rows * cols + row * cols + col;
 
-    // Calculate the running mean
-    float delta = current_slice[current_index] - output[current_index];
-    output[current_index] += delta / (frame_i + 1);
+    // Ensure proper initialization for the first frame
+    if (frame_i == 0) {
+        mean_output[current_index] = current_slice[current_index];
+        variance_output[current_index] = 0.0f;
+    } else {
+        // Update the running mean
+        float delta = current_slice[current_index] - mean_output[current_index];
+        mean_output[current_index] += delta / (frame_i + 1);
 
-    // Update the running variance
-    float delta2 = current_slice[current_index] - output[current_index];
-    output[current_index] += delta * delta2 / (frame_i + 1);
+        // Update the running variance
+        variance_output[current_index] += delta * (current_slice[current_index] - mean_output[current_index]);
+    }
 }
