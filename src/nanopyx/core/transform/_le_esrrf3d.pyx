@@ -505,19 +505,6 @@ class eSRRF3D(LiquidEngine):
 
         # loop over frames:
         for frame_i in range(image.shape[0]):
-            # fill all buffers with zeros
-            cl.enqueue_fill_buffer(cl_queue, input_magnified_buffer, np.float32(0), 0, output_array.nbytes).wait()
-            cl.enqueue_fill_buffer(cl_queue, slices_gradient_magnified_buffer, np.float32(0), 0, output_array.nbytes).wait()
-            cl.enqueue_fill_buffer(cl_queue, rows_gradient_magnified_buffer, np.float32(0), 0, output_array.nbytes).wait()
-            cl.enqueue_fill_buffer(cl_queue, cols_gradient_magnified_buffer, np.float32(0), 0, output_array.nbytes).wait()
-            cl.enqueue_fill_buffer(cl_queue, rgc_buffer, np.float32(0), 0, output_array.nbytes).wait()
-            cl.enqueue_fill_buffer(cl_queue, output_buffer, np.float32(0), 0, output_array.nbytes).wait()
-            cl.enqueue_fill_buffer(cl_queue, slices_gradient_buffer, np.float32(0), 0, image.shape[1] * image.shape[2] * image.shape[3] * np.dtype(np.float32).itemsize).wait()
-            cl.enqueue_fill_buffer(cl_queue, rows_gradient_buffer, np.float32(0), 0, image.shape[1] * image.shape[2] * image.shape[3] * np.dtype(np.float32).itemsize).wait()
-            cl.enqueue_fill_buffer(cl_queue, cols_gradient_buffer, np.float32(0), 0, image.shape[1] * image.shape[2] * image.shape[3] * np.dtype(np.float32).itemsize).wait()
-            if mode == "std":
-                cl.enqueue_fill_buffer(cl_queue, mean_buffer, np.float32(0), 0, output_array.nbytes).wait()
-
             # interpolate image
             interpolate_kernel(
                 cl_queue,
@@ -588,9 +575,9 @@ class eSRRF3D(LiquidEngine):
                 cl_queue,
                 (highest_slice - lowest_slice, highest_row - lowest_row, highest_col - lowest_col),
                 None,
-                slices_gradient_magnified_buffer,
-                rows_gradient_magnified_buffer,
-                cols_gradient_magnified_buffer,
+                slices_gradient_buffer,
+                rows_gradient_buffer,
+                cols_gradient_buffer,
                 input_magnified_buffer,
                 rgc_buffer,
                 np.int32(output_shape[0]),
@@ -635,4 +622,4 @@ class eSRRF3D(LiquidEngine):
         if mode == "std":
             return np.asarray(np.sqrt(output_array / image.shape[0]))
         else:
-            return np.asarray(output_array / image.shape[0])
+            return np.asarray(output_array)

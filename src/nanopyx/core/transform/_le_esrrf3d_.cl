@@ -101,14 +101,6 @@ double _c_calculate_dw3D(double distance, double distance_xy, double distance_z,
   return pow(D_weight, 4);
 }
 
-double _c_calculate_dw_xy(double distance_xy, double tSS) {
-  return pow((distance_xy * exp((-distance_xy * distance_xy) / tSS)), 4);
-}
-
-double _c_calculate_dw_z(double distance_z, double tSS_z) {
-  return pow((distance_z * exp((-distance_z * distance_z) / tSS_z)), 4);
-}
-
 double _c_calculate_dk3D(float Gx, float Gy, float Gz, float dx, float dy, float dz, float distance) {
   float Dk = sqrt((Gy * dz - Gz * dy) * (Gy * dz - Gz * dy) + (Gz * dx - Gx * dz) * (Gz * dx - Gx * dz) + (Gx * dy - Gy * dx) * (Gx * dy - Gy * dx)) / sqrt(Gx * Gx + Gy * Gy + Gz * Gz);
   if (isnan(Dk)) {
@@ -126,8 +118,8 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
     float yc = (yM) / magnification_xy;
     float zc = (sliceM) / magnification_z;
 
-    float RGC = 0;
-    float distanceWeightSum = 0;
+    float RGC = 0.0f;
+    float distanceWeightSum = 0.0f;
 
     int _start = -(int)(2 * fwhm);
     int _end = (int)(2 * fwhm + 1);
@@ -164,14 +156,20 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
                                 Gy = imIntGy[linear_index];
                                 Gz = imIntGz[linear_index];
 
+                                // distanceWeight = _c_calculate_dw3D_isotropic(distance, tSS);
                                 distanceWeight = _c_calculate_dw3D(distance, distance_xy, distance_z, tSS, tSS_z);
+
+                                // distanceWeight_xy = _c_calculate_dw_xy(distance_xy, tSS); 
+                                // distanceWeight_z = _c_calculate_dw_z(distance_z, tSS_z);
                                 
-                                distanceWeightSum += distanceWeight;
+                                distanceWeightSum = distanceWeightSum + distanceWeight;
+                                // distanceWeightSum_xy += distanceWeight_xy;
+                                // distanceWeightSum_z += distanceWeight_z;
                                 GdotR = Gx*dx + Gy*dy + Gz*dz_real;
 
                                 if (GdotR < 0) {
                                     Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, dz_real, distance);
-                                    RGC += (Dk * distanceWeight);
+                                    RGC = RGC + (Dk * distanceWeight);
                                 }
                             }
                         }
@@ -181,7 +179,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
         }
     }
 
-    RGC /= distanceWeightSum;
+    RGC = RGC / distanceWeightSum;
 
     if (RGC >= 0 && sensitivity > 1) {
         RGC = pow(RGC, sensitivity);
@@ -225,10 +223,11 @@ __kernel void time_projection_average(__global float* current_slice, __global fl
 
   // Ensure proper initialization for the first frame
   if (frame_i == 0) {
-    output[current_index] = current_slice[current_index];
+    output[current_index] = current_slice[current_index] / (frame_i + 1);
   } else {
     // Accumulate the average
-    output[current_index] += (current_slice[current_index] - output[current_index]) / (frame_i + 1);
+    output[current_index] = output[current_index];
+    output[current_index] = output[current_index] + ((current_slice[current_index] - output[current_index]) / (frame_i + 1));
   }
 }
 
