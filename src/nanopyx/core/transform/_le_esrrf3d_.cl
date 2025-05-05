@@ -1,62 +1,101 @@
-float catmull_rom_weight(float t, int offset) {
-  // Catmull-Rom spline weight calculation
-  t = fabs(t - offset);
-  if (t < 1.0f) {
-    return 1.0f - 2.0f * t * t + t * t * t;
-  } else if (t < 2.0f) {
-    return 4.0f - 8.0f * t + 5.0f * t * t - t * t * t;
+__kernel void interpolate_z_1d(__global float* image, __global float* image_out, int magnification_z, int frame_i) {
+  int sM = get_global_id(0);
+  int r = get_global_id(1);
+  int c = get_global_id(2);
+  float slice = sM / magnification_z;
+
+  int slicesM = get_global_size(0);
+  int rows = get_global_size(1);
+  int cols = get_global_size(2);
+  int slices = (int)(slicesM / magnification_z);
+
+  int slice0 = (int)floor(slice);
+  int slice1 = slice0 + 1;
+
+  float weight1 = slice - slice0;
+  float weight0 = 1.0f - weight1;
+
+  if (slice0 >= 0 && slice1 < slices) {
+    image_out[sM * rows * cols + r * cols + c] =
+        weight0 * image[frame_i * slices * rows * cols + slice0 * rows * cols + r * cols + c] +
+        weight1 * image[frame_i * slices * rows * cols + slice1 * rows * cols + r * cols + c];
+  } else if (slice0 >= 0) {
+    image_out[sM * rows * cols + r * cols + c] =
+        image[frame_i * slices * rows * cols + slice0 * rows * cols + r * cols + c];
+  } else if (slice1 < slices) {
+    image_out[sM * rows * cols + r * cols + c] =
+        image[frame_i * slices * rows * cols + slice1 * rows * cols + r * cols + c];
+  } else {
+    image_out[sM * rows * cols + r * cols + c] = 0.0f;
   }
-  return 0.0f;
 }
 
+float _c_cubic(double v) {
+  double a = 0.5;
+  double z = 0;
+  if (v < 0) {
+    v = -v;
+  }
+  if (v < 1) {
+    z = v * v * (v * (-a + 2) + (a - 3)) + 1;
+  } else if (v < 2) {
+    z = -a * v * v * v + 5 * a * v * v - 8 * a * v + 4 * a;
+  }
+  return z;
+}
 
-__kernel void interpolate_3d(__global float* image, __global float* magnified_image, int magnification_xy, int magnification_z, int f) {
-  int s = get_global_id(0);
-  int row = get_global_id(1);
-  int col = get_global_id(2);
+float _c_interpolate_cr(__global float *image, int s, int r, float c, int rows, int cols) {
+  // return 0 if r OR c positions do not exist in image
+  if (r < 0 || r >= rows || c < 0 || c >= cols) {
+    return 0;
+  }
 
-  int slices = get_global_size(0) / magnification_z;
-  int rows = get_global_size(1) / magnification_xy;
-  int cols = get_global_size(2) / magnification_xy;
+  const int r_int = (int)floor((float) (r - 0.5));
+  const int c_int = (int)floor((float) (c - 0.5));
+  double q = 0;
+  double p = 0;
 
-  // Linear interpolation in z
-  float z_ratio = (float)s / magnification_z;
-  int z0 = (int)floor(z_ratio);
-  int z1 = z0 + 1;
-  z1 = z1 < slices ? z1 : slices - 1;
-  float z_weight = z_ratio - z0;
+  int r_neighbor, c_neighbor;
 
-  // Bicubic interpolation in xy
-  float y_ratio = (float)row / magnification_xy;
-  float x_ratio = (float)col / magnification_xy;
-  int y0 = (int)floor(y_ratio);
-  int x0 = (int)floor(x_ratio);
-  float y_weight = y_ratio - y0;
-  float x_weight = x_ratio - x0;
-
-  float result = 0.0f;
-  for (int dz = 0; dz <= 1; dz++) {
-    int z = dz == 0 ? z0 : z1;
-    float z_contrib = dz == 0 ? (1 - z_weight) : z_weight;
-
-    for (int dy = -1; dy <= 2; dy++) {
-      int y = y0 + dy;
-      y = y > 0 ? (y < rows ? y : rows - 1) : 0;
-      float y_contrib = catmull_rom_weight(y_weight, dy);
-
-      for (int dx = -1; dx <= 2; dx++) {
-        int x = x0 + dx;
-        x = x > 0 ? (x < cols ? x : cols - 1) : 0;
-        float x_contrib = catmull_rom_weight(x_weight, dx);
-
-        float pixel_value = image[f * slices * rows * cols + z * rows * cols + y * cols + x];
-        result += pixel_value * z_contrib * y_contrib * x_contrib;
-      }
+  for (int j = 0; j < 4; j++) {
+    c_neighbor = c_int - 1 + j;
+    p = 0;
+    if (c_neighbor < 0 || c_neighbor >= cols) {
+      continue;
     }
-  }
 
-  magnified_image[s * get_global_size(1) * get_global_size(2) + row * get_global_size(2) + col] = result;
+    for (int i = 0; i < 4; i++) {
+      r_neighbor = r_int - 1 + i;
+      if (r_neighbor < 0 || r_neighbor >= rows) {
+        continue;
+      }
+      p = p + image[s * rows * cols + r_neighbor * cols + c_neighbor] *
+                  _c_cubic(r - (r_neighbor + 0.5));
+    }
+    q = q + p * _c_cubic(c - (c_neighbor + 0.5));
+  }
+  return image[s * rows * cols + r_neighbor * cols + c_neighbor]; //q;
 }
+
+__kernel void interpolate_xy_2d(__global float* image, __global float* image_out, int magnification_xy, int frame_i) {
+  int s = get_global_id(0);
+  int rM = get_global_id(1);
+  int cM = get_global_id(2);
+
+  float row = rM / magnification_xy;
+  float col = cM / magnification_xy;
+
+  int slices = get_global_size(0);
+  int rowsM = get_global_size(1);
+  int colsM = get_global_size(2);
+
+  int rows = (int)(rowsM / magnification_xy);
+  int cols = (int)(colsM / magnification_xy);
+  int nPixels_out = slices * rowsM * colsM;
+
+  image_out[s * rowsM * colsM + rM * colsM + cM] =  _c_interpolate_cr(&image[frame_i * slices * rows * cols], s, row, col, rows, cols);
+}
+
 
 void _c_gradient_3d(__global float* image, __global float* imGc, __global float* imGr, __global float* imGs, int slices, int rows, int cols, int z_i, int y_i, int x_i) {
   float z0x0y0, z0x0y1, z0x1y0, z0x_1y0, z0x0y_1;

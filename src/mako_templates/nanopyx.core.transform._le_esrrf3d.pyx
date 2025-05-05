@@ -157,6 +157,7 @@ class eSRRF3D(LiquidEngine):
 
         # create input cl buffers
         input_buffer = cl.Buffer(cl_ctx, cl.mem_flags.READ_ONLY | cl.mem_flags.COPY_HOST_PTR, hostbuf=np.ascontiguousarray(image))
+        intermediate_buffer = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, size=image.shape[1] * image.shape[2] * magnification_xy * image.shape[3] * magnification_xy * np.dtype(np.float32).itemsize)
         input_magnified_buffer = cl.Buffer(cl_ctx, cl.mem_flags.READ_WRITE, size=output_array.nbytes)
 
         # create gradient buffers
@@ -178,7 +179,8 @@ class eSRRF3D(LiquidEngine):
         # create cl code, program and kernels
         cl_code = self._get_cl_code("_le_esrrf3d_.cl", device["DP"])
         cl_prg = cl.Program(cl_ctx, cl_code).build(options=["-cl-fast-relaxed-math", "-cl-mad-enable"])
-        interpolate_kernel = cl_prg.interpolate_3d
+        interpolate_xy_kernel = cl_prg.interpolate_xy_2d
+        interpolate_z_kernel = cl_prg.interpolate_z_1d
         gradients_kernel = cl_prg.gradients_3d
         rgc_kernel = cl_prg.calculate_rgc3D
         if mode == "average":
@@ -211,17 +213,25 @@ class eSRRF3D(LiquidEngine):
         # loop over frames:
         for frame_i in range(image.shape[0]):
             # interpolate image
-            interpolate_kernel(
+            interpolate_xy_kernel(
                 cl_queue,
-                (output_shape[0], output_shape[1], output_shape[2]),
+                (image.shape[1], output_shape[1], output_shape[2]),
                 None,
                 input_buffer,
-                input_magnified_buffer,
+                intermediate_buffer,
                 np.int32(magnification_xy),
-                np.int32(magnification_z),
                 np.int32(frame_i),
             ).wait()
 
+            interpolate_z_kernel(
+                cl_queue,
+                (output_shape[0], output_shape[1], output_shape[2]),
+                None,
+                intermediate_buffer,
+                input_magnified_buffer,
+                np.int32(magnification_z),
+                np.int32(frame_i),
+            ).wait()
 
             # calculate gradients
             gradients_kernel(
@@ -238,38 +248,60 @@ class eSRRF3D(LiquidEngine):
                 np.int32(frame_i),
             ).wait()
 
-
-
             # interpolate gradients
-            interpolate_kernel(
+            interpolate_xy_kernel(
                 cl_queue,
-                (output_shape[0], output_shape[1], output_shape[2]),
+                (image.shape[1], output_shape[1], output_shape[2]),
                 None,
                 slices_gradient_buffer,
-                slices_gradient_magnified_buffer,
+                intermediate_buffer,
                 np.int32(magnification_xy),
+                np.int32(frame_i),
+            ).wait()
+            interpolate_z_kernel(
+                cl_queue,
+                (output_shape[0], output_shape[1], output_shape[2]),
+                None,
+                intermediate_buffer,
+                slices_gradient_magnified_buffer,
                 np.int32(magnification_z),
                 np.int32(frame_i),
             ).wait()
 
-            interpolate_kernel(
+            interpolate_xy_kernel(
                 cl_queue,
-                (output_shape[0], output_shape[1], output_shape[2]),
+                (image.shape[1], output_shape[1], output_shape[2]),
                 None,
                 rows_gradient_buffer,
-                rows_gradient_magnified_buffer,
+                intermediate_buffer,
                 np.int32(magnification_xy),
+                np.int32(frame_i),
+            ).wait()
+            interpolate_z_kernel(
+                cl_queue,
+                (output_shape[0], output_shape[1], output_shape[2]),
+                None,
+                intermediate_buffer,
+                rows_gradient_magnified_buffer,
                 np.int32(magnification_z),
                 np.int32(frame_i),
             ).wait()
 
-            interpolate_kernel(
+            interpolate_xy_kernel(
+                cl_queue,
+                (image.shape[1], output_shape[1], output_shape[2]),
+                None,
+                cols_gradient_buffer,
+                intermediate_buffer,
+                np.int32(magnification_xy),
+                np.int32(frame_i),
+            ).wait()
+            interpolate_z_kernel(
                 cl_queue,
                 (output_shape[0], output_shape[1], output_shape[2]),
                 None,
-                cols_gradient_buffer,
+                intermediate_buffer,
                 cols_gradient_magnified_buffer,
-                np.int32(magnification_xy),
                 np.int32(magnification_z),
                 np.int32(frame_i),
             ).wait()
