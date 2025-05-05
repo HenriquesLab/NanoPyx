@@ -44,7 +44,7 @@ float _c_cubic(double v) {
   return z;
 }
 
-float _c_interpolate_cr(__global float *image, int s, int r, float c, int rows, int cols) {
+float _c_interpolate_cr(__global float *image, int s, int r, int c, int rows, int cols) {
   // return 0 if r OR c positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
@@ -74,7 +74,7 @@ float _c_interpolate_cr(__global float *image, int s, int r, float c, int rows, 
     }
     q = q + p * _c_cubic(c - (c_neighbor + 0.5));
   }
-  return image[s * rows * cols + r_neighbor * cols + c_neighbor]; //q;
+  return q;
 }
 
 __kernel void interpolate_xy_2d(__global float* image, __global float* image_out, int magnification_xy, int frame_i) {
