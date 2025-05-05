@@ -65,39 +65,50 @@ void _c_gradient_roberts_cross(float* image, float* imGc, float* imGr, int rows,
     }
 }
 
-// as in https://www.nature.com/articles/s41592-022-01669-y#MOESM1
-// 3D Gradient calculation
+
 void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slices,
                  int rows, int cols) {
-  float ip0, ip1, ip2, ip3, ip4, ip5, ip6, ip7;
+  float z0x0y0, z0x0y1, z0x1y0, z0x_1y0, z0x0y_1;
+  float z1x0y0, z_1x0y0;
 
-  int z_i, y_i, x_i, z_1, y_1, x_1;
+  int z_plus1, y_plus1, x_plus1,
+      z_minus1, y_minus1, x_minus1;
 
+  int z_i, y_i, x_i;
+  
   for (z_i = 0; z_i < slices; z_i++) {
     for (y_i = 0; y_i < rows; y_i++) {
       for (x_i = 0; x_i < cols; x_i++) {
 
-        z_1 = z_i >= slices - 1 ? slices - 1 : z_i + 1;
-        y_1 = y_i >= rows - 1 ? rows - 1 : y_i + 1;
-        x_1 = x_i >= cols - 1 ? cols - 1 : x_i + 1;
-        ip0 = image[z_i * rows * cols + y_i * cols + x_i];
-        ip1 = image[z_i * rows * cols + y_i * cols + x_1];
-        ip2 = image[z_i * rows * cols + y_1 * cols + x_i];
-        ip3 = image[z_i * rows * cols + y_1 * cols + x_1];
-        ip4 = image[z_1 * rows * cols + y_i * cols + x_i];
-        ip5 = image[z_1 * rows * cols + y_i * cols + x_1];
-        ip6 = image[z_1 * rows * cols + y_1 * cols + x_i];
-        ip7 = image[z_1 * rows * cols + y_1 * cols + x_1];
-        imGc[z_i * rows* cols + y_i * cols + x_i] =
-            (ip1 + ip3 + ip5 + ip7 - ip0 - ip2 - ip4 - ip6) / 4;
-        imGr[z_i * rows* cols + y_i * cols + x_i] =
-            (ip2 + ip3 + ip6 + ip7 - ip0 - ip1 - ip4 - ip5) / 4;
-        imGs[z_i * rows* cols + y_i * cols + x_i] =
-            (ip4 + ip5 + ip6 + ip7 - ip0 - ip1 - ip2 - ip3) / 4;
+        z_plus1 = z_i >= slices - 1 ? slices - 1 : z_i + 1;
+        y_plus1 = y_i >= rows - 1 ? rows - 1 : y_i + 1;
+        x_plus1 = x_i >= cols - 1 ? cols - 1 : x_i + 1;
+
+        z_minus1 = z_i <= 0 ? 0 : z_i - 1;
+        y_minus1 = y_i <= 0 ? 0 : y_i - 1;
+        x_minus1 = x_i <= 0 ? 0 : x_i - 1;
+
+        // z=0
+        z0x0y0 = image[z_i * rows * cols + y_i * cols + x_i];  // central pixel
+        z0x0y1 = image[z_i * rows * cols + y_plus1 * cols + x_i]; // y+1
+        z0x1y0 = image[z_i * rows * cols + y_i * cols + x_plus1]; // x+1
+        z0x0y_1 = image[z_i * rows * cols + y_minus1 * cols + x_i]; // y-1
+        z0x_1y0 = image[z_i * rows * cols + y_i * cols + x_minus1]; // x-1
+
+        // z=1 
+        z1x0y0 = image[z_plus1 * rows * cols + y_i * cols + x_i]; // z+1
+        
+        // z=-1
+        z_1x0y0 = image[z_minus1 * rows * cols + y_i * cols + x_i]; // z-1
+        
+        imGc[z_i * rows* cols + y_i * cols + x_i] = (z0x1y0 - z0x_1y0)/2;
+        imGr[z_i * rows* cols + y_i * cols + x_i] = (z0x0y1 - z0x0y_1)/2;
+        imGs[z_i * rows* cols + y_i * cols + x_i] = (z0x0y0 - z_1x0y0)/2;
       }
     }
   }
 }
+
 
 void _c_gradient_2_point_3d(float* image, float* imGc, float* imGr, float* imGs, int slices, int rows, int cols) {
   int s_i, y_i, x_i, s0, y0, x0;
