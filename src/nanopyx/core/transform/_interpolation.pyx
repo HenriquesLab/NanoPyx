@@ -7,6 +7,8 @@ import cython
 
 from ._le_interpolation_catmull_rom import ShiftAndMagnify as ShiftMagnify_CR
 
+from cython.parallel import prange
+
 
 cdef extern from "_c_interpolation_catmull_rom.h":
     float _c_cr_interpolate "_c_interpolate" (float *image, float row, float col, int rows, int cols) 
@@ -46,11 +48,45 @@ def linear_interpolation_1D_z(image, magnification):
     
     return image_interpolated
 
+cdef _linear_interpolation_1D_z(float[:, :, :] image, int magnification_z):
+
+    cdef int slices = image.shape[0]
+    cdef int slicesM = int(image.shape[0] * magnification_z)
+    cdef int rows = image.shape[1]
+    cdef int cols = image.shape[2]
+
+    cdef int sM, r, c
+    cdef int slice0, slice1, slc
+    cdef float weight0, weight1
+
+    cdef float[:, :, :] image_out = np.zeros((slicesM, rows, cols), dtype=np.float32)
+
+    with nogil:
+        for sM in range(slicesM):
+            for r in prange(rows):
+                for c in prange(cols):
+                    slice0 = sM / magnification_z;
+                    slice1 = slice0 + 1;
+
+                    weight1 = sM % magnification_z;
+                    weight0 = 1.0 - weight1;
+
+                    if slice0 >= 0 and slice1 < slices:
+                        image_out[sM, r, c] = weight0 * image[slice0, r, c] + weight1 * image[slice1, r, c];
+                    elif slice0 >= 0:
+                        image_out[sM, r, c] = image[slice0, r, c];
+                    elif slice1 < slices:
+                        image_out[sM, r, c] = image[slice1, r, c];
+                    else:
+                        image_out[sM, r, c] = 0.0;
+
+    return image_out
+
 
 def interpolate_3d_zlinear(image, magnification_xy: int = 5, magnification_z: int = 5):
     interpolator_xy = ShiftMagnify_CR(verbose=False)
 
-    xy_interpolated = interpolator_xy.run(np.ascontiguousarray(image), 0, 0, magnification_xy, magnification_xy)
-    z_interpolated = linear_interpolation_1D_z(xy_interpolated, magnification_z)
+    xy_interpolated = interpolator_xy.run(image, 0, 0, 1, 1)
+    z_interpolated = _linear_interpolation_1D_z(image, magnification_z)
 
     return z_interpolated
