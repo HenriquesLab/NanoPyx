@@ -87,6 +87,6 @@ def interpolate_3d_zlinear(image, magnification_xy: int = 5, magnification_z: in
     interpolator_xy = ShiftMagnify_CR(verbose=False)
 
     xy_interpolated = interpolator_xy.run(image, 0, 0, 1, 1)
-    z_interpolated = _linear_interpolation_1D_z(image, magnification_z)
+    z_interpolated = _linear_interpolation_1D_z(xy_interpolated, magnification_z)
 
     return z_interpolated
