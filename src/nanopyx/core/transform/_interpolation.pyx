@@ -4,8 +4,12 @@ import numpy as np
 cimport numpy as np
 
 import cython
+from math import floor
 
 from ._le_interpolation_catmull_rom import ShiftAndMagnify as ShiftMagnify_CR
+from ._le_interpolation_bicubic import ShiftAndMagnify as ShiftMagnify_BC
+from ._le_interpolation_lanczos import ShiftAndMagnify as ShiftMagnify_Lanczos
+from ._le_interpolation_nearest_neighbor import ShiftAndMagnify as ShiftMagnify_NN
 
 from cython.parallel import prange
 
@@ -61,15 +65,17 @@ cdef _linear_interpolation_1D_z(float[:, :, :] image, int magnification_z):
 
     cdef float[:, :, :] image_out = np.zeros((slicesM, rows, cols), dtype=np.float32)
 
-    with nogil:
-        for sM in range(slicesM):
+
+    for sM in range(slicesM):
+        slc = sM / magnification_z
+        slice0 = int(floor(slc))
+        slice1 = slice0 + 1
+        weight1 = slc - slice0
+        weight0 = 1.0 - weight1
+        with nogil:
             for r in prange(rows):
                 for c in prange(cols):
-                    slice0 = sM / magnification_z;
-                    slice1 = slice0 + 1;
-
-                    weight1 = sM % magnification_z;
-                    weight0 = 1.0 - weight1;
+                    
 
                     if slice0 >= 0 and slice1 < slices:
                         image_out[sM, r, c] = weight0 * image[slice0, r, c] + weight1 * image[slice1, r, c];

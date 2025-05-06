@@ -136,7 +136,7 @@ class eSRRF3D(LiquidEngine):
             rgc_out = np.sqrt(np.asarray(rgc_out) / n_frames)
             return rgc_out
         else:
-            return np.asarray(gradients_row_mag)
+            return np.asarray(rgc_out)
     % endfor
 
     def _run_opencl(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, device=None, mem_div=1):
@@ -354,7 +354,7 @@ class eSRRF3D(LiquidEngine):
                     np.int32(frame_i),
                 ).wait()
             cl_queue.finish()
-        cl.enqueue_copy(cl_queue, output_array, rows_gradient_magnified_buffer).wait()
+        cl.enqueue_copy(cl_queue, output_array, output_buffer).wait()
 
         if mode == "std":
             return np.asarray(np.sqrt(output_array / image.shape[0]))

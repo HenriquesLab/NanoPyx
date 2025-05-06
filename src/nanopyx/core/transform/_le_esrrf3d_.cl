@@ -34,9 +34,9 @@ __kernel void interpolate_z_1d(__global float* image, __global float* image_out,
   }
 }
 
-float _c_cubic(double v) {
-  double a = 0.5;
-  double z = 0;
+float _c_cubic(float v) {
+  float a = 0.5;
+  float z = 0;
   if (v < 0) {
     v = -v;
   }
@@ -48,6 +48,15 @@ float _c_cubic(double v) {
   return z;
 }
 
+float _c_interpolate(__global float *image, float row, float col, int rows, int cols) {
+  int r = (int)row;
+  int c = (int)col;
+  if (r < 0 || r >= rows || c < 0 || c >= cols) {
+    return 0;
+  }
+  return image[r * cols + c];
+}
+
 float _c_interpolate_cr(__global float *image, float r, float c, int rows, int cols) {
   // return 0 if r OR c positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
@@ -56,8 +65,8 @@ float _c_interpolate_cr(__global float *image, float r, float c, int rows, int c
 
   const int r_int = (int)floor((float) (r - 0.5));
   const int c_int = (int)floor((float) (c - 0.5));
-  double q = 0;
-  double p = 0;
+  float q = 0;
+  float p = 0;
 
   int r_neighbor, c_neighbor;
 
@@ -151,7 +160,7 @@ __kernel void gradients_3d(__global float* image, __global float* imGs, __global
   }
 }
 
-double _c_calculate_dw3D(double distance, double distance_xy, double distance_z,double tSS, double tSS_z) {
+float _c_calculate_dw3D(float distance, float distance_xy, float distance_z,float tSS, float tSS_z) {
   float D_weight_xy, D_weight_z, D_weight;
   D_weight_xy = (exp((-distance_xy * distance_xy) / tSS));
   D_weight_z = (exp((-distance_z * distance_z) / tSS_z));
@@ -159,7 +168,7 @@ double _c_calculate_dw3D(double distance, double distance_xy, double distance_z,
   return pow(D_weight, 4);
 }
 
-double _c_calculate_dk3D(float Gx, float Gy, float Gz, float dx, float dy, float dz, float distance) {
+float _c_calculate_dk3D(float Gx, float Gy, float Gz, float dx, float dy, float dz, float distance) {
   float Dk = sqrt((Gy * dz - Gz * dy) * (Gy * dz - Gz * dy) + (Gz * dx - Gx * dz) * (Gz * dx - Gx * dz) + (Gx * dy - Gy * dx) * (Gx * dy - Gy * dx)) / sqrt(Gx * Gx + Gy * Gy + Gz * Gz);
   if (isnan(Dk)) {
     Dk = distance;
@@ -320,8 +329,8 @@ __kernel void time_projection_std(
         // Update the running mean
         float delta = current_slice[current_index] - mean_output[current_index];
         mean_output[current_index] += delta / (frame_i + 1);
-
+        float delta2 = current_slice[current_index] - mean_output[current_index];
         // Update the running variance
-        variance_output[current_index] += delta * (current_slice[current_index] - mean_output[current_index]);
+        variance_output[current_index] += delta * delta2;
     }
 }
