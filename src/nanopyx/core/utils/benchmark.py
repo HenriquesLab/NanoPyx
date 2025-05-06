@@ -41,6 +41,7 @@ def benchmark_all_le_methods(
     rgc = nanopyx.core.transform._le_radial_gradient_convergence.RadialGradientConvergence()
 
     esrrf = nanopyx.core.transform._le_esrrf.eSRRF()
+    esrrf3d = nanopyx.core.transform._le_esrrf3d.eSRRF3D()
 
     nlm = nanopyx.core.transform._le_nlm_denoising.NLMDenoising()
 
@@ -77,6 +78,9 @@ def benchmark_all_le_methods(
 
     for i in range(n_benchmark_runs):
         esrrf.benchmark(img)
+
+    for i in range(n_benchmark_runs):
+        esrrf3d.benchmark(img[np.newaxis, ...])
 
     for i in range(n_benchmark_runs):
         nlm.benchmark(img)
