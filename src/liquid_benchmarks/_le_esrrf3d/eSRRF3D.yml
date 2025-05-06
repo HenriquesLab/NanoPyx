@@ -1,36 +1,48 @@
-Threaded:
-  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
-  : - 600000.0
-    - 3.009124042
-    - 3.0523655000000005
-    - 3.0673777499999986
-Threaded_dynamic:
-  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
-  : - 600000.0
-    - 2.9377308749999997
-    - 3.038488291
-    - 2.9445285420000076
-    - 3.01370875
-Threaded_guided:
-  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
-  : - 600000.0
-    - 2.9383910419999992
-    - 3.179585459000002
-    - 2.9465658749999903
-Threaded_static:
-  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
-  : - 600000.0
-    - 3.0556022499999997
-    - 3.011091624999999
-    - 3.0389940410000023
-Unthreaded:
-  ? '([''shape(1, 10, 100, 100)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''sensitivity'': 1.0, ''doIntensityWeighting'': True})'
-  : - 600000.0
-    - 10.075773250000001
-    - 10.147714
-    - 10.096515416999999
+opencl:
+  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
+  : - 12363612.0
+    - 0.534501292015193
+    - 0.4527143339801114
+    - 0.4526337919814978
+threaded:
+  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
+  : - 12363612.0
+    - 1.9790987920132466
+    - 1.9240770420001354
+    - 1.895047333004186
+threaded_dynamic:
+  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
+  : - 12363612.0
+    - 1.7660593329928815
+    - 1.719053625012748
+    - 1.7240022089972626
+threaded_guided:
+  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
+  : - 12363612.0
+    - 1.781112333002966
+    - 1.8617710830003489
+    - 2.0126889999955893
+threaded_static:
+  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
+  : - 12363612.0
+    - 1.8515684169833548
+    - 1.8730584580043796
+    - 1.8657334169838578
+unthreaded:
+  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
+  : - 12363612.0
+    - 4.863078458001837
+    - 4.9081600419885945
+    - 4.920950291998452
