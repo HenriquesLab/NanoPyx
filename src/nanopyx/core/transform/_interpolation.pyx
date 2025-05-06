@@ -86,7 +86,13 @@ cdef _linear_interpolation_1D_z(float[:, :, :] image, int magnification_z):
 def interpolate_3d_zlinear(image, magnification_xy: int = 5, magnification_z: int = 5):
     interpolator_xy = ShiftMagnify_CR(verbose=False)
 
-    xy_interpolated = interpolator_xy.run(image, 0, 0, 1, 1)
-    z_interpolated = _linear_interpolation_1D_z(xy_interpolated, magnification_z)
+    if magnification_xy > 1:
+        xy_interpolated = np.asarray(interpolator_xy.run(np.ascontiguousarray(image), 0, 0, magnification_xy, magnification_xy))
+    else:
+        xy_interpolated = np.asarray(image)
+    if magnification_z > 1:
+        z_interpolated = _linear_interpolation_1D_z(xy_interpolated, magnification_z)
+    else:
+        z_interpolated = np.asarray(xy_interpolated)
 
     return z_interpolated

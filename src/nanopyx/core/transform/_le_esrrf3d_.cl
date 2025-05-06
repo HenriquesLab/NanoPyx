@@ -1,4 +1,4 @@
-__kernel void interpolate_z_1d(__global float* image, __global float* image_out, int magnification_z, int frame_i) {
+__kernel void interpolate_z_1d(__global float* image, __global float* image_out, float magnification_z, int frame_i) {
   int sM = get_global_id(0);
   int r = get_global_id(1);
   int c = get_global_id(2);
@@ -15,7 +15,11 @@ __kernel void interpolate_z_1d(__global float* image, __global float* image_out,
   float weight1 = slice - slice0;
   float weight0 = 1.0f - weight1;
 
-  if (slice0 >= 0 && slice1 < slices) {
+  if (magnification_z == 1) {
+    image_out[sM * rows * cols + r * cols + c] =
+        image[frame_i * slices * rows * cols + slice0 * rows * cols + r * cols + c];
+  }
+  else if (slice0 >= 0 && slice1 < slices) {
     image_out[sM * rows * cols + r * cols + c] =
         weight0 * image[frame_i * slices * rows * cols + slice0 * rows * cols + r * cols + c] +
         weight1 * image[frame_i * slices * rows * cols + slice1 * rows * cols + r * cols + c];
@@ -44,7 +48,7 @@ float _c_cubic(double v) {
   return z;
 }
 
-float _c_interpolate_cr(__global float *image, int s, int r, int c, int rows, int cols) {
+float _c_interpolate_cr(__global float *image, float r, float c, int rows, int cols) {
   // return 0 if r OR c positions do not exist in image
   if (r < 0 || r >= rows || c < 0 || c >= cols) {
     return 0;
@@ -69,7 +73,7 @@ float _c_interpolate_cr(__global float *image, int s, int r, int c, int rows, in
       if (r_neighbor < 0 || r_neighbor >= rows) {
         continue;
       }
-      p = p + image[s * rows * cols + r_neighbor * cols + c_neighbor] *
+      p = p + image[r_neighbor * cols + c_neighbor] *
                   _c_cubic(r - (r_neighbor + 0.5));
     }
     q = q + p * _c_cubic(c - (c_neighbor + 0.5));
@@ -77,7 +81,7 @@ float _c_interpolate_cr(__global float *image, int s, int r, int c, int rows, in
   return q;
 }
 
-__kernel void interpolate_xy_2d(__global float* image, __global float* image_out, int magnification_xy, int frame_i) {
+__kernel void interpolate_xy_2d(__global float* image, __global float* image_out, float magnification_xy, int frame_i) {
   int s = get_global_id(0);
   int rM = get_global_id(1);
   int cM = get_global_id(2);
@@ -91,9 +95,15 @@ __kernel void interpolate_xy_2d(__global float* image, __global float* image_out
 
   int rows = (int)(rowsM / magnification_xy);
   int cols = (int)(colsM / magnification_xy);
-  int nPixels_out = slices * rowsM * colsM;
 
-  image_out[s * rowsM * colsM + rM * colsM + cM] =  _c_interpolate_cr(&image[frame_i * slices * rows * cols], s, row, col, rows, cols);
+  if (magnification_xy == 1) {
+    image_out[s * rowsM * colsM + rM * colsM + cM] =
+        image[frame_i * slices * rows * cols + s * rows * cols + rM * cols + cM];
+  }
+  else {
+    image_out[s * rowsM * colsM + rM * colsM + cM] =
+        _c_interpolate_cr(&image[frame_i * slices * rows * cols], row, col, rows, cols);
+  }
 }
 
 
@@ -227,11 +237,19 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
         }
     }
 
+    if (distanceWeightSum == 0) {
+        return 0;
+    }
+
     RGC = RGC / distanceWeightSum;
 
     if (RGC >= 0 && sensitivity > 1) {
         RGC = pow(RGC, sensitivity);
     } else if (RGC < 0) {
+        RGC = 0;
+    }
+
+    if (isnan(RGC)) {
         RGC = 0;
     }
 
