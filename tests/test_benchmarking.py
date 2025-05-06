@@ -45,6 +45,9 @@ def test_benchmark_esrrf(random_image_with_ramp):
     esrrf = nanopyx.core.transform._le_esrrf.eSRRF()
     esrrf.benchmark(random_image_with_ramp)
 
+def test_benchmark_esrrf3d():
+    esrrf = nanopyx.core.transform._le_esrrf3d.eSRRF3D()
+    esrrf.benchmark(np.random.random((1,10,10,10)).astype(np.float32))
 
 def test_benchmark_nlm(random_image_with_ramp):
     nlm = nanopyx.core.transform._le_nlm_denoising.NLMDenoising()
