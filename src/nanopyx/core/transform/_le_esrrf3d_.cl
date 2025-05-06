@@ -111,7 +111,7 @@ __kernel void interpolate_xy_2d(__global float* image, __global float* image_out
   }
   else {
     image_out[s * rowsM * colsM + rM * colsM + cM] =
-        _c_interpolate_cr(&image[frame_i * slices * rows * cols], row, col, rows, cols);
+        _c_interpolate_cr(&image[frame_i * slices * rows * cols + s * rows * cols], row, col, rows, cols);
   }
 }
 
