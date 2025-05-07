@@ -1,0 +1,6 @@
+[run]
+omit =
+    */convolution.py
+    */_transonic.py
+    */_le_template_simple_.py
+    */benchmark.py
