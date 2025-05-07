@@ -2,10 +2,19 @@ import math
 import nanopyx
 import numpy as np
 
-from ..generate.beads import generate_channel_misalignment, generate_timelapse_drift
+from ..generate.beads import (
+    generate_channel_misalignment,
+    generate_timelapse_drift,
+)
+
 
 def benchmark_all_le_methods(
-    n_benchmark_runs=3, img_dims=100, shift=1, magnification=2, rotation=math.radians(15), conv_kernel_dims=5
+    n_benchmark_runs=3,
+    img_dims=100,
+    shift=1,
+    magnification=2,
+    rotation=math.radians(15),
+    conv_kernel_dims=5,
 ):
     """
     Runs benchmark tests for all LE methods.
@@ -21,24 +30,44 @@ def benchmark_all_le_methods(
     """
 
     img = np.random.random((img_dims, img_dims)).astype(np.float32)
-    img_int = np.random.random((img_dims * magnification, img_dims * magnification)).astype(np.float32)
+    img_int = np.random.random(
+        (img_dims * magnification, img_dims * magnification)
+    ).astype(np.float32)
     kernel = np.ones((conv_kernel_dims, conv_kernel_dims)).astype(np.float32)
 
-    bicubic_sm = nanopyx.core.transform._le_interpolation_bicubic.ShiftAndMagnify()
-    bicubic_ssr = nanopyx.core.transform._le_interpolation_bicubic.ShiftScaleRotate()
-    cr_sm = nanopyx.core.transform._le_interpolation_catmull_rom.ShiftAndMagnify()
-    cr_ssr = nanopyx.core.transform._le_interpolation_catmull_rom.ShiftScaleRotate()
+    bicubic_sm = (
+        nanopyx.core.transform._le_interpolation_bicubic.ShiftAndMagnify()
+    )
+    bicubic_ssr = (
+        nanopyx.core.transform._le_interpolation_bicubic.ShiftScaleRotate()
+    )
+    cr_sm = (
+        nanopyx.core.transform._le_interpolation_catmull_rom.ShiftAndMagnify()
+    )
+    cr_ssr = (
+        nanopyx.core.transform._le_interpolation_catmull_rom.ShiftScaleRotate()
+    )
     l_sm = nanopyx.core.transform._le_interpolation_lanczos.ShiftAndMagnify()
     l_ssr = nanopyx.core.transform._le_interpolation_lanczos.ShiftScaleRotate()
-    nn_sm = nanopyx.core.transform._le_interpolation_nearest_neighbor.ShiftAndMagnify()
-    nn_ssr = nanopyx.core.transform._le_interpolation_nearest_neighbor.ShiftScaleRotate()
-    nn_pt = nanopyx.core.transform._le_interpolation_nearest_neighbor.PolarTransform()
+    nn_sm = (
+        nanopyx.core.transform._le_interpolation_nearest_neighbor.ShiftAndMagnify()
+    )
+    nn_ssr = (
+        nanopyx.core.transform._le_interpolation_nearest_neighbor.ShiftScaleRotate()
+    )
+    nn_pt = (
+        nanopyx.core.transform._le_interpolation_nearest_neighbor.PolarTransform()
+    )
 
     conv2d = nanopyx.core.transform._le_convolution.Convolution()
 
     rad = nanopyx.core.transform._le_radiality.Radiality()
-    rc = nanopyx.core.transform._le_roberts_cross_gradients.GradientRobertsCross()
-    rgc = nanopyx.core.transform._le_radial_gradient_convergence.RadialGradientConvergence()
+    rc = (
+        nanopyx.core.transform._le_roberts_cross_gradients.GradientRobertsCross()
+    )
+    rgc = (
+        nanopyx.core.transform._le_radial_gradient_convergence.RadialGradientConvergence()
+    )
 
     esrrf = nanopyx.core.transform._le_esrrf.eSRRF()
     esrrf3d = nanopyx.core.transform._le_esrrf3d.eSRRF3D()
@@ -55,13 +84,21 @@ def benchmark_all_le_methods(
         nn_sm.benchmark(img, shift, shift, magnification, magnification)
 
     for i in range(n_benchmark_runs):
-        bicubic_ssr.benchmark(img, shift, shift, magnification, magnification, rotation)
+        bicubic_ssr.benchmark(
+            img, shift, shift, magnification, magnification, rotation
+        )
     for i in range(n_benchmark_runs):
-        cr_ssr.benchmark(img, shift, shift, magnification, magnification, rotation)
+        cr_ssr.benchmark(
+            img, shift, shift, magnification, magnification, rotation
+        )
     for i in range(n_benchmark_runs):
-        l_ssr.benchmark(img, shift, shift, magnification, magnification, rotation)
+        l_ssr.benchmark(
+            img, shift, shift, magnification, magnification, rotation
+        )
     for i in range(n_benchmark_runs):
-        nn_ssr.benchmark(img, shift, shift, magnification, magnification, rotation)
+        nn_ssr.benchmark(
+            img, shift, shift, magnification, magnification, rotation
+        )
 
     for i in range(n_benchmark_runs):
         nn_pt.benchmark(img, (img_dims, img_dims), "log")
@@ -85,7 +122,9 @@ def benchmark_all_le_methods(
     for i in range(n_benchmark_runs):
         nlm.benchmark(img)
 
-    channel_reg = nanopyx.core.analysis._le_channel_registration.ChannelRegistrationEstimator()
+    channel_reg = (
+        nanopyx.core.analysis._le_channel_registration.ChannelRegistrationEstimator()
+    )
 
     drift_reg = nanopyx.core.analysis._le_drift_calculator.DriftEstimator()
 
