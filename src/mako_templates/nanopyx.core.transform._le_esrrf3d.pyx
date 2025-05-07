@@ -17,6 +17,8 @@ from ._le_interpolation_catmull_rom import ShiftAndMagnify
 from ...__liquid_engine__ import LiquidEngine
 from ...__opencl__ import cl, cl_array, _fastest_device
 
+from scipy.stats import pearsonr as pearson_correlation
+
 cdef extern from "_c_gradients.h":
     void _c_gradient_3d(float* image, float* imGc, float* imGr, float* imGs, int slices, int rows, int cols) nogil
 
@@ -360,3 +362,26 @@ class eSRRF3D(LiquidEngine):
             return np.asarray(np.sqrt(output_array / image.shape[0]))
         else:
             return np.asarray(output_array)
+
+
+    def _compare_runs(self, output_1, output_2):
+        """@public"""
+        if output_1.ndim > 2:
+            pcc = 0
+            count = 0 
+            for i in range(output_1.shape[0]):
+                pccresult = pearson_correlation(output_1[i, :, :].flatten(), output_2[i, :, :].flatten()).statistic
+
+                if np.isnan(pccresult):
+                    continue
+                else:
+                    count += 1
+                    # calculate pcc for each frame
+                    pcc += (pccresult-pcc) / count
+        else:
+            pcc = pearson_correlation(output_1.flatten(), output_2.flatten()).statistic
+
+        if pcc > 0.8:
+            return True
+        else:
+            return False
