@@ -280,7 +280,7 @@ __kernel void calculate_rgc3D(__global float* imIntGz, __global float* imIntGy, 
   s = s + fwhm_z*2*magnification_z;
 
   if (doIntensityWeighting == 1) {
-    tmp_slice[s * rowsM * colsM + row * colsM + col] = _c_calculate_rgc3D(col, row, s, &imIntGx[0], &imIntGy[0], &imIntGz[0], colsM, rowsM, slicesM, magnification_xy, magnification_z, ratio_px, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity) * imM[f * nPixels_out + s * rowsM * colsM + row * colsM + col];
+    tmp_slice[s * rowsM * colsM + row * colsM + col] = _c_calculate_rgc3D(col, row, s, &imIntGx[0], &imIntGy[0], &imIntGz[0], colsM, rowsM, slicesM, magnification_xy, magnification_z, ratio_px, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity) * imM[s * rowsM * colsM + row * colsM + col];
   } else {
     tmp_slice[s * rowsM * colsM + row * colsM + col] = _c_calculate_rgc3D(col, row, s, &imIntGx[0], &imIntGy[0], &imIntGz[0], colsM, rowsM, slicesM, magnification_xy, magnification_z, ratio_px, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity);
   }
