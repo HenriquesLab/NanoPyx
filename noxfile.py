@@ -69,10 +69,37 @@ def build_wheel(session: nox.Session) -> None:
         )
     elif is_macos:
         session.install("delocate==0.10.4")
+
+        # Remove per-architecture x86_64 dylibs from the wheel
+        import zipfile
+        import tempfile
+
+        wheel_path = os.path.join(temp_path, wheel_name)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_whl_dir = Path(tmpdir) / "wheel"
+            tmp_whl_dir.mkdir()
+
+            # Unzip wheel
+            with zipfile.ZipFile(wheel_path, "r") as zip_ref:
+                zip_ref.extractall(tmp_whl_dir)
+
+            # Remove the problematic metadata file
+            for path in tmp_whl_dir.rglob("*.dylibs"):
+                if "x86_64" in path.name:
+                    path.unlink()
+
+            # Re-zip
+            new_wheel_path = Path(temp_path) / f"cleaned-{wheel_name}"
+            shutil.make_archive(
+                str(new_wheel_path).removesuffix(".whl"), "zip", tmp_whl_dir
+            )
+            new_wheel_path.rename(Path(new_wheel_path).with_suffix(".whl"))
+
+        # Now safely run delocate
         session.run(
             "delocate-wheel",
             "-v",
-            os.path.join(temp_path, wheel_name),
+            str(Path(temp_path) / new_wheel_path.name),
             "-w",
             DIR / "wheelhouse",
         )
