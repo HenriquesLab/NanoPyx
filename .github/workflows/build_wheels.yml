@@ -1,4 +1,4 @@
-name: Test - Nightly
+name: (self-hosted) Build wheels
 # does a massive check, every night
 
 on:
