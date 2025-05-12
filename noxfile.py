@@ -83,23 +83,24 @@ def build_wheel(session: nox.Session) -> None:
             with zipfile.ZipFile(wheel_path, "r") as zip_ref:
                 zip_ref.extractall(tmp_whl_dir)
 
-            # Remove the problematic metadata file
-            for path in tmp_whl_dir.rglob("*.dylibs"):
+            # Remove any x86_64-specific .dylib files (adjust this if needed)
+            for path in tmp_whl_dir.rglob("*.dylib"):
                 if "x86_64" in path.name:
                     path.unlink()
 
-            # Re-zip
-            new_wheel_path = Path(temp_path) / f"cleaned-{wheel_name}"
-            shutil.make_archive(
-                str(new_wheel_path).removesuffix(".whl"), "zip", tmp_whl_dir
+            # Re-zip as a wheel
+            cleaned_base = Path(temp_path) / f"cleaned-{wheel_name}"
+            zip_path = shutil.make_archive(
+                str(cleaned_base).removesuffix(".whl"), "zip", tmp_whl_dir
             )
-            new_wheel_path.rename(Path(new_wheel_path).with_suffix(".whl"))
+            fixed_wheel_path = Path(zip_path).with_suffix(".whl")
+            Path(zip_path).rename(fixed_wheel_path)
 
         # Now safely run delocate
         session.run(
             "delocate-wheel",
             "-v",
-            str(Path(temp_path) / new_wheel_path.name),
+            str(fixed_wheel_path),
             "-w",
             DIR / "wheelhouse",
         )
