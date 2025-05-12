@@ -1,11 +1,13 @@
 name: (self-hosted) Build wheels
-# does a massive check, every night
 
 on:
+  push:
+    branches:
+      - updates  # Only run on commits to the 'updates' branch
+
   schedule:
     - cron: "0 23 * * *"
 
-  # creates a button
   workflow_dispatch:
     inputs:
       logLevel:
@@ -17,6 +19,7 @@ on:
           - info
           - warning
           - debug
+
 
 jobs:
 
