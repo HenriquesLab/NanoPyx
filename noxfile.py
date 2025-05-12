@@ -30,21 +30,29 @@ if PLATFORM == "macos":
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def build_wheel(session: nox.Session) -> None:
     """
-    Build a wheel
+    Build a wheel for ARM64 on macOS or AMD64 on Linux/Windows
     """
-    # if PLATFORM == "macos":  # build libomp from source, better ARM compatibility
-    #     path = Path(os.path.dirname(__file__)) / "build_tools" / "libs_build"
-    #     if not path:  # did we already build libomp?
-    #         session.run("bash", "build_tools/build_libomp.sh")
+    import platform
+
+    arch = platform.machine()
+    is_macos = sys.platform == "darwin"
+    is_linux = sys.platform.startswith("linux")
+    is_windows = sys.platform == "win32"
+
+    # Skip if not on the right arch/platform combination
+    if is_macos and arch != "arm64":
+        session.skip(f"Skipping macOS build on non-arm64 architecture (found {arch})")
+    elif (is_linux or is_windows) and arch != "x86_64":
+        session.skip(f"Skipping {PLATFORM} build on non-x86_64 architecture (found {arch})")
 
     session.install("build")
     temp_path = session.create_tmp()
-    # session.run("python", "-m", "build", "--wheel", "-o", temp_path)
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
-    # get the produced wheel name
+
+    # Get wheel name
     wheel_name = [name for name in os.listdir(temp_path) if name.endswith(".whl")][0]
 
-    if PLATFORM == "unix" and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
+    if is_linux and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
         session.install("auditwheel")
         session.run(
             "auditwheel",
@@ -53,8 +61,7 @@ def build_wheel(session: nox.Session) -> None:
             "-w",
             DIR / "wheelhouse",
         )
-
-    elif PLATFORM == "macos":
+    elif is_macos:
         session.install("delocate==0.10.4")
         session.run(
             "delocate-wheel",
@@ -63,13 +70,12 @@ def build_wheel(session: nox.Session) -> None:
             "-w",
             DIR / "wheelhouse",
         )
-        pass
-
     else:
         os.makedirs(DIR / "wheelhouse", exist_ok=True)
         for file in os.listdir(temp_path):
             if file.endswith(".whl"):
                 shutil.copy(os.path.join(temp_path, file), DIR / "wheelhouse")
+
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
