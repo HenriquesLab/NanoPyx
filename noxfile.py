@@ -41,16 +41,22 @@ def build_wheel(session: nox.Session) -> None:
 
     # Skip if not on the right arch/platform combination
     if is_macos and arch != "arm64":
-        session.skip(f"Skipping macOS build on non-arm64 architecture (found {arch})")
-    elif (is_linux or is_windows) and arch != "x86_64":
-        session.skip(f"Skipping {PLATFORM} build on non-x86_64 architecture (found {arch})")
+        session.skip(
+            f"Skipping macOS build on non-arm64 architecture (found {arch})"
+        )
+    elif (is_linux or is_windows) and arch != "x86_64" and arch != "AMD64":
+        session.skip(
+            f"Skipping {PLATFORM} build on non-x86_64 architecture (found {arch})"
+        )
 
     session.install("build")
     temp_path = session.create_tmp()
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
 
     # Get wheel name
-    wheel_name = [name for name in os.listdir(temp_path) if name.endswith(".whl")][0]
+    wheel_name = [
+        name for name in os.listdir(temp_path) if name.endswith(".whl")
+    ][0]
 
     if is_linux and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
         session.install("auditwheel")
@@ -75,7 +81,6 @@ def build_wheel(session: nox.Session) -> None:
         for file in os.listdir(temp_path):
             if file.endswith(".whl"):
                 shutil.copy(os.path.join(temp_path, file), DIR / "wheelhouse")
-
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
@@ -118,12 +123,16 @@ def test_wheel(session):
     python_version_str = f"cp{session.python.replace('.', '')}"
     # find the latest wheel
     wheel_names = [
-        wheel for wheel in os.listdir("wheelhouse") if wheel.endswith(".whl") and python_version_str in wheel
+        wheel
+        for wheel in os.listdir("wheelhouse")
+        if wheel.endswith(".whl") and python_version_str in wheel
     ]
     wheel_names.sort()
     wheel_name = wheel_names[-1]
 
-    session.run("pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]")
+    session.run(
+        "pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]"
+    )
     with session.chdir(".nox"):
         extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
         if extra_args != "":
@@ -135,7 +144,14 @@ def test_wheel(session):
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def test_testpypi(session):
-    session.run("pip", "install", "-U", "--extra-index-url", "https://testpypi.python.org/pypi", "nanopyx[all]")
+    session.run(
+        "pip",
+        "install",
+        "-U",
+        "--extra-index-url",
+        "https://testpypi.python.org/pypi",
+        "nanopyx[all]",
+    )
     with session.chdir(".nox"):
         extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
         if extra_args != "":
