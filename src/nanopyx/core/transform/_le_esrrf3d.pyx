@@ -34,10 +34,6 @@ class eSRRF3D(LiquidEngine):
 
     def run(self, image, magnification_xy: int = 2, magnification_z: int = 2, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, run_type=None):
         # TODO: complete and check _run inputs, need to complete variables?
-        if radius * 2 > image.shape[2] / 2 or radius * 2 > image.shape[3] / 2:
-            raise ValueError("Radius is too big for the image. Half the radius must be smaller than both half the number of columns and half number of rows of the image.")
-        if radius_z * 2 > image.shape[1] / 2:
-            raise ValueError("Radius_z is too big for the image. Half the radius_z must be smaller than half of number of Z planes")
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
