@@ -34,17 +34,21 @@ class eSRRF3D(LiquidEngine):
 
     def run(self, image, magnification_xy: int = 2, magnification_z: int = 2, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, run_type=None):
         # TODO: complete and check _run inputs, need to complete variables?
-        if radius * 2 > image.shape[2] / 2 or radius * 2 > image.shape[3] / 2:
-            raise ValueError("Radius is too big for the image. Half the radius must be smaller than both half the number of columns and half number of rows of the image.")
+        if len(image.shape) == 3:
+            image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
+        if len(image.shape) != 4:
+            print("Warning:image must either be 3D or 4D. If 3D, it will be reshaped to 4D.")
+            return None
+        if radius * 2 > (image.shape[2]) / 2 or radius * 2 > (image.shape[3] / 2):
+            print("Warning: Radius is too big for the image. Half the radius must be smaller than both half the number of columns and half number of rows of the image.")
+            return None
         if radius_z * 2 > image.shape[1] / 2:
-            raise ValueError("Radius_z is too big for the image. Half the radius_z must be smaller than half of number of Z planes")
+            print("Warning: Radius_z is too big for the image. Half the radius_z must be smaller than half of number of Z planes.")
+            return None
         if image.dtype != np.float32:
             image = image.astype(np.float32)
-        if len(image.shape) == 4:
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
-        elif len(image.shape) == 3:
-            image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
-            return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
+        
+        return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
     def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
         if image.dtype != np.float32:
