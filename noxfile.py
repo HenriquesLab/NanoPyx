@@ -30,35 +30,23 @@ if PLATFORM == "macos":
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def build_wheel(session: nox.Session) -> None:
     """
-    Build a wheel for ARM64 on macOS or AMD64 on Linux/Windows
+    Build a wheel
     """
-    import platform
-
-    arch = platform.machine()
-    is_macos = sys.platform == "darwin"
-    is_linux = sys.platform.startswith("linux")
-    is_windows = sys.platform == "win32"
-
-    # Skip if not on the right arch/platform combination
-    if is_macos and arch != "arm64":
-        session.skip(
-            f"Skipping macOS build on non-arm64 architecture (found {arch})"
-        )
-    elif (is_linux or is_windows) and arch != "x86_64" and arch != "AMD64":
-        session.skip(
-            f"Skipping {PLATFORM} build on non-x86_64 architecture (found {arch})"
-        )
+    # if PLATFORM == "macos":  # build libomp from source, better ARM compatibility
+    #     path = Path(os.path.dirname(__file__)) / "build_tools" / "libs_build"
+    #     if not path:  # did we already build libomp?
+    #         session.run("bash", "build_tools/build_libomp.sh")
 
     session.install("build")
     temp_path = session.create_tmp()
+    # session.run("python", "-m", "build", "--wheel", "-o", temp_path)
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
-
-    # Get wheel name
+    # get the produced wheel name
     wheel_name = [
         name for name in os.listdir(temp_path) if name.endswith(".whl")
     ][0]
 
-    if is_linux and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
+    if PLATFORM == "unix" and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
         session.install("auditwheel")
         session.run(
             "auditwheel",
@@ -67,43 +55,18 @@ def build_wheel(session: nox.Session) -> None:
             "-w",
             DIR / "wheelhouse",
         )
-    elif is_macos:
+
+    elif PLATFORM == "macos":
         session.install("delocate==0.10.4")
-
-        # Remove per-architecture x86_64 dylibs from the wheel
-        import zipfile
-        import tempfile
-
-        wheel_path = os.path.join(temp_path, wheel_name)
-        with tempfile.TemporaryDirectory() as tmpdir:
-            tmp_whl_dir = Path(tmpdir) / "wheel"
-            tmp_whl_dir.mkdir()
-
-            # Unzip wheel
-            with zipfile.ZipFile(wheel_path, "r") as zip_ref:
-                zip_ref.extractall(tmp_whl_dir)
-
-            # Remove any x86_64-specific .dylib files (adjust this if needed)
-            for path in tmp_whl_dir.rglob("*.dylib"):
-                if "x86_64" in path.name:
-                    path.unlink()
-
-            # Re-zip as a wheel
-            cleaned_base = Path(temp_path) / f"cleaned-{wheel_name}"
-            zip_path = shutil.make_archive(
-                str(cleaned_base).removesuffix(".whl"), "zip", tmp_whl_dir
-            )
-            fixed_wheel_path = Path(zip_path).with_suffix(".whl")
-            Path(zip_path).rename(fixed_wheel_path)
-
-        # Now safely run delocate
         session.run(
             "delocate-wheel",
             "-v",
-            str(fixed_wheel_path),
+            os.path.join(temp_path, wheel_name),
             "-w",
             DIR / "wheelhouse",
         )
+        pass
+
     else:
         os.makedirs(DIR / "wheelhouse", exist_ok=True)
         for file in os.listdir(temp_path):
