@@ -104,6 +104,7 @@ jobs:
           python -m pip install --upgrade nox
           python -m pip install cibuildwheel==2.23.3
           python -m pip install setuptools==73.0.1
+          brew install libomp # Ensure libomp is installed via Homebrew
       - name: Clear Wheels
         run: |
           python -m nox --sessions clear_wheelhouse
@@ -111,10 +112,9 @@ jobs:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
-          # to supply options, put them in 'env', like:
         env:
           CIBW_BUILD: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64 cp313-macosx_arm64
           CIBW_ARCHS: arm64
-
+          MACOSX_DEPLOYMENT_TARGET: 11.0 # Set macOS deployment target
       - name: Test wheels
         run: python -m nox --sessions test_wheel
