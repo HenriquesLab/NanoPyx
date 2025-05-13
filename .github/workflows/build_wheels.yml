@@ -1,13 +1,6 @@
 name: (self-hosted) Build wheels
 
 on:
-  push:
-    branches:
-      - updates  # Only run on commits to the 'updates' branch
-
-  schedule:
-    - cron: "0 23 * * *"
-
   workflow_dispatch:
     inputs:
       logLevel:
