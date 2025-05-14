@@ -168,6 +168,12 @@ float _c_calculate_dw3D(float distance, float distance_xy, float distance_z,floa
   return pow(D_weight, 4);
 }
 
+double _c_calculate_dw_3d(double distance_xy, double distance_z, double tSS, double tSS_z) {
+  double weight_xy = distance_xy * exp((-distance_xy * distance_xy) / tSS);
+  double weight_z = distance_z * exp((-distance_z * distance_z) / tSS_z);
+  return pow((weight_xy * weight_z), 4);
+}
+
 float _c_calculate_dk3D(float Gx, float Gy, float Gz, float dx, float dy, float dz, float distance) {
   float Dk = sqrt((Gy * dz - Gz * dy) * (Gy * dz - Gz * dy) + (Gz * dx - Gx * dz) * (Gz * dx - Gx * dz) + (Gx * dy - Gy * dx) * (Gx * dy - Gy * dx)) / sqrt(Gx * Gx + Gy * Gy + Gz * Gz);
   if (isnan(Dk)) {
@@ -177,13 +183,38 @@ float _c_calculate_dk3D(float Gx, float Gy, float Gz, float dx, float dy, float 
   return Dk;
 }
 
+float _c_calculate_dk_3d(float Gx, float Gy, float Gz, float dx, float dy, float dz, float distance) {
+    // Compute the cross product magnitude in 3D
+    float cross_magnitude = sqrt(
+        pow(Gy * dz - Gz * dy, 2) +
+        pow(Gz * dx - Gx * dz, 2) +
+        pow(Gx * dy - Gy * dx, 2)
+    );
+
+    // Compute the magnitude of the gradient vector
+    float gradient_magnitude = sqrt(Gx * Gx + Gy * Gy + Gz * Gz);
+
+    // Compute Dk
+    float Dk = cross_magnitude / gradient_magnitude;
+
+    // Handle NaN case
+    if (isnan(Dk)) {
+        Dk = distance;
+    }
+
+    // Normalize Dk
+    Dk = 1 - Dk / distance;
+
+    return Dk;
+}
+
 float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __global float* imIntGy, __global float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float voxel_ratio, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
 
     float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, dz_real, distance, distance_xy, distance_z, distanceWeight, GdotR, Dk;
 
-    float xc = (xM) / magnification_xy;
-    float yc = (yM) / magnification_xy;
-    float zc = (sliceM) / magnification_z;
+    float xc = (float)(xM) / magnification_xy;
+    float yc = (float)(yM) / magnification_xy;
+    float zc = (float)(sliceM) / magnification_z;
 
     float RGC = 0.0f;
     float distanceWeightSum = 0.0f;
@@ -197,15 +228,15 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
     for (int j = _start; j <= _end; j++) {
         vy = yc + j;
 
-        if (0 < vy && vy < rowsM/magnification_xy - 1) {
+        if (0 < vy && vy <= (rowsM/magnification_xy) - 1) {
             for (int i = _start; i <= _end; i++) {
                 vx = xc + i;
 
-                if (0 < vx && vx < colsM/magnification_xy - 1) {
+                if (0 < vx && vx <= (colsM/magnification_xy) - 1) {
                     for (int k = _start_z; k <= _end_z; k++) {
                         vz = zc + k;
 
-                        if (0 < vz && vz < slicesM/magnification_z - 1) {
+                        if (0 < vz && vz <= (slicesM/magnification_z) - 1) {
                             dx = vx - xc;
                             dy = vy - yc;
                             dz = vz - zc; 
@@ -225,6 +256,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
 
                                 // distanceWeight = _c_calculate_dw3D_isotropic(distance, tSS);
                                 distanceWeight = _c_calculate_dw3D(distance, distance_xy, distance_z, tSS, tSS_z);
+                                //distanceWeight = _c_calculate_dw_3d(distance_xy, distance_z, tSS, tSS_z);
 
                                 // distanceWeight_xy = _c_calculate_dw_xy(distance_xy, tSS); 
                                 // distanceWeight_z = _c_calculate_dw_z(distance_z, tSS_z);

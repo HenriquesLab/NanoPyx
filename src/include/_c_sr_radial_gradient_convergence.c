@@ -125,9 +125,9 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
 
     float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, dz_real, distance, distance_xy, distance_z, distanceWeight, distanceWeight_xy, distanceWeight_z, GdotR, Dk;
 
-    float xc = (xM) / magnification_xy;
-    float yc = (yM) / magnification_xy;
-    float zc = (sliceM) / magnification_z;
+    float xc = (float)(xM) / magnification_xy;
+    float yc = (float)(yM) / magnification_xy;
+    float zc = (float)(sliceM) / magnification_z;
 
     float RGC = 0;
     float distanceWeightSum = 0;
@@ -143,15 +143,15 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
     for (int j = _start; j <= _end; j++) {
         vy = yc + j;
 
-        if (0 < vy && vy < rowsM/magnification_xy - 1) {
+        if (0 < vy && vy <= (rowsM/magnification_xy) - 1) {
             for (int i = _start; i <= _end; i++) {
                 vx = xc + i;
 
-                if (0 < vx && vx < colsM/magnification_xy - 1) {
+                if (0 < vx && vx <= (colsM/magnification_xy) - 1) {
                     for (int k = _start_z; k <= _end_z; k++) {
                         vz = zc + k;
 
-                        if (0 < vz && vz < slicesM/magnification_z - 1) {
+                        if (0 < vz && vz <= (slicesM/magnification_z) - 1) {
                             dx = vx - xc;
                             dy = vy - yc;
                             dz = vz - zc; 
@@ -169,15 +169,9 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                                 Gy = imIntGy[linear_index];
                                 Gz = imIntGz[linear_index];
 
-                                // distanceWeight = _c_calculate_dw3D_isotropic(distance, tSS);
                                 distanceWeight = _c_calculate_dw3D(distance, distance_xy, distance_z, tSS, tSS_z);
-
-                                // distanceWeight_xy = _c_calculate_dw_xy(distance_xy, tSS); 
-                                // distanceWeight_z = _c_calculate_dw_z(distance_z, tSS_z);
                                 
                                 distanceWeightSum += distanceWeight;
-                                // distanceWeightSum_xy += distanceWeight_xy;
-                                // distanceWeightSum_z += distanceWeight_z;
                                 GdotR = Gx*dx + Gy*dy + Gz*dz_real;
 
                                 if (GdotR < 0) {
