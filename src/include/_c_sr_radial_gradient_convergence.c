@@ -35,8 +35,8 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM
     float RGC = 0;
     float distanceWeightSum = 0;
 
-    int _start = -(int)(2 * fwhm);
-    int _end = (int)(2 * fwhm + 1);
+    int _start = -(int)(fwhm);
+    int _end = (int)(fwhm + 1);
 
     for (int j = _start; j < _end; j++) {
         vy = yc + j;
@@ -134,11 +134,11 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
     float distanceWeightSum_xy = 0;
     float distanceWeightSum_z = 0;
 
-    int _start = -(int)(2 * fwhm);
-    int _end = (int)(2 * fwhm + 1);
+    int _start = -(int)(fwhm);
+    int _end = (int)(fwhm + 1);
 
-    int _start_z = -(int)(2 * fwhm_z);
-    int _end_z = (int)(2 * fwhm_z + 1);
+    int _start_z = -(int)(fwhm_z);
+    int _end_z = (int)(fwhm_z + 1);
     
     for (int j = _start; j <= _end; j++) {
         vy = yc + j;

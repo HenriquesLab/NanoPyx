@@ -201,8 +201,8 @@ class eSRRF3D(LiquidEngine):
             raise ValueError("Invalid mode. Use 'average' or 'std'.")
 
         # set margins
-        margin = int(2 * radius) * magnification_xy
-        margin_z = int(2 * radius_z) * magnification_z
+        margin = int(radius) * magnification_xy
+        margin_z = int(radius_z) * magnification_z
         lowest_slice = margin_z
         highest_slice = output_shape[0] - margin_z
         lowest_row = margin

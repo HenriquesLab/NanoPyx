@@ -219,11 +219,11 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
     float RGC = 0.0f;
     float distanceWeightSum = 0.0f;
 
-    int _start = -(int)(2 * fwhm);
-    int _end = (int)(2 * fwhm + 1);
+    int _start = -(int)(fwhm);
+    int _end = (int)(fwhm + 1);
 
-    int _start_z = -(int)(2 * fwhm_z);
-    int _end_z = (int)(2 * fwhm_z + 1);
+    int _start_z = -(int)(fwhm_z);
+    int _end_z = (int)(fwhm_z + 1);
     
     for (int j = _start; j <= _end; j++) {
         vy = yc + j;
@@ -307,9 +307,9 @@ __kernel void calculate_rgc3D(__global float* imIntGz, __global float* imIntGy, 
   // Output image dimensions
   int nPixels_out = slicesM * rowsM * colsM;
 
-  row = row + fwhm*2*magnification_xy;
-  col = col + fwhm*2*magnification_xy;
-  s = s + fwhm_z*2*magnification_z;
+  row = row + fwhm*magnification_xy;
+  col = col + fwhm*magnification_xy;
+  s = s + fwhm_z*magnification_z;
 
   if (doIntensityWeighting == 1) {
     tmp_slice[s * rowsM * colsM + row * colsM + col] = _c_calculate_rgc3D(col, row, s, &imIntGx[0], &imIntGy[0], &imIntGz[0], colsM, rowsM, slicesM, magnification_xy, magnification_z, ratio_px, fwhm, fwhm_z, tSO, tSO_z, tSS, tSS_z, sensitivity) * imM[s * rowsM * colsM + row * colsM + col];
