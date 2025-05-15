@@ -1,5 +1,6 @@
 from ..workflow import Workflow
 from ...core.transform import eSRRF_ST
+from ...core.transform.mpcorrector import macro_pixel_corrector
 import numpy as np
 
 # TODO check correlations and error map
@@ -11,6 +12,7 @@ def eSRRF(
     radius: float = 1.5,
     sensitivity: float = 1,
     doIntensityWeighting: bool = True,
+    macro_pixel_correction: bool = False,
     _force_run_type=None,
 ):
     """
@@ -53,5 +55,10 @@ def eSRRF(
             },
         )
     )
-
-    return _eSRRF.calculate(_force_run_type=_force_run_type)
+    if macro_pixel_correction:
+        return macro_pixel_corrector(
+            _eSRRF.calculate(_force_run_type=_force_run_type)[0],
+            magnification=magnification,
+        )
+    else:
+        return _eSRRF.calculate(_force_run_type=_force_run_type)[0]
