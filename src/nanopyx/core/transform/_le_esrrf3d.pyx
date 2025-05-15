@@ -72,7 +72,7 @@ class eSRRF3D(LiquidEngine):
         cdef int margin = int(2 * radius) * magnification_xy
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float sigma_z = radius_z * voxel_ratio / 2.355 # Taking voxel size into account
+        cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
         cdef int margin_z = int(2 * radius_z) * magnification_z
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
@@ -149,7 +149,7 @@ class eSRRF3D(LiquidEngine):
         cdef int margin = int(2 * radius) * magnification_xy
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float sigma_z = radius_z * voxel_ratio / 2.355 # Taking voxel size into account
+        cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
         cdef int margin_z = int(2 * radius_z) * magnification_z
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
@@ -226,7 +226,7 @@ class eSRRF3D(LiquidEngine):
         cdef int margin = int(2 * radius) * magnification_xy
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float sigma_z = radius_z * voxel_ratio / 2.355 # Taking voxel size into account
+        cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
         cdef int margin_z = int(2 * radius_z) * magnification_z
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
@@ -303,7 +303,7 @@ class eSRRF3D(LiquidEngine):
         cdef int margin = int(2 * radius) * magnification_xy
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float sigma_z = radius_z * voxel_ratio / 2.355 # Taking voxel size into account
+        cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
         cdef int margin_z = int(2 * radius_z) * magnification_z
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
@@ -379,7 +379,7 @@ class eSRRF3D(LiquidEngine):
         cdef int margin = int(2 * radius) * magnification_xy
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float sigma_z = radius_z * voxel_ratio / 2.355 # Taking voxel size into account
+        cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
         cdef int margin_z = int(2 * radius_z) * magnification_z
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
@@ -509,7 +509,7 @@ class eSRRF3D(LiquidEngine):
         cdef float sigma = radius / 2.355
         cdef float tss = 2 * sigma * sigma
         cdef float tso = 2 * sigma + 1
-        cdef float sigma_z = radius_z * voxel_ratio / 2.355 # Taking voxel size into account
+        cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
         cdef float tss_z = 2 * sigma_z * sigma_z
         cdef float tso_z = 2 * sigma_z + 1
 
