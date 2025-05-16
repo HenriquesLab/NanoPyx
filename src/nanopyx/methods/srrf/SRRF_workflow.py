@@ -1,5 +1,6 @@
 from ..workflow import Workflow
 from ...core.transform import Radiality, CRShiftAndMagnify
+from ...core.transform.mpcorrector import macro_pixel_corrector
 
 
 import numpy as np
@@ -12,6 +13,7 @@ def SRRF(
     border=0,
     radialityPositivityConstraint=True,
     doIntensityWeighting=True,
+    macro_pixel_correction=True,
     _force_run_type=None,
 ):
     """
@@ -45,7 +47,11 @@ def SRRF(
     """
 
     _SRRF = Workflow(
-        (CRShiftAndMagnify(verbose=False), (image, 0, 0, magnification, magnification), {}),
+        (
+            CRShiftAndMagnify(verbose=False),
+            (image, 0, 0, magnification, magnification),
+            {},
+        ),
         (
             Radiality(verbose=False),
             (image, "PREV_RETURN_VALUE_0_0"),
@@ -59,4 +65,11 @@ def SRRF(
         ),
     )
 
-    return _SRRF.calculate(_force_run_type=_force_run_type)
+    if macro_pixel_correction:
+        return macro_pixel_corrector(
+            _SRRF.calculate(_force_run_type=_force_run_type)[0],
+            magnification=magnification,
+        )
+
+    else:
+        return _SRRF.calculate(_force_run_type=_force_run_type)[0]
