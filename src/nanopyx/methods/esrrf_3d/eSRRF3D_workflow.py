@@ -15,7 +15,7 @@ def eSRRF3D(
     sensitivity: float = 1,
     mode: str = "average",
     doIntensityWeighting: bool = True,
-    macro_pixel_correction: bool = False,
+    macro_pixel_correction: bool = True,
     _force_run_type=None,
 ):
     """

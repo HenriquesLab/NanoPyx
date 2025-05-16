@@ -12,7 +12,7 @@ def eSRRF(
     radius: float = 1.5,
     sensitivity: float = 1,
     doIntensityWeighting: bool = True,
-    macro_pixel_correction: bool = False,
+    macro_pixel_correction: bool = True,
     _force_run_type=None,
 ):
     """
