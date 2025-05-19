@@ -14,6 +14,7 @@ def run_srrf(b):
     magnification = gui_srrf["magnification"].value
     frames_per_timepoint = gui_srrf["frames_per_timepoint"].value
     srrf_order = gui_srrf["srrf_order"].value
+    mpcorrection = gui_srrf["mpcorrection"].value
     # disable button while running
     gui_srrf["run"].disabled = True
     gui_srrf["run"].description = "Running..."
@@ -34,6 +35,7 @@ def run_srrf(b):
             ringRadius=ring_radius,
             radialityPositivityConstraint=True,
             doIntensityWeighting=True,
+            macro_pixel_correction=mpcorrection,
         )
         output.append(calculate_SRRF_temporal_correlations(result, srrf_order))
 
@@ -77,6 +79,9 @@ gui_srrf.add_int_slider(
     min=1,
     max=dataset_original.shape[0],
     value=dataset_original.shape[0] // 2,
+)
+gui_srrf.add_checkbox(
+    "mpcorrection", description="Macro Pixel Correction", value=True
 )
 gui_srrf.add_checkbox("save", description="Save Output", value=True)
 gui_srrf.add_dropdown(

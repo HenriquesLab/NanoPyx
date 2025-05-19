@@ -14,7 +14,7 @@ def run_esrrf(b):
     magnification = gui_esrrf["magnification"].value
     frames_per_timepoint = gui_esrrf["frames_per_timepoint"].value
     sensitivity = gui_esrrf["sensitivity"].value
-
+    mpcorrection = gui_esrrf["mpcorrection"].value
     esrrf_order = gui_esrrf["esrrf_order"].value
     if esrrf_order == 1:
         esrrf_order = "AVG"
@@ -42,6 +42,7 @@ def run_esrrf(b):
             radius=ring_radius,
             sensitivity=sensitivity,
             doIntensityWeighting=True,
+            macro_pixel_correction=mpcorrection,
         )
         output.append(
             calculate_eSRRF_temporal_correlations(result, esrrf_order)
@@ -110,6 +111,9 @@ gui_esrrf.add_int_slider(
     min=0,
     max=dataset_original.shape[0],
     value=dataset_original.shape[0] // 2,
+)
+gui_esrrf.add_checkbox(
+    "mpcorrection", description="Macro Pixel Correction", value=True
 )
 gui_esrrf.add_checkbox("save", description="Save Output", value=True)
 gui_esrrf.add_dropdown(
