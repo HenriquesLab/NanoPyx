@@ -60,7 +60,7 @@ cdef float[:, :, :] _macro_pixel_corrector(float[:, :, :] img, int magnification
                         gx = rx * magnification + x
                         gy = ry * magnification + y
                         map[y, x] += img[s, gy, gx]
-        map = np.asarray(map) / rows*cols
+        map = np.asarray(map) / (rows*cols)
 
         for yM in range(rowsM):
             for xM in range(colsM):
