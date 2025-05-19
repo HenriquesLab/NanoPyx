@@ -14,7 +14,7 @@ def test_package_SRRF():
 
 def test_package_eSRRF():
     img = np.random.random((10, 100, 100)).astype(np.float32)
-    nanopyx.eSRRF(img)
+    nanopyx.eSRRF(img, macro_pixel_correction=False)
 
 
 def test_package_frc():
