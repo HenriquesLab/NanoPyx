@@ -44,7 +44,7 @@ def run_esrrf(b):
             doIntensityWeighting=True,
         )
         output.append(
-            calculate_eSRRF_temporal_correlations(result[0], esrrf_order)
+            calculate_eSRRF_temporal_correlations(result, esrrf_order)
         )
 
     global dataset_esrrf
