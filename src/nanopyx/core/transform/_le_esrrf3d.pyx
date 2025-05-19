@@ -69,11 +69,11 @@ class eSRRF3D(LiquidEngine):
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
-        cdef int margin = int(2 * radius) * magnification_xy
+        cdef int margin = int(radius * magnification_xy)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
-        cdef int margin_z = int(2 * radius_z) * magnification_z
+        cdef int margin_z = int(radius_z*magnification_z)
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
         cdef float fwhm = radius
@@ -146,11 +146,11 @@ class eSRRF3D(LiquidEngine):
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
-        cdef int margin = int(2 * radius) * magnification_xy
+        cdef int margin = int(radius * magnification_xy)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
-        cdef int margin_z = int(2 * radius_z) * magnification_z
+        cdef int margin_z = int(radius_z*magnification_z)
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
         cdef float fwhm = radius
@@ -223,11 +223,11 @@ class eSRRF3D(LiquidEngine):
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
-        cdef int margin = int(2 * radius) * magnification_xy
+        cdef int margin = int(radius * magnification_xy)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
-        cdef int margin_z = int(2 * radius_z) * magnification_z
+        cdef int margin_z = int(radius_z*magnification_z)
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
         cdef float fwhm = radius
@@ -300,11 +300,11 @@ class eSRRF3D(LiquidEngine):
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
-        cdef int margin = int(2 * radius) * magnification_xy
+        cdef int margin = int(radius * magnification_xy)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
-        cdef int margin_z = int(2 * radius_z) * magnification_z
+        cdef int margin_z = int(radius_z*magnification_z)
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
         cdef float fwhm = radius
@@ -376,11 +376,11 @@ class eSRRF3D(LiquidEngine):
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
-        cdef int margin = int(2 * radius) * magnification_xy
+        cdef int margin = int(radius * magnification_xy)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float sigma_z = radius_z / 2.355 # Taking voxel size into account
-        cdef int margin_z = int(2 * radius_z) * magnification_z
+        cdef int margin_z = int(radius_z*magnification_z)
         cdef float tSS_z = 2 * sigma_z * sigma_z
         cdef float tSO_z = 2 * sigma_z + 1
         cdef float fwhm = radius
@@ -496,8 +496,8 @@ class eSRRF3D(LiquidEngine):
             raise ValueError("Invalid mode. Use 'average' or 'std'.")
 
         # set margins
-        margin = int(radius) * magnification_xy
-        margin_z = int(radius_z) * magnification_z
+        margin = int(radius*magnification_xy)
+        margin_z = int(radius_z*magnification_z)
         lowest_slice = margin_z
         highest_slice = output_shape[0] - margin_z
         lowest_row = margin

@@ -45,7 +45,7 @@ class RadialGradientConvergence(LiquidEngine):
         """
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
-        cdef int margin = int(fwhm) * magnification
+        cdef int margin = int(fwhm*magnification)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float Gx_Gy_MAGNIFICATION = grad_magnification
@@ -219,7 +219,7 @@ class RadialGradientConvergence(LiquidEngine):
         # Parameters
         cdef float sigma = radius / 2.355
         cdef float fwhm = radius
-        cdef int margin = int(fwhm) * magnification
+        cdef int margin = int(fwhm*magnification)
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
         cdef float Gx_Gy_MAGNIFICATION = grad_magnification
