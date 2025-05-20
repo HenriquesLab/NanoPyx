@@ -170,7 +170,7 @@ omit = [
 [tool.cibuildwheel]
 # https://cibuildwheel.readthedocs.io/en/stable/options/
 skip = ["pp*", "*musllinux*"]
-build = ["cp39-*", "cp310-*", "cp311-*", "cp312-*", "cp313-*"]
+build = ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
 # it is not possible to test arm64 and the arm64 part of a universal2 wheel on this CI platform
 test-skip = ["*arm64"]
 # build-frontend = "pip"
