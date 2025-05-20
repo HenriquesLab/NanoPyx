@@ -72,5 +72,5 @@ cdef float[:, :, :] _macro_pixel_corrector(float[:, :, :] img, int magnification
                 if correction != 0:
                     img[s, yM, xM] /= correction
 
-    return img
+    return img.astype(np.float32)
                 
