@@ -16,6 +16,8 @@
 
 Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging
 
+WARNING: Currently stable and working for Python 3.9 to 3.12. For Python 3.13, it is possible to use it if you build numpy<2 from source but it is not officially supported (Yet!)
+
 ---
 
 ## What is the NanoPyx 🔬 Library?
