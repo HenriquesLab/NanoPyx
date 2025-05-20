@@ -34,7 +34,7 @@ class eSRRF3D(LiquidEngine):
         self._designation = "eSRRF_3D"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
-    def run(self, image, magnification_xy: int = 2, magnification_z: int = 2, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, run_type=None):
+    def run(self, image, magnification_xy: int = 2, magnification_z: int = 2, radius: float = 1.5, radius_z: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, run_type=None):
         # TODO: complete and check _run inputs, need to complete variables?
         if len(image.shape) == 3:
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
@@ -52,7 +52,7 @@ class eSRRF3D(LiquidEngine):
         
         return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
-    def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
+    def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
@@ -62,7 +62,7 @@ class eSRRF3D(LiquidEngine):
             return super().benchmark(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting)
 
     % for sch in schedulers:
-    def _run_${sch}(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
+    def _run_${sch}(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
         """
         @cpu
         % if sch!='unthreaded':
@@ -149,7 +149,7 @@ class eSRRF3D(LiquidEngine):
             return np.asarray(rgc_out)
     % endfor
 
-    def _run_opencl(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 0.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, device=None, mem_div=1):
+    def _run_opencl(self, float[:,:,:,:] image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, device=None, mem_div=1):
         """
         @gpu
         """
