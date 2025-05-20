@@ -28,6 +28,7 @@ void _rotate_vector(float* Gx, float* Gy, float angle) {
 float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity, float offset, float xyoffset, float angle) {
 
     float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk;
+    float correct_vx, correct_vy;
 
     float xc = (float)xM / magnification + offset; // offset in non-magnified space
     float yc = (float)yM / magnification + offset;
@@ -51,8 +52,33 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM
                     distance = sqrt(dx * dx + dy * dy);
 
                     if (distance != 0 && distance <= tSO) {
-                        Gx = imIntGx[(int)((vy+xyoffset) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((vx+xyoffset) * magnification * Gx_Gy_MAGNIFICATION)];
-                        Gy = imIntGy[(int)((vy+xyoffset) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((vx+xyoffset) * magnification * Gx_Gy_MAGNIFICATION)];
+                        
+                        correct_vx = vx+xyoffset;
+                        correct_vy = vy+xyoffset;
+
+                        if (correct_vx<fabs(xyoffset)){
+
+                            correct_vx = 0;
+
+                        };
+
+                        if (correct_vy<fabs(xyoffset)){
+
+                            correct_vy = 0;
+
+                        };
+
+                        // // Calculate the linear index for the gradient images
+                        // int linear_index = (int)((vy+xyoffset) * magnification * colsM) + (int)((vx+xyoffset) * magnification);
+                        // // Ensure the index is within bounds
+                        // if (linear_index < 0 || linear_index >= colsM * rowsM) {
+                        //     printf("magnification: %i, colsM: %i, xyoffset: %f\n", magnification, colsM, xyoffset);
+                        //     printf("Index out of bounds: %i, %f, %f\n", linear_index, vy, vx);
+                        //     continue; // Skip this iteration if the index is out of bounds
+                        // }
+
+                        Gx = imIntGx[(int)((correct_vy) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((correct_vx) * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gy = imIntGy[(int)((correct_vy) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((correct_vx) * magnification * Gx_Gy_MAGNIFICATION)];
 
                         _rotate_vector(&Gx, &Gy, angle);
 
