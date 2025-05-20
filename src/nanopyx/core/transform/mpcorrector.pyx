@@ -45,13 +45,12 @@ cdef float[:, :, :] _macro_pixel_corrector(float[:, :, :] img, int magnification
     cdef int rows = rowsM // magnification
     cdef int cols = colsM // magnification
 
-    cdef float map_value
-    cdef int x, y, offset, s, r, c
-
-    cdef float[:, :] map
+    cdef float map_value, correction
+    cdef int x, y, offset, s, r, c, gx, gy, y_offset, x_offset
+    cdef float[:, :] correction_map
 
     for s in range(slices):
-        map = np.zeros((magnification, magnification), dtype=np.float32)
+        correction_map = np.zeros((magnification, magnification), dtype=np.float32)
         for ry in range(rows):
             for rx in range(cols):
                 for y in range(magnification):
@@ -59,8 +58,7 @@ cdef float[:, :, :] _macro_pixel_corrector(float[:, :, :] img, int magnification
                         # global coordinates in original image
                         gx = rx * magnification + x
                         gy = ry * magnification + y
-                        map[y, x] += img[s, gy, gx]
-        map = np.asarray(map) / (rows*cols)
+                        correction_map[y, x] += img[s, gy, gx] / (rows * cols)
 
         for yM in range(rowsM):
             for xM in range(colsM):
@@ -68,9 +66,9 @@ cdef float[:, :, :] _macro_pixel_corrector(float[:, :, :] img, int magnification
                 x = xM // magnification
                 y_offset = yM - y * magnification
                 x_offset = xM - x * magnification
-                correction = map[y_offset, x_offset]
+                correction = correction_map[y_offset, x_offset]
                 if correction != 0:
                     img[s, yM, xM] /= correction
 
-    return np.asarray(img).astype(np.float32)
+    return np.asarray(img, dtype=np.float32)
                 
