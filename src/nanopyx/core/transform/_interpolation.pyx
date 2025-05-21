@@ -7,9 +7,6 @@ import cython
 from math import floor
 
 from ._le_interpolation_catmull_rom import ShiftAndMagnify as ShiftMagnify_CR
-from ._le_interpolation_bicubic import ShiftAndMagnify as ShiftMagnify_BC
-from ._le_interpolation_lanczos import ShiftAndMagnify as ShiftMagnify_Lanczos
-from ._le_interpolation_nearest_neighbor import ShiftAndMagnify as ShiftMagnify_NN
 
 from cython.parallel import prange
 
