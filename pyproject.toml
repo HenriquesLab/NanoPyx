@@ -15,7 +15,7 @@ build-backend = "setuptools.build_meta"
 name = "nanopyx"
 description = "Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging"
 readme = "README.md"
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.9"
 license = { file = "LICENSE.txt" }
 keywords = [
     "NanoJ",
@@ -53,6 +53,7 @@ dependencies = [
     "scikit-learn>=1.1.0",
     "matplotlib>=3.5",
     "importlib-resources",
+    "ezinput>=0.0.2",
 ]
 dynamic = ["version"] # changed in setup.py
 
@@ -169,7 +170,7 @@ omit = [
 [tool.cibuildwheel]
 # https://cibuildwheel.readthedocs.io/en/stable/options/
 skip = ["pp*", "*musllinux*"]
-build = ["cp39-*", "cp310-*", "cp311-*"]
+build = ["cp39-*", "cp310-*", "cp311-*", "cp312-*"]
 # it is not possible to test arm64 and the arm64 part of a universal2 wheel on this CI platform
 test-skip = ["*arm64"]
 # build-frontend = "pip"
@@ -198,7 +199,7 @@ manylinux-x86_64-image = "manylinux2014"
 # repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]
-archs = ["x86_64", "arm64"]
+archs = ["arm64"]
 before-all = ["brew install llvm libomp"]
 test-requires = ["nanopyx[test]"]
 #test-command = "pytest -n=1 --timeout=1200 {project}/tests"

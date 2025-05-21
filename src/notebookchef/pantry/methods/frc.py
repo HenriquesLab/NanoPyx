@@ -38,7 +38,7 @@ def run_frc(b):
     gui_frc._main_display.children = gui_frc._main_display.children + (output_plot,)
     plt.clf()
     
-gui_frc.add_int_slider("pixel_size", description="Pixel Size:", min=0.01, max=1000, value=100, remember_value=True)
+gui_frc.add_int_slider("pixel_size", description="Pixel Size:", min=0.01, max=1000, value=100)
 gui_frc.add_dropdown("units", description="Units: ", options=["nm", "um", "mm"], value="nm")
 gui_frc.add_int_slider("first_frame", description="First Frame:", min=0, max=dataset_original[0].shape[0]-1, value=0)
 gui_frc.add_int_slider ("second_frame", description="Second Frame:", min=0, max=dataset_original[0].shape[0]-1, value=1)

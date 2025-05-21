@@ -22,11 +22,13 @@ EXTRA_COMPILE_ARGS = [
 ]
 EXTRA_LING_ARGS = []
 
-VERSION = "1.1.0"  # sets version number for whole package
+VERSION = "1.2.0"  # sets version number for whole package
 
 
 def run_command(command: str) -> str:
-    result = subprocess.run(command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result = subprocess.run(
+        command.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
     return result.stdout.decode("utf-8").strip()
 
 
@@ -44,7 +46,9 @@ def is_xcode_installed() -> bool:
 
 def is_homebrew_installed() -> bool:
     try:
-        result = subprocess.run(["which", "brew"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(
+            ["which", "brew"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
         return result.returncode == 0
     except Exception:
         return False
@@ -131,7 +135,9 @@ elif sys.platform == "darwin":
 
     # Lets check if homebrew is installed
     use_openmp_support = True
-    print("Checking for openmp support, to run code... ─=≡Σ((( つ◕ل͜◕)つ... blazing fast!!! ")
+    print(
+        "Checking for openmp support, to run code... ─=≡Σ((( つ◕ل͜◕)つ... blazing fast!!! "
+    )
 
     BUILD_TOOLS_PATH = (
         Path(os.path.dirname(__file__)) / "build_tools" / "libs_build"
@@ -155,13 +161,19 @@ elif sys.platform == "darwin":
                 INCLUDE_DIRS += [os.path.join(libomp_path, "include")]
                 LIBRARY_DIRS += [os.path.join(libomp_path, "lib")]
             else:
-                print(f"\t - {packages} instalation not detected: consider running 'brew install {' '.join(packages)}'")
+                print(
+                    f"\t - {packages} instalation not detected: consider running 'brew install {' '.join(packages)}'"
+                )
                 use_openmp_support = False
         else:
-            print("\t - brew instalation not detected, consider installing from https://brew.sh/")
+            print(
+                "\t - brew instalation not detected, consider installing from https://brew.sh/"
+            )
             use_openmp_support = False
     else:
-        print("\t - xcode instalation not detected, consider installing from the App Store")
+        print(
+            "\t - xcode instalation not detected, consider installing from the App Store"
+        )
         use_openmp_support = False
 
     if use_openmp_support:
@@ -203,15 +215,17 @@ def collect_extensions():
     path = os.path.join("src")
 
     # Compile mako template(s)
-    lookup = TemplateLookup(directories = ['src/mako_templates'])
-    for template_ in os.listdir('src/mako_templates'):
-        if 'base' in template_:
+    lookup = TemplateLookup(directories=["src/mako_templates"])
+    for template_ in os.listdir("src/mako_templates"):
+        if "base" in template_:
             continue
-        path2out = os.path.join(path,template_.replace('.',os.sep,template_.count('.')-1))
+        path2out = os.path.join(
+            path, template_.replace(".", os.sep, template_.count(".") - 1)
+        )
         rendered_output = lookup.get_template(template_).render_unicode()
         enconded_rendered_output = rendered_output.encode()
         try:
-            with open(path2out, 'r+b') as outfile:
+            with open(path2out, "r+b") as outfile:
                 current_content = outfile.read()
 
                 if current_content != enconded_rendered_output:
@@ -225,27 +239,30 @@ def collect_extensions():
 
         except FileNotFoundError:
             # If the file doesn't exist, create it with the new content
-            with open(path2out, 'wb') as outfile:
+            with open(path2out, "wb") as outfile:
                 outfile.write(enconded_rendered_output)
 
-        #with open(path2out, 'wb') as outfile:
+        # with open(path2out, 'wb') as outfile:
         #    outfile.write(rendered_output.encode())
-        
-        #template_obj = lookup.get_template(template_)
-        #with open(path2out,'w') as outfile:
+
+        # template_obj = lookup.get_template(template_)
+        # with open(path2out,'w') as outfile:
         #    outfile.write(template_obj.render())
-    
 
     cython_files = [
         os.path.join(dir, file)
         for (dir, dirs, files) in os.walk(path)
         for file in files
         if file.endswith(".pyx")
-        or (file.endswith(".py") and "# nanopyx-cythonize: True\n" in open(os.path.join(dir, file)).read())
+        or (
+            file.endswith(".py")
+            and "# nanopyx-cythonize: True\n"
+            in open(os.path.join(dir, file)).read()
+        )
     ]
-    
+
     # remove mako templates
-    cython_files = [c for c in cython_files if 'mako' not in c]
+    cython_files = [c for c in cython_files if "mako" not in c]
 
     cython_extensions = []
     extra_c_files = []
@@ -262,13 +279,17 @@ def collect_extensions():
         )
         if os.path.exists(pxd_file):
             with open(pxd_file, "r") as f:
-                extra_c_files_candadates = search_for_c_files_referrenced_in_pyx_text(f.read())
+                extra_c_files_candadates = (
+                    search_for_c_files_referrenced_in_pyx_text(f.read())
+                )
             sources += extra_c_files_candadates
             extra_c_files += extra_c_files_candadates
 
         # Now search in the pyx file
         with open(file, "r") as f:
-            extra_c_files_candadates = search_for_c_files_referrenced_in_pyx_text(f.read())
+            extra_c_files_candadates = (
+                search_for_c_files_referrenced_in_pyx_text(f.read())
+            )
             sources += extra_c_files_candadates
             extra_c_files += extra_c_files_candadates
 
@@ -278,7 +299,9 @@ def collect_extensions():
 
         # Remove files that don't exist
         sources = [file for file in sources if os.path.exists(file)]
-        extra_c_files = [file for file in extra_c_files if os.path.exists(file)]
+        extra_c_files = [
+            file for file in extra_c_files if os.path.exists(file)
+        ]
 
         # Make sure we have all the include paths
         for path in extra_c_files:
@@ -291,9 +314,13 @@ def collect_extensions():
     print(f"Found following .pyx files to build:\n {'; '.join(cython_files)}")
     print(f"Found the extra c files to build:\n {'; '.join(extra_c_files)}")
 
-    collected_extensions = cythonize(cython_extensions, annotate=True, language_level="3")
+    collected_extensions = cythonize(
+        cython_extensions, annotate=True, language_level="3"
+    )
 
     return collected_extensions
+
+
 # Show the logo
 print(
     r"""

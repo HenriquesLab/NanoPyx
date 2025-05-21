@@ -42,7 +42,7 @@ def on_button_register(b):
     gui_reg._main_display.children = gui_reg._main_display.children + (stackview.slice(dataset_registered, colormap=gui_reg["cmaps"].value, continuous_update=True),)
 
 
-gui_reg.add_label("Channel Registration parameters:")
+gui_reg.add_label(value="Channel Registration parameters:")
 gui_reg.add_int_slider("ref", description="Reference channel", min=0, max=dataset_original.shape[0]-1, value=0)
 gui_reg.add_int_slider("max", description="Max expected drift", min=0, max=1000, value=10)
 gui_reg.add_int_slider("blocks", description="Blocks per axis", min=1, max=10, value=5)

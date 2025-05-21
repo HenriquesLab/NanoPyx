@@ -27,15 +27,15 @@ class eSRRF(LiquidEngine):
         self._designation = "eSRRF_ST"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
-    def run(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
+    def run(self, image, magnification: int = 5, grad_magnification: int = 1, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
         image = check_image(image)
         return self._run(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
-    def benchmark(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
+    def benchmark(self, image, magnification: int = 5, grad_magnification: int = 1, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
         image = check_image(image)
         return super().benchmark(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
-    def _run_opencl(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
+    def _run_opencl(self, image, magnification=5, grad_magnification=1, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
         """
         @gpu
         """
@@ -90,7 +90,7 @@ class eSRRF(LiquidEngine):
         rgc_prg = cl.Program(cl_ctx, rgc_code).build(options=["-cl-mad-enable -cl-fast-relaxed-math"])
         rgc_knl = rgc_prg.calculate_rgc
 
-        margin = int(radius*2*magnification)
+        margin = int(radius*magnification)
         lowest_row = margin # TODO discuss edges calculation
         highest_row = output_shape[1] - margin
         lowest_col = margin
@@ -178,7 +178,7 @@ class eSRRF(LiquidEngine):
 
         return output_image
 
-    def _run_threaded(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_threaded(self, image, magnification=5, grad_magnification=1, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         """
         @cpu
         @threaded
@@ -200,7 +200,7 @@ class eSRRF(LiquidEngine):
         radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=-0.5, angle=np.pi/4, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_guided(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_threaded_guided(self, image, magnification=5, grad_magnification=1, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         """
         @cpu
         @threaded
@@ -222,7 +222,7 @@ class eSRRF(LiquidEngine):
         radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=-0.5, angle=np.pi/4, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_dynamic(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_threaded_dynamic(self, image, magnification=5, grad_magnification=1, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         """
         @cpu
         @threaded
@@ -244,7 +244,7 @@ class eSRRF(LiquidEngine):
         radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, offset=0, xyoffset=-0.5, angle=np.pi/4, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_static(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_threaded_static(self, image, magnification=5, grad_magnification=1, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         """
         @cpu
         @threaded

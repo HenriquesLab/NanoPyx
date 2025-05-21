@@ -42,7 +42,9 @@ def build_wheel(session: nox.Session) -> None:
     # session.run("python", "-m", "build", "--wheel", "-o", temp_path)
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
     # get the produced wheel name
-    wheel_name = [name for name in os.listdir(temp_path) if name.endswith(".whl")][0]
+    wheel_name = [
+        name for name in os.listdir(temp_path) if name.endswith(".whl")
+    ][0]
 
     if PLATFORM == "unix" and os.environ.get("NPX_LINUX_FIX_WHEELS", False):
         session.install("auditwheel")
@@ -112,12 +114,16 @@ def test_wheel(session):
     python_version_str = f"cp{session.python.replace('.', '')}"
     # find the latest wheel
     wheel_names = [
-        wheel for wheel in os.listdir("wheelhouse") if wheel.endswith(".whl") and python_version_str in wheel
+        wheel
+        for wheel in os.listdir("wheelhouse")
+        if wheel.endswith(".whl") and python_version_str in wheel
     ]
     wheel_names.sort()
     wheel_name = wheel_names[-1]
 
-    session.run("pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]")
+    session.run(
+        "pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]"
+    )
     with session.chdir(".nox"):
         extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
         if extra_args != "":
@@ -129,7 +135,14 @@ def test_wheel(session):
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def test_testpypi(session):
-    session.run("pip", "install", "-U", "--extra-index-url", "https://testpypi.python.org/pypi", "nanopyx[all]")
+    session.run(
+        "pip",
+        "install",
+        "-U",
+        "--extra-index-url",
+        "https://testpypi.python.org/pypi",
+        "nanopyx[all]",
+    )
     with session.chdir(".nox"):
         extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
         if extra_args != "":

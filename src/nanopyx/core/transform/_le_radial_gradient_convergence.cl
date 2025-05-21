@@ -47,6 +47,7 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk;
     float2 correctedv;
     float2 correctedd;
+    float correct_vx, correct_vy;
 
     float xc = (float)xM / magnification + offset; // offset in non-magnified space
     float yc = (float)yM / magnification + offset;
@@ -54,8 +55,8 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     float RGC = 0;
     float distanceWeightSum = 0;
 
-    int _start = -(int)(2 * fwhm); //changed to have "Factor Cagança" but with properly iterating over the desired range
-    int _end = (int)(2 * fwhm + 1); // TODO discuss with Ricardo
+    int _start = -(int)(fwhm);
+    int _end = (int)(fwhm + 1);
 
     for (int j = _start; j < _end; j++) {
         vy = yc + j;
@@ -70,8 +71,24 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
                     distance = sqrt(dx * dx + dy * dy);
 
                     if (distance != 0 && distance <= tSO) {
-                        Gx = imIntGx[(int)((vy+xyoffset) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((vx+xyoffset) * magnification * Gx_Gy_MAGNIFICATION)];
-                        Gy = imIntGy[(int)((vy+xyoffset) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((vx+xyoffset) * magnification * Gx_Gy_MAGNIFICATION)];
+
+                        correct_vx = vx+xyoffset;
+                        correct_vy = vy+xyoffset;
+
+                        if (correct_vx<fabs(xyoffset)){
+
+                            correct_vx = 0;
+
+                        };
+
+                        if (correct_vy<fabs(xyoffset)){
+
+                            correct_vy = 0;
+
+                        };
+
+                        Gx = imIntGx[(int)((correct_vy) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((correct_vx) * magnification * Gx_Gy_MAGNIFICATION)];
+                        Gy = imIntGy[(int)((correct_vy) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((correct_vx) * magnification * Gx_Gy_MAGNIFICATION)];
 
                         // Rotate the gradient components
                         float2 rotatedG = _rotate_vector(Gx, Gy, angle);
@@ -115,10 +132,10 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
     int nPixels_out = nRows * nCols;
 
     // gradient image dimensions
-    int nPixels_grad = nRows*Gx_Gy_MAGNIFICATION * nCols*Gx_Gy_MAGNIFICATION;
+    int nPixels_grad = (int) (nRows*Gx_Gy_MAGNIFICATION * nCols*Gx_Gy_MAGNIFICATION);
 
-    row = row + fwhm*2*magnification;
-    col = col + fwhm*2*magnification;
+    row = row + (int)(fwhm*magnification);
+    col = col + (int)(fwhm*magnification);
 
     if (doIntensityWeighting == 1) {
         image_out[f * nPixels_out + row * nCols + col] =  _c_calculate_rgc(col, row, &imIntGx[f * nPixels_grad], &imIntGy[f * nPixels_grad], nCols, nRows, magnification, Gx_Gy_MAGNIFICATION, fwhm, tSO, tSS, sensitivity, offset, xyoffset, angle) * imInt[f * nPixels_out + row * nCols + col];

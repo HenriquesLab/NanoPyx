@@ -7,9 +7,6 @@ $include: notebook_intro.txt
 $include: citations/nlm_denoising.txt
 __cellbreak__
 $code
-$include: opencl_colab_fix.py
-__cellbreak__
-$code
 $include: notebook_setup.py
 __cellbreak__
 $code

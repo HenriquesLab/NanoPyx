@@ -49,9 +49,9 @@ def on_button_apply(b):
     gui_drift_apply["Align image"].description = "Align"
     gui_drift_apply._main_display.children = gui_drift_apply._main_display.children + (stackview.slice(aligned_image, colormap=gui_drift_apply["cmaps"].value, continuous_update=True),)
 
-gui_drift_apply.add_label("Load drift table:")
+gui_drift_apply.add_label(value="Load drift table:")
 gui_drift_apply.add_file_upload("upload")
-gui_drift_apply.add_label("Load image to align:")
+gui_drift_apply.add_label(value="Load image to align:")
 gui_drift_apply.add_file_upload("upload image")
 gui_drift_apply.add_dropdown("cmaps", description="Colormap:",
                       options=sorted(list(mpl.colormaps)),

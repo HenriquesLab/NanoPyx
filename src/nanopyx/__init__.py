@@ -17,7 +17,6 @@ if not os.path.exists(__config_folder__):
 
 from .__agent__ import Agent  # noqa: E402
 
-
 # TODO: allow benchmarking of only specific implementations
 # TODO: provide parallelized batch processing
 
@@ -42,7 +41,7 @@ __all__ = [
 # Section for imports of high-level functions
 from .core.utils.benchmark import benchmark_all_le_methods as benchmark
 from .methods import non_local_means_denoising
-from .methods import eSRRF, run_esrrf_parameter_sweep
+from .methods import eSRRF, run_esrrf_parameter_sweep, eSRRF3D
 from .methods import SRRF
 from .methods import calculate_frc, calculate_decorr_analysis
 from .methods import calculate_error_map

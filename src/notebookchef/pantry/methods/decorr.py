@@ -38,7 +38,7 @@ def run_decorr(b):
     gui_decorr._main_display.children = gui_decorr._main_display.children + (output_plot,)
     plt.clf()
 
-gui_decorr.add_int_slider("pixel_size", description="Pixel Size:", min=0.01, max=1000, value=100, remember_value=True)
+gui_decorr.add_int_slider("pixel_size", description="Pixel Size:", min=0.01, max=1000, value=100)
 gui_decorr.add_dropdown("units", description="Units: ", options=["nm", "um", "mm"], value="nm")
 gui_decorr.add_int_slider("first_frame", description="Frame to be used:", min=0, max=dataset_original.shape[0]-1, value=0)
 gui_decorr.add_float_slider("rmin", description="Radius Min:", min=0.0, max=0.5, value=0.0)

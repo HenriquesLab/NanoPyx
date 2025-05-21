@@ -8,6 +8,7 @@ import platform
 import numpy as np
 from ipyfilechooser import FileChooser
 from skimage.exposure import rescale_intensity
+import warnings
 
 # import cache if python >= 3.9, otherwise import lru_cache
 if platform.python_version_tuple() >= ("3", "9"):
@@ -15,13 +16,21 @@ if platform.python_version_tuple() >= ("3", "9"):
 else:
     from functools import lru_cache as cache
 
+warnings.warn(
+    "The EasyGui class is deprecated.\nConsider using ezinput (the updated version of EasyGui) instead.\nYou can install ezinput with 'pip install ezinput'.\nThe API is similar to EasyGui, but with additional features and improvements.\nIt also allows to run the same widget code in both Jupyter Notebooks and on the terminal.\nFor more information: https://github.com/henriqueslab/ezinput",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 try:
     import ipywidgets as widgets
     from IPython import display as dp
     from IPython.display import display, clear_output
     from matplotlib import pyplot as plt
 except ImportError:
-    print("jupyter optional-dependencies not installed, conside installing with 'pip install nanopyx[jupyter]'")
+    print(
+        "jupyter optional-dependencies not installed, conside installing with 'pip install nanopyx[jupyter]'"
+    )
     raise ImportError
 
 
@@ -102,7 +111,9 @@ class EasyGui:
         :param kwargs: kwargs for the widget
         """
         self._nLabels += 1
-        self._widgets[f"label_{self._nLabels}"] = widgets.Label(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[f"label_{self._nLabels}"] = widgets.Label(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
     def add_button(self, tag, *args, **kwargs):
         """
@@ -111,7 +122,9 @@ class EasyGui:
         :param args: args for the widget
         :param kwargs: kwargs for the widget
         """
-        self._widgets[tag] = widgets.Button(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.Button(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
     def add_text(self, tag, *args, **kwargs):
         """
@@ -120,7 +133,9 @@ class EasyGui:
         :param args: args for the widget
         :param kwargs: kwargs for the widget
         """
-        self._widgets[tag] = widgets.Text(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.Text(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
     def add_int_slider(self, tag, *args, remember_value=False, **kwargs):
         """
@@ -130,9 +145,15 @@ class EasyGui:
         :param remember_value: remember the last value
         :param kwargs: kwargs for the widget
         """
-        if remember_value and tag in self.cfg and kwargs["min"] <= self.cfg[tag] <= kwargs["max"]:
+        if (
+            remember_value
+            and tag in self.cfg
+            and kwargs["min"] <= self.cfg[tag] <= kwargs["max"]
+        ):
             kwargs["value"] = self.cfg[tag]
-        self._widgets[tag] = widgets.IntSlider(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.IntSlider(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
     def add_float_slider(self, tag, *args, remember_value=False, **kwargs):
         """
@@ -144,7 +165,9 @@ class EasyGui:
         """
         if remember_value and tag in self.cfg:
             kwargs["value"] = self.cfg[tag]
-        self._widgets[tag] = widgets.FloatSlider(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.FloatSlider(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
     def add_checkbox(self, tag, *args, remember_value=False, **kwargs):
         """
@@ -156,7 +179,9 @@ class EasyGui:
         """
         if remember_value and tag in self.cfg:
             kwargs["value"] = self.cfg[tag]
-        self._widgets[tag] = widgets.Checkbox(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.Checkbox(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
     def add_int_text(self, tag, *args, remember_value=False, **kwargs):
         """
@@ -169,7 +194,9 @@ class EasyGui:
         if remember_value and tag in self.cfg:
             kwargs["value"] = self.cfg[tag]
 
-        self._widgets[tag] = widgets.IntText(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.IntText(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
     def add_float_text(self, tag, *args, remember_value=False, **kwargs):
         """
@@ -181,7 +208,9 @@ class EasyGui:
         """
         if remember_value and tag in self.cfg:
             kwargs["value"] = self.cfg[tag]
-        self._widgets[tag] = widgets.FloatText(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.FloatText(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
     def add_dropdown(self, tag, *args, remember_value=False, **kwargs):
         """
@@ -191,11 +220,19 @@ class EasyGui:
         :param remember_value: remember the last value
         :param kwargs: kwargs for the widget
         """
-        if remember_value and tag in self.cfg and self.cfg[tag] in kwargs["options"]:
+        if (
+            remember_value
+            and tag in self.cfg
+            and self.cfg[tag] in kwargs["options"]
+        ):
             kwargs["value"] = self.cfg[tag]
-        self._widgets[tag] = widgets.Dropdown(*args, **kwargs, layout=self._layout, style=self._style)
+        self._widgets[tag] = widgets.Dropdown(
+            *args, **kwargs, layout=self._layout, style=self._style
+        )
 
-    def add_file_upload(self, tag, *args, accept=None, multiple=False, **kwargs):
+    def add_file_upload(
+        self, tag, *args, accept=None, multiple=False, **kwargs
+    ):
         """
         Add a file upload widget to the container.
         :param tag: tag to identify the widget
@@ -224,7 +261,7 @@ class EasyGui:
         Show the widgets in the container.
         """
         # display the widgets
-        self._main_display.children = (tuple(self._widgets.values()))
+        self._main_display.children = tuple(self._widgets.values())
         clear_output()
         display(self._main_display)
 
