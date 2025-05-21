@@ -68,15 +68,6 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM
 
                         };
 
-                        // // Calculate the linear index for the gradient images
-                        // int linear_index = (int)((vy+xyoffset) * magnification * colsM) + (int)((vx+xyoffset) * magnification);
-                        // // Ensure the index is within bounds
-                        // if (linear_index < 0 || linear_index >= colsM * rowsM) {
-                        //     printf("magnification: %i, colsM: %i, xyoffset: %f\n", magnification, colsM, xyoffset);
-                        //     printf("Index out of bounds: %i, %f, %f\n", linear_index, vy, vx);
-                        //     continue; // Skip this iteration if the index is out of bounds
-                        // }
-
                         Gx = imIntGx[(int)((correct_vy) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((correct_vx) * magnification * Gx_Gy_MAGNIFICATION)];
                         Gy = imIntGy[(int)((correct_vy) * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)((correct_vx) * magnification * Gx_Gy_MAGNIFICATION)];
 
