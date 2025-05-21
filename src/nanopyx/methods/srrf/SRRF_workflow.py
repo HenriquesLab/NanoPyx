@@ -26,6 +26,7 @@ def SRRF(
         border (int, optional): Border parameter for radiality analysis (default is 0).
         radialityPositivityConstraint (bool, optional): Enable radiality positivity constraint (default is True).
         doIntensityWeighting (bool, optional): Enable intensity weighting (default is True).
+        macro_pixel_correction (bool, optional): Enable macro pixel correction (default is True).
         _force_run_type (str, optional): Force a specific run type for the analysis (default is None).
 
     Returns:

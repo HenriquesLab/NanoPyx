@@ -19,7 +19,35 @@ def eSRRF3D(
     _force_run_type=None,
 ):
     """
-    #TODO
+    Perform eSRRF3D analysis on an image.
+
+    Args:
+        img (numpy.ndarray): The input image for eSRRF3D analysis.
+        magnification_xy (int, optional): Magnification factor in XY plane (default is 2).
+        magnification_z (int, optional): Magnification factor in Z plane (default is 2).
+        radius (float, optional): Radius parameter for eSRRF3D analysis (default is 1.5).
+        radius_z (float, optional): Radius parameter in Z direction for eSRRF3D analysis (default is 0.5).
+        voxel_ratio (float, optional): Ratio of voxel size in XY to Z direction (default is 4.0).
+        sensitivity (float, optional): Sensitivity parameter for eSRRF3D analysis (default is 1).
+        mode (str, optional): Time projection mode (default is "average").
+        doIntensityWeighting (bool, optional): Enable intensity weighting (default is True).
+        macro_pixel_correction (bool, optional): Enable macro pixel correction (default is True).
+        _force_run_type (str, optional): Force a specific run type for the analysis (default is None).
+
+    Returns:
+        numpy.ndarray: The result of eSRRF3D analysis, typically representing the localizations.
+
+    Example:
+        result = eSRRF3D(image, magnification_xy=2, magnification_z=2, radius=1.5, sensitivity=1, doIntensityWeighting=True)
+
+    Note:
+        - eSRRF3D (enhanced Super-Resolution Radial Fluctuations 3D) is a method for super-resolution localization microscopy in three dimensions.
+        - This function sets up a workflow to perform eSRRF3D analysis on the input image.
+        
+    See Also:
+        - eSRRF3D_ST: The eSRRF3D step that performs the actual analysis.
+        - Workflow: The class used to define and run analysis workflows.    
+
     """
 
     _eSRRF3D = Workflow(

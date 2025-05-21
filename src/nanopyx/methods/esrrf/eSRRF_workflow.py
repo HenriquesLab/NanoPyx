@@ -25,6 +25,7 @@ def eSRRF(
           radius (float, optional): Radius parameter for eSRRF analysis (default is 1.5).
           sensitivity (float, optional): Sensitivity parameter for eSRRF analysis (default is 1).
           doIntensityWeighting (bool, optional): Enable intensity weighting (default is True).
+          macro_pixel_correction (bool, optional): Enable macro pixel correction (default is True).
           _force_run_type (str, optional): Force a specific run type for the analysis (default is None).
 
     Returns:
