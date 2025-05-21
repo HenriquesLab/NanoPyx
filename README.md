@@ -85,7 +85,7 @@ pip install napari-nanopyx
 
 ## Installation
 
-`NanoPyx` is compatible and tested with Python 3.9, 3.10, 3.11, 3.12 and 3.13 in MacOS, Windows and Linux. Installation time depends on your hardware and internet connection, but should take around 5 minutes.
+`NanoPyx` is compatible and tested with Python 3.9, 3.10, 3.11 and 3.12 in MacOS, Windows and Linux. Installation time depends on your hardware and internet connection, but should take around 5 minutes.
 
 You can install `NanoPyx` via [pip]:
 
