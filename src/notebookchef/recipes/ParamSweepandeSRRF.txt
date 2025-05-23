@@ -10,6 +10,9 @@ $include: citations/frc.txt
 $include: citations/decorr.txt
 __cellbreak__
 $code
+$include: colab_numpy_fix.py
+__cellbreak__
+$code
 $include: notebook_setup.py
 __cellbreak__
 $code

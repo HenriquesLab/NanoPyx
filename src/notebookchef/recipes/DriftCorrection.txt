@@ -7,6 +7,9 @@ $include: notebook_intro.txt
 $include: citations/drift_correction.txt
 __cellbreak__
 $code
+$include: colab_numpy_fix.py
+__cellbreak__
+$code
 $include: notebook_setup.py
 __cellbreak__
 $code
