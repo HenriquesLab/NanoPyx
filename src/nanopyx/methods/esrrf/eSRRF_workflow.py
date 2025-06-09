@@ -60,8 +60,8 @@ def eSRRF(
     )
     if macro_pixel_correction:
         return macro_pixel_corrector(
-            _eSRRF.calculate(_force_run_type=_force_run_type)[0],
+            np.asarray(_eSRRF.calculate(_force_run_type=_force_run_type)[0]),
             magnification=magnification,
         )
     else:
-        return _eSRRF.calculate(_force_run_type=_force_run_type)[0]
+        return np.asarray(_eSRRF.calculate(_force_run_type=_force_run_type)[0])
