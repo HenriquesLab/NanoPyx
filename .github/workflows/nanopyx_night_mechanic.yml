@@ -41,7 +41,7 @@ jobs:
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
       - name: Upload Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: coverage.xml # optional
           flags: pytests # optional
@@ -70,7 +70,7 @@ jobs:
         env:
           LOG_LEVEL: ${{ github.event.inputs.logLevel }}
       - name: Upload Coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           files: coverage.xml # optional
           flags: pytests # optional
