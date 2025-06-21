@@ -65,7 +65,6 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
@@ -142,7 +141,6 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
@@ -219,7 +217,6 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
@@ -296,7 +293,6 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
@@ -372,7 +368,6 @@ class eSRRF3D(LiquidEngine):
         @cpu
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355

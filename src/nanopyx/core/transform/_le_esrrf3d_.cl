@@ -240,7 +240,7 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
                             dx = vx - xc;
                             dy = vy - yc;
                             dz = vz - zc; 
-                            dz_real = dz * voxel_ratio;
+                            dz_real = dz;
                             distance = sqrt(dx * dx + dy * dy + dz_real * dz_real);
                             distance_xy = sqrt(dx * dx + dy * dy);
                             distance_z = dz_real;
