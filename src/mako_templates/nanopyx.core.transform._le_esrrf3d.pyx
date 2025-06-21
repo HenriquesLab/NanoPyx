@@ -41,11 +41,11 @@ class eSRRF3D(LiquidEngine):
         if len(image.shape) != 4:
             print("Warning:image must either be 3D or 4D. If 3D, it will be reshaped to 4D.")
             return None
-        if radius * 2 > (image.shape[2]) / 2 or radius * 2 > (image.shape[3] / 2):
-            print("Warning: Radius is too big for the image. Half the radius must be smaller than both half the number of columns and half number of rows of the image.")
+        if radius > (image.shape[2]) / 2 or radius * 2 > (image.shape[3] / 2):
+            print("Warning: Radius is too big for the image. The radius must be smaller than half the number of columns and half number of rows of the image.")
             return None
-        if radius_z * 2 > image.shape[1] / 2:
-            print("Warning: Radius_z is too big for the image. Half the radius_z must be smaller than half of number of Z planes.")
+        if radius_z > image.shape[1] / 2:
+            print("Warning: Radius_z is too big for the image. The radius_z must be smaller than half of number of Z planes.")
             return None
         if image.dtype != np.float32:
             image = image.astype(np.float32)
