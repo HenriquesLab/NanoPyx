@@ -10,7 +10,7 @@ def test_esrrf3d_workflow(downloader):
     )
     small_dataset = dataset[:10, :20, :20]
 
-    dataset = dataset[np.newaxis, ...]
+    small_dataset = small_dataset[np.newaxis, ...]
 
     eSRRF3D_w(small_dataset)
 
@@ -96,4 +96,4 @@ def test_esrrf3d_radiusz_too_high(downloader):
 
     e3d = eSRRF3D_ST(testing=True, clear_benchmarks=True)
 
-    assert e3d.run(small_dataset, radius_z=15) is None
+    assert e3d.run(small_dataset, PSF_ratio=15) is None

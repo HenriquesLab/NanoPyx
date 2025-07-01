@@ -140,7 +140,7 @@ float _c_get_bound_value(float* im, int slices, int rows, int cols, int s, int r
 
 float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIntGy, float* imIntGz, int colsM, int rowsM, int slicesM, int magnification_xy, int magnification_z, float voxel_ratio, float fwhm, float fwhm_z, float tSO, float tSO_z, float tSS, float tSS_z, float sensitivity) {
 
-    float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, dz_real, distance, distance_xy, distance_z, distanceWeight, distanceWeight_xy, distanceWeight_z, GdotR, Dk;
+    float vx, vy, vz, Gx, Gy, Gz, dx, dy, dz, distance, distance_xy, distance_z, distanceWeight, distanceWeight_xy, distanceWeight_z, GdotR, Dk;
 
     float xc = (float)(xM) / magnification_xy;
     float yc = (float)(yM) / magnification_xy;
@@ -171,11 +171,9 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                         if (0 < vz && vz <= (slicesM/magnification_z) - 1) {
                             dx = vx - xc;
                             dy = vy - yc;
-                            dz = vz - zc; 
-                            dz_real = dz * voxel_ratio;
-                            distance = sqrt(dx * dx + dy * dy + dz_real * dz_real);
+                            distance_z = vz - zc;
+                            distance = sqrt(dx * dx + dy * dy + distance_z * distance_z);
                             distance_xy = sqrt(dx * dx + dy * dy);
-                            distance_z = dz_real;
                             
                             if (distance != 0 && distance_xy <= tSO && distance_z <= tSO_z) {
                                 int linear_index = (int)(vz * magnification_z) * rowsM * colsM +
@@ -189,10 +187,10 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, float* imIntGx, float* imIn
                                 distanceWeight = _c_calculate_dw3D(distance, distance_xy, distance_z, tSS, tSS_z);
                                 
                                 distanceWeightSum += distanceWeight;
-                                GdotR = Gx*dx + Gy*dy + Gz*dz_real;
+                                GdotR = Gx*dx + Gy*dy + Gz*distance_z;
 
                                 if (GdotR < 0) {
-                                    Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, dz_real, distance);
+                                    Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, distance_z, distance);
                                     RGC += (Dk * distanceWeight);
                                 }
                             }

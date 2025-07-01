@@ -239,11 +239,9 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
                         if (0 < vz && vz <= (slicesM/magnification_z) - 1) {
                             dx = vx - xc;
                             dy = vy - yc;
-                            dz = vz - zc; 
-                            dz_real = dz * voxel_ratio;
-                            distance = sqrt(dx * dx + dy * dy + dz_real * dz_real);
+                            distance_z = vz - zc; 
+                            distance = sqrt(dx * dx + dy * dy + distance_z * distance_z);
                             distance_xy = sqrt(dx * dx + dy * dy);
-                            distance_z = dz_real;
                             
                             if (distance != 0 && distance_xy <= tSO && distance_z <= tSO_z) {
                                 int linear_index = (int)(vz * magnification_z) * rowsM * colsM +
@@ -264,10 +262,10 @@ float _c_calculate_rgc3D(int xM, int yM, int sliceM, __global float* imIntGx, __
                                 distanceWeightSum = distanceWeightSum + distanceWeight;
                                 // distanceWeightSum_xy += distanceWeight_xy;
                                 // distanceWeightSum_z += distanceWeight_z;
-                                GdotR = Gx*dx + Gy*dy + Gz*dz_real;
+                                GdotR = Gx*dx + Gy*dy + Gz*distance_z;
 
                                 if (GdotR < 0) {
-                                    Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, dz_real, distance);
+                                    Dk = _c_calculate_dk3D(Gx, Gy, Gz, dx, dy, distance_z, distance);
                                     RGC = RGC + (Dk * distanceWeight);
                                 }
                             }

@@ -32,25 +32,28 @@ class eSRRF3D(LiquidEngine):
         self._designation = "eSRRF_3D"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
-    def run(self, image, magnification_xy: int = 2, magnification_z: int = 2, radius: float = 1.5, radius_z: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, run_type=None):
+    def run(self, image, magnification_xy: int = 2, magnification_z: int = 2, radius: float = 1.5, PSF_ratio: float = 2.8, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True, run_type=None):
         # TODO: complete and check _run inputs, need to complete variables?
+        radius_z = radius * PSF_ratio / voxel_ratio
         if len(image.shape) == 3:
             image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
         if len(image.shape) != 4:
             print("Warning:image must either be 3D or 4D. If 3D, it will be reshaped to 4D.")
             return None
-        if radius * 2 > (image.shape[2]) / 2 or radius * 2 > (image.shape[3] / 2):
-            print("Warning: Radius is too big for the image. Half the radius must be smaller than both half the number of columns and half number of rows of the image.")
+        if radius > (image.shape[2]) / 2 or radius * 2 > (image.shape[3] / 2):
+            print("Warning: Radius is too big for the image. The radius must be smaller than half the number of columns and half number of rows of the image.")
             return None
-        if radius_z * 2 > image.shape[1] / 2:
-            print("Warning: Radius_z is too big for the image. Half the radius_z must be smaller than half of number of Z planes.")
+        if radius_z > image.shape[1] / 2:
+            print("Warning: Radius_z is too big for the image. The radius_z must be smaller than half of number of Z planes. Radius_z is automatically calculated from radius * PSF_ratio / voxel_ratio.")
             return None
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         
         return self._run(image, magnification_xy=magnification_xy, magnification_z=magnification_z, radius=radius, radius_z=radius_z, voxel_ratio=voxel_ratio, sensitivity=sensitivity, mode=mode, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
-    def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, radius_z: float = 1.5, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
+    def benchmark(self, image, magnification_xy: int = 5, magnification_z: int = 5, radius: float = 1.5, PSF_ratio: float = 2.8, voxel_ratio: float = 4.0, sensitivity: float = 1, mode: str = "average", doIntensityWeighting: bool = True):
+
+        radius_z = radius * PSF_ratio / voxel_ratio
         if image.dtype != np.float32:
             image = image.astype(np.float32)
         if len(image.shape) == 4:
@@ -65,7 +68,6 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
@@ -142,7 +144,6 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
@@ -219,7 +220,6 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
@@ -296,7 +296,6 @@ class eSRRF3D(LiquidEngine):
         @threaded
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355
@@ -372,7 +371,6 @@ class eSRRF3D(LiquidEngine):
         @cpu
         @cython
         """
-
         time_start = time.time()
         # calculate all constants
         cdef float sigma = radius / 2.355

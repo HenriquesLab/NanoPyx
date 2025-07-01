@@ -1,48 +1,53 @@
 opencl:
-  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
-    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
-  : - 12363612.0
-    - 0.534501292015193
-    - 0.4527143339801114
-    - 0.4526337919814978
+  ? '([''shape(10, 20, 40, 40)''], {''magnification_xy'': 5, ''magnification_z'':
+    5, ''radius'': 1.5, ''radius_z'': 1.0499999999999998, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': True})'
+  : - 50399999.99999999
+    - 6.163972874986939
+    - 6.691725915996358
+    - 5.600578582962044
+  ? '([''shape(1000, 30, 29, 30)''], {''magnification_xy'': 2, ''magnification_z'':
+    2, ''radius'': 1.5, ''radius_z'': 1.0499999999999998, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': True})'
+  : - 657719999.9999999
+    - 51.01166029192973
 threaded:
-  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
-    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
-  : - 12363612.0
-    - 1.9790987920132466
-    - 1.9240770420001354
-    - 1.895047333004186
+  ? '([''shape(10, 20, 40, 40)''], {''magnification_xy'': 5, ''magnification_z'':
+    5, ''radius'': 1.5, ''radius_z'': 1.0499999999999998, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': True})'
+  : - 50399999.99999999
+    - 19.27102233399637
+    - 18.66210575005971
+    - 18.99253195791971
 threaded_dynamic:
-  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
-    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
-  : - 12363612.0
-    - 1.7660593329928815
-    - 1.719053625012748
-    - 1.7240022089972626
+  ? '([''shape(10, 20, 40, 40)''], {''magnification_xy'': 5, ''magnification_z'':
+    5, ''radius'': 1.5, ''radius_z'': 1.0499999999999998, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': True})'
+  : - 50399999.99999999
+    - 17.991310499957763
+    - 18.140572750009596
+    - 18.62613470805809
 threaded_guided:
-  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
-    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
-  : - 12363612.0
-    - 1.781112333002966
-    - 1.8617710830003489
-    - 2.0126889999955893
+  ? '([''shape(10, 20, 40, 40)''], {''magnification_xy'': 5, ''magnification_z'':
+    5, ''radius'': 1.5, ''radius_z'': 1.0499999999999998, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': True})'
+  : - 50399999.99999999
+    - 18.974687915993854
+    - 18.85600141703617
+    - 18.480262708035298
 threaded_static:
-  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
-    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
-  : - 12363612.0
-    - 1.8515684169833548
-    - 1.8730584580043796
-    - 1.8657334169838578
+  ? '([''shape(10, 20, 40, 40)''], {''magnification_xy'': 5, ''magnification_z'':
+    5, ''radius'': 1.5, ''radius_z'': 1.0499999999999998, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': True})'
+  : - 50399999.99999999
+    - 19.723863166058436
+    - 19.532742790994234
+    - 19.2554613329703
 unthreaded:
-  ? '([''shape(1, 101, 101, 101)''], {''magnification_xy'': 2, ''magnification_z'':
-    2, ''radius'': 1.5, ''radius_z'': 0.5, ''voxel_ratio'': 4.0, ''sensitivity'':
-    1.0, ''mode'': ''average'', ''doIntensityWeighting'': False})'
-  : - 12363612.0
-    - 4.863078458001837
-    - 4.9081600419885945
-    - 4.920950291998452
+  ? '([''shape(10, 20, 40, 40)''], {''magnification_xy'': 5, ''magnification_z'':
+    5, ''radius'': 1.5, ''radius_z'': 1.0499999999999998, ''voxel_ratio'': 4.0, ''sensitivity'':
+    1.0, ''mode'': ''average'', ''doIntensityWeighting'': True})'
+  : - 50399999.99999999
+    - 35.281799208023585
+    - 35.78980629099533
+    - 35.422467958997004

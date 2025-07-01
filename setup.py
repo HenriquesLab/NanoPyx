@@ -22,7 +22,7 @@ EXTRA_COMPILE_ARGS = [
 ]
 EXTRA_LING_ARGS = []
 
-VERSION = "1.2.1"  # sets version number for whole package
+VERSION = "1.2.2"  # sets version number for whole package
 
 
 def run_command(command: str) -> str:
