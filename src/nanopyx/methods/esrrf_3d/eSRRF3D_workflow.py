@@ -58,7 +58,7 @@ def eSRRF3D(
         frames_per_timepoint = img.shape[0]
 
     number_of_timepoints = img.shape[0] // frames_per_timepoint
-    if number_of_timepoints % 2 != 0:
+    if img.shape[0] % frames_per_timepoint != 0:
         number_of_timepoints += 1
 
     output_array = np.zeros(
