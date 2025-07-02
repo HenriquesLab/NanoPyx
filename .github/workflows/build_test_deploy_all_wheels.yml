@@ -30,6 +30,10 @@ jobs:
         with:
           python-version: 3.9  # Works as bootstrap for cibuildwheel
 
+      - name: Install libjpeg-dev
+        if: matrix.os == 'manylinux'
+        run: sudo apt-get update && sudo apt-get install -y libjpeg-dev
+
       - name: Install cibuildwheel and nox
         run: |
           python -m pip install --upgrade pip
