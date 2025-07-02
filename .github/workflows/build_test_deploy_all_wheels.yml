@@ -15,7 +15,7 @@ jobs:
             archs: arm64
             cibw_build: cp39-macosx_arm64 cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64
           - os: manylinux
-            runner: [self-hosted, Ubuntu, Native]
+            runner: ubuntu-latest
             archs: auto
             cibw_build: cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64
           - os: windows
@@ -30,10 +30,6 @@ jobs:
         with:
           python-version: 3.9  # Works as bootstrap for cibuildwheel
 
-      - name: Install libjpeg-dev
-        if: matrix.os == 'manylinux'
-        run: sudo apt-get update && sudo apt-get install -y libjpeg-dev
-
       - name: Install cibuildwheel and nox
         run: |
           python -m pip install --upgrade pip
@@ -46,7 +42,6 @@ jobs:
 
       - name: Build wheels
         run: |
-          python -m pip install --only-binary=:all: pillow
           python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
