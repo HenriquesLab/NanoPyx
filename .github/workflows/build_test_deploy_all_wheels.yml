@@ -49,6 +49,7 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.archs }}
+          CIBW_BEFORE_ALL: yum install -y libjpeg-devel zlib-devel libpng-devel
 
       - name: Test wheels (only on macOS ARM64)
         if: matrix.os == 'macOS-ARM'
