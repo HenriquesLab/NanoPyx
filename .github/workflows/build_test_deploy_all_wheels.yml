@@ -47,8 +47,13 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.archs }}
-          CIBW_ENVIRONMENT: "PIP_ONLY_BINARY=pillow PIP_NO_BUILD_ISOLATION=1"
-          CIBW_BEFORE_ALL: "pip install --only-binary=:all: pillow"
+          CIBW_ENVIRONMENT: >
+            PIP_ONLY_BINARY=pillow
+            PIP_NO_BUILD_ISOLATION=1
+            CL_INC_DIR=/usr/include
+            CL_LIB_DIR=/usr/lib/x86_64-linux-gnu
+            CL_LIBNAME=OpenCL
+          CIBW_BEFORE_ALL: "apt-get update && apt-get install -y ocl-icd-opencl-dev && pip install --only-binary=:all: pillow"
 
       - name: Test wheels (only on macOS ARM64)
         if: matrix.os == 'macOS-ARM'
