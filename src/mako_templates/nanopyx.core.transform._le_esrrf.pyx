@@ -29,15 +29,15 @@ class eSRRF(LiquidEngine):
         self._designation = "eSRRF_ST"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
-    def run(self, image, magnification: int = 5, grad_magnification: int = 1, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
+    def run(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
         image = check_image(image)
         return self._run(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
 
-    def benchmark(self, image, magnification: int = 5, grad_magnification: int = 1, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
+    def benchmark(self, image, magnification: int = 5, grad_magnification: int = 2, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
         image = check_image(image)
         return super().benchmark(image, magnification=magnification, grad_magnification=grad_magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
 
-    def _run_opencl(self, image, magnification=5, grad_magnification=1, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
+    def _run_opencl(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
         """
         @gpu
         """
@@ -70,8 +70,8 @@ class eSRRF(LiquidEngine):
         input_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(image[0:max_slices, :, :].nbytes, dc, max_slices))
         output_cl = cl.Buffer(cl_ctx, mf.WRITE_ONLY, self._check_max_buffer_size(np.empty((max_slices, output_shape[1], output_shape[2]), dtype=np.float32).nbytes, dc, max_slices))
         magnified_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, output_shape[1], output_shape[2]), dtype=np.float32).nbytes, dc, max_slices))
-        col_kernel_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(np.empty((2,2)).nbytes, dc, max_slices))
-        row_kernel_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(np.empty((2,2)).nbytes, dc, max_slices))
+        col_kernel_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(np.empty_like(kernely).nbytes, dc, max_slices))
+        row_kernel_cl = cl.Buffer(cl_ctx, mf.READ_ONLY, self._check_max_buffer_size(np.empty_like(kernelx).nbytes, dc, max_slices))
         cl.enqueue_copy(cl_queue, col_kernel_cl, kernely).wait()
         cl.enqueue_copy(cl_queue, row_kernel_cl, kernelx).wait()
         col_gradients_cl = cl.Buffer(cl_ctx, mf.READ_WRITE, self._check_max_buffer_size(np.empty((max_slices, image.shape[1], image.shape[2]), dtype=np.float32).nbytes, dc, max_slices))
@@ -181,7 +181,7 @@ class eSRRF(LiquidEngine):
         return output_image
 
     % for sch in schedulers:
-    def _run_${sch}(self, image, magnification=5, grad_magnification=1, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_${sch}(self, image, magnification=5, grad_magnification=2, radius=1.5, sensitivity=1, doIntensityWeighting=True):
         """
         @cpu
         @threaded
