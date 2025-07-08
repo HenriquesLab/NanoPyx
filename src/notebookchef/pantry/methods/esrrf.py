@@ -30,23 +30,16 @@ def run_esrrf(b):
     elif frames_per_timepoint > dataset_original.shape[0]:
         frames_per_timepoint = dataset_original.shape[0]
 
-    output = []
-
-    for i in range(dataset_original.shape[0] // frames_per_timepoint):
-        block = dataset_original[
-            i * frames_per_timepoint : (i + 1) * frames_per_timepoint
-        ]
-        result = eSRRF(
-            block,
-            magnification=magnification,
-            radius=ring_radius,
-            sensitivity=sensitivity,
-            doIntensityWeighting=True,
-            macro_pixel_correction=mpcorrection,
-        )
-        output.append(
-            calculate_eSRRF_temporal_correlations(result, esrrf_order)
-        )
+    output = eSRRF(
+        dataset_original,
+        magnification=magnification,
+        radius=ring_radius,
+        sensitivity=sensitivity,
+        doIntensityWeighting=True,
+        macro_pixel_correction=mpcorrection,
+        frames_per_timepoint=frames_per_timepoint,
+        temporal_correlation=esrrf_order,
+    )
 
     global dataset_esrrf
     dataset_esrrf = np.array(output)
