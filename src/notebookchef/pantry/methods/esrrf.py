@@ -25,10 +25,6 @@ def run_esrrf(b):
     # disable button while running
     gui_esrrf["run"].disabled = True
     gui_esrrf["run"].description = "Running..."
-    if frames_per_timepoint == 0:
-        frames_per_timepoint = dataset_original.shape[0]
-    elif frames_per_timepoint > dataset_original.shape[0]:
-        frames_per_timepoint = dataset_original.shape[0]
 
     output = eSRRF(
         dataset_original,
