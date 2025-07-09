@@ -54,9 +54,12 @@ jobs:
           CIBW_ENVIRONMENT: >
             PIP_ONLY_BINARY=pillow
             PIP_NO_BUILD_ISOLATION=1
+            CFLAGS="-I/usr/include"
+            LDFLAGS="-L/usr/lib/x86_64-linux-gnu"
             CL_INC_DIR=/usr/include
             CL_LIB_DIR=/usr/lib/x86_64-linux-gnu
             CL_LIBNAME=OpenCL
+          CIBW_ENVIRONMENT_PASS_LINUX: CL_INC_DIR,CL_LIB_DIR,CL_LIBNAME,CFLAGS,LDFLAGS
 
       - name: Test wheels (only on macOS ARM64)
         if: matrix.os == 'macOS-ARM'
