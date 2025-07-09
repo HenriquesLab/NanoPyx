@@ -53,6 +53,7 @@ jobs:
             CL_INC_DIR=/usr/include
             CL_LIB_DIR=/usr/lib/x86_64-linux-gnu
             CL_LIBNAME=OpenCL
+          CIBW_BEFORE_ALL_LINUX: 'yum install -y opencl-headers'
 
       - name: Test wheels (only on macOS ARM64)
         if: matrix.os == 'macOS-ARM'
