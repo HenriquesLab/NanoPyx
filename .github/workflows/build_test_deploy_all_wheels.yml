@@ -52,6 +52,9 @@ jobs:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.archs }}
           CIBW_BEFORE_ALL_LINUX: >
+            sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*.repo &&
+            sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo &&
+            yum clean all &&
             yum install -y epel-release &&
             yum install -y ocl-icd-devel opencl-headers
           CIBW_ENVIRONMENT_LINUX: >
