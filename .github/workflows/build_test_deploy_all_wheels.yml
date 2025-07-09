@@ -28,7 +28,11 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.9  # Works as bootstrap for cibuildwheel
+          python-version: |
+            3.9
+            3.10
+            3.11
+            3.12 
 
       - name: Install cibuildwheel and nox
         run: |
@@ -53,7 +57,6 @@ jobs:
             CL_INC_DIR=/usr/include
             CL_LIB_DIR=/usr/lib/x86_64-linux-gnu
             CL_LIBNAME=OpenCL
-          CIBW_BEFORE_ALL_LINUX: 'yum install -y opencl-headers'
 
       - name: Test wheels (only on macOS ARM64)
         if: matrix.os == 'macOS-ARM'
