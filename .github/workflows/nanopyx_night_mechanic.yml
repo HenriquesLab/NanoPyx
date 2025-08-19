@@ -21,7 +21,7 @@ on:
 jobs:
 
   test_on_ubuntu_container:
-    runs-on: [self-hosted, Ubuntu, Native]
+    runs-on: [self-hosted, Ubuntu, Docker]
     steps:
       - uses: actions/checkout@v4
         with:
