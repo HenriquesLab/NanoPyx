@@ -94,16 +94,15 @@ def clear_wheelhouse(session: nox.Session) -> None:
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def test_source(session):
     """
-    Run the test suite by directly calling pip install -e .[test] and then pytest on tests/test_package_level_calls.py
+    Run the test suite by directly calling pip install -e .[test] and then pytest
     """
     extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
     session.run("pip", "install", "-e", ".[test]")
-    test_file = DIR.joinpath("tests", "test_package_level_calls.py")
     if extra_args != "":
         extra_args = extra_args.split(" ")
-        session.run("pytest", test_file, *extra_args)
+        session.run("pytest", DIR.joinpath("tests"), *extra_args)
     else:
-        session.run("pytest", test_file)
+        session.run("pytest", DIR.joinpath("tests"))
     session.run("coverage", "xml")
 
 
