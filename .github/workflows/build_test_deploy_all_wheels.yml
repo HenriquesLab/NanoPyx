@@ -39,7 +39,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade setuptools==73.0.1
           python -m pip install cibuildwheel
-          python -m pip install 
           python -m pip install nox
 
       - name: Build sdist (only on Windows)
