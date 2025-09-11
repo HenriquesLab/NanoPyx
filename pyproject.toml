@@ -78,7 +78,7 @@ test = [
     "nanopyx[jupyter]",
     "nanopyx[optional]",
 ]
-optional=["numba", "dask", "dask_image", "transonic"]
+optional=["numba", "dask<2025.7.0", "dask_image", "transonic"]
 cuda = ["cupy"] # should be manually installed by users according to their CUDA version https://docs.cupy.dev/en/stable/install.html
 jupyter = [
     "nbformat>=4.2.0",

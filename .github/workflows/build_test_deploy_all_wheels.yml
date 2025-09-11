@@ -39,6 +39,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install --upgrade setuptools==73.0.1
           python -m pip install cibuildwheel
+          python -m pip install 
           python -m pip install nox
 
       - name: Build sdist (only on Windows)
@@ -56,8 +57,7 @@ jobs:
             sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo &&
             yum clean all &&
             yum install -y epel-release &&
-            yum install -y ocl-icd-devel opencl-headers &&
-            yum install -y arrow-devel
+            yum install -y ocl-icd-devel opencl-headers
           CIBW_ENVIRONMENT_LINUX: >
             PIP_ONLY_BINARY=pyarrow:pillow
             PIP_NO_BUILD_ISOLATION=1
