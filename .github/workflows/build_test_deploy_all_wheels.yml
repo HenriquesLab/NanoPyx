@@ -40,6 +40,7 @@ jobs:
           python -m pip install --upgrade setuptools==73.0.1
           python -m pip install cibuildwheel
           python -m pip install nox
+          python -m pip install --no-deps --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary --pre pyarrow
 
       - name: Build sdist (only on Windows)
         if: matrix.os == 'windows'
