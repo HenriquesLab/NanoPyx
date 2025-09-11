@@ -12,7 +12,6 @@ import numpy as np
 def eSRRF(
     image,
     magnification: int = 5,
-    grad_magnification: int = 2,
     radius: float = 1.5,
     sensitivity: float = 1,
     frames_per_timepoint: int = 0,
@@ -84,7 +83,6 @@ def eSRRF(
                 ),
                 {
                     "magnification": magnification,
-                    "grad_magnification": grad_magnification,
                     "radius": radius,
                     "sensitivity": sensitivity,
                     "doIntensityWeighting": doIntensityWeighting,
