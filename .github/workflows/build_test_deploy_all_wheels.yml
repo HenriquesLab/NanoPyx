@@ -58,7 +58,7 @@ jobs:
             yum install -y epel-release &&
             yum install -y ocl-icd-devel opencl-headers
           CIBW_ENVIRONMENT_LINUX: >
-            PIP_ONLY_BINARY=pillow
+            PIP_ONLY_BINARY=pyarrow:pillow
             PIP_NO_BUILD_ISOLATION=1
             CFLAGS="-I/usr/include"
             LDFLAGS="-L/usr/lib64"
@@ -66,7 +66,7 @@ jobs:
             CL_LIB_DIR=/usr/lib64
             CL_LIBNAME=OpenCL
           CIBW_ENVIRONMENT: >
-            PIP_ONLY_BINARY=pillow
+            PIP_ONLY_BINARY=pyarrow:pillow
             PIP_NO_BUILD_ISOLATION=1
           CIBW_ENVIRONMENT_PASS_LINUX: CL_INC_DIR,CL_LIB_DIR,CL_LIBNAME,CFLAGS,LDFLAGS
 
