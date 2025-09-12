@@ -17,10 +17,6 @@ elif sys.platform == "win32":
 else:
     PLATFORM = "unix"
 
-
-# Set nox options
-nox.options.reuse_existing_virtualenvs = False
-
 # Some platform specific actions
 if PLATFORM == "macos":
     if os.environ.get("NPX_MACOS_INSTALL_DEPENDENCIES", False):
@@ -29,19 +25,10 @@ if PLATFORM == "macos":
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def build_wheel(session: nox.Session) -> None:
-    """
-    Build a wheel
-    """
-    # if PLATFORM == "macos":  # build libomp from source, better ARM compatibility
-    #     path = Path(os.path.dirname(__file__)) / "build_tools" / "libs_build"
-    #     if not path:  # did we already build libomp?
-    #         session.run("bash", "build_tools/build_libomp.sh")
-
+    """Build a wheel"""
     session.install("build")
     temp_path = session.create_tmp()
-    # session.run("python", "-m", "build", "--wheel", "-o", temp_path)
     session.run("pip", "wheel", "--no-deps", "--wheel-dir", temp_path, ".")
-    # get the produced wheel name
     wheel_name = [
         name for name in os.listdir(temp_path) if name.endswith(".whl")
     ][0]
@@ -55,7 +42,6 @@ def build_wheel(session: nox.Session) -> None:
             "-w",
             DIR / "wheelhouse",
         )
-
     elif PLATFORM == "macos":
         session.install("delocate==0.10.4")
         session.run(
@@ -65,8 +51,6 @@ def build_wheel(session: nox.Session) -> None:
             "-w",
             DIR / "wheelhouse",
         )
-        pass
-
     else:
         os.makedirs(DIR / "wheelhouse", exist_ok=True)
         for file in os.listdir(temp_path):
@@ -76,43 +60,39 @@ def build_wheel(session: nox.Session) -> None:
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
 def build_sdist(session: nox.Session) -> None:
-    """
-    Build an SDist
-    """
+    """Build an SDist"""
     session.install("build")
     session.run("python", "-m", "build", "--sdist", "-o", "wheelhouse")
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
 def clear_wheelhouse(session: nox.Session) -> None:
-    """
-    Clear the wheelhouse
-    """
+    """Clear the wheelhouse"""
     shutil.rmtree(DIR / "wheelhouse", ignore_errors=True)
 
 
-@nox.session(python=PYTHON_ALL_VERSIONS)
-def test_source(session):
-    """
-    Run the test suite by directly calling pip install -e .[test] and then pytest
-    """
-    extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
-    session.run("pip", "install", "-e", ".[test]")
-    if extra_args != "":
-        extra_args = extra_args.split(" ")
-        session.run("pytest", DIR.joinpath("tests"), *extra_args)
-    else:
-        session.run("pytest", DIR.joinpath("tests"))
+def _run_pytest(session, *extra_args):
+    """Helper to enforce sequential pytest execution"""
+    args = [str(DIR / "tests")]
+    if extra_args:
+        args.extend(extra_args)
+    # 🚫 Force sequential pytest, even if xdist is installed
+    session.run("pytest", "-n", "0", *args)
     session.run("coverage", "xml")
 
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
+def test_source(session):
+    """Run tests from source"""
+    extra_args = os.environ.get("NPX_PYTEST_ARGS", "").split()
+    session.run("pip", "install", "-e", ".[test]")
+    _run_pytest(session, *extra_args)
+
+
+@nox.session(python=PYTHON_ALL_VERSIONS)
 def test_wheel(session):
-    """
-    Run the test suite by installing the wheel, changing directory and then calling pytest
-    """
+    """Run tests from wheel"""
     python_version_str = f"cp{session.python.replace('.', '')}"
-    # find the latest wheel
     wheel_names = [
         wheel
         for wheel in os.listdir("wheelhouse")
@@ -125,16 +105,13 @@ def test_wheel(session):
         "pip", "install", "-U", DIR / "wheelhouse" / f"{wheel_name}[test]"
     )
     with session.chdir(".nox"):
-        extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
-        if extra_args != "":
-            extra_args = extra_args.split(" ")
-            session.run("pytest", DIR.joinpath("tests"), *extra_args)
-        else:
-            session.run("pytest", DIR.joinpath("tests"))
+        extra_args = os.environ.get("NPX_PYTEST_ARGS", "").split()
+        _run_pytest(session, *extra_args)
 
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def test_testpypi(session):
+    """Run tests against TestPyPI"""
     session.run(
         "pip",
         "install",
@@ -144,30 +121,21 @@ def test_testpypi(session):
         "nanopyx[all]",
     )
     with session.chdir(".nox"):
-        extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
-        if extra_args != "":
-            extra_args = extra_args.split(" ")
-            session.run("pytest", DIR.joinpath("tests"), *extra_args)
-        else:
-            session.run("pytest", DIR.joinpath("tests"))
+        extra_args = os.environ.get("NPX_PYTEST_ARGS", "").split()
+        _run_pytest(session, *extra_args)
 
 
 @nox.session(python=PYTHON_ALL_VERSIONS)
 def test_pypi(session):
+    """Run tests against PyPI"""
     session.run("pip", "install", "-U", "nanopyx[all]")
     with session.chdir(".nox"):
-        extra_args = os.environ.get("NPX_PYTEST_ARGS", "")
-        if extra_args != "":
-            extra_args = extra_args.split(" ")
-            session.run("pytest", DIR.joinpath("tests"), *extra_args)
-        else:
-            session.run("pytest", DIR.joinpath("tests"))
+        extra_args = os.environ.get("NPX_PYTEST_ARGS", "").split()
+        _run_pytest(session, *extra_args)
 
 
 @nox.session(python=PYTHON_DEFAULT_VERSION)
 def generate_docs(session: nox.Session) -> None:
-    """
-    Generate the docs
-    """
+    """Generate the docs"""
     session.run("pip", "install", "-e", ".[doc, optional]")
     session.run("pdoc", DIR / "src" / "nanopyx", "-o", DIR / "docs")
