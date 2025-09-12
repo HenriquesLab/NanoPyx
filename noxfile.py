@@ -17,11 +17,6 @@ elif sys.platform == "win32":
 else:
     PLATFORM = "unix"
 
-# Set nox options
-nox.options.reuse_existing_virtualenvs = False
-# 🚫 Prevent parallel runs
-nox.options.error_on_parallel = True
-
 # Some platform specific actions
 if PLATFORM == "macos":
     if os.environ.get("NPX_MACOS_INSTALL_DEPENDENCIES", False):
