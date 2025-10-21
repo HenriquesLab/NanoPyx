@@ -27,17 +27,26 @@ void _c_gradient_radiality(float* image, float* imGc, float* imGr, int rows,
 // as in REF:
 // https://github.com/HenriquesLab/NanoJ-eSRRF/blob/785c71b3bd508c938f63bb780cba47b0f1a5b2a7/resources/liveSRRF.cl
 // under calculateGradient_2point
-void _c_gradient_2point(float* image, float* imGc, float* imGr, int rows,
+void _c_gradient_two_point(float* image, float* imGc, float* imGr, int rows,
                      int cols) {
-  int c0, r0, c1, r1;
-  for (int j = 1; j < rows; j++) {
-    r1 = j * cols;
-    r0 = (j - 1) * cols;
-    for (int i = 1; i < cols; i++) {
-      c1 = i;
-      c0 = i - 1;
-      imGc[r1 + i] = image[r1 + c1] - image[r1 + c0];
-      imGr[r1 + i] = image[r1 + c1] - image[r0 + c1];
+  int c1, r1;
+  int c0, r0;
+  int offset, left_offset, top_offset;
+
+  for (r1 = 0; r1 < rows; r1++) {
+      for (c1 = 0; c1 < cols; c1++) {
+
+          // compute previous column/row with clamp at 0 (max(x-1,0))
+          c0 = c1 > 0 ? c1 - 1 : 0;
+          r0 = r1 > 0 ? r1 - 1 : 0;
+
+          offset = r1 * cols + c1;
+          left_offset = r1 * cols + c0;  // (x0, y1)
+          top_offset  = r0 * cols + c1;  // (x1, y0)
+
+          // 2-point gradient (same as calculateGradient_2point)
+          imGc[offset] = image[offset] - image[left_offset];
+          imGr[offset] = image[offset] - image[top_offset];
     }
   }
 }

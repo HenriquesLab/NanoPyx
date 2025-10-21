@@ -4,7 +4,7 @@
 void _c_gradient_radiality(float* image, float* imGc, float* imGr, int rows,
                            int cols);
 
-void _c_gradient_2point(float* image, float* imGc, float* imGr, int rows,
+void _c_gradient_two_point(float* image, float* imGc, float* imGr, int rows,
                      int cols);
 
 void _c_gradient_roberts_cross(float* image, float* imGc, float* imGr, int rows, int cols);
