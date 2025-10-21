@@ -210,10 +210,10 @@ def fht_space_interpolation(image, int magnification=2, bint doMirrorPadding=Fal
     cdef float[:, :] img2d
     if image.ndim == 2:
         img2d = np.ascontiguousarray(image, dtype=np.float32)
-        return np.asarray(_fht_space_interpolation_c(img2d, magnification, doMirrorPadding))
+        return np.ascontiguousarray(np.asarray(_fht_space_interpolation_c(img2d, magnification, doMirrorPadding)))
     elif image.ndim == 3:
-        return np.stack([np.asarray(_fht_space_interpolation_c(
+        return np.ascontiguousarray(np.stack([np.asarray(_fht_space_interpolation_c(
             np.ascontiguousarray(frame, dtype=np.float32), 
-            magnification, doMirrorPadding)) for frame in image])
+            magnification, doMirrorPadding)) for frame in image]))
     else:
         raise ValueError("Input must be 2D or 3D array")
