@@ -47,15 +47,15 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 2.0
+        cdef float Gx_Gy_MAGNIFICATION = 1.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
         cdef int margin = int(fwhm * magnification)
 
         cdef int nFrames = gradient_col_interp.shape[0]
-        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
-        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+        cdef int rowsM = image_interp.shape[1]
+        cdef int colsM = image_interp.shape[2]
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
@@ -81,15 +81,15 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 2.0
+        cdef float Gx_Gy_MAGNIFICATION = 1.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
         cdef int margin = int(fwhm * magnification)
 
         cdef int nFrames = gradient_col_interp.shape[0]
-        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
-        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+        cdef int rowsM = image_interp.shape[1]
+        cdef int colsM = image_interp.shape[2]
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
@@ -113,15 +113,15 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 2.0
+        cdef float Gx_Gy_MAGNIFICATION = 1.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
         cdef int margin = int(fwhm * magnification)
 
         cdef int nFrames = gradient_col_interp.shape[0]
-        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
-        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+        cdef int rowsM = image_interp.shape[1]
+        cdef int colsM = image_interp.shape[2]
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
@@ -145,15 +145,15 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 2.0
+        cdef float Gx_Gy_MAGNIFICATION = 1.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
         cdef int margin = int(fwhm * magnification)
 
         cdef int nFrames = gradient_col_interp.shape[0]
-        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
-        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+        cdef int rowsM = image_interp.shape[1]
+        cdef int colsM = image_interp.shape[2]
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
@@ -177,15 +177,15 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 2.0
+        cdef float Gx_Gy_MAGNIFICATION = 1.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
         cdef int margin = int(fwhm * magnification)
 
         cdef int nFrames = gradient_col_interp.shape[0]
-        cdef int rowsM = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
-        cdef int colsM = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+        cdef int rowsM = image_interp.shape[1]
+        cdef int colsM = image_interp.shape[2]
 
         cdef float [:,:,:] rgc_map = np.zeros((nFrames, rowsM, colsM), dtype=np.float32)
 
@@ -221,7 +221,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 2.0
+        cdef float Gx_Gy_MAGNIFICATION = 1.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
@@ -229,8 +229,8 @@ class RadialGradientConvergence(LiquidEngine):
 
         # Sizes
         cdef int nFrames = gradient_col_interp.shape[0]
-        cdef int rows_interpolated = <int>(gradient_row_interp.shape[1] / Gx_Gy_MAGNIFICATION)
-        cdef int cols_interpolated = <int>(gradient_row_interp.shape[2] / Gx_Gy_MAGNIFICATION)
+        cdef int rows_interpolated = image_interp.shape[1]
+        cdef int cols_interpolated = image_interp.shape[2]
 
         # Grid size of the global work space
         lowest_row = margin 
