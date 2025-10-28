@@ -48,8 +48,8 @@ class eSRRF(LiquidEngine):
 
         magnified_image = dht_interpolation(image, magnification)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
-        gradient_col_interp = dht_interpolation(gradient_col, magnification)
-        gradient_row_interp = dht_interpolation(gradient_row, magnification)
+        gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
+        gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
         radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
 
         return radial_gradients
@@ -68,8 +68,8 @@ class eSRRF(LiquidEngine):
 
         magnified_image = dht_interpolation(image, magnification)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
-        gradient_col_interp = dht_interpolation(gradient_col, magnification)
-        gradient_row_interp = dht_interpolation(gradient_row, magnification)
+        gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
+        gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
         radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
 
         return radial_gradients
@@ -86,8 +86,8 @@ class eSRRF(LiquidEngine):
 
         magnified_image = dht_interpolation(image, magnification)
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
-        gradient_col_interp = dht_interpolation(gradient_col, magnification)
-        gradient_row_interp = dht_interpolation(gradient_row, magnification)
+        gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
+        gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
         radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
 
         return radial_gradients

@@ -47,7 +47,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 1.0
+        cdef float Gx_Gy_MAGNIFICATION = 2.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
@@ -81,7 +81,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 1.0
+        cdef float Gx_Gy_MAGNIFICATION = 2.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
@@ -113,7 +113,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 1.0
+        cdef float Gx_Gy_MAGNIFICATION = 2.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
@@ -145,7 +145,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 1.0
+        cdef float Gx_Gy_MAGNIFICATION = 2.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
@@ -177,7 +177,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 1.0
+        cdef float Gx_Gy_MAGNIFICATION = 2.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
@@ -221,7 +221,7 @@ class RadialGradientConvergence(LiquidEngine):
         cdef float fwhm = radius
         cdef float tSS = 2 * sigma * sigma
         cdef float tSO = 2 * sigma + 1
-        cdef float Gx_Gy_MAGNIFICATION = 1.0
+        cdef float Gx_Gy_MAGNIFICATION = 2.0
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
