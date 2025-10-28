@@ -1,4 +1,4 @@
-# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=True
+# cython: infer_types=True, wraparound=False, nonecheck=False, boundscheck=False, cdivision=True, language_level=3, profile=True, autogen_pxd=False
 
 import numpy as np
 cimport numpy as np
@@ -198,7 +198,7 @@ cdef float[:, :] _fht_space_interpolation_c(float[:, :] img, int intFactor, bint
                       xROI:xROI + intFactor * img.shape[1]]
     return output
 
-def fht_space_interpolation(image, int magnification=2, bint doMirrorPadding=False):
+def fht_space_interpolation(image, int magnification=2, bint doMirrorPadding=True):
     """
     Fourier interpolation of 2D images or 3D stacks
     

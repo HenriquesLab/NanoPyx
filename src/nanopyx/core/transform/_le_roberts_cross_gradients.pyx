@@ -8,6 +8,8 @@ from ...__liquid_engine__ import LiquidEngine
 from cython.parallel import prange
 from .__interpolation_tools__ import check_image
 
+from scipy.stats import pearsonr as pearson_correlation
+
 cdef extern from "_c_gradients.h":
     void _c_gradient_roberts_cross(float* pixels, float* GxArray, float* GyArray, int w, int h) nogil
 
@@ -26,6 +28,25 @@ class GradientRobertsCross(LiquidEngine):
     def benchmark(self, image):
         image = check_image(image)
         return super().benchmark(image)
+
+    def _compare_runs(self, output_1, output_2):
+        """@public"""
+        if isinstance(output_1, tuple):
+            output_1 = np.concatenate((output_1[0], output_1[1]), axis=0)
+        if isinstance(output_2, tuple):
+            output_2 = np.concatenate((output_2[0], output_2[1]), axis=0)
+        if output_1.ndim > 2:
+            pcc = 0
+            for i in range(output_1.shape[0]):
+                pcc += pearson_correlation(output_1[i, :, :].flatten(), output_2[i, :, :].flatten()).statistic
+            pcc /= output_1.shape[0]
+        else:
+            pcc = pearson_correlation(output_1.flatten(), output_2.flatten()).statistic
+
+        if pcc > 0.8:
+            return True
+        else:
+            return False
     
     def _run_unthreaded(self, float[:,:,:] image):
         """
