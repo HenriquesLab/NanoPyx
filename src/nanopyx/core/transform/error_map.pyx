@@ -13,6 +13,7 @@ from scipy.stats import (
 
 # TODO RECHECK VALUES
 from ._le_interpolation_catmull_rom import ShiftAndMagnify
+from ._interpolation import fht_space_interpolation as dht_interpolation
 
 from ..analysis.pearson_correlation import pearson_correlation
 
@@ -48,8 +49,9 @@ cdef class ErrorMap:
         cdef float[:,:,:] result
 
         if magnification > 1:
-            result = interpolator.run(np.asarray(img_ref).astype(np.float32),0,0,magnification,magnification) 
-            img_ref_int[:,:] = result[0,:,:]
+            result = dht_interpolation(np.asarray([img_ref]), magnification)
+
+            img_ref_int = result[0, :, :]
         else:
             img_ref_int = img_ref
 
