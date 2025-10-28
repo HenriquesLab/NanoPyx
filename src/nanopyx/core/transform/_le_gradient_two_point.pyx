@@ -8,15 +8,13 @@ from ...__liquid_engine__ import LiquidEngine
 from cython.parallel import prange
 from .__interpolation_tools__ import check_image
 
-from scipy.stats import pearsonr as pearson_correlation
-
 cdef extern from "_c_gradients.h":
-    void _c_gradient_roberts_cross(float* pixels, float* GxArray, float* GyArray, int w, int h) nogil
+    void _c_gradient_two_point(float* pixels, float* GxArray, float* GyArray, int w, int h) nogil
 
-class GradientRobertsCross(LiquidEngine):
+class GradientTwoPoint(LiquidEngine):
 
     def __init__(self, clear_benchmarks=False, testing=False, verbose=True):
-        self._designation = "GradientRobertsCross"
+        self._designation = "GradientTwoPoint"
         super().__init__(
             clear_benchmarks=clear_benchmarks, testing=testing,
             verbose=verbose)
@@ -28,25 +26,6 @@ class GradientRobertsCross(LiquidEngine):
     def benchmark(self, image):
         image = check_image(image)
         return super().benchmark(image)
-
-    def _compare_runs(self, output_1, output_2):
-        """@public"""
-        if isinstance(output_1, tuple):
-            output_1 = np.concatenate((output_1[0], output_1[1]), axis=0)
-        if isinstance(output_2, tuple):
-            output_2 = np.concatenate((output_2[0], output_2[1]), axis=0)
-        if output_1.ndim > 2:
-            pcc = 0
-            for i in range(output_1.shape[0]):
-                pcc += pearson_correlation(output_1[i, :, :].flatten(), output_2[i, :, :].flatten()).statistic
-            pcc /= output_1.shape[0]
-        else:
-            pcc = pearson_correlation(output_1.flatten(), output_2.flatten()).statistic
-
-        if pcc > 0.8:
-            return True
-        else:
-            return False
     
     def _run_unthreaded(self, float[:,:,:] image):
         """
@@ -60,8 +39,8 @@ class GradientRobertsCross(LiquidEngine):
         cdef int n
         with nogil: 
             for n in range(nFrames):
-                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
-        
+                _c_gradient_two_point(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
+
         return gradient_col, gradient_row
     
     def _run_threaded(self, float[:,:,:] image):
@@ -78,8 +57,8 @@ class GradientRobertsCross(LiquidEngine):
         cdef int n
         with nogil:
             for n in prange(nFrames):
-                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
-        
+                _c_gradient_two_point(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
+
         return gradient_col, gradient_row
     def _run_threaded_guided(self, float[:,:,:] image):
         """
@@ -95,8 +74,8 @@ class GradientRobertsCross(LiquidEngine):
         cdef int n
         with nogil:
             for n in prange(nFrames, schedule="guided"):
-                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
-        
+                _c_gradient_two_point(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
+
         return gradient_col, gradient_row
     def _run_threaded_dynamic(self, float[:,:,:] image):
         """
@@ -112,8 +91,8 @@ class GradientRobertsCross(LiquidEngine):
         cdef int n
         with nogil:
             for n in prange(nFrames, schedule="dynamic"):
-                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
-        
+                _c_gradient_two_point(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
+
         return gradient_col, gradient_row
     def _run_threaded_static(self, float[:,:,:] image):
         """
@@ -129,7 +108,7 @@ class GradientRobertsCross(LiquidEngine):
         cdef int n
         with nogil:
             for n in prange(nFrames, schedule="static"):
-                _c_gradient_roberts_cross(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
+                _c_gradient_two_point(&image[n,0,0], &gradient_col[n,0,0], &gradient_row[n,0,0], image.shape[1], image.shape[2])
         
         return gradient_col, gradient_row
 
@@ -167,9 +146,9 @@ class GradientRobertsCross(LiquidEngine):
 
         cl.enqueue_copy(cl_queue, input_opencl, image[0:max_slices,:,:]).wait()
 
-        code = self._get_cl_code("_le_roberts_cross_gradients.cl", device['DP'])
+        code = self._get_cl_code("_le_gradient_two_point.cl", device['DP'])
         prg = cl.Program(cl_ctx, code).build()
-        knl = prg.gradient_roberts_cross
+        knl = prg.gradient_two_point
 
         for i in range(0, image.shape[0], max_slices):
             if image.shape[0] - i >= max_slices:
