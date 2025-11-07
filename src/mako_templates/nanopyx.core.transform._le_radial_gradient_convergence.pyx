@@ -27,20 +27,20 @@ class RadialGradientConvergence(LiquidEngine):
             verbose=verbose)
 
 
-    def run(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, run_type = None): 
+    def run(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, pad_edges: bool = False, run_type = None): 
         gradient_col_interp = check_image(gradient_col_interp)
         gradient_row_interp = check_image(gradient_row_interp)
         image_interp = check_image(image_interp)
-        return self._run(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, run_type=run_type)
-    
+        return self._run(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, pad_edges=pad_edges, run_type=run_type)
 
-    def benchmark(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True):
+
+    def benchmark(self, gradient_col_interp, gradient_row_interp, image_interp, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1 , doIntensityWeighting: bool = True, pad_edges: bool = False):
         gradient_col_interp = check_image(gradient_col_interp)
         gradient_row_interp = check_image(gradient_row_interp)
         image_interp = check_image(image_interp)
-        return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting)
+        return super().benchmark(gradient_col_interp, gradient_row_interp, image_interp, magnification, radius, sensitivity, doIntensityWeighting, pad_edges=pad_edges)
 
-    def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_unthreaded(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False):
         """
         @cpu
         @cython
@@ -53,7 +53,12 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
-        cdef int margin = int(fwhm * magnification)
+
+        cdef int margin
+        if pad_edges:
+            margin = 0
+        else:
+            margin = int(fwhm * magnification)
 
         cdef int nFrames = gradient_col_interp.shape[0]
         cdef int rowsM = image_interp.shape[1]
@@ -74,7 +79,7 @@ class RadialGradientConvergence(LiquidEngine):
         return np.asarray(rgc_map,dtype=np.float32)
 
     % for sch in schedulers:
-    def _run_${sch}(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_${sch}(self, float[:,:,:] gradient_col_interp, float[:,:,:] gradient_row_interp, float[:,:,:] image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False):
         """
         @cpu
         @threaded
@@ -88,7 +93,12 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
-        cdef int margin = int(fwhm * magnification)
+
+        cdef int margin
+        if pad_edges:
+            margin = 0
+        else:
+            margin = int(fwhm * magnification)
 
         cdef int nFrames = gradient_col_interp.shape[0]
         cdef int rowsM = image_interp.shape[1]
@@ -112,8 +122,8 @@ class RadialGradientConvergence(LiquidEngine):
         return np.asarray(rgc_map,dtype=np.float32)
     % endfor
 
-    
-    def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, int mem_div=1):
+
+    def _run_opencl(self, gradient_col_interp, gradient_row_interp, image_interp, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False, device=None, int mem_div=1):
         """
         @gpu
         """
@@ -137,7 +147,12 @@ class RadialGradientConvergence(LiquidEngine):
         cdef int _magnification = magnification
         cdef float _sensitivity = sensitivity
         cdef int _doIntensityWeighting = doIntensityWeighting
-        cdef int margin = int(fwhm * magnification)
+
+        cdef int margin
+        if pad_edges:
+            margin = 0
+        else:
+            margin = int(fwhm * magnification)
 
         # Sizes
         cdef int nFrames = gradient_col_interp.shape[0]
