@@ -18,6 +18,7 @@ def eSRRF(
     temporal_correlation: str = "AVG",
     doIntensityWeighting: bool = True,
     macro_pixel_correction: bool = True,
+    pad_edges: bool = False,
     _force_run_type=None,
 ):
     """
@@ -32,6 +33,7 @@ def eSRRF(
           temporal_correlation (str, optional): Type of temporal correlation to calculate. Options are: AVG, VAR or TAC2 (default is "AVG").
           doIntensityWeighting (bool, optional): Enable intensity weighting (default is True).
           macro_pixel_correction (bool, optional): Enable macro pixel correction (default is True).
+          pad_edges (bool, optional): Enable edge padding for borders calculation instead of setting the edges to 0 (default is False).
           _force_run_type (str, optional): Force a specific run type for the analysis (default is None).
 
     Returns:
@@ -86,6 +88,7 @@ def eSRRF(
                     "radius": radius,
                     "sensitivity": sensitivity,
                     "doIntensityWeighting": doIntensityWeighting,
+                    "pad_edges": pad_edges,
                 },
             )
         )

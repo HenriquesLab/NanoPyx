@@ -27,15 +27,16 @@ class eSRRF(LiquidEngine):
         self._designation = "eSRRF_ST"
         super().__init__(clear_benchmarks=clear_benchmarks, testing=testing, verbose=verbose)
 
-    def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, run_type=None):
+    def run(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, pad_edges: bool = False, run_type=None):
         image = check_image(image)
-        return self._run(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=run_type)
+        return self._run(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting,
+        pad_edges=pad_edges, run_type=run_type)
 
-    def benchmark(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True):
+    def benchmark(self, image, magnification: int = 5, radius: float = 1.5, sensitivity: float = 1, doIntensityWeighting: bool = True, pad_edges: bool = False):
         image = check_image(image)
-        return super().benchmark(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting)
+        return super().benchmark(image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, pad_edges=pad_edges)
 
-    def _run_opencl(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, device=None, mem_div=1):
+    def _run_opencl(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False, device=None, mem_div=1):
         """
         @gpu
         """
@@ -48,11 +49,11 @@ class eSRRF(LiquidEngine):
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
         gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
         gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, pad_edges=pad_edges, run_type=runtype)
 
         return radial_gradients
 
-    def _run_threaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_threaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False):
         """
         @cpu
         @threaded
@@ -67,10 +68,10 @@ class eSRRF(LiquidEngine):
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
         gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
         gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, pad_edges=pad_edges, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_guided(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_threaded_guided(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False):
         """
         @cpu
         @threaded
@@ -85,10 +86,10 @@ class eSRRF(LiquidEngine):
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
         gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
         gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, pad_edges=pad_edges, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_dynamic(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_threaded_dynamic(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False):
         """
         @cpu
         @threaded
@@ -103,10 +104,10 @@ class eSRRF(LiquidEngine):
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
         gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
         gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, pad_edges=pad_edges, run_type=runtype)
 
         return radial_gradients
-    def _run_threaded_static(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_threaded_static(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False):
         """
         @cpu
         @threaded
@@ -121,11 +122,11 @@ class eSRRF(LiquidEngine):
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
         gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
         gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, pad_edges=pad_edges, run_type=runtype)
 
         return radial_gradients
 
-    def _run_unthreaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True):
+    def _run_unthreaded(self, image, magnification=5, radius=1.5, sensitivity=1, doIntensityWeighting=True, pad_edges=False):
         """
         @cpu
         @cython
@@ -138,6 +139,6 @@ class eSRRF(LiquidEngine):
         gradient_col, gradient_row = rbc.run(image, run_type=runtype)
         gradient_col_interp = dht_interpolation(gradient_col, magnification*2)
         gradient_row_interp = dht_interpolation(gradient_row, magnification*2)
-        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, run_type=runtype)
+        radial_gradients = rgc.run(gradient_col_interp, gradient_row_interp, magnified_image, magnification=magnification, radius=radius, sensitivity=sensitivity, doIntensityWeighting=doIntensityWeighting, pad_edges=pad_edges, run_type=runtype)
 
         return radial_gradients

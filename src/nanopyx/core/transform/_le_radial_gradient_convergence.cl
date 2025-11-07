@@ -4,8 +4,6 @@ double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance);
 
 float2 _rotation_matrix(float2 point, float angle);
 
-// RGC takes as input the interpolated intensity gradients in the x and y directions
-
 // calculate distance weight
 double _c_calculate_dw(double distance, double tSS) {
   return pow((distance * exp((-distance * distance) / tSS)), 4);
@@ -44,7 +42,7 @@ float2 _rotation_matrix(float2 point, float angle){
 
 float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) {
 
-    float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk;
+    float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk, pos_x, pos_y;
 
     float xc = (xM + 0.5) / magnification;
     float yc = (yM + 0.5) / magnification;
@@ -54,6 +52,8 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
 
     int _start = -(int)(Gx_Gy_MAGNIFICATION * fwhm);
     int _end = (int)(Gx_Gy_MAGNIFICATION * fwhm + 1);
+
+    int gx_x, gx_y, gx_width, gx_height;
 
     for (int j = _start; j < _end; j++) {
         vy = (int)(Gx_Gy_MAGNIFICATION * yc) + j;
@@ -70,8 +70,22 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
                     distance = sqrt(dx * dx + dy * dy);
 
                     if (distance != 0 && distance <= tSO) {
-                        Gx = imIntGx[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
-                        Gy = imIntGy[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
+                        pos_y = vy * magnification * Gx_Gy_MAGNIFICATION;
+                        pos_x = vx * magnification * Gx_Gy_MAGNIFICATION;
+                        if (pos_y > rowsM * Gx_Gy_MAGNIFICATION) {
+                            pos_y = rowsM * Gx_Gy_MAGNIFICATION-1;
+                        }
+                        if (pos_x > colsM * Gx_Gy_MAGNIFICATION) {
+                            pos_x = colsM * Gx_Gy_MAGNIFICATION-1;
+                        }
+                        if (pos_y < 0) {
+                            pos_y = 0;
+                        }
+                        if (pos_x < 0) {
+                            pos_x = 0;
+                        }
+                        Gx = imIntGx[(int)(pos_y * colsM * Gx_Gy_MAGNIFICATION) + (int)(pos_x)];
+                        Gy = imIntGy[(int)(pos_y * colsM * Gx_Gy_MAGNIFICATION) + (int)(pos_x)];
 
                         distanceWeight = _c_calculate_dw(distance, tSS);
                         distanceWeightSum += distanceWeight;

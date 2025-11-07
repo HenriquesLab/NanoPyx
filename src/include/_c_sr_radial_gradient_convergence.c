@@ -16,7 +16,7 @@ double _c_calculate_dk(float Gx, float Gy, float dx, float dy, float distance) {
 
 float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM, int rowsM, int magnification, float Gx_Gy_MAGNIFICATION, float fwhm, float tSO, float tSS, float sensitivity) {
 
-    float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk;
+    float vx, vy, Gx, Gy, dx, dy, distance, distanceWeight, GdotR, Dk, pos_x, pos_y;
 
     float xc = (xM + 0.5) / magnification;
     float yc = (yM + 0.5) / magnification;
@@ -42,8 +42,22 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM
                     distance = sqrt(dx * dx + dy * dy);
 
                     if (distance != 0 && distance <= tSO) {
-                        Gx = imIntGx[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
-                        Gy = imIntGy[(int)(vy * magnification * Gx_Gy_MAGNIFICATION * colsM * Gx_Gy_MAGNIFICATION) + (int)(vx * magnification * Gx_Gy_MAGNIFICATION)];
+                        pos_y = vy * magnification * Gx_Gy_MAGNIFICATION;
+                        pos_x = vx * magnification * Gx_Gy_MAGNIFICATION;
+                        if (pos_y > rowsM * Gx_Gy_MAGNIFICATION) {
+                            pos_y = rowsM * Gx_Gy_MAGNIFICATION-1;
+                        }
+                        if (pos_x > colsM * Gx_Gy_MAGNIFICATION) {
+                            pos_x = colsM * Gx_Gy_MAGNIFICATION-1;
+                        }
+                        if (pos_y < 0) {
+                            pos_y = 0;
+                        }
+                        if (pos_x < 0) {
+                            pos_x = 0;
+                        }
+                        Gx = imIntGx[(int)(pos_y * colsM * Gx_Gy_MAGNIFICATION) + (int)(pos_x)];
+                        Gy = imIntGy[(int)(pos_y * colsM * Gx_Gy_MAGNIFICATION) + (int)(pos_x)];
 
                         distanceWeight = _c_calculate_dw(distance, tSS);
                         distanceWeightSum += distanceWeight;

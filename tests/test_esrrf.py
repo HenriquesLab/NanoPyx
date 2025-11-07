@@ -25,3 +25,11 @@ def test_esrrf(downloader):
     small_dataset = dataset[:10,:20,:20]
     
     eSRRF(small_dataset)
+
+def test_esrrf_padding(downloader):
+
+    dataset = downloader.get_ZipTiffIterator(
+        "SMLMS2013_HDTubulinAlexa647", as_ndarray=True)
+    small_dataset = dataset[:10,:20,:20]
+    
+    eSRRF(small_dataset, pad_edges=True)
