@@ -2,7 +2,13 @@ import numpy as np
 from ...core.transform._le_nlm_denoising import NLMDenoising
 
 
-def non_local_means_denoising(img: np.ndarray, patch_size: int = 7, patch_distance: int = 11, h: float = 0.1, sigma: float = 0.0):
+def non_local_means_denoising(
+    img: np.ndarray,
+    patch_size: int = 7,
+    patch_distance: int = 11,
+    h: float = 0.1,
+    sigma: float = 0.0,
+):
     """
     Apply Non-Local Means (NLM) denoising algorithm to an image.
 
@@ -17,7 +23,7 @@ def non_local_means_denoising(img: np.ndarray, patch_size: int = 7, patch_distan
     h : float, optional
         The filtering parameter controlling the degree of smoothing. Higher values increase smoothing. Default is 0.1.
     sigma : float, optional
-        The standard deviation of the noise (if known). Default is 0.0, which means it is estimated from the image.
+        The standard deviation of the noise (if known). Default is 0.0, please estimate the value on your image with np.float32 dtype. For example, using np.std(img.astype(np.float32)).
 
     Returns
     -------
@@ -29,4 +35,10 @@ def non_local_means_denoising(img: np.ndarray, patch_size: int = 7, patch_distan
     The Non-Local Means algorithm denoises an image by replacing each pixel's value with an average of similar pixels in a local neighborhood. This method is particularly effective for preserving edges and fine details in images.
     """
     denoiser = NLMDenoising()
-    return denoiser.run(img, patch_size=patch_size, patch_distance=patch_distance, h=h, sigma=sigma)
+    return denoiser.run(
+        img,
+        patch_size=patch_size,
+        patch_distance=patch_distance,
+        h=h,
+        sigma=sigma,
+    )
