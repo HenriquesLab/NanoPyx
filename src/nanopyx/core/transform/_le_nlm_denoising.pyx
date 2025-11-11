@@ -442,6 +442,7 @@ class NLMDenoising(LiquidEngine):
         offset = patch_size // 2 
 
         padded = np.ascontiguousarray(np.pad(image, ((0,0), (offset, offset), (offset, offset)), mode='reflect'))
+        _,paddednrow, paddedncol = padded.shape
         result = np.zeros_like(image)
         result_per_frame = np.zeros_like(result[0,:,:])
 
@@ -475,11 +476,11 @@ class NLMDenoising(LiquidEngine):
                 np.int32(offset),
                 np.float32(var)).wait()
             
-            cl.enqueue_copy(cl_queue, result_per_frame, result_cl, origin=(0,0), region=(nrow,ncol)).wait()
+            cl.enqueue_copy(cl_queue, result_per_frame, result_cl, origin=(0,0), region=(ncol,nrow)).wait()
             result[f,:,:] = result_per_frame
 
             if f<(nframes-1):
-                cl.enqueue_copy(cl_queue, padded_cl, padded[f+1,:,:],origin=(0,0),region=(nrow+offset*2,ncol+offset*2)).wait()
+                cl.enqueue_copy(cl_queue, padded_cl, padded[f+1,:,:],origin=(0,0),region=(paddedncol,paddednrow)).wait()
 
             cl_queue.finish()
 
