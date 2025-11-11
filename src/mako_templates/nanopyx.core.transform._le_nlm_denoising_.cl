@@ -27,18 +27,18 @@ __kernel void nlm_denoising(__read_only image2d_t padded, __write_only image2d_t
             tmp_diff = 0;
             for (int is=0;is<patch_size;is++) {
                 for (int js=0;js<patch_size;js++) {
-                    tmp_diff = read_imagef(padded,sampler,(int2)(row+is,col+js)).x - read_imagef(padded,sampler,(int2)(i+is,j+js)).x;
-                    distance = distance + read_imagef(w,sampler,(int2)(is,js)).x * (tmp_diff*tmp_diff-var);
+                    tmp_diff = read_imagef(padded,sampler,(int2)(col+js,row+is)).x - read_imagef(padded,sampler,(int2)(j+js,i+is)).x;
+                    distance = distance + read_imagef(w,sampler,(int2)(js,is)).x * (tmp_diff*tmp_diff-var);
                 }
             }
             weight = exp(-max((float)(0.0),distance));
             weight_sum = weight_sum + weight;
 
-            new_value = new_value + weight * read_imagef(padded,sampler,(int2)(i+offset,j+offset)).x;
+            new_value = new_value + weight * read_imagef(padded,sampler,(int2)(j+offset,i+offset)).x;
 
         }
     }
-    write_imagef(result,(int2)(row,col),new_value/weight_sum);
+    write_imagef(result,(int2)(col,row),new_value/weight_sum);
 }
 
 
