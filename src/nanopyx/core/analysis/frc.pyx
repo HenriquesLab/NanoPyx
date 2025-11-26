@@ -170,7 +170,7 @@ cdef class FIRECalculator:
         return results
 
     def calculate_fft(self, img: np.ndarray):
-        return np.fft.fftshift(np.fft.fft2(img))
+        return np.fft.fftshift(np.fft.fft2(img)).astype(np.complex64)
 
     cdef _calculate_frc_curve(self, float[:, :] img1, float[:, :] img2):
 
