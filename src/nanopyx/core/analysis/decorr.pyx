@@ -270,7 +270,7 @@ cdef class DecorrAnalysis:
     cdef float[:, :] _compute_d(self):
 
         cdef float[:] coef, kc, a, dg, result, results_gm, results_max
-        cdef complex[:, :] fft
+        cdef float complex[:, :] fft
         cdef float[:, :] d_curve, img_ref, blurred, mask, fft_real, fft_imag
         cdef float[:, :, :] normalized_fft
         cdef int count = 0
@@ -402,7 +402,7 @@ cdef class DecorrAnalysis:
     cdef _run_analysis(self):
 
         cdef float[:] out
-        cdef complex[:, :] img_fft
+        cdef float complex[:, :] img_fft
         cdef float[:, :] img_ref, img_f, temp, fft_real, fft_imag
         cdef float resolution
         img_ref = np.copy(self.img)

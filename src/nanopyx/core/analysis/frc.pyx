@@ -189,8 +189,8 @@ cdef class FIRECalculator:
         img_1 = self._get_squared_tapered_image(img_1)
         img_2 = self._get_squared_tapered_image(img_2)
         
-        cdef complex[:, :] fft_1 = self.calculate_fft(np.array(img_1, dtype=np.float32))
-        cdef complex[:, :] fft_2 = self.calculate_fft(np.array(img_2, dtype=np.float32))
+        cdef float complex[:, :] fft_1 = self.calculate_fft(np.array(img_1, dtype=np.float32))
+        cdef float complex[:, :] fft_2 = self.calculate_fft(np.array(img_2, dtype=np.float32))
         
         cdef int size = fft_1.shape[0]
         self.field_of_view = size
