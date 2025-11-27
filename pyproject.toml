@@ -71,7 +71,7 @@ all = ["nanopyx[developer,test,jupyter,doc, optional]"]
 developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
 test = [
     "nox>=2022.11.21",
-    "pytest==7.2", # required to work with pytest-cython (https://github.com/lgpage/pytest-cython/issues/58)
+    "pytest>=7.2",
     "pytest-cov>= 4.0.0",
     "pytest-icdiff>=0.6",    # https://github.com/hjwp/pytest-icdiff
     "pytest-clarity>=1.0.1", # https://pypi.org/project/pytest-clarity/
@@ -79,7 +79,6 @@ test = [
     "pytest-plt>=1.1.0",
     "pytest-xdist>=3.1.0",
     "pytest-sugar>=0.9.6",
-    "pytest-cython>=0.2.0",
     "nanopyx[jupyter]",
     "nanopyx[optional]",
 ]
@@ -147,7 +146,7 @@ reportUndefinedVariable = false
 reportMissingImports = false
 
 [tool.pytest.ini_options]
-addopts = "--cov=nanopyx --plots --doctest-modules --doctest-cython --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks --cov-report term-missing"
+addopts = "--cov=nanopyx --plots --doctest-modules --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks --cov-report term-missing"
 timeout = 6001
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
@@ -159,7 +158,6 @@ filterwarnings = [
     "ignore:.*distutils.*:UserWarning:.*",
     "ignore:.*The 'u' format is deprecated.*:DeprecationWarning:pywintypes",
     "ignore:.*Deprecated NumPy.*:DeprecationWarning:.*",
-    "ignore:pkg_resources is deprecated.*:UserWarning:pytest_cython",
 ]
 testpaths = ["tests", "src/nanopyx"]
 
