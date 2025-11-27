@@ -7,7 +7,7 @@ import os
 try:
     from importlib.metadata import version
 except ImportError:
-    # Python < 3.8 fallback (though we require 3.9+)
+    # Python < 3.8 fallback (though we require 3.10+)
     from importlib_metadata import version
 
 __version__ = version("nanopyx")

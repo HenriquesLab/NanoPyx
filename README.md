@@ -16,7 +16,7 @@
 
 Nanoscopy Python library (NanoPyx, the successor to NanoJ) - focused on light microscopy and super-resolution imaging
 
-WARNING: Currently stable and working for Python 3.9 to 3.12. For Python 3.13, it is possible to use it if you build numpy<2 from source but it is not officially supported (Yet!)
+⚠️ **Python 3.10+ Required**: NanoPyx v2.0+ supports Python 3.10-3.14 with NumPy 2.x compatibility.
 
 ---
 
@@ -87,7 +87,7 @@ pip install napari-nanopyx
 
 ## Installation
 
-`NanoPyx` is compatible and tested with Python 3.9, 3.10, 3.11 and 3.12 in MacOS, Windows and Linux. Installation time depends on your hardware and internet connection, but should take around 5 minutes.
+`NanoPyx` is compatible and tested with Python 3.10, 3.11, 3.12, 3.13, and 3.14 in macOS, Windows and Linux. Installation time depends on your hardware and internet connection, but should take around 5 minutes.
 
 You can install `NanoPyx` via [pip]:
 
