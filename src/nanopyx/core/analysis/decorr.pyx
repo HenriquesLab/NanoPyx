@@ -270,7 +270,7 @@ cdef class DecorrAnalysis:
     cdef float[:, :] _compute_d(self):
 
         cdef float[:] coef, kc, a, dg, result, results_gm, results_max
-        cdef complex[:, :] fft
+        cdef float complex[:, :] fft
         cdef float[:, :] d_curve, img_ref, blurred, mask, fft_real, fft_imag
         cdef float[:, :, :] normalized_fft
         cdef int count = 0
@@ -302,7 +302,7 @@ cdef class DecorrAnalysis:
                 blurred = np.copy(self.img_ref)
                 blurred = gaussian_filter(blurred, sig)
                 blurred = np.copy(self.img_ref) - blurred
-                fft = np.fft.fftshift(np.fft.fft2(blurred))
+                fft = np.fft.fftshift(np.fft.fft2(blurred)).astype(np.complex64)
                 fft_real = np.real(fft).astype(np.float32)
                 fft_imag = np.imag(fft).astype(np.float32)
                 normalized_fft = _normalizeFFT(fft_real, fft_imag)
@@ -402,7 +402,7 @@ cdef class DecorrAnalysis:
     cdef _run_analysis(self):
 
         cdef float[:] out
-        cdef complex[:, :] img_fft
+        cdef float complex[:, :] img_fft
         cdef float[:, :] img_ref, img_f, temp, fft_real, fft_imag
         cdef float resolution
         img_ref = np.copy(self.img)
@@ -416,7 +416,7 @@ cdef class DecorrAnalysis:
         img_f = _apodize_edges(img_f)
         temp = self._get_preprocessed_image(img_f)
         self.img_ref = np.copy(temp)
-        img_fft = np.fft.fftshift(np.fft.fft2(temp))
+        img_fft = np.fft.fftshift(np.fft.fft2(temp)).astype(np.complex64)
         fft_real = np.real(img_fft).astype(np.float32)
         fft_imag = np.imag(img_fft).astype(np.float32)
         fft_real[fft_real.shape[0]//2, fft_real.shape[1]//2] = 0

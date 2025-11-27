@@ -170,7 +170,7 @@ cdef class FIRECalculator:
         return results
 
     def calculate_fft(self, img: np.ndarray):
-        return np.fft.fftshift(np.fft.fft2(img))
+        return np.fft.fftshift(np.fft.fft2(img)).astype(np.complex64)
 
     cdef _calculate_frc_curve(self, float[:, :] img1, float[:, :] img2):
 
@@ -189,8 +189,8 @@ cdef class FIRECalculator:
         img_1 = self._get_squared_tapered_image(img_1)
         img_2 = self._get_squared_tapered_image(img_2)
         
-        cdef complex[:, :] fft_1 = self.calculate_fft(np.array(img_1, dtype=np.float32))
-        cdef complex[:, :] fft_2 = self.calculate_fft(np.array(img_2, dtype=np.float32))
+        cdef float complex[:, :] fft_1 = self.calculate_fft(np.array(img_1, dtype=np.float32))
+        cdef float complex[:, :] fft_2 = self.calculate_fft(np.array(img_2, dtype=np.float32))
         
         cdef int size = fft_1.shape[0]
         self.field_of_view = size
