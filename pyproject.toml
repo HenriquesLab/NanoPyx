@@ -83,8 +83,9 @@ test = [
     "nanopyx[jupyter]",
     "nanopyx[optional]",
 ]
-optional=["numba", "dask<2024.2.0", "dask_image", "transonic"]
+optional=["dask<2024.2.0", "dask_image", "transonic"]
 cuda = ["cupy"] # should be manually installed by users according to their CUDA version https://docs.cupy.dev/en/stable/install.html
+numba=["numba"] # moved to manual install as we will start supporting Python 3.14 and numba is not fully supported there yet
 jupyter = [
     "nbformat>=4.2.0",
     "seaborn>=0.12.1",
