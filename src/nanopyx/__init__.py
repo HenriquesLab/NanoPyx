@@ -3,9 +3,14 @@
 """
 
 import os
-import pkg_resources  # part of setuptools
 
-__version__ = pkg_resources.require("NanoPyx")[0].version
+try:
+    from importlib.metadata import version
+except ImportError:
+    # Python < 3.8 fallback (though we require 3.9+)
+    from importlib_metadata import version
+
+__version__ = version("nanopyx")
 
 from . import core, data, methods  # noqa: F401
 
