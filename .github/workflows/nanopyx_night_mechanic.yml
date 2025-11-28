@@ -111,6 +111,7 @@ jobs:
         env:
           CIBW_BUILD: cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64 cp313-macosx_arm64
           CIBW_ARCHS: arm64
+          MACOSX_DEPLOYMENT_TARGET: "14.0"
 
       - name: Test wheels
         run: python -m nox --sessions test_wheel

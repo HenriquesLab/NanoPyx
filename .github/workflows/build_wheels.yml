@@ -45,6 +45,7 @@ jobs:
         env:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.archs }}
+          MACOSX_DEPLOYMENT_TARGET: "14.0"
 
       - name: Test wheels (only on macOS ARM64)
         if: matrix.os == 'macOS-ARM'
