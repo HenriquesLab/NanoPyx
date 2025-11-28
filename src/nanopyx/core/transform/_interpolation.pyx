@@ -162,8 +162,8 @@ cdef float[:, :] _fht_space_interpolation_c(float[:, :] img, int intFactor, bint
         working_img = img
 
     # Forward FFT (use complex128 for accuracy)
-    cdef complex[:, :] F = fft.fft2(np.asarray(working_img))
-    cdef complex[:, :] Fshift = fft.fftshift(F)
+    cdef double complex[:, :] F = fft.fft2(np.asarray(working_img)).astype(np.complex128)
+    cdef double complex[:, :] Fshift = fft.fftshift(F).astype(np.complex128)
 
     cdef int h = Fshift.shape[0]
     cdef int w = Fshift.shape[1]
@@ -181,7 +181,7 @@ cdef float[:, :] _fht_space_interpolation_c(float[:, :] img, int intFactor, bint
     FInt[yROI:yROI + h, xROI:xROI + w] = Fshift
 
     # Inverse transform
-    cdef complex[:, :] result = fft.ifft2(fft.ifftshift(FInt))
+    cdef double complex[:, :] result = fft.ifft2(fft.ifftshift(FInt)).astype(np.complex128)
     cdef float[:, :] output = np.real(result).astype(np.float32)
 
     # Scale to match input range (robust to constant images)

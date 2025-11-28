@@ -77,7 +77,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     cdef float[:] _xp = xp  # xp exists in python land, _xp in c land as memoryview
     cdef float[:] _yp = yp  # same as above
 
-    cdef np.ndarray[np.int32_t, ndim=1] particles_not_set, particles_set
+    cdef int[:] particles_not_set, particles_set
 
     cdef int n_particles = 0
     cdef int previous_n_particles = 0
@@ -88,7 +88,7 @@ def simulate_particle_field_based_on_2D_PDF(image_pdf,
     # start by creating the minimal pool of particles
     with tqdm(total=max_particles, desc="Generating particles", unit="particles") as progress_bar:
         while 1:
-            particles_not_set = np.nonzero(xp < 0)[0].astype(np.int32)  # get the index for the parciles not yet set
+            particles_not_set = np.nonzero(xp < 0)[0].astype(np.int32)  # get the index for the particles not yet set
             with nogil:
                 for p in prange(particles_not_set.shape[0]):
                     _get_particle_candidate(_image_pdf, p, _xp, _yp, _min_distance)  # find some particles

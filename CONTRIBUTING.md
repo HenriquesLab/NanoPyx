@@ -65,7 +65,7 @@ Ready to contribute? Here's how to set up **nanopyx** for local development.
 Before you submit a pull request, check that it meets these guidelines:
 
 - The pull request should pass every existing test.
-- The pull request should work for Python 3.8, 3.9 and 3.10
+- The pull request should work for Python 3.10, 3.11, 3.12, and 3.13
 - If the pull request adds functionality, new automated tests should be included in the pull request covering the new functionality
 - Please ensure pytest coverage at least stays the same before you submit a pull request.
 - The core development team reserves the right to reject pull requests, particularly if these only entail cosmetic changes to the code such as orthographic correction or the addition of type hint to variables.
