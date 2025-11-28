@@ -212,9 +212,6 @@ test-requires = ["nanopyx[test]"]
 
 [tool.cibuildwheel.macos.environment]
 MACOSX_DEPLOYMENT_TARGET = "14.0"
-LDFLAGS="-L/usr/local/lib"
-CXX="/usr/local/opt/llvm/bin/clang++"
-CC="/usr/local/opt/llvm/bin/clang"
 
 [tool.cibuildwheel.windows]
 archs = ["AMD64"]
