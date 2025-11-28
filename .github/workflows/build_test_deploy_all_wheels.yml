@@ -13,15 +13,15 @@ jobs:
           - os: macOS-ARM
             runner: [self-hosted, macOS, ARM64]
             archs: arm64
-            cibw_build: cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64 cp313-macosx_arm64 cp314-macosx_arm64
+            cibw_build: cp310-macosx_arm64 cp311-macosx_arm64 cp312-macosx_arm64 cp313-macosx_arm64
           - os: manylinux
             runner: [self-hosted, Ubuntu, Native]
             archs: auto
-            cibw_build: cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64 cp314-manylinux_x86_64
+            cibw_build: cp310-manylinux_x86_64 cp311-manylinux_x86_64 cp312-manylinux_x86_64 cp313-manylinux_x86_64
           - os: windows
             runner: [self-hosted, Windows]
             archs: auto
-            cibw_build: cp310-win_amd64 cp311-win_amd64 cp312-win_amd64 cp313-win_amd64 cp314-win_amd64
+            cibw_build: cp310-win_amd64 cp311-win_amd64 cp312-win_amd64 cp313-win_amd64
 
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,6 @@ jobs:
             3.11
             3.12
             3.13
-            3.14
 
       - name: Install cibuildwheel and nox
         run: |
