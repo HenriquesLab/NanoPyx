@@ -7,9 +7,6 @@ $include: notebook_intro.txt
 $include: citations/channel_registration.txt
 __cellbreak__
 $code
-$include: colab_numpy_fix.py
-__cellbreak__
-$code
 $include: notebook_setup.py
 __cellbreak__
 $code
