@@ -22,7 +22,7 @@ EXTRA_COMPILE_ARGS = [
 ]
 EXTRA_LING_ARGS = []
 
-VERSION = "1.3.3"  # sets version number for whole package
+VERSION = "2.0.0"  # sets version number for whole package
 
 
 def run_command(command: str) -> str:
@@ -117,10 +117,9 @@ def search_for_c_files_referrenced_in_pyx_text(text: str):
 
 
 if sys.platform == "win32":
-    from distutils import msvccompiler
+    # distutils.msvccompiler removed in Python 3.12+, no longer needed
     from platform import architecture
 
-    VC_VERSION = msvccompiler.get_build_version()
     ARCH = "x64" if architecture()[0] == "64bit" else "x86"
     INCLUDE_DIRS += []
     LIBRARY_DIRS += []
