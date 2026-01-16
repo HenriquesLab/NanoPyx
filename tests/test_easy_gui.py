@@ -3,7 +3,7 @@ import os
 import shutil
 import yaml
 from unittest.mock import patch
-from nanopyx.core.utils.easy_gui import EasyGui
+from ezinput import EZInput as EasyGui
 
 
 @pytest.fixture
