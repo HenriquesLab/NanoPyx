@@ -105,7 +105,6 @@ def on_button_load_data_clicked_example(b):
     # enable button
     gui_data["load_data"].disabled = False
     gui_data["load_data"].description = "Load data"
-    gui_data.save_settings()
 
 
 gui_data.add_callback(

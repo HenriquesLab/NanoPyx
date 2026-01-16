@@ -7,7 +7,6 @@ from nanopyx.core.analysis.decorr import DecorrAnalysis
 def run_decorr(b):
     clear_output()
     gui_decorr.show()
-    gui_decorr.save_settings()
     pixel_size = gui_decorr["pixel_size"].value
     units = gui_decorr["units"].value
     first_frame = gui_decorr["first_frame"].value

@@ -6,7 +6,6 @@ from nanopyx.core.transform._le_nlm_denoising import NLMDenoising
 def run_nlm(b):
     clear_output()
     gui_nlm.show()
-    gui_nlm.save_settings()
     patch_size = gui_nlm["patch_size"].value
     patch_distance = gui_nlm["patch_distance"].value
     h = gui_nlm["h"].value

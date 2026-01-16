@@ -9,7 +9,6 @@ from nanopyx.core.transform.sr_temporal_correlations import (
 def run_esrrf(b):
     clear_output()
     gui_esrrf.show()
-    gui_esrrf.save_settings()
     ring_radius = gui_esrrf["ring_radius"].value
     magnification = gui_esrrf["magnification"].value
     frames_per_timepoint = gui_esrrf["frames_per_timepoint"].value

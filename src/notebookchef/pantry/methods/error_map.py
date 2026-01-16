@@ -11,7 +11,6 @@ from nanopyx.core.transform import ErrorMap
 def run_error(b):
     clear_output()
     gui_error.show()
-    gui_error.save_settings()
     gui_error["run"].disabled = True
     gui_error["run"].description = "Calculating..."
     global errormap
@@ -52,7 +51,6 @@ def run_error(b):
 def run_error_stack(b):
     clear_output()
     gui_error.show()
-    gui_error.save_settings()
     gui_error["run"].disabled = True
     gui_error["run"].description = "Calculating..."
 

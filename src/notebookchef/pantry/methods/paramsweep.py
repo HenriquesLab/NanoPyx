@@ -6,7 +6,6 @@ from nanopyx import run_esrrf_parameter_sweep
 def run_param_sweep(b):
     clear_output()
     gui_param_sweep.show()
-    gui_param_sweep.save_settings()
     radii = [float(val) for val in gui_param_sweep["raddi"].value.split(",")]
     sensitivities = [
         float(val) for val in gui_param_sweep["sensitivities"].value.split(",")

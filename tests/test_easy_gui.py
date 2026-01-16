@@ -80,7 +80,6 @@ def test_add_file_upload(gui):
 
 def test_save_settings(gui):
     gui.add_text("test_text", value="Hello")
-    gui.save_settings()
     config_file = os.path.join(gui._config_folder, "easy_gui.yml")
     assert os.path.exists(config_file)
     with open(config_file, "r") as f:

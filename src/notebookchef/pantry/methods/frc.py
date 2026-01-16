@@ -8,7 +8,6 @@ from nanopyx.core.analysis.frc import FIRECalculator
 def run_frc(b):
     clear_output()
     gui_frc.show()
-    gui_frc.save_settings()
     pixel_size = gui_frc["pixel_size"].value
     units = gui_frc["units"].value
     first_frame = gui_frc["first_frame"].value
