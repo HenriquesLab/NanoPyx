@@ -91,6 +91,5 @@ gui_srrf.add_dropdown(
     value="viridis",
     remember_value=True,
 )
-gui_srrf.add_button("run", description="Run")
-gui_srrf["run"].on_click(run_srrf)
+gui_srrf.add_callback("run", run_srrf, {}, description="Run")
 gui_srrf.show()

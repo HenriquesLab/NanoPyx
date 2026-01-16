@@ -57,6 +57,5 @@ gui_drift_apply.add_dropdown("cmaps", description="Colormap:",
                       options=sorted(list(mpl.colormaps)),
                       value="viridis", remember_value=True)
 gui_drift_apply.add_checkbox("save", description="Save Output", value=True)
-gui_drift_apply.add_button("Align image", description="Align image")
-gui_drift_apply["Align image"].on_click(on_button_apply)
+gui_drift_apply.add_callback("Align image", on_button_apply, {}, description="Align image")
 gui_drift_apply.show()

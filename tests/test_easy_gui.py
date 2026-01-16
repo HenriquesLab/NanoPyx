@@ -24,7 +24,7 @@ def test_add_label(gui):
 
 
 def test_add_button(gui):
-    gui.add_button("test_button", description="Click Me")
+    gui.add_callback("test_button", lambda b: None, {}, description="Click Me")
     assert "test_button" in gui._widgets
     assert gui._widgets["test_button"].description == "Click Me"
 
@@ -66,7 +66,9 @@ def test_add_float_text(gui):
 
 
 def test_add_dropdown(gui):
-    gui.add_dropdown("test_dropdown", options=["Option 1", "Option 2"], value="Option 1")
+    gui.add_dropdown(
+        "test_dropdown", options=["Option 1", "Option 2"], value="Option 1"
+    )
     assert "test_dropdown" in gui._widgets
     assert gui._widgets["test_dropdown"].value == "Option 1"
 

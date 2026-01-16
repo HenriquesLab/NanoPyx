@@ -55,6 +55,5 @@ gui_reg_apply.add_dropdown("cmaps", description="Colormap:",
                       options=sorted(list(mpl.colormaps)),
                       value="viridis", remember_value=True)
 gui_reg_apply.add_checkbox("save", description="Save Output", value=True)
-gui_reg_apply.add_button("Register Image", description="Register Image")
-gui_reg_apply["Register Image"].on_click(on_button_apply)
+gui_reg_apply.add_callback("Register Image", on_button_apply, {}, description="Register Image")
 gui_reg_apply.show()

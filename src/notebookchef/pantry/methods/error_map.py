@@ -138,6 +138,5 @@ gui_error.add_dropdown(
     value="viridis",
     remember_value=True,
 )
-gui_error.add_button("run", description="Calculate")
-gui_error["run"].on_click(run_error_stack)
+gui_error.add_callback("run", run_error, {}, description="Calculate")
 gui_error.show()

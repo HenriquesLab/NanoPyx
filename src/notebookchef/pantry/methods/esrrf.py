@@ -112,6 +112,5 @@ gui_esrrf.add_dropdown(
     value="viridis",
     remember_value=True,
 )
-gui_esrrf.add_button("run", description="Run")
-gui_esrrf["run"].on_click(run_esrrf)
+gui_esrrf.add_callback("run", run_esrrf, {}, description="Run eSRRF")
 gui_esrrf.show()
