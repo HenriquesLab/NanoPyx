@@ -1,4 +1,8 @@
 """
+WARNING: This module is deprecated. Consider using ezinput instead.
+ezinput can be installed with 'pip install ezinput'.
+For more information check: htps://github.com/henriqueslab/ezinput
+
 A module to help simplify the create of GUIs in Jupyter notebooks using ipywidgets.
 """
 
