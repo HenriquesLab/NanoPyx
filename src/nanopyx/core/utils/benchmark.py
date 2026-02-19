@@ -117,9 +117,6 @@ def benchmark_all_le_methods(
         esrrf.benchmark(img)
 
     for i in range(n_benchmark_runs):
-        esrrf3d.benchmark(img[np.newaxis, ...])
-
-    for i in range(n_benchmark_runs):
         nlm.benchmark(img)
 
     channel_reg = (
