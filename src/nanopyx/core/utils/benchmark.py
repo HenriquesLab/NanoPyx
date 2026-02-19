@@ -84,7 +84,7 @@ def benchmark_all_le_methods(
 
     for i in range(n_benchmark_runs):
         bicubic_sm.benchmark(img, shift, shift, magnification, magnification)
-    for i in range(n_benchmΩΩark_runs):
+    for i in range(n_benchmark_runs):
         cr_sm.benchmark(img, shift, shift, magnification, magnification)
     for i in range(n_benchmark_runs):
         l_sm.benchmark(img, shift, shift, magnification, magnification)
@@ -119,7 +119,9 @@ def benchmark_all_le_methods(
     for i in range(n_benchmark_runs):
         rc.benchmark(img)
     for i in range(n_benchmark_runs):
-        rgc.benchmark(img_grad_3d, img_grad_3d, img_int_3d, magnification=magnification)
+        rgc.benchmark(
+            img_grad_3d, img_grad_3d, img_int_3d, magnification=magnification
+        )
 
     for i in range(n_benchmark_runs):
         esrrf.benchmark(img)
