@@ -73,7 +73,11 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM
         }
     }
 
-    RGC /= distanceWeightSum;
+    if (distanceWeightSum > 0) {
+        RGC /= distanceWeightSum;
+    } else {
+        RGC = 0;
+    }
 
     if (RGC >= 0 && sensitivity > 1) {
         RGC = pow(RGC, sensitivity);
