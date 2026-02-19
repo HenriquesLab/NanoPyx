@@ -84,8 +84,9 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
                         if (pos_x < 0) {
                             pos_x = 0;
                         }
-                        Gx = imIntGx[(int)(pos_y * colsM * Gx_Gy_MAGNIFICATION) + (int)(pos_x)];
-                        Gy = imIntGy[(int)(pos_y * colsM * Gx_Gy_MAGNIFICATION) + (int)(pos_x)];
+                        int grad_width = (int)(colsM * Gx_Gy_MAGNIFICATION);
+                        Gx = imIntGx[(int)pos_y * grad_width + (int)pos_x];
+                        Gy = imIntGy[(int)pos_y * grad_width + (int)pos_x];
 
                         distanceWeight = _c_calculate_dw(distance, tSS);
                         distanceWeightSum += distanceWeight;
@@ -101,7 +102,11 @@ float _c_calculate_rgc(int xM, int yM, __global float* imIntGx, __global float* 
         }
     }
 
-    RGC /= distanceWeightSum;
+    if (distanceWeightSum > 0) {
+        RGC /= distanceWeightSum;
+    } else {
+        RGC = 0;
+    }
 
     if (RGC >= 0 && sensitivity > 1) {
         RGC = pow(RGC, sensitivity);
