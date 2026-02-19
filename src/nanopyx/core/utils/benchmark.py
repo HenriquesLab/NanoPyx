@@ -33,6 +33,14 @@ def benchmark_all_le_methods(
     img_int = np.random.random(
         (img_dims * magnification, img_dims * magnification)
     ).astype(np.float32)
+    # For RadialGradientConvergence: gradient arrays need to be 2x larger than image_interp
+    # and need frame dimension (nFrames, rows, cols)
+    img_int_3d = np.random.random(
+        (1, img_dims * magnification, img_dims * magnification)
+    ).astype(np.float32)
+    img_grad_3d = np.random.random(
+        (1, img_dims * magnification * 2, img_dims * magnification * 2)
+    ).astype(np.float32)
     kernel = np.ones((conv_kernel_dims, conv_kernel_dims)).astype(np.float32)
 
     bicubic_sm = (
@@ -76,7 +84,7 @@ def benchmark_all_le_methods(
 
     for i in range(n_benchmark_runs):
         bicubic_sm.benchmark(img, shift, shift, magnification, magnification)
-    for i in range(n_benchmark_runs):
+    for i in range(n_benchmΩΩark_runs):
         cr_sm.benchmark(img, shift, shift, magnification, magnification)
     for i in range(n_benchmark_runs):
         l_sm.benchmark(img, shift, shift, magnification, magnification)
@@ -111,7 +119,7 @@ def benchmark_all_le_methods(
     for i in range(n_benchmark_runs):
         rc.benchmark(img)
     for i in range(n_benchmark_runs):
-        rgc.benchmark(img_int, img_int, img_int)
+        rgc.benchmark(img_grad_3d, img_grad_3d, img_int_3d, magnification=magnification)
 
     for i in range(n_benchmark_runs):
         esrrf.benchmark(img)
