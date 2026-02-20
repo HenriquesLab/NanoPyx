@@ -44,10 +44,10 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM
                     if (distance != 0 && distance <= tSO) {
                         pos_y = vy * magnification * Gx_Gy_MAGNIFICATION;
                         pos_x = vx * magnification * Gx_Gy_MAGNIFICATION;
-                        if (pos_y > rowsM * Gx_Gy_MAGNIFICATION) {
+                        if (pos_y >= rowsM * Gx_Gy_MAGNIFICATION) {
                             pos_y = rowsM * Gx_Gy_MAGNIFICATION-1;
                         }
-                        if (pos_x > colsM * Gx_Gy_MAGNIFICATION) {
+                        if (pos_x >= colsM * Gx_Gy_MAGNIFICATION) {
                             pos_x = colsM * Gx_Gy_MAGNIFICATION-1;
                         }
                         if (pos_y < 0) {
