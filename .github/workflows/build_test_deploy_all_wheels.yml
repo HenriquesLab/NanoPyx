@@ -46,12 +46,6 @@ jobs:
         if: matrix.os == 'windows'
         run: python -m nox --sessions build_sdist
 
-      - name: Install openBLAS
-        if: matrix.os == 'manylinux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libopenblas-dev pkg-config cmake
-
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse
