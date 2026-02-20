@@ -56,8 +56,9 @@ float _c_calculate_rgc(int xM, int yM, float* imIntGx, float* imIntGy, int colsM
                         if (pos_x < 0) {
                             pos_x = 0;
                         }
-                        Gx = imIntGx[(int)(pos_y * colsM * Gx_Gy_MAGNIFICATION) + (int)(pos_x)];
-                        Gy = imIntGy[(int)(pos_y * colsM * Gx_Gy_MAGNIFICATION) + (int)(pos_x)];
+                        int grad_width = (int)(colsM * Gx_Gy_MAGNIFICATION);
+                        Gx = imIntGx[(int)pos_y * grad_width + (int)pos_x];
+                        Gy = imIntGy[(int)pos_y * grad_width + (int)pos_x];
 
                         distanceWeight = _c_calculate_dw(distance, tSS);
                         distanceWeightSum += distanceWeight;
