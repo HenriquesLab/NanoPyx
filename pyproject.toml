@@ -71,7 +71,7 @@ developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0", "pytest-clarity
 test = [
     "nox>=2022.11.21",
     "pytest>=7.2",
-    "pytest-cov>= 4.0.0",
+    "pytest-cov>=4.0.0",
     "pytest-icdiff>=0.6",, # https://pypi.org/project/pytest-clarity/
     "pytest-timeout>=2.1.0",
     "pytest-plt>=1.1.0",
