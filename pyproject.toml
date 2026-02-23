@@ -67,13 +67,12 @@ dynamic = ["version"] # changed in setup.py
 
 [project.optional-dependencies]
 all = ["nanopyx[developer,test,jupyter,doc, optional]"]
-developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0"]
+developer = ["pyx2pxd>=0.1.1", "black>=23.1.0", "flake8>=6.0.0", "pytest-clarity>=1.0.1"]
 test = [
     "nox>=2022.11.21",
     "pytest>=7.2",
     "pytest-cov>= 4.0.0",
-    "pytest-icdiff>=0.6",    # https://github.com/hjwp/pytest-icdiff
-    "pytest-clarity>=1.0.1", # https://pypi.org/project/pytest-clarity/
+    "pytest-icdiff>=0.6",, # https://pypi.org/project/pytest-clarity/
     "pytest-timeout>=2.1.0",
     "pytest-plt>=1.1.0",
     "pytest-xdist>=3.1.0",
@@ -195,13 +194,7 @@ test-command = "pytest {project}/tests"
 test-requires = [
     "pytest>=7.2",
     "pytest-cov>=4.0.0",
-    "pytest-icdiff>=0.6",
-    "pytest-clarity>=1.0.1",
     "pytest-timeout>=2.1.0",
-    "pytest-plt>=1.1.0",
-    "pytest-xdist>=3.1.0",
-    "pytest-sugar>=0.9.6",
-    "nox>=2022.11.21",
 ]
 # test-extras = []
 
