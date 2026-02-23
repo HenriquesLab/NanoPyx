@@ -53,13 +53,18 @@ jobs:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.archs }}
           MACOSX_DEPLOYMENT_TARGET: "14.0"
+
+          # Updated: make Linux dependency install compatible with modern manylinux images (EL8/9)
           CIBW_BEFORE_ALL_LINUX: >
-            sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*.repo &&
-            sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo &&
-            yum clean all &&
-            yum install -y epel-release &&
-            yum install -y openblas-devel lapack-devel blas-devel gfortran gcc-c++ ocl-icd-devel opencl-headers &&
+            set -euxo pipefail &&
+            (command -v dnf && PM=dnf || PM=yum) &&
+            $PM -y update || true &&
+            $PM -y install epel-release || true &&
+            $PM -y install gcc gcc-c++ gcc-gfortran make &&
+            $PM -y install openblas-devel lapack-devel blas-devel ocl-icd-devel opencl-headers &&
+            gfortran --version &&
             python -m pip install --no-deps --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary --pre pyarrow
+
           CIBW_ENVIRONMENT_LINUX: >
             PIP_ONLY_BINARY=pyarrow:pillow
             PIP_NO_BUILD_ISOLATION=1
@@ -68,9 +73,11 @@ jobs:
             CL_INC_DIR=/usr/include
             CL_LIB_DIR=/usr/lib64
             CL_LIBNAME=OpenCL
+
           CIBW_ENVIRONMENT: >
             PIP_ONLY_BINARY=pyarrow:pillow
             PIP_NO_BUILD_ISOLATION=1
+
           CIBW_ENVIRONMENT_PASS_LINUX: CL_INC_DIR,CL_LIB_DIR,CL_LIBNAME,CFLAGS,LDFLAGS
 
       - name: Test wheels (only on macOS ARM64)
