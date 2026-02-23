@@ -200,7 +200,7 @@ test-requires = [
 
 [tool.cibuildwheel.linux]
 # archs = ["x86_64"]
-manylinux-x86_64-image = "manylinux2014"
+manylinux-x86_64-image = "manylinux_2_28"
 # before-all = "yum install opencv opencv-devel opencv-python"
 # before-all = "yum install opencv-python"
 # repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
