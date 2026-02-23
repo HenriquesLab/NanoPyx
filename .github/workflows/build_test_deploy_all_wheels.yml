@@ -62,7 +62,6 @@ jobs:
             python -m pip install --no-deps --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary --pre pyarrow
           CIBW_ENVIRONMENT_LINUX: >
             PIP_ONLY_BINARY=pyarrow:pillow
-            PIP_NO_BUILD_ISOLATION=1
             CFLAGS="-I/usr/include"
             LDFLAGS="-L/usr/lib64"
             CL_INC_DIR=/usr/include
