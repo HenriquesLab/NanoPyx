@@ -69,7 +69,6 @@ jobs:
             CL_LIBNAME=OpenCL
           CIBW_ENVIRONMENT: >
             PIP_ONLY_BINARY=pyarrow:pillow
-            PIP_NO_BUILD_ISOLATION=1
           CIBW_ENVIRONMENT_PASS_LINUX: CL_INC_DIR,CL_LIB_DIR,CL_LIBNAME,CFLAGS,LDFLAGS
 
       - name: Test wheels (only on macOS ARM64)
