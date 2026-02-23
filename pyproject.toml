@@ -192,7 +192,17 @@ build-verbosity = 0
 # repair-wheel-command = ""
 
 test-command = "pytest {project}/tests"
-test-requires = ["nanopyx[test]"]
+test-requires = [
+    "pytest>=7.2",
+    "pytest-cov>=4.0.0",
+    "pytest-icdiff>=0.6",
+    "pytest-clarity>=1.0.1",
+    "pytest-timeout>=2.1.0",
+    "pytest-plt>=1.1.0",
+    "pytest-xdist>=3.1.0",
+    "pytest-sugar>=0.9.6",
+    "nox>=2022.11.21",
+]
 # test-extras = []
 
 [tool.cibuildwheel.linux]
