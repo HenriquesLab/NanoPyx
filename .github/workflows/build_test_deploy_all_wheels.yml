@@ -60,8 +60,12 @@ jobs:
             yum install -y epel-release &&
             yum install -y ocl-icd-devel opencl-headers &&
             python -m pip install --no-deps --extra-index-url https://pypi.anaconda.org/scientific-python-nightly-wheels/simple --prefer-binary --pre pyarrow
+          CIBW_BEFORE_BUILD_LINUX: >
+            python -m pip install --upgrade pip &&
+            python -m pip install "scipy==1.15.*"
+
           CIBW_ENVIRONMENT_LINUX: >
-            PIP_ONLY_BINARY=pyarrow:pillow
+            PIP_ONLY_BINARY=:all:
             CFLAGS="-I/usr/include"
             LDFLAGS="-L/usr/lib64"
             CL_INC_DIR=/usr/include
