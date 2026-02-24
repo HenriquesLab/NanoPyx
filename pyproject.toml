@@ -190,7 +190,7 @@ build-verbosity = 0
 # before-build = ["git status"]
 # repair-wheel-command = ""
 
-test-command = "pytest {project}/tests --cov=nanopyx --doctest-modules --ignore-glob=run*Tools.py --cov-report term-missing"
+test-command = "pytest {project}/tests -o addopts='--cov=nanopyx --doctest-modules --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks --cov-report term-missing'"
 test-requires = [
     "pytest>=7.2",
     "pytest-cov>=4.0.0",
