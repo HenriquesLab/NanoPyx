@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: 3.10  # Works as bootstrap for cibuildwheel
+          python-version: "3.10"  # Works as bootstrap for cibuildwheel
 
       - name: Install cibuildwheel and nox
         run: |
