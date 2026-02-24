@@ -143,7 +143,7 @@ reportUndefinedVariable = false
 reportMissingImports = false
 
 [tool.pytest.ini_options]
-addopts = "--cov=nanopyx --plots --doctest-modules --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks --cov-report term-missing"
+addopts = "--cov=nanopyx --doctest-modules --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks --cov-report term-missing"
 timeout = 6001
 plt_dirname = "tests_plots"
 doctest_encoding = "latin1"
@@ -189,7 +189,7 @@ build-verbosity = 0
 # before-build = ["git status"]
 # repair-wheel-command = ""
 
-test-command = "pytest {project}/tests -o addopts='--cov=nanopyx --doctest-modules --ignore-glob=run*Tools.py --ignore=setup.py --ignore=notebooks/ --ignore=src/scripts --ignore=src/notebookchef --ignore=tests/notebooks --cov-report term-missing' --ignore={project}/tests/test_conv2d.py"
+test-command = "pytest {project}/tests --ignore={project}/tests/test_conv2d.py"
 test-requires = [
     "pytest>=7.2",
     "pytest-cov>=4.0.0",
