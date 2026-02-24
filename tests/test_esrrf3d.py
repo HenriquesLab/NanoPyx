@@ -1,10 +1,11 @@
 import numpy as np
 from nanopyx.methods import eSRRF3D as eSRRF3D_w
 from nanopyx.core.transform import eSRRF3D_ST
+from nanopyx.data.download import ExampleDataManager
 
 
-def test_esrrf3d_workflow(downloader):
-
+def test_esrrf3d_workflow():
+    downloader = ExampleDataManager()
     dataset = downloader.get_ZipTiffIterator(
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True
     )
@@ -15,8 +16,8 @@ def test_esrrf3d_workflow(downloader):
     eSRRF3D_w(small_dataset)
 
 
-def test_esrrf3d_mag11(downloader):
-
+def test_esrrf3d_mag11():
+    downloader = ExampleDataManager()
     dataset = downloader.get_ZipTiffIterator(
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True
     )
@@ -29,8 +30,8 @@ def test_esrrf3d_mag11(downloader):
     e3d.benchmark(small_dataset, magnification_xy=1, magnification_z=1)
 
 
-def test_esrrf3d_mag12(downloader):
-
+def test_esrrf3d_mag12():
+    downloader = ExampleDataManager()
     dataset = downloader.get_ZipTiffIterator(
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True
     )
@@ -43,8 +44,8 @@ def test_esrrf3d_mag12(downloader):
     e3d.benchmark(small_dataset, magnification_xy=1, magnification_z=2)
 
 
-def test_esrrf3d_mag21(downloader):
-
+def test_esrrf3d_mag21():
+    downloader = ExampleDataManager()
     dataset = downloader.get_ZipTiffIterator(
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True
     )
@@ -57,8 +58,8 @@ def test_esrrf3d_mag21(downloader):
     e3d.benchmark(small_dataset, magnification_xy=2, magnification_z=1)
 
 
-def test_esrrf3d_mag22(downloader):
-
+def test_esrrf3d_mag22():
+    downloader = ExampleDataManager()
     dataset = downloader.get_ZipTiffIterator(
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True
     )
@@ -71,8 +72,8 @@ def test_esrrf3d_mag22(downloader):
     e3d.benchmark(small_dataset, magnification_xy=2, magnification_z=2)
 
 
-def test_esrrf3d_radius_too_high(downloader):
-
+def test_esrrf3d_radius_too_high():
+    downloader = ExampleDataManager()
     dataset = downloader.get_ZipTiffIterator(
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True
     )
@@ -85,8 +86,8 @@ def test_esrrf3d_radius_too_high(downloader):
     assert e3d.run(small_dataset, radius=15) is None
 
 
-def test_esrrf3d_radiusz_too_high(downloader):
-
+def test_esrrf3d_radiusz_too_high():
+    downloader = ExampleDataManager()
     dataset = downloader.get_ZipTiffIterator(
         "SMLMS2013_HDTubulinAlexa647", as_ndarray=True
     )

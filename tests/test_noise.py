@@ -9,33 +9,46 @@ from nanopyx.core.generate.noise_add_simplex import add_simplex_noise
 from nanopyx.core.generate.noise_add_squares import get_squares
 
 
-def test_mixed_noise(random_image_with_ramp_squares):
-    random_image = random_image_with_ramp_squares
-    add_mixed_gaussian_poisson_noise(random_image, gauss_sigma=100, gauss_mean=100)
+def test_mixed_noise():
+    import random
+    from nanopyx.core.generate.noise_add_ramp import add_ramp
+    from nanopyx.core.generate.noise_add_squares import add_squares
+    import numpy as np
+
+    w = random.randint(32, 64)
+    h = random.randint(32, 64)
+    random_image = np.zeros((w, h), dtype="float32")
+    add_ramp(random_image, 1000)
+    add_squares(random_image, 100, nSquares=10)
+    add_mixed_gaussian_poisson_noise(
+        random_image, gauss_sigma=100, gauss_mean=100
+    )
     assert random_image.mean() > 100
 
 
-def test_get_ramp(): #(plt):
+def test_get_ramp():  # (plt):
     ramp = get_ramp(100, 400)
     assert ramp.shape == (400, 100)
-    #plt.imshow(ramp)
+    # plt.imshow(ramp)
 
 
-def test_get_squares(): #(plt):
+def test_get_squares():  # (plt):
     squares = get_squares(100, 400, nSquares=10)
     assert np.all(squares >= 0)
-    #plt.imshow(squares)
+    # plt.imshow(squares)
 
 
-def test_add_simplex_noise(): #(plt):
+def test_add_simplex_noise():  # (plt):
     im = np.zeros((100, 100), dtype=np.float32)
     add_simplex_noise(im)
-    #plt.imshow(im)
+    # plt.imshow(im)
 
 
-def test_random_gaussians(): #(plt):
+def test_random_gaussians():  # (plt):
     n_frames = 25
-    gaussians = render_random_gaussians(150, 100, n_frames, particles_per_slice=1000)
+    gaussians = render_random_gaussians(
+        150, 100, n_frames, particles_per_slice=1000
+    )
 
     # plt.figure()
     # f, axarr = plt.subplots(5, 5)
@@ -45,7 +58,7 @@ def test_random_gaussians(): #(plt):
     #     axarr[nf // 5, nf % 5].axis("off")
 
 
-def test_random_gaussians_with_noise(): #(plt):
+def test_random_gaussians_with_noise():  # (plt):
     n_frames = 25
     gaussians = render_random_gaussians(
         150, 100, n_frames, particles_per_slice=1000, amplitude=1000

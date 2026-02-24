@@ -74,7 +74,6 @@ test = [
     "pytest-cov>=4.0.0",
     "pytest-icdiff>=0.6", # https://pypi.org/project/pytest-clarity/
     "pytest-timeout>=2.1.0",
-    "pytest-plt>=1.1.0",
     "pytest-xdist>=3.1.0",
     "pytest-sugar>=0.9.6",
     "nanopyx[jupyter]",
