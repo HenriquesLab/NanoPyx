@@ -46,6 +46,7 @@ jobs:
         if: matrix.os == 'windows'
         run: python -m nox --sessions build_sdist
 
+      # OpenCL environment is now configured in pyproject.toml
       - name: Build wheels
         run: |
           python -m cibuildwheel --output-dir wheelhouse
@@ -53,9 +54,6 @@ jobs:
           CIBW_BUILD: ${{ matrix.cibw_build }}
           CIBW_ARCHS: ${{ matrix.archs }}
           MACOSX_DEPLOYMENT_TARGET: "14.0"
-          # Linux-specific OpenCL and build configuration now in pyproject.toml
-          CIBW_ENVIRONMENT: >
-            PIP_ONLY_BINARY=pyarrow:pillow
 
       - name: Test wheels (only on macOS ARM64)
         if: matrix.os == 'macOS-ARM'
