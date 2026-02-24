@@ -203,8 +203,7 @@ test-requires = [
 manylinux-x86_64-image = "manylinux_2_28"
 before-all = "dnf install -y ocl-icd-devel opencl-headers"
 before-build = "python -m pip install --upgrade pip && python -m pip install 'scipy==1.15.*'"
-environment = { PIP_ONLY_BINARY=":all:", CFLAGS="-I/usr/include", LDFLAGS="-L/usr/lib64", CL_INC_DIR="/usr/include", CL_LIB_DIR="/usr/lib64", CL_LIBNAME="OpenCL" }
-environment-pass = ["CL_INC_DIR", "CL_LIB_DIR", "CL_LIBNAME", "CFLAGS", "LDFLAGS"]
+environment = { CFLAGS="-I/usr/include", LDFLAGS="-L/usr/lib64", CL_INC_DIR="/usr/include", CL_LIB_DIR="/usr/lib64", CL_LIBNAME="OpenCL" }
 # repair-wheel-command = "auditwheel repair -w {dest_dir} {wheel}"
 
 [tool.cibuildwheel.macos]

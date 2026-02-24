@@ -185,9 +185,24 @@ elif sys.platform == "darwin":
     # EXTRA_LING_ARGS = ["-Xpreprocessor", "-fopenmp"]
 
 elif sys.platform.startswith("linux"):
-    INCLUDE_DIRS += ["/usr/local/include", "/usr/include"]
-    LIBRARY_DIRS += ["/usr/local/lib", "/usr/lib"]
-    EXTRA_COMPILE_ARGS += ["-O3", "-march=native", "-fopenmp"]
+    # Check for OpenCL environment variables (used by cibuildwheel)
+    cl_inc_dir = os.environ.get("CL_INC_DIR", "/usr/include")
+    cl_lib_dir = os.environ.get("CL_LIB_DIR", "/usr/lib64")
+
+    INCLUDE_DIRS += ["/usr/local/include", "/usr/include", cl_inc_dir]
+    LIBRARY_DIRS += ["/usr/local/lib", "/usr/lib", "/usr/lib64", cl_lib_dir]
+
+    # Don't use -march=native in manylinux builds (breaks portability)
+    # Detect if we're in a cibuildwheel/manylinux environment
+    in_manylinux = os.environ.get(
+        "AUDITWHEEL_PLAT"
+    ) is not None or "manylinux" in os.environ.get("CIBUILDWHEEL", "")
+
+    if in_manylinux:
+        EXTRA_COMPILE_ARGS += ["-O3", "-fopenmp"]
+    else:
+        EXTRA_COMPILE_ARGS += ["-O3", "-march=native", "-fopenmp"]
+
     EXTRA_LING_ARGS += ["-fopenmp"]
 
 try:
