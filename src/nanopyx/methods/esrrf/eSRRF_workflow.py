@@ -16,6 +16,7 @@ def eSRRF(
     sensitivity: float = 1,
     frames_per_timepoint: int = 0,
     temporal_correlation: str = "AVG",
+    use_fht: bool = False,
     doIntensityWeighting: bool = True,
     macro_pixel_correction: bool = True,
     pad_edges: bool = False,
@@ -31,6 +32,7 @@ def eSRRF(
           sensitivity (float, optional): Sensitivity parameter for eSRRF analysis (default is 1).
           frames_per_timepoint (int, optional): Number of frames per timepoint (default is 0, which means all frames are used).
           temporal_correlation (str, optional): Type of temporal correlation to calculate. Options are: AVG, VAR or TAC2 (default is "AVG").
+          use_fht (bool, optional): Whether to use Fourier interpolation for magnification (default is False).
           doIntensityWeighting (bool, optional): Enable intensity weighting (default is True).
           macro_pixel_correction (bool, optional): Enable macro pixel correction (default is True).
           pad_edges (bool, optional): Enable edge padding for borders calculation instead of setting the edges to 0 (default is False).
@@ -87,6 +89,7 @@ def eSRRF(
                     "magnification": magnification,
                     "radius": radius,
                     "sensitivity": sensitivity,
+                    "use_fht": use_fht,
                     "doIntensityWeighting": doIntensityWeighting,
                     "pad_edges": pad_edges,
                 },
