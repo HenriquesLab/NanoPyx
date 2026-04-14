@@ -1,3 +1,4 @@
+import inspect
 import os
 import shutil
 import tempfile
@@ -12,6 +13,20 @@ from ..core.io.downloader import download
 
 from ..core.io.zip_image_loader import ZipTiffIterator
 from .examples import get_path as get_examples_path
+
+
+def _gdrive_download_compatible(url, file_path):
+    kwargs = {"quiet": False}
+
+    try:
+        signature = inspect.signature(gdrive_download)
+    except (TypeError, ValueError):
+        signature = None
+
+    if signature is None or "fuzzy" in signature.parameters:
+        kwargs["fuzzy"] = True
+
+    return gdrive_download(url, file_path, **kwargs)
 
 
 class ExampleDataManager:
@@ -117,7 +132,7 @@ class ExampleDataManager:
         if download_type == "onedrive":
             onedrive_download(url, file_path, unzip=unzip, clean=True)
         elif download_type == "gdrive":
-            gdrive_download(url, file_path, fuzzy=True, quiet=False)
+            _gdrive_download_compatible(url, file_path)
         else:
             download(url, file_path)
 
