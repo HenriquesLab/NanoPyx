@@ -22,7 +22,7 @@ EXTRA_COMPILE_ARGS = [
 ]
 EXTRA_LING_ARGS = []
 
-VERSION = "2.0.3"  # sets version number for whole package
+VERSION = "2.1.0"  # sets version number for whole package
 
 
 def run_command(command: str) -> str:
@@ -336,18 +336,14 @@ def collect_extensions():
 
 
 # Show the logo
-print(
-    r"""
+print(r"""
   _  _               ___
  | \| |__ _ _ _  ___| _ \_  ___ __
  | .` / _` | ' \/ _ \  _/ || \ \ /
  |_|\_\__,_|_||_\___/_|  \_, /_\_\
       [ (( X )) ]     *|<|__/==/==
   |-- Python Nanoscopy Library --|
-"""
-    + "  "
-    + f"v{VERSION}".center(len("|-- Python Nanoscopy Library --|"))
-)
+""" + "  " + f"v{VERSION}".center(len("|-- Python Nanoscopy Library --|")))
 
 # cython options
 # REF: https://cython.readthedocs.io/en/latest/src/userguide/source_files_and_compilation.html#compiler-options
