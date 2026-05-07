@@ -141,3 +141,61 @@ def linkinpy_calculate_decorr_analysis_main() -> None:
         roi=args.roi,
         plot_decorr_analysis=args.plot_decorr_analysis,
     )
+
+
+def linkinpy_Metrics_CalculateErrorMap(
+    input_reference: str,
+    input_super_resolution: str,
+    output_image: str,
+    output_metrics: str = None,
+) -> None:
+    linkinpy_calculate_error_map(
+        input_reference=input_reference,
+        input_super_resolution=input_super_resolution,
+        output_image=output_image,
+        output_metrics=output_metrics,
+    )
+
+
+def linkinpy_Metrics_CalculateFRC(
+    input_frame_1: str,
+    input_frame_2: str,
+    output_csv: str,
+    pixel_size: float = 1.0,
+    units: str = "pixel",
+    plot_frc_curve: bool = False,
+) -> None:
+    linkinpy_calculate_frc(
+        input_frame_1=input_frame_1,
+        input_frame_2=input_frame_2,
+        output_csv=output_csv,
+        pixel_size=pixel_size,
+        units=units,
+        plot_frc_curve=plot_frc_curve,
+    )
+
+
+def linkinpy_Metrics_ImageDecorrelationAnalysis(
+    input_image: str,
+    output_csv: str,
+    rmin: float = 0.0,
+    rmax: float = 1.0,
+    n_r: int = 50,
+    n_g: int = 10,
+    pixel_size: float = 1.0,
+    units: str = "pixel",
+    roi: str = "0,0,0,0",
+    plot_decorr_analysis: bool = False,
+) -> None:
+    linkinpy_calculate_decorr_analysis(
+        input_image=input_image,
+        output_csv=output_csv,
+        rmin=rmin,
+        rmax=rmax,
+        n_r=n_r,
+        n_g=n_g,
+        pixel_size=pixel_size,
+        units=units,
+        roi=roi,
+        plot_decorr_analysis=plot_decorr_analysis,
+    )

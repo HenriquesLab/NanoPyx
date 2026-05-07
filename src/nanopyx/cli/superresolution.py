@@ -133,3 +133,53 @@ def linkinpy_eSRRF_main() -> None:
         macro_pixel_correction=args.macro_pixel_correction,
         pad_edges=args.pad_edges,
     )
+
+
+def linkinpy_SuperResolution_SRRF(
+    input_image: str,
+    output_image: str,
+    magnification: int = 5,
+    ringRadius: float = 0.5,
+    border: int = 0,
+    radialityPositivityConstraint: bool = True,
+    doIntensityWeighting: bool = True,
+    macro_pixel_correction: bool = True,
+) -> None:
+    linkinpy_SRRF(
+        input_image=input_image,
+        output_image=output_image,
+        magnification=magnification,
+        ringRadius=ringRadius,
+        border=border,
+        radialityPositivityConstraint=radialityPositivityConstraint,
+        doIntensityWeighting=doIntensityWeighting,
+        macro_pixel_correction=macro_pixel_correction,
+    )
+
+
+def linkinpy_SuperResolution_eSRRF(
+    input_image: str,
+    output_image: str,
+    magnification: int = 5,
+    radius: float = 1.5,
+    sensitivity: float = 1.0,
+    frames_per_timepoint: int = 0,
+    temporal_correlation: str = "AVG",
+    use_fht: bool = False,
+    doIntensityWeighting: bool = True,
+    macro_pixel_correction: bool = True,
+    pad_edges: bool = False,
+) -> None:
+    linkinpy_eSRRF(
+        input_image=input_image,
+        output_image=output_image,
+        magnification=magnification,
+        radius=radius,
+        sensitivity=sensitivity,
+        frames_per_timepoint=frames_per_timepoint,
+        temporal_correlation=temporal_correlation,
+        use_fht=use_fht,
+        doIntensityWeighting=doIntensityWeighting,
+        macro_pixel_correction=macro_pixel_correction,
+        pad_edges=pad_edges,
+    )

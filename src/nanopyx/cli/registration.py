@@ -155,3 +155,73 @@ def linkinpy_apply_drift_alignment_main() -> None:
         output_image=args.output_image,
         input_drift_table=args.input_drift_table,
     )
+
+
+def linkinpy_Registration_EstimateChannelRegistration(
+    input_image: str,
+    output_image: str,
+    ref_channel: int,
+    max_shift: float,
+    blocks_per_axis: int,
+    min_similarity: float,
+    save_translation_masks: bool = True,
+    translation_mask_save_path: str = None,
+    apply: bool = True,
+) -> None:
+    linkinpy_estimate_channel_registration(
+        input_image=input_image,
+        output_image=output_image,
+        ref_channel=ref_channel,
+        max_shift=max_shift,
+        blocks_per_axis=blocks_per_axis,
+        min_similarity=min_similarity,
+        save_translation_masks=save_translation_masks,
+        translation_mask_save_path=translation_mask_save_path,
+        apply=apply,
+    )
+
+
+def linkinpy_Registration_ApplyChannelRegistration(
+    input_image: str,
+    output_image: str,
+    input_translation_masks: str,
+) -> None:
+    linkinpy_apply_channel_registration(
+        input_image=input_image,
+        output_image=output_image,
+        input_translation_masks=input_translation_masks,
+    )
+
+
+def linkinpy_Registration_EstimateDriftAlignment(
+    input_image: str,
+    output_image: str,
+    save_as_npy: bool = True,
+    save_drift_table_path: str = None,
+    time_averaging: int = 1,
+    max_expected_drift: float = 6.0,
+    ref_option: int = 0,
+    apply: bool = True,
+) -> None:
+    linkinpy_estimate_drift_alignment(
+        input_image=input_image,
+        output_image=output_image,
+        save_as_npy=save_as_npy,
+        save_drift_table_path=save_drift_table_path,
+        time_averaging=time_averaging,
+        max_expected_drift=max_expected_drift,
+        ref_option=ref_option,
+        apply=apply,
+    )
+
+
+def linkinpy_Registration_ApplyDriftAlignment(
+    input_image: str,
+    output_image: str,
+    input_drift_table: str,
+) -> None:
+    linkinpy_apply_drift_alignment(
+        input_image=input_image,
+        output_image=output_image,
+        input_drift_table=input_drift_table,
+    )

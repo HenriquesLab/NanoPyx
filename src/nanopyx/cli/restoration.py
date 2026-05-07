@@ -43,3 +43,21 @@ def linkinpy_non_local_means_denoising_main() -> None:
         h=args.h,
         sigma=args.sigma,
     )
+
+
+def linkinpy_Restoration_NLMDenoising(
+    input_image: str,
+    output_image: str,
+    patch_size: int = 7,
+    patch_distance: int = 11,
+    h: float = 0.1,
+    sigma: float = 0.0,
+) -> None:
+    linkinpy_non_local_means_denoising(
+        input_image=input_image,
+        output_image=output_image,
+        patch_size=patch_size,
+        patch_distance=patch_distance,
+        h=h,
+        sigma=sigma,
+    )
