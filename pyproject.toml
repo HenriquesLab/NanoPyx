@@ -61,9 +61,17 @@ dependencies = [
 ]
 dynamic = ["version"] # changed in setup.py
 
-# [project.scripts]
-# nanopyx-pyx2pxd = "scripts.pyx2pxd:main"
-# nanopyx-c2cl = "scripts.c2cl:main"
+[project.scripts]
+linkinpy-SuperResolution-SRRF = "nanopyx.cli.superresolution:linkinpy_SRRF_main"
+linkinpy-SuperResolution-eSRRF = "nanopyx.cli.superresolution:linkinpy_eSRRF_main"
+linkinpy-Restoration-NLMDenoising = "nanopyx.cli.restoration:linkinpy_non_local_means_denoising_main"
+linkinpy-Registration-EstimateChannelRegistration = "nanopyx.cli.registration:linkinpy_estimate_channel_registration_main"
+linkinpy-Registration-ApplyChannelRegistration = "nanopyx.cli.registration:linkinpy_apply_channel_registration_main"
+linkinpy-Registration-EstimateDriftAlignment = "nanopyx.cli.registration:linkinpy_estimate_drift_alignment_main"
+linkinpy-Registration-ApplyDriftAlignment = "nanopyx.cli.registration:linkinpy_apply_drift_alignment_main"
+linkinpy-Metrics-CalculateErrorMap = "nanopyx.cli.metrics:linkinpy_calculate_error_map_main"
+linkinpy-Metrics-CalculateFRC = "nanopyx.cli.metrics:linkinpy_calculate_frc_main"
+linkinpy-Metrics-ImageDecorrelationAnalysis = "nanopyx.cli.metrics:linkinpy_calculate_decorr_analysis_main"
 
 [project.optional-dependencies]
 all = ["nanopyx[developer,test,jupyter,doc, optional]"]
