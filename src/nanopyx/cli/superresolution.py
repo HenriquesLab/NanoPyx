@@ -35,20 +35,26 @@ def linkinpy_SRRF_main() -> None:
     parser.add_argument("input_image", help="Input image path.")
     parser.add_argument("output_image", help="Output image path.")
     parser.add_argument("--magnification", type=int, default=5)
-    parser.add_argument("--ringRadius", type=float, default=0.5)
+    parser.add_argument("--ring-radius", "--ringRadius", dest="ringRadius", type=float, default=0.5)
     parser.add_argument("--border", type=int, default=0)
     parser.add_argument(
+        "--radiality-positivity-constraint",
         "--radialityPositivityConstraint",
+        dest="radialityPositivityConstraint",
         action=argparse.BooleanOptionalAction,
         default=True,
     )
     parser.add_argument(
+        "--intensity-weighting",
         "--doIntensityWeighting",
+        dest="doIntensityWeighting",
         action=argparse.BooleanOptionalAction,
         default=True,
     )
     parser.add_argument(
+        "--macro-pixel-correction",
         "--macro_pixel_correction",
+        dest="macro_pixel_correction",
         action=argparse.BooleanOptionalAction,
         default=True,
     )
@@ -101,23 +107,27 @@ def linkinpy_eSRRF_main() -> None:
     parser.add_argument("--magnification", type=int, default=5)
     parser.add_argument("--radius", type=float, default=1.5)
     parser.add_argument("--sensitivity", type=float, default=1.0)
-    parser.add_argument("--frames_per_timepoint", type=int, default=0)
-    parser.add_argument("--temporal_correlation", default="AVG")
+    parser.add_argument("--frames-per-timepoint", "--frames_per_timepoint", dest="frames_per_timepoint", type=int, default=0)
+    parser.add_argument("--temporal-correlation", "--temporal_correlation", dest="temporal_correlation", default="AVG")
     parser.add_argument(
-        "--use_fht", action=argparse.BooleanOptionalAction, default=False
+        "--use-fht", "--use_fht", dest="use_fht", action=argparse.BooleanOptionalAction, default=False
     )
     parser.add_argument(
+        "--intensity-weighting",
         "--doIntensityWeighting",
+        dest="doIntensityWeighting",
         action=argparse.BooleanOptionalAction,
         default=True,
     )
     parser.add_argument(
+        "--macro-pixel-correction",
         "--macro_pixel_correction",
+        dest="macro_pixel_correction",
         action=argparse.BooleanOptionalAction,
         default=True,
     )
     parser.add_argument(
-        "--pad_edges", action=argparse.BooleanOptionalAction, default=False
+        "--pad-edges", "--pad_edges", dest="pad_edges", action=argparse.BooleanOptionalAction, default=False
     )
     args = parser.parse_args()
     linkinpy_eSRRF(

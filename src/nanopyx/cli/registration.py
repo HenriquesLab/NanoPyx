@@ -42,12 +42,12 @@ def linkinpy_estimate_channel_registration_main() -> None:
     parser = argparse.ArgumentParser(description="Estimate and optionally apply channel registration.")
     parser.add_argument("input_image", help="Input multi-channel image path.")
     parser.add_argument("output_image", help="Output aligned image path.")
-    parser.add_argument("--ref_channel", type=int, required=True)
-    parser.add_argument("--max_shift", type=float, required=True)
-    parser.add_argument("--blocks_per_axis", type=int, required=True)
-    parser.add_argument("--min_similarity", type=float, required=True)
-    parser.add_argument("--save_translation_masks", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--translation_mask_save_path", default=None)
+    parser.add_argument("--ref-channel", "--ref_channel", dest="ref_channel", type=int, required=True)
+    parser.add_argument("--max-shift", "--max_shift", dest="max_shift", type=float, required=True)
+    parser.add_argument("--blocks-per-axis", "--blocks_per_axis", dest="blocks_per_axis", type=int, required=True)
+    parser.add_argument("--min-similarity", "--min_similarity", dest="min_similarity", type=float, required=True)
+    parser.add_argument("--save-translation-masks", "--save_translation_masks", dest="save_translation_masks", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--translation-mask-save-path", "--translation_mask_save_path", dest="translation_mask_save_path", default=None)
     parser.add_argument("--apply", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args()
     linkinpy_estimate_channel_registration(
@@ -78,7 +78,7 @@ def linkinpy_apply_channel_registration_main() -> None:
     parser = argparse.ArgumentParser(description="Apply channel registration using translation masks.")
     parser.add_argument("input_image", help="Input multi-channel image path.")
     parser.add_argument("output_image", help="Output aligned image path.")
-    parser.add_argument("--input_translation_masks", required=True)
+    parser.add_argument("--input-translation-masks", "--input_translation_masks", dest="input_translation_masks", required=True)
     args = parser.parse_args()
     linkinpy_apply_channel_registration(
         input_image=args.input_image,
@@ -115,11 +115,11 @@ def linkinpy_estimate_drift_alignment_main() -> None:
     parser = argparse.ArgumentParser(description="Estimate and optionally apply drift alignment.")
     parser.add_argument("input_image", help="Input timelapse image path.")
     parser.add_argument("output_image", help="Output drift-corrected image path.")
-    parser.add_argument("--save_as_npy", action=argparse.BooleanOptionalAction, default=True)
-    parser.add_argument("--save_drift_table_path", default=None)
-    parser.add_argument("--time_averaging", type=int, default=1)
-    parser.add_argument("--max_expected_drift", type=float, default=6)
-    parser.add_argument("--ref_option", type=int, default=0)
+    parser.add_argument("--save-as-npy", "--save_as_npy", dest="save_as_npy", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--save-drift-table-path", "--save_drift_table_path", dest="save_drift_table_path", default=None)
+    parser.add_argument("--time-averaging", "--time_averaging", dest="time_averaging", type=int, default=1)
+    parser.add_argument("--max-expected-drift", "--max_expected_drift", dest="max_expected_drift", type=float, default=6)
+    parser.add_argument("--ref-option", "--ref_option", dest="ref_option", type=int, default=0)
     parser.add_argument("--apply", action=argparse.BooleanOptionalAction, default=True)
     args = parser.parse_args()
     linkinpy_estimate_drift_alignment(
@@ -148,7 +148,7 @@ def linkinpy_apply_drift_alignment_main() -> None:
     parser = argparse.ArgumentParser(description="Apply drift alignment using a drift table.")
     parser.add_argument("input_image", help="Input timelapse image path.")
     parser.add_argument("output_image", help="Output drift-corrected image path.")
-    parser.add_argument("--input_drift_table", required=True)
+    parser.add_argument("--input-drift-table", "--input_drift_table", dest="input_drift_table", required=True)
     args = parser.parse_args()
     linkinpy_apply_drift_alignment(
         input_image=args.input_image,

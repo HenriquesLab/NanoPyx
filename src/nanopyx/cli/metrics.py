@@ -39,7 +39,7 @@ def linkinpy_calculate_error_map_main() -> None:
     parser.add_argument("input_reference", help="Reference image path.")
     parser.add_argument("input_super_resolution", help="Super-resolution image path.")
     parser.add_argument("output_image", help="Output error map image path.")
-    parser.add_argument("--output_metrics", default=None, help="Optional output CSV path for RSE/RSP.")
+    parser.add_argument("--output-metrics", "--output_metrics", dest="output_metrics", default=None, help="Optional output CSV path for RSE/RSP.")
     args = parser.parse_args()
     linkinpy_calculate_error_map(
         input_reference=args.input_reference,
@@ -74,9 +74,9 @@ def linkinpy_calculate_frc_main() -> None:
     parser.add_argument("input_frame_1", help="First image path.")
     parser.add_argument("input_frame_2", help="Second image path.")
     parser.add_argument("output_csv", help="Output CSV path.")
-    parser.add_argument("--pixel_size", type=float, default=1.0)
+    parser.add_argument("--pixel-size", "--pixel_size", dest="pixel_size", type=float, default=1.0)
     parser.add_argument("--units", default="pixel")
-    parser.add_argument("--plot_frc_curve", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--plot-frc-curve", "--plot_frc_curve", dest="plot_frc_curve", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
     linkinpy_calculate_frc(
         input_frame_1=args.input_frame_1,
@@ -122,12 +122,12 @@ def linkinpy_calculate_decorr_analysis_main() -> None:
     parser.add_argument("output_csv", help="Output CSV path.")
     parser.add_argument("--rmin", type=float, default=0.0)
     parser.add_argument("--rmax", type=float, default=1.0)
-    parser.add_argument("--n_r", type=int, default=50)
-    parser.add_argument("--n_g", type=int, default=10)
-    parser.add_argument("--pixel_size", type=float, default=1.0)
+    parser.add_argument("--n-r", "--n_r", dest="n_r", type=int, default=50)
+    parser.add_argument("--n-g", "--n_g", dest="n_g", type=int, default=10)
+    parser.add_argument("--pixel-size", "--pixel_size", dest="pixel_size", type=float, default=1.0)
     parser.add_argument("--units", default="pixel")
     parser.add_argument("--roi", default="0,0,0,0")
-    parser.add_argument("--plot_decorr_analysis", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--plot-decorr-analysis", "--plot_decorr_analysis", dest="plot_decorr_analysis", action=argparse.BooleanOptionalAction, default=False)
     args = parser.parse_args()
     linkinpy_calculate_decorr_analysis(
         input_image=args.input_image,
