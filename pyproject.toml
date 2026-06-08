@@ -108,6 +108,26 @@ colab = [
 ]
 doc = ["pdoc>=12.3.1", "nanopyx[jupyter,developer]"]
 
+[tool.uv]
+conflicts = [
+    [
+        { extra = "all" },
+        { extra = "colab" },
+    ],
+    [
+        { extra = "doc" },
+        { extra = "colab" },
+    ],
+    [
+        { extra = "jupyter" },
+        { extra = "colab" },
+    ],
+    [
+        { extra = "test" },
+        { extra = "colab" },
+    ],
+]
+
 [project.urls]
 homepage = "https://github.com/HenriquesLab/NanoPyx"
 documentation = "https://henriqueslab.github.io/nanopyx"
