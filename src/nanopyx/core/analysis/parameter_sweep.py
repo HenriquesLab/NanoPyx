@@ -24,6 +24,11 @@ class ParameterSweep:
         use_decorr: bool = False,
         n_frames=None
     ):
+        if n_frames is not None:
+            if n_frames <= 0:
+                raise ValueError("n_frames must be a positive integer or None")
+            n_frames = int(n_frames)
+
         RSP_map = np.zeros((len(sensitivity_array), len(radius_array)))
         FRC_map = np.zeros((len(sensitivity_array), len(radius_array)))
         s_size = len(sensitivity_array)
@@ -32,10 +37,11 @@ class ParameterSweep:
         with tqdm(total=s_size*r_size, desc="Parameters pairs", unit="pairs") as progress_bar:
             for s in range(s_size):
                 for r in range(r_size):
-                    rgc_map = eSRRF(verbose=True).run(
-                        im, magnification=magnification, radius=radius_array[r], sensitivity=sensitivity_array[s]
-                    )
                     if n_frames is None:
+                        rgc_map = eSRRF(verbose=True).run(
+                            im, magnification=magnification, radius=radius_array[r], sensitivity=sensitivity_array[s]
+                        )
+                        rgc_map = self._as_frame_stack(rgc_map)
                         if self.doErrorMapping:
                             reconstruction = calculate_eSRRF_temporal_correlations(rgc_map, temporal_correlation)
                             RSP_map[s, r] = self.calculate_rsp(im, reconstruction)
@@ -51,50 +57,51 @@ class ParameterSweep:
                                 reconstruction_even = calculate_eSRRF_temporal_correlations(rgc_map_even, temporal_correlation)
                                 FRC_map[s, r] = self.calculate_frc(reconstruction_odd, reconstruction_even)
                     else:
-                        if im.shape[0] % n_frames != 0:
-                            n_slices = im.shape[0] // n_frames + 1
-                        else:
-                            n_slices = im.shape[0] // n_frames
+                        RSP_values = []
+                        FRC_values = []
 
-                        RSP_map = np.zeros((n_slices, len(sensitivity_array), len(radius_array)))
-                        for i in range(n_slices):
+                        for start in range(0, im.shape[0], n_frames):
+                            stop = start + n_frames
+                            sliced_image = im[start:stop]
+                            rgc_map = eSRRF(verbose=True).run(
+                                sliced_image,
+                                magnification=magnification,
+                                radius=radius_array[r],
+                                sensitivity=sensitivity_array[s],
+                            )
+                            rgc_map = self._as_frame_stack(rgc_map)
+
                             if self.doErrorMapping:
-                                reconstruction = calculate_eSRRF_temporal_correlations(rgc_map[i*n_frames:(i+1)*n_frames], temporal_correlation)
-                                sliced_image = im[i*n_frames:(i+1)*n_frames]
-                                print(sliced_image.shape, rgc_map[i*n_frames:(i+1)*n_frames].shape)
-                                RSP_map[i, s, r] = self.calculate_rsp(sliced_image, reconstruction)
-                                
-                            # if self.doFRCMapping:
-                            #     if use_decorr:
-                            #         decorr = DecorrAnalysis()
-                            #         decorr.run_analysis(calculate_eSRRF_temporal_correlations(rgc_map[i*n_frames:(i+1)*n_frames], temporal_correlation))
-                            #         FRC_map[i, s, r] = decorr.resolution
-                            #     else:
-                            #         rgc_map_odd = rgc_map[i*n_frames+1:(i+1)*n_frames:2, :, :]
-                            #         rgc_map_even = rgc_map[i*n_frames:(i+1)*n_frames:2, :, :]
-                            #         reconstruction_odd = calculate_eSRRF_temporal_correlations(rgc_map_odd, temporal_correlation)
-                            #         reconstruction_even = calculate_eSRRF_temporal_correlations(rgc_map_even, temporal_correlation)
-                            #         FRC_map[i, s, r] = self.calculate_frc(reconstruction_odd, reconstruction_even)
-                        RSP_map = np.mean(RSP_map, axis=0)
-                    
-                        if self.doFRCMapping:
-                            if use_decorr:
-                                decorr = DecorrAnalysis()
-                                decorr.run_analysis(calculate_eSRRF_temporal_correlations(rgc_map, temporal_correlation))
-                                FRC_map[s, r] = decorr.resolution
-                            else:
-                                rgc_map_odd = rgc_map[1::2, :, :]
-                                rgc_map_even = rgc_map[::2, :, :]
-                                reconstruction_odd = calculate_eSRRF_temporal_correlations(rgc_map_odd, temporal_correlation)
-                                reconstruction_even = calculate_eSRRF_temporal_correlations(rgc_map_even, temporal_correlation)
-                                FRC_map[s, r] = self.calculate_frc(reconstruction_odd, reconstruction_even)
+                                reconstruction = calculate_eSRRF_temporal_correlations(rgc_map, temporal_correlation)
+                                RSP_values.append(self.calculate_rsp(sliced_image, reconstruction))
+
+                            if self.doFRCMapping:
+                                if use_decorr:
+                                    decorr = DecorrAnalysis()
+                                    decorr.run_analysis(calculate_eSRRF_temporal_correlations(rgc_map, temporal_correlation))
+                                    FRC_values.append(decorr.resolution)
+                                elif rgc_map.shape[0] >= 2:
+                                    rgc_map_odd = rgc_map[1::2, :, :]
+                                    rgc_map_even = rgc_map[::2, :, :]
+                                    reconstruction_odd = calculate_eSRRF_temporal_correlations(rgc_map_odd, temporal_correlation)
+                                    reconstruction_even = calculate_eSRRF_temporal_correlations(rgc_map_even, temporal_correlation)
+                                    FRC_values.append(self.calculate_frc(reconstruction_odd, reconstruction_even))
+
+                        if RSP_values:
+                            RSP_map[s, r] = np.nanmean(RSP_values)
+                        if FRC_values:
+                            FRC_map[s, r] = np.nanmean(FRC_values)
                     progress_bar.update()
 
-        print(RSP_map)
-        print(FRC_map)
         QnR = self.calculate_qnr_score(RSP_map, FRC_map)
 
         return QnR
+
+    def _as_frame_stack(self, im):
+        im = np.asarray(im)
+        if im.ndim == 2:
+            return np.expand_dims(im, axis=0)
+        return im
 
     def calculate_rsp(self, im, reconstruction):
         error_map = ErrorMap()
@@ -107,14 +114,21 @@ class ParameterSweep:
         return fire_nb
 
     def logistic_image_conversion(self, im, min_val=None, max_val=None):  # max and min in nm
-        # trying change to min and max vals to be taken from "im" instead of user defined
+        im = np.asarray(im, dtype=np.float32)
+        finite_mask = np.isfinite(im)
+        if not np.any(finite_mask):
+            return np.zeros_like(im, dtype=np.float32)
 
         if min_val is None:
-            min_val = np.min(im)
-            print(min_val)
+            min_val = np.min(im[finite_mask])
         if max_val is None:
-            max_val = np.max(im)
-            print(max_val)
+            max_val = np.max(im[finite_mask])
+
+        if not np.isfinite(min_val) or not np.isfinite(max_val):
+            return np.zeros_like(im, dtype=np.float32)
+
+        if min_val == max_val:
+            return np.where(finite_mask, 0.5, 0).astype(np.float32)
 
         M1 = 0.075
         M2 = 0.925
@@ -128,12 +142,16 @@ class ParameterSweep:
             normalized_image = 1 / (np.exp(-k * (image - x0)) + 1)
             im_out.append(normalized_image)
 
-        return np.asarray(im_out)
+        return np.nan_to_num(np.asarray(im_out), nan=0.0, posinf=1.0, neginf=0.0)
 
     def calculate_qnr_score(self, RSP: np.array, FRC: np.array):
-        print(RSP.shape, FRC.shape)
         assert RSP.shape == FRC.shape
         nFRC = self.logistic_image_conversion(FRC)
-        print(nFRC)
-        QnR = (2 * np.asarray(RSP) * np.asarray(nFRC)) / (np.asarray(RSP) + np.asarray(nFRC))
-        return QnR
+        denominator = np.asarray(RSP) + np.asarray(nFRC)
+        QnR = np.divide(
+            2 * np.asarray(RSP) * np.asarray(nFRC),
+            denominator,
+            out=np.zeros_like(denominator, dtype=np.float32),
+            where=denominator != 0,
+        )
+        return np.nan_to_num(QnR, nan=0.0, posinf=0.0, neginf=0.0)
