@@ -685,13 +685,14 @@ class PolarTransform(LiquidEngine):
 
         cdef int f,i,j
         cdef float angle, radius, col, row
+        cdef int is_log_scale = scale == 'log'
 
         with nogil:
             for f in range(nFrames):
                 for i in range(ncol):
                     for j in range(nrow):
                         angle = j * 2 * pi  / (nrow-1)
-                        if scale=='log':
+                        if is_log_scale:
                             radius = exp(i*log(max_radius)/(ncol-1))
                         else:
                             radius = i * max_radius / (ncol-1)
@@ -723,13 +724,14 @@ class PolarTransform(LiquidEngine):
 
         cdef int f,i,j
         cdef float angle, radius, col, row
+        cdef int is_log_scale = scale == 'log'
 
         with nogil:
             for f in range(nFrames):
                 for i in prange(ncol):
                     for j in range(nrow):
                         angle = j * 2 * pi  / (nrow-1)
-                        if scale=='log':
+                        if is_log_scale:
                             radius = exp(i*log(max_radius)/(ncol-1))
                         else:
                             radius = i * max_radius / (ncol-1)
@@ -761,13 +763,14 @@ class PolarTransform(LiquidEngine):
 
         cdef int f,i,j
         cdef float angle, radius, col, row
+        cdef int is_log_scale = scale == 'log'
 
         with nogil:
             for f in range(nFrames):
                 for i in prange(ncol, schedule="guided"):
                     for j in range(nrow):
                         angle = j * 2 * pi  / (nrow-1)
-                        if scale=='log':
+                        if is_log_scale:
                             radius = exp(i*log(max_radius)/(ncol-1))
                         else:
                             radius = i * max_radius / (ncol-1)
@@ -799,13 +802,14 @@ class PolarTransform(LiquidEngine):
 
         cdef int f,i,j
         cdef float angle, radius, col, row
+        cdef int is_log_scale = scale == 'log'
 
         with nogil:
             for f in range(nFrames):
                 for i in prange(ncol, schedule="dynamic"):
                     for j in range(nrow):
                         angle = j * 2 * pi  / (nrow-1)
-                        if scale=='log':
+                        if is_log_scale:
                             radius = exp(i*log(max_radius)/(ncol-1))
                         else:
                             radius = i * max_radius / (ncol-1)
@@ -837,13 +841,14 @@ class PolarTransform(LiquidEngine):
 
         cdef int f,i,j
         cdef float angle, radius, col, row
+        cdef int is_log_scale = scale == 'log'
 
         with nogil:
             for f in range(nFrames):
                 for i in prange(ncol, schedule="static"):
                     for j in range(nrow):
                         angle = j * 2 * pi  / (nrow-1)
-                        if scale=='log':
+                        if is_log_scale:
                             radius = exp(i*log(max_radius)/(ncol-1))
                         else:
                             radius = i * max_radius / (ncol-1)
